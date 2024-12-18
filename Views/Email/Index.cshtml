@@ -1,0 +1,14 @@
+﻿@{
+    Layout = null;
+}
+<form asp-action="SendMail">
+    <label>Email</label>
+    <input name="toEmail" type="email" />
+    <label>Doctor Name</label>
+    <input name="doctorName"  type="text"/>
+    <label>User Name</label>
+    <input name="fullUserName" type="text"/>
+    <label>Appointment Time</label>
+    <input name="appointmentTime" type="date" />
+    <button type="submit">Submit</button>
+</form>

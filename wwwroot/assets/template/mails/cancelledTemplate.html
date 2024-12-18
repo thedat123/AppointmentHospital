@@ -1,0 +1,46 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thông báo hủy lịch hẹn khám bệnh</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            background-color: #f9f9f9;
+        }
+
+        h2 {
+            color: #F44336;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #F44336;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <h2>Thông báo hủy lịch hẹn khám bệnh</h2>
+        <p>Chào <strong>{{fullUserName}}</strong></p>
+        <p>Chúng tôi xin thông báo rằng lịch hẹn khám bệnh của bạn vào <strong>{{AppointmentTime}}</strong> với bác sĩ <strong>{{DoctorName}}</strong> đã bị hủy do lý do không thể tránh khỏi từ phía bác sĩ.</p>
+        <p>Chúng tôi rất tiếc về sự bất tiện này và xin lỗi bạn vì sự gián đoạn. Bạn có thể liên hệ với chúng tôi để sắp xếp lại lịch khám hoặc chọn một bác sĩ khác.</p>
+        <br><br>
+        <p>Trân trọng
+    </div>
+</body>
+</html>

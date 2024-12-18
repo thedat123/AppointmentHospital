@@ -1,0 +1,51 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác nhận email</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            background-color: #f9f9f9;
+        }
+
+        h2 {
+            color: #4CAF50;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="email-container">
+        <h2>Xác nhận email của bạn</h2>
+        <p>Chào <strong>{{fullUserName}}</strong>,</p>
+        <p>Cảm ơn bạn đã đăng ký tài khoản tại <strong>MedicalCare</strong>. Để hoàn tất việc đăng ký, vui lòng xác nhận địa chỉ email của bạn bằng cách nhấn vào nút bên dưới:</p>
+        <p>
+            <a href="{{confirmationLink}}" class="button">Xác nhận email</a>
+        </p>
+        <p>Nếu bạn không đăng ký tài khoản này, vui lòng bỏ qua email này.</p>
+        <br><br>
+        <p>Trân trọng, <br> Đội ngũ phòng khám MedicalCare</p>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,53 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nhắc nhở lịch hẹn khám bệnh</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            background-color: #f9f9f9;
+        }
+
+        h2 {
+            color: #FF5722;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #FF5722;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="email-container">
+        <h2>Nhắc nhở lịch hẹn khám bệnh</h2>
+        <p>Chào <strong>{{fullUserName}}</strong></p>
+        <p>Đây là thông báo nhắc nhở về lịch hẹn khám bệnh của bạn tại <strong>phòng khám MedicalCare</strong>:</p>
+        <ul>
+            <li><strong>Ngày và giờ khám:</strong>{{AppointmentTime}}</li>
+            <li><strong>Bác sĩ:</strong> {{DoctorName}}</li>
+            <li><strong>Địa chỉ:</strong> 123 Trưng Nữ Vưng</li>
+        </ul>
+        <p>Vui lòng đến đúng giờ để tránh làm ảnh hưởng đến các bệnh nhân khác. Nếu bạn không thể tham gia cuộc hẹn, vui lòng thông báo trước để chúng tôi có thể sắp xếp lại lịch.</p>
+        <br><br>
+        <p>Trân trọng, <br> Đội ngũ phòng khám MedicalCare</p>
+    </div>
+
+</body>
+</html>

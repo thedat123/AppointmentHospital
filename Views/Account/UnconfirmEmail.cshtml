@@ -1,0 +1,42 @@
+﻿@using static AppointmentHospital.DTOs.Account.AccountRequest;
+@model UnconfirmedEmailRequest;
+@{
+    Layout = "_AccountLayout";
+}
+
+<div class="card shadow-lg">
+    <div class="card-body p-5">
+        <div class="text-center mb-4">
+            <i class="fas fa-envelope-open text-warning" style="font-size: 4rem;"></i>
+        </div>
+        <h2 class="text-center mb-3">Email Confirmation Required</h2>
+        <p class="text-muted text-center mb-4">
+            The email address you entered has not been confirmed. Please complete the following steps:
+        </p>
+
+        <div class="alert alert-warning" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-exclamation-triangle me-3"></i>
+                <div>
+                    <strong>@Model.Email</strong> is not yet confirmed.
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-12">
+                <form asp-action="ResendConfirmationEmail" method="post">
+                    <input type="hidden" asp-for="Email" value="@Model.Email" />
+                    <button type="submit" class="btn btn-primary w-100 mb-3">
+                        <i class="fas fa-paper-plane me-2"></i>Resend Confirmation Email
+                    </button>
+                </form>
+            </div>
+            <div class="col-12">
+                <a asp-action="Login" class="btn btn-outline-secondary w-100">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Login
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

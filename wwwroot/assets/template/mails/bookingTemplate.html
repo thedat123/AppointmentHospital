@@ -1,0 +1,55 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác nhận lịch hẹn khám bệnh</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            background-color: #f9f9f9;
+        }
+
+        h2 {
+            color: #007BFF;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="email-container">
+        <h2>Xác nhận lịch hẹn khám bệnh</h2>
+        <p>Chào <strong>{{FullUserName}}</strong></p>
+        <p>Cảm ơn bạn đã đặt lịch khám tại <strong>phòng khám MedicalCare</strong>. Lịch hẹn của bạn đã được xác nhận thành công:</p>
+        <ul>
+            <li><strong>Ngày và giờ khám:</strong> {{AppointmentTime}}</li>
+            <li><strong>Bác sĩ:</strong> {{DoctorName}}</li>
+            <li><strong>Địa chỉ:</strong> 123 Trưng Nữ Vương</li>
+        </ul>
+        <p>Vui lòng đến đúng giờ để được khám bệnh. Nếu có bất kỳ thay đổi nào về lịch hẹn, chúng tôi sẽ thông báo cho bạn trước.</p>
+        <p>Chúng tôi rất mong được chào đón bạn tại phòng khám của chúng tôi!</p>
+        <a href="[Link trang web]" class="button">Xem lại lịch hẹn</a>
+        <br><br>
+        <p>Trân trọng, <br> Đội ngũ phòng khám MedicalCare</p>
+    </div>
+
+</body>
+</html>
