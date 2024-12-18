@@ -1,1 +1,83 @@
-﻿Trang Patient
+﻿@model IEnumerable<AppointmentHospital.Models.Doctor>
+@using AppointmentHospital.EnumStatus
+
+@{
+    ViewData["Title"] = "Trang chủ";
+    Layout = "_Layout";
+}
+
+<link rel="stylesheet" href="~/css/patientIndex.css" asp-append-version="true" />
+
+<div class="hero-section text-white text-center py-5" style="background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('@Url.Content("~/images/bookingcare-cove.jpg")');
+            background-size: cover; 
+            background-position: center; 
+            min-height: 75vh; 
+            display: flex; 
+            align-items: center;">
+    <div class="container">
+        <h1 class="display-3 fw-bold mb-4" style="color: cyan; text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);">NỀN TẢNG Y
+            TẾ</h1>
+        <h2 class="h4 fw-light mb-5">Chăm sóc sức khỏe toàn diện cho mọi nhà</h2>
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="input-group search-bar">
+                    <input type="text" class="form-control form-control-lg"
+                        placeholder="Tìm bác sĩ, chuyên khoa, bệnh viện..." />
+                    <button class="btn btn-primary" type="button">
+                        <i class="fas fa-search me-2"></i> Tìm kiếm
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container my-5">
+    <div class="row g-4 text-center service-icons">
+        @{
+            var services = new[] {
+        ("specialist.png", "Khám chuyên khoa"),
+        ("remote.png", "Khám từ xa"),
+        ("general.png", "Khám tổng quát"),
+        ("mental.png", "Sức khỏe tinh thần"),
+        };
+        }
+        @foreach (var (icon, label) in services)
+        {
+            <div class="service-icon p-4">
+                <img src="@Url.Content($"~/images/patient/{icon}")" alt="@label" class="img-fluid mb-3" />
+                <p class="mb-0">@label</p>
+            </div>
+        }
+    </div>
+
+    <section class="doctors-section mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="h4 fw-bold">Doctor List</h2>
+            <a href="#" class="link-primary text-decoration-none">See more</a>
+        </div>
+
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+            @foreach (var doctor in Model)
+            {
+                <div class="col">
+                    <div class="card doctor-card border-0">
+                        <div class="card-body text-center">
+                            <div class="mb-3 mx-auto rounded-circle overflow-hidden" style="width: 120px; height: 120px;">
+                                <img src="@Url.Content(string.IsNullOrEmpty(doctor.ImagePath) ? "~/images/user-default.png" : $"~/images/{doctor.ImagePath}")"
+                                    alt="@doctor.FullName" class="w-100 h-100 object-fit-cover">
+                            </div>
+                            <h5 class="card-title text-dark">@doctor.FullName</h5>
+                            <p class="card-text text-muted small">@doctor.Specializaiton.GetDisplayName()</p>
+
+                            <a href="@Url.Action("DetailDoctor", "Patient", new { id = doctor.DoctorId })"
+                                class="btn btn-primary mt-3">
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+</div>

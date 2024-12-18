@@ -1,0 +1,47 @@
+.modal-content {
+    max-width: 800px;
+    margin: auto;
+    padding: 20px;
+}
+
+.modal-header {
+    background-color: #00b5d8;
+    color: white;
+    padding: 10px 20px;
+}
+
+.close {
+    color: white;
+}
+
+.text-info {
+    color: #00b5d8 !important;
+    margin-bottom: 15px;
+}
+
+.form-control {
+    border-radius: 4px;
+    padding: 8px 12px;
+}
+
+.fee-info {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-primary {
+    background-color: #00b5d8;
+    border-color: #00b5d8;
+}
+
+.btn-primary:hover {
+    background-color: #008ab3;
+    border-color: #008ab3;
+}

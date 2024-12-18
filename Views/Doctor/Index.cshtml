@@ -1,1 +1,62 @@
-﻿<p>Trang là trang Doctor</p>
+﻿<link rel="stylesheet" href="~/css/doctor-calendar.css" asp-append-version="true" />
+<div class="container">
+    <header class="page-header">
+        <h1 class="page-title">MANAGE DOCTOR'S APPOINTMENT SCHEDULE</h1>
+    </header>
+
+    <section class="filter-section">
+        <div class="filter-row">
+            <div class="filter-item">
+                <label for="doctor-name">Doctor</label>
+                <input type="text" id="doctor-name" class="filter-input" value="HA QUOC HUNG" readonly>
+            </div>
+        </div>
+
+        <div class="status-filters">
+            <div class="status-radio">
+                <button class="btn btn-primary">New Appointment</button>
+            </div>
+            <div class="status-radio">
+                <button class="btn btn-primary">Confirmed</button>
+            </div>
+            <div class="status-radio">
+                <button class="btn btn-primary">Completed</button>
+            </div>
+            <div class="status-radio">
+                <button class="btn btn-primary">Cancelled</button>
+            </div>
+        </div>
+    </section>
+
+    <table class="appointment-table">
+        <thead class="table-header">
+            <tr>
+                <th>No.</th>
+                <th>Time</th>
+                <th>Full Name</th>
+                <th>Year of Birth</th>
+                <th>Gender</th>
+                <th>Address</th>
+                <th>Symptoms</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="table-row">
+                <td class="table-cell">1</td>
+                <td class="table-cell">8:00 - 9:00</td>
+                <td class="table-cell">Nguyen Dinh Thang</td>
+                <td class="table-cell">2001</td>
+                <td class="table-cell">Male</td>
+                <td class="table-cell">Hanoi</td>
+                <td class="table-cell">Headache</td>
+                <td class="table-cell">
+                    <div class="action-buttons">
+                        <button class="btn btn-confirm">Confirm</button>
+                        <button class="btn btn-cancel">Cancel</button>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

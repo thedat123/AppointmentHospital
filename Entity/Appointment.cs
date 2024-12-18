@@ -10,10 +10,10 @@ namespace AppointmentHospital.Models
         public Guid AppointmentId { get; set; }
 
         [Required]
-        public Guid PatientId { get; set; } // FK to Patient
+        public Guid PatientId { get; set; }
 
         [Required]
-        public Guid DoctorId { get; set; } // FK to Doctor
+        public Guid DoctorId { get; set; }
 
         [Required]
         public DateTime AppointmentTime { get; set; }
@@ -21,6 +21,10 @@ namespace AppointmentHospital.Models
         [Required]
         [MaxLength(20)]
         public AppointmentStatus Status { get; set; } = AppointmentStatus.Pending;
+
+        [Required]
+        [MaxLength(255)]
+        public String Symptoms { get; set; }
 
         [MaxLength(255)]
         public string? CancellationReason { get; set; } 

@@ -1,0 +1,213 @@
+﻿@model DoctorDetailViewModel
+@using AppointmentHospital.EnumStatus
+
+<link rel="stylesheet" href="~/css/doctor-detail.css" asp-append-version="true" />
+
+<div class="container doctor-details">
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card doctor-profile">
+                <div class="card-body text-center">
+                    <div class="doctor-avatar-container">
+                        <img src="@(!string.IsNullOrEmpty(Model.Doctor.ImagePath) ? $"/images/{Model.Doctor.ImagePath}" : "/images/user-default.png")" 
+                             class="doctor-avatar" alt="@Model.Doctor.FullName">
+                    </div>
+                    <h2 class="doctor-name mt-3">@Model.Doctor.FullName</h2>
+                    <p class="doctor-specialization">
+                        <i class="fas fa-user-md me-2"></i>@Model.Doctor.Specializaiton.GetDisplayName()
+                    </p>
+                </div>
+            </div>
+
+            <div class="card mt-4 contact-info">
+                <div class="card-header">
+                    <h4><i class="fas fa-address-card me-2"></i>Contact Information</h4>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled contact-list">
+                        @if (!string.IsNullOrEmpty(Model.Doctor.User.PhoneNumber))
+                        {
+                            <li class="contact-item">
+                                <i class="fas fa-phone contact-icon"></i>
+                                <span class="contact-text">@Model.Doctor.User.PhoneNumber</span>
+                            </li>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.Doctor.User.Email))
+                        {
+                            <li class="contact-item">
+                                <i class="fas fa-envelope contact-icon"></i>
+                                <span class="contact-text">@Model.Doctor.User.Email</span>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card doctor-details-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-user-md me-2"></i>Professional Profile</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5 class="section-title"><i class="fas fa-info-circle me-2 text-primary"></i>Personal Info</h5>
+                            <table class="table info-table">
+                                <tr>
+                                    <th>Gender:</th>
+                                    <td>@(Model.Doctor.Gender)</td>
+                                </tr>
+                                <tr>
+                                    <th>Date of Birth:</th>
+                                    <td>@Model.Doctor.DateOfBirth.ToString("MM/dd/yyyy")</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="section-title"><i class="fas fa-graduation-cap me-2 text-success"></i>Professional Info</h5>
+                            <table class="table info-table">
+                                <tr>
+                                    <th>Degree:</th>
+                                    <td>@Model.Doctor.Degree</td>
+                                </tr>
+                                <tr>
+                                    <th>Experience:</th>
+                                    <td>@Model.Doctor.ExperienceYear years</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <h5 class="section-title mt-4"><i class="fas fa-file-alt me-2 text-info"></i>Summary</h5>
+                    <p class="summary-text">@Model.Doctor.Description</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-calendar-alt me-2"></i>Availability Schedule</h3>
+                </div>
+                <div class="card-body">
+                    @if (Model?.TimeSlots?.Any() == true)
+                    {
+                        <div class="schedule-container">
+                            <label for="appointmentDate" class="form-label">Select Appointment Date</label>
+                            <input id="appointmentDate" type="date" class="form-control" 
+                                min="@DateTime.Now.ToString("yyyy-MM-dd")" 
+                                onchange="updateTimeSlots()">
+
+                            @foreach (var dateGroup in Model.TimeSlots
+                                .Where(slot => slot.StartTime.Date >= DateTime.Now.Date)
+                                .OrderBy(slot => slot.StartTime)
+                                .GroupBy(slot => slot.StartTime.Date)
+                                .Select(group => new 
+                                { 
+                                    Date = group.Key, 
+                                    DistinctSlots = group.DistinctBy(slot => new { slot.StartTime, slot.EndTime })
+                                }))
+                            {
+                                <div class="time-slots-for-date" data-date="@dateGroup.Date.ToString("yyyy-MM-dd")" style="display: none;">
+                                    <div class="row g-3 mt-3">
+                                        @foreach (var slot in dateGroup.DistinctSlots
+                                            .Where(slot => slot.StartTime != default(DateTime) && slot.EndTime != default(DateTime))
+                                            .OrderBy(slot => slot.StartTime))
+                                        {
+                                            <div class="col-md-3">
+                                                <div class="time-slot-card" 
+                                                    data-slot-id="@slot.TimeSlotId" 
+                                                    data-start-time="@slot.StartTime.ToString("yyyy-MM-dd HH:mm:ss")" 
+                                                    onclick="selectTimeSlot(this)">
+                                                    <span class="time-slot-content">
+                                                        @slot.StartTime.ToString("h:mm tt") - @slot.EndTime.ToString("h:mm tt")
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info text-center">
+                            No available time slots. Please check back later.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+    <div class="text-center mt-4">
+        <form id="appointmentForm" method="post" action="/Patient/BookSchedule">
+            <input type="hidden" name="DoctorId" value="@Model.Doctor.DoctorId">
+            <input type="hidden" name="SelectedDate" id="selectedDate">
+            <input type="hidden" name="SelectedTime" id="selectedTime">
+            <button type="submit" id="bookAppointmentButton" class="btn appointment-btn disabled" disabled>
+                <i class="fas fa-calendar-plus me-2"></i>Book Appointment
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const dateSelector = document.getElementById('appointmentDate');
+        const timeSlotGroups = document.querySelectorAll('.time-slots-for-date');
+        const bookButton = document.getElementById('bookAppointmentButton');
+        const formSelectedDate = document.getElementById('selectedDate');
+        const formSelectedTime = document.getElementById('selectedTime');
+
+        function updateTimeSlots() {
+            const selectedDate = dateSelector.value;
+
+            timeSlotGroups.forEach(group => {
+                if (group.getAttribute('data-date') === selectedDate) {
+                    group.style.display = 'block';
+                } else {
+                    group.style.display = 'none';
+                }
+            });
+
+            resetSelection();
+        }
+
+        function resetSelection() {
+            document.querySelectorAll('.time-slot-card').forEach(slot => {
+                slot.classList.remove('selected');
+            });
+
+            bookButton.disabled = true;
+            bookButton.classList.add('disabled');
+            formSelectedDate.value = '';
+            formSelectedTime.value = '';
+        }
+
+        window.selectTimeSlot = function (timeSlotElement) {
+            const parentGroup = timeSlotElement.closest('.time-slots-for-date');
+            const allSlots = parentGroup.querySelectorAll('.time-slot-card');
+
+            allSlots.forEach(slot => slot.classList.remove('selected'));
+
+            timeSlotElement.classList.add('selected');
+
+            const selectedDate = dateSelector.value;
+            const selectedStartTime = timeSlotElement.getAttribute('data-start-time');
+            const timeOnly = new Date(selectedStartTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            if (selectedDate && timeOnly) {
+                formSelectedDate.value = selectedDate;
+                formSelectedTime.value = timeOnly; 
+
+                bookButton.disabled = false;
+                bookButton.classList.remove('disabled');
+            }
+        };
+        dateSelector.addEventListener('change', updateTimeSlots);
+        updateTimeSlots();
+    });
+
+</script>
+

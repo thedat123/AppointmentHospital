@@ -1,0 +1,89 @@
+﻿<link rel="stylesheet" href="~/css/book-schedule.css" asp-append-version="true" />
+@model dynamic
+<div class="modal-content">
+    <div class="modal-header">
+        <h5 class="modal-title">BOOK APPOINTMENT</h5>
+    </div>
+    <div class="modal-body">
+        <div class="doctor-info mb-3">
+            <p class="mb-1">Doctor: @Model.DoctorName</p>
+            <p class="mb-3">Appointment Time: @Model.AppointmentDateTime.ToString("f")</p>
+
+            <div class="booking-type mb-3">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="bookingType" id="forSelf" value="self" checked onchange="togglePatientInfo()">
+                    <label class="form-check-label" for="forSelf">For Myself</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="bookingType" id="forOther" value="other" onchange="togglePatientInfo()">
+                    <label class="form-check-label" for="forOther">For Someone Else</label>
+                </div>
+            </div>
+        </div>
+
+        <form id="bookingForm">
+            <div id="self-section" class="patient-section">
+                <h6 class="text-info">Symptoms</h6>
+                <div class="mb-3">
+                    <textarea class="form-control" rows="4" placeholder="Reason for Appointment"></textarea>
+                </div>
+            </div>
+
+            <div id="other-section" class="patient-section" style="display: none;">
+                <h6 class="text-info">Patient's Information</h6>
+                <div class="mb-3">
+                    <input type="text" class="form-control" placeholder="Patient's Full Name (required)">
+                    <small class="form-text text-muted">Please use proper capitalization, e.g., John Doe</small>
+                </div>
+
+                <div class="gender-selection mb-3">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="gender" id="male" value="Male">
+                        <label class="form-check-label" for="male">Male</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="gender" id="female" value="Female">
+                        <label class="form-check-label" for="female">Female</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="gender" id="other" value="Other">
+                        <label class="form-check-label" for="other">Other</label>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <input type="tel" class="form-control" placeholder="Patient's Phone Number">
+                    </div>
+                    <div class="col-md-6">
+                        <input id="scheduleDate" type="date" class="form-control" 
+                                min="@DateTime.Now.ToString("yyyy-MM-dd")">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <input type="text" class="form-control" placeholder="Identification Number">
+                </div>
+
+                <div class="mb-3">
+                    <input type="text" class="form-control" placeholder="Address">
+                </div>
+
+                <div class="mb-3">
+                    <textarea class="form-control" rows="4" placeholder="Reason for Appointment"></textarea>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-primary">Confirm Appointment</button>
+    </div>
+</div>
+
+<script>
+    function togglePatientInfo() {
+        const forSelf = document.getElementById('forSelf').checked;
+        document.getElementById('self-section').style.display = forSelf ? 'block' : 'none';
+        document.getElementById('other-section').style.display = forSelf ? 'none' : 'block';
+    }
+</script>

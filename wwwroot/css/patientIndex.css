@@ -1,0 +1,78 @@
+/* Hero Section */
+.hero-section {
+    background-size: cover;
+    background-position: center;
+    min-height: 75vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hero-section h1 {
+    font-size: 3.5rem;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+}
+
+.hero-section h2 {
+    font-size: 1.25rem;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.search-bar input {
+    border-radius: 30px 0 0 30px;
+    border: none;
+    font-size: 1.1rem;
+}
+
+.search-bar button {
+    border-radius: 0 30px 30px 0;
+    background: #007bff;
+    color: #fff;
+    padding: 0.5rem 1.5rem;
+    border: none;
+}
+
+.search-bar button:hover {
+    background: #0056b3;
+}
+
+/* Services Section */
+.service-icon {
+    background: #f8f9fa;
+    border-radius: 15px;
+    transition: transform 0.3s, box-shadow 0.3s;
+    padding: 1.5rem;
+}
+
+.service-icon:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.service-icon img {
+    max-height: 80px;
+}
+
+/* Doctors Section */
+.doctor-card {
+    border-radius: 15px;
+    background: #fff;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.doctor-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero-section {
+        min-height: 400px;
+    }
+    
+    .search-bar input {
+        font-size: 16px;
+        padding: 12px 16px;
+    }
+}

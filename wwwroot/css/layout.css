@@ -1,0 +1,220 @@
+﻿/* Common styles */
+:root {
+  --primary-color: #00b5f1;
+  --secondary-color: #45c3d2;
+  --text-color: #333;
+  --gray-light: #f9fafc;
+  --border-color: #e0e0e0;
+  --hover-bg-color: #f1f7fc;
+  --active-bg-color: #e6f7ff;
+  --card-shadow: rgba(0, 0, 0, 0.1);
+}
+
+body {
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: var(--text-color);
+  padding-top: 76px;
+  background-color: var(--gray-light);
+  line-height: 1.6;
+}
+
+/* Navbar styles */
+.navbar {
+  box-shadow: 0 2px 6px var(--card-shadow);
+  transition: box-shadow 0.3s ease;
+}
+
+.navbar:hover {
+  box-shadow: 0 4px 10px var(--card-shadow);
+}
+
+.navbar .nav-link {
+  padding: 0.7rem 1rem;
+  color: var(--text-color);
+  transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+.navbar .nav-link:hover {
+  color: var(--primary-color);
+  background-color: var(--hover-bg-color);
+  border-radius: 5px;
+}
+
+.navbar .nav-link .sub-text {
+  font-size: 12px;
+  color: #777;
+}
+
+/* Dropdown menu styles */
+.dropdown-menu {
+  border-radius: 8px;
+  box-shadow: 0 4px 8px var(--card-shadow);
+}
+
+.dropdown-item {
+  padding: 0.7rem 1.2rem;
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.dropdown-item:hover {
+  background-color: var(--active-bg-color);
+  color: var(--primary-color);
+}
+
+/* Dashboard styles */
+.doctor-dashboard {
+  display: flex;
+  min-height: calc(100vh - 76px);
+  background-color: white;
+}
+
+.sidebar {
+  width: 280px;
+  background: var(--gray-light);
+  border-right: 1px solid var(--border-color);
+  padding: 1.5rem 1rem;
+  box-shadow: 0 2px 6px var(--card-shadow);
+}
+
+.sidebar-header {
+  padding: 1rem;
+  font-weight: bold;
+  color: var(--primary-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.user-info img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+}
+
+.content {
+  flex: 1;
+  padding: 2rem;
+  background-color: white;
+  box-shadow: 0 2px 6px var(--card-shadow);
+}
+
+/* Patient styles */
+.hero-section {
+  background: linear-gradient(to right, rgba(0, 181, 241, 0.8), rgba(69, 195, 210, 0.8)),
+    url('/images/hero-bg.jpg') center/cover no-repeat;
+  color: white;
+  text-align: center;
+  padding: 6rem 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px var(--card-shadow);
+}
+
+.search-bar {
+  max-width: 600px;
+  margin: 2rem auto;
+  position: relative;
+}
+
+.search-bar input {
+  width: 100%;
+  padding: 1rem 1rem 1rem 3rem;
+  border-radius: 50px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 2px 4px var(--card-shadow);
+  font-size: 1rem;
+}
+
+.search-bar .search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #777;
+}
+
+/* Doctor card styles */
+.doctor-card {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.3s ease;
+  background-color: white;
+}
+
+.doctor-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px var(--card-shadow);
+}
+
+.doctor-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.doctor-card .card-body {
+  padding: 1.5rem;
+  text-align: center;
+  background-color: var(--hover-bg-color);
+  border-top: 1px solid var(--border-color);
+}
+
+/* Appointment form styles */
+.appointment-form {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px var(--card-shadow);
+}
+
+.time-slots {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.time-slot {
+  padding: 0.8rem;
+  text-align: center;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.time-slot.active {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.time-slot:hover {
+  background: var(--active-bg-color);
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .doctor-dashboard {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem;
+  }
+
+  .content {
+    padding: 1.5rem;
+  }
+}

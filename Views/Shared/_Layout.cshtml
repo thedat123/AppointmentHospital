@@ -1,119 +1,113 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - AppointmentHospital</title>
+    <title>@ViewData["Title"] - BookingCare</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/AppointmentHospital.styles.css" asp-append-version="true" />
-    <link href="https://fonts.googleapis.com" rel="preconnect">
-    <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
-    <link href="~/lib/bootstrap-icons/bootstrap-icons.css" rel="stylesheet"/>
-    <link href="~/lib/aos/aos.css" rel="stylesheet" />
-    <link href="~/lib/fontawesome-free/css/all.min.css" rel="stylesheet"/>
-    <link href="~/lib/glightbox/css/glightbox.min.css" rel="stylesheet"/>
-    <link href="~/lib/swiper/swiper-bundle.min.css"/>
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="~/css/layout.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css">
+    @RenderSection("Styles", required: false)
 </head>
 <body>
-    <header id="header" class="header sticky-top">
-
-        <div class="topbar d-flex align-items-center">
-            <div class="container d-flex justify-content-center justify-content-md-between">
-                <div class="contact-info d-flex align-items-center">
-                    <i class="bi bi-envelope d-flex align-items-center"><a href="mailto:contact@example.com">contact@example.com</a></i>
-                    <i class="bi bi-phone d-flex align-items-center ms-4"><span>+1 5589 55488 55</span></i>
-                </div>
-                <div class="social-links d-none d-md-flex align-items-center">
-                    <a href="#" class="twitter"><i class="bi bi-twitter-x"></i></a>
-                    <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
-                    <a href="#" class="instagram"><i class="bi bi-instagram"></i></a>
-                    <a href="#" class="linkedin"><i class="bi bi-linkedin"></i></a>
-                </div>
-            </div>
-        </div><!-- End Top Bar -->
-
-        <div class="branding d-flex align-items-center">
-
-            <div class="container position-relative d-flex align-items-center justify-content-between">
-                <a href="index.html" class="logo d-flex align-items-center me-auto">
-                    <!-- Uncomment the line below if you also wish to use an image logo -->
-                    <!-- <img src="assets/img/logo.png" alt=""> -->
-                    <h1 class="sitename">Medilab</h1>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom fixed-top">
+            <div class="container">
+                <a class="navbar-brand" href="/">
+                    <img src="~/images/logo.png" alt="BookingCare" height="40">
                 </a>
-
-                <nav id="navmenu" class="navmenu">
-                    <ul>
-                        <li><a href="#hero" class="active">Home<br></a></li>
-                        <li><a href="#about">About</a></li>
-                        <li><a href="#doctors">Doctors</a></li>
-                        <li class="dropdown">
-                            <a href="#"><span>Dropdown</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
-                            <ul>
-                                <li><a href="#">Dropdown 1</a></li>
-                                <li class="dropdown">
-                                    <a href="#"><span>Deep Dropdown</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
-                                    <ul>
-                                        <li><a href="#">Deep Dropdown 1</a></li>
-                                        <li><a href="#">Deep Dropdown 2</a></li>
-                                        <li><a href="#">Deep Dropdown 3</a></li>
-                                        <li><a href="#">Deep Dropdown 4</a></li>
-                                        <li><a href="#">Deep Dropdown 5</a></li>
-                                    </ul>
-                                </li>
-                                <li><a href="#">Dropdown 2</a></li>
-                                <li><a href="#">Dropdown 3</a></li>
-                                <li><a href="#">Dropdown 4</a></li>
-                            </ul>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarMain">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link" href="/chuyen-khoa">
+                                Chuyên khoa
+                                <div class="sub-text">Tìm bác sĩ theo chuyên khoa</div>
+                            </a>
                         </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link" href="/co-so-y-te">
+                                Cơ sở y tế
+                                <div class="sub-text">Chọn bệnh viện phòng khám</div>
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link" href="/bac-si">
+                                Bác sĩ
+                                <div class="sub-text">Chọn bác sĩ giỏi</div>
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link" href="/goi-kham">
+                                Gói khám
+                                <div class="sub-text">Khám sức khỏe tổng quát</div>
+                            </a>
+                        </li>
+                    </ul>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="dropdown me-3">
+                            <select class="form-select form-select-sm border-primary">
+                                <option value="vi">VN</option>
+                                <option value="en">EN</option>
+                            </select>
+                        </div>
                         @if (User.Identity.IsAuthenticated)
                         {
-                            <li>
-                                <span class="nav-link">Hi, @User.Identity?.Name!</span>
-                            </li>
-                            <li>
-                                <form asp-action="Logout" asp-controller="Account" method="post">
-                                    <button class="btn btn-link nav-link"><i class="bi bi-box-arrow-right"></i>Logout</button>
-                                </form>
-                            </li>
+                            <div class="dropdown">
+                                <a class="nav-link dropdown-toggle text-primary" href="#" id="userDropdown" role="button" 
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                    Hi, @User.Identity?.Name!
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                    <li>
+                                        <a class="dropdown-item" href="/profile">
+                                            <i class="bi bi-person-circle"></i> Profile
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="/mySchedule">
+                                            <i class="bi bi-person-circle"></i> mySchedule
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="/settings">
+                                            <i class="bi bi-gear"></i> Settings
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <form asp-action="Logout" asp-controller="Account" method="post" class="dropdown-item m-0 p-0">
+                                            <button class="btn btn-link text-danger w-100 text-start">
+                                                <i class="bi bi-box-arrow-right"></i> Logout
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
                         }
-                    </ul>
-                    <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
-                </nav>
+                    </div>
 
-                <a class="cta-btn d-none d-sm-block" href="#appointment">Make an Appointment</a>
 
+                </div>
             </div>
-
-        </div>
-
+        </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
 
-    <footer id="footer" class="footer light-background">
-        <div class="container copyright text-center mt-4">
-            <p>© <span>Copyright</span> <strong class="px-1 sitename">Medilab</strong> <span>All Rights Reserved</span></p>
-            <div class="credits">
-                <!-- All the links in the footer should remain intact. -->
-                <!-- You can delete the links only if you've purchased the pro version. -->
-                <!-- Licensing information: https://bootstrapmade.com/license/ -->
-                <!-- Purchase the pro version with working PHP/AJAX contact form: [buy-url] -->
-                Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
-            </div>
+    <main role="main">
+        @RenderBody()
+    </main>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2023 - BookingCare - <a href="/privacy">Privacy</a>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    <script src="~/lib/aos/aos.js" ></script>
-    <script src="~/lib/glightbox/js/glightbox.min.js"></script>
-    <script src="~/lib/purecounter/purecounter_vanilla.js"></script>
-    <script src="~/lib/swiper/swiper-bundle.min.js"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+    <script src="~/js/site.js"></script>
+    @RenderSection("Scripts", required: false)
 </body>
 </html>

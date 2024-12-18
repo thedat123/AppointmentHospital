@@ -14,6 +14,7 @@ namespace AppointmentHospital.Models
         public DbSet<Doctor> Doctors { get; set; }
         public DbSet<Patient> Patients { get; set; }
         public DbSet<TimeSlot> TimeSlots { get; set; }
+        public DbSet<Acquaintance> Acquaintances { get; set;}
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

@@ -44,6 +44,42 @@ namespace AppointmentHospital.Migrations
                     b.ToTable("TimeSlots");
                 });
 
+            modelBuilder.Entity("AppointmentHospital.Models.Acquaintance", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("DateOfBirth")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Gender")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("IdentificationNumber")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<Guid>("PatientId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PatientId");
+
+                    b.ToTable("Acquaintances");
+                });
+
             modelBuilder.Entity("AppointmentHospital.Models.Appointment", b =>
                 {
                     b.Property<Guid>("AppointmentId")
@@ -73,6 +109,11 @@ namespace AppointmentHospital.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("int");
 
+                    b.Property<string>("Symptoms")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -90,6 +131,17 @@ namespace AppointmentHospital.Migrations
                     b.Property<Guid>("DoctorId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime>("DateOfBirth")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Degree")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("ExperienceYear")
                         .HasColumnType("int");
 
@@ -97,6 +149,14 @@ namespace AppointmentHospital.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Gender")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ImagePath")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Specializaiton")
                         .HasColumnType("int");
@@ -336,6 +396,17 @@ namespace AppointmentHospital.Migrations
                     b.Navigation("Doctor");
                 });
 
+            modelBuilder.Entity("AppointmentHospital.Models.Acquaintance", b =>
+                {
+                    b.HasOne("AppointmentHospital.Models.Patient", "Patient")
+                        .WithMany("Acquaintances")
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Patient");
+                });
+
             modelBuilder.Entity("AppointmentHospital.Models.Appointment", b =>
                 {
                     b.HasOne("AppointmentHospital.Models.Doctor", "Doctor")
@@ -437,6 +508,8 @@ namespace AppointmentHospital.Migrations
 
             modelBuilder.Entity("AppointmentHospital.Models.Patient", b =>
                 {
+                    b.Navigation("Acquaintances");
+
                     b.Navigation("Appointments");
                 });
 

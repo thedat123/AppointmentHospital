@@ -19,8 +19,8 @@ namespace AppointmentHospital
     {
         public static void Main(string[] args)
         {
-            var builder = WebApplication.CreateBuilder(args);
 
+            var builder = WebApplication.CreateBuilder(args);
             // Add services to the container.
             builder.Services.AddControllersWithViews();
             var configuration = builder.Configuration;
@@ -36,6 +36,12 @@ namespace AppointmentHospital
             builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
             builder.Services.AddScoped<IAppointmentStatisticService, AppointmentStatisticService>();
             builder.Services.AddScoped<IAppointmentStatisticRepository, AppointmentStatisticRepository>();
+
+            builder.Services.AddScoped<IDoctorRepository, DoctorRepository>();
+            builder.Services.AddScoped<IDoctorService, DoctorService>();
+
+            builder.Services.AddScoped<IAppointmentDateRepository, AppointmentDateRepository>();
+            
 
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("AppointmentHospitalDB")));
@@ -96,7 +102,6 @@ namespace AppointmentHospital
             app.UseAuthentication();
             app.UseAuthorization();
 
-
             app.MapAreaControllerRoute(
             name: "admin",
             areaName: "Admin",
@@ -105,6 +110,10 @@ namespace AppointmentHospital
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Account}/{action=Login}/{id?}");
+            
+            app.MapControllerRoute(
+                name: "default",
+                pattern: "{controller=Home}/{action=Index}/{id?}");
 
             app.Run();
         }
