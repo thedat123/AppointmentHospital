@@ -1,4 +1,5 @@
-﻿<link rel="stylesheet" href="~/css/doctor-calendar.css" asp-append-version="true" />
+﻿@model List<Appointment>
+<link rel="stylesheet" href="~/css/doctor-calendar.css" asp-append-version="true" />
 <div class="container">
     <header class="page-header">
         <h1 class="page-title">MANAGE DOCTOR'S APPOINTMENT SCHEDULE</h1>
@@ -34,7 +35,7 @@
                 <th>No.</th>
                 <th>Time</th>
                 <th>Full Name</th>
-                <th>Year of Birth</th>
+                <th>Date Of Birth</th>
                 <th>Gender</th>
                 <th>Address</th>
                 <th>Symptoms</th>
@@ -42,21 +43,37 @@
             </tr>
         </thead>
         <tbody>
-            <tr class="table-row">
-                <td class="table-cell">1</td>
-                <td class="table-cell">8:00 - 9:00</td>
-                <td class="table-cell">Nguyen Dinh Thang</td>
-                <td class="table-cell">2001</td>
-                <td class="table-cell">Male</td>
-                <td class="table-cell">Hanoi</td>
-                <td class="table-cell">Headache</td>
-                <td class="table-cell">
-                    <div class="action-buttons">
-                        <button class="btn btn-confirm">Confirm</button>
-                        <button class="btn btn-cancel">Cancel</button>
-                    </div>
-                </td>
-            </tr>
+            @for (int i = 0; i < Model.Count; i++)
+            {
+                var appointment = Model[i];
+                <tr>
+                    <td>@(i + 1)</td>
+                    <td>
+                        @appointment.AppointmentTime.ToString("dddd, MMMM d, yyyy h:mm tt")
+                    </td>
+                    <td>
+                        @appointment.Patient.FullName
+                    </td>
+                    <td>
+                        @(appointment.Patient.DateOfBirth)
+                    </td>
+                    <td>
+                        
+                    </td>
+                    <td>
+                        @appointment.Patient.Address
+                    </td>
+                    <td>
+                        @appointment.Symptoms
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-confirm">Confirm</button>
+                            <button class="btn btn-cancel">Cancel</button>
+                        </div>
+                    </td>
+                </tr>
+            }
         </tbody>
     </table>
 </div>

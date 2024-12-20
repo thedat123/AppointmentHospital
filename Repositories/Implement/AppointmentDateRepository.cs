@@ -27,5 +27,21 @@ namespace AppointmentHospital.Repositories.Implement
 
             return appointments;
         }
+
+        public void AddAppointment(Appointment appointment)
+        {
+            _context.Appointments.Add(appointment);
+            _context.SaveChanges();
+        }
+
+        public List<Appointment> GetAppointmentsByPatientId(Guid patientId){
+            List<Appointment> appointments = _context.Appointments.Where(a => a.PatientId == patientId).ToList();
+            return appointments;
+        }
+
+        public List<Appointment> GetAppointmentsByDoctorId(Guid doctorId){
+            List<Appointment> appointments = _context.Appointments.Where(a => a.DoctorId == doctorId).ToList();
+            return appointments;
+        }
     }
 }

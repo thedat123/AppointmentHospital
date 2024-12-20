@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -23,35 +23,31 @@
                 <div class="collapse navbar-collapse" id="navbarMain">
                     <ul class="navbar-nav me-auto">
                         <li class="nav-item dropdown">
-                            <a class="nav-link" href="/chuyen-khoa">
-                                Chuyên khoa
-                                <div class="sub-text">Tìm bác sĩ theo chuyên khoa</div>
+                            <a class="nav-link" href="/specialties">
+                                Specialties
                             </a>
                         </li>
                         <li class="nav-item dropdown">
-                            <a class="nav-link" href="/co-so-y-te">
-                                Cơ sở y tế
-                                <div class="sub-text">Chọn bệnh viện phòng khám</div>
+                            <a class="nav-link" href="/medical-facilities">
+                                Medical Facilities
                             </a>
                         </li>
                         <li class="nav-item dropdown">
-                            <a class="nav-link" href="/bac-si">
-                                Bác sĩ
-                                <div class="sub-text">Chọn bác sĩ giỏi</div>
+                            <a class="nav-link" href="/doctors">
+                                Doctors
                             </a>
                         </li>
                         <li class="nav-item dropdown">
-                            <a class="nav-link" href="/goi-kham">
-                                Gói khám
-                                <div class="sub-text">Khám sức khỏe tổng quát</div>
+                            <a class="nav-link" href="/health-packages">
+                                Health Packages
                             </a>
                         </li>
                     </ul>
                     <div class="d-flex align-items-center justify-content-between">
                         <div class="dropdown me-3">
                             <select class="form-select form-select-sm border-primary">
-                                <option value="vi">VN</option>
                                 <option value="en">EN</option>
+                                <option value="vi">VN</option>
                             </select>
                         </div>
                         @if (User.Identity.IsAuthenticated)
@@ -68,8 +64,8 @@
                                         </a>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="/mySchedule">
-                                            <i class="bi bi-person-circle"></i> mySchedule
+                                        <a class="dropdown-item" href="/Patient/MySchedule">
+                                            <i class="bi bi-person-circle"></i> My Schedule
                                         </a>
                                     </li>
                                     <li>
@@ -88,8 +84,6 @@
                             </div>
                         }
                     </div>
-
-
                 </div>
             </div>
         </nav>
@@ -98,12 +92,6 @@
     <main role="main">
         @RenderBody()
     </main>
-
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2023 - BookingCare - <a href="/privacy">Privacy</a>
-        </div>
-    </footer>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

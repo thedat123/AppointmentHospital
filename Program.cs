@@ -24,8 +24,13 @@ namespace AppointmentHospital
         {
 
             var builder = WebApplication.CreateBuilder(args);
-            // Add services to the container.
             builder.Services.AddControllersWithViews();
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(30);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
             var configuration = builder.Configuration;
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddScoped<SeedData>();
@@ -47,6 +52,7 @@ namespace AppointmentHospital
             builder.Services.AddScoped<IDoctorService, DoctorService>();
 
             builder.Services.AddScoped<IAppointmentDateRepository, AppointmentDateRepository>();
+            builder.Services.AddScoped<IAppointmentDateService, AppointmentDateService>();
             
 
             builder.Services.AddDbContext<AppDbContext>(options =>
@@ -105,13 +111,12 @@ namespace AppointmentHospital
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-
+            app.UseSession();
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();

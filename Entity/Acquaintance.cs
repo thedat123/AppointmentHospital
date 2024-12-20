@@ -32,7 +32,7 @@ namespace AppointmentHospital.Models
         public Guid PatientId { get; set; }
 
         [ForeignKey("PatientId")]
-        public Patient Patient { get; set; } 
+        public virtual Patient Patient { get; set; } 
     }
 }
 

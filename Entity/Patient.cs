@@ -16,9 +16,9 @@ namespace AppointmentHospital.Models
         public string? Address  { get; set; }
         public DateTime? DateOfBirth { get; set; }
         [ForeignKey("PatientId")]
-        public User User { set;get; }
-        public ICollection<Appointment> Appointments { set; get; }
+        public virtual User User { set;get; }
+        public virtual ICollection<Appointment> Appointments { set; get; }
 
-        public ICollection<Acquaintance> Acquaintances { get; set; }
+        public virtual ICollection<Acquaintance> Acquaintances { get; set; }
     }
 }

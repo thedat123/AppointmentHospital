@@ -11,18 +11,22 @@ namespace AppointmentHospital.Controllers
     {
         private readonly IDoctorService doctorService;
         private readonly ILogger<DoctorController> _logger;
+        private readonly IHttpContextAccessor _contextAccessor;
+        private readonly IAppointmentDateService _appointmentDateService;
         
-        public DoctorController(ILogger<DoctorController> logger, IDoctorService doctorService)
+        public DoctorController(ILogger<DoctorController> logger, IDoctorService doctorService, IHttpContextAccessor contextAccessor, IAppointmentDateService appointmentDateService)
         {
             _logger = logger;
             this.doctorService = doctorService;
+            this._contextAccessor = contextAccessor;
+            this._appointmentDateService = appointmentDateService;
         }
 
         public IActionResult Index()
         {
-            List<Doctor> doctor = doctorService.getAllDoctors();
-            return View(doctor);
+            var doctorId = _contextAccessor.HttpContext?.Session.GetString("DoctorId");
+            var appointments = _appointmentDateService.GetAppointmentsByDoctorId(Guid.Parse(doctorId));
+            return View(appointments); 
         }
-
     }
 }

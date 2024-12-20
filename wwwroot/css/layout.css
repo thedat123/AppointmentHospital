@@ -16,6 +16,7 @@ body {
   padding-top: 76px;
   background-color: var(--gray-light);
   line-height: 1.6;
+  margin: 0;
 }
 
 /* Navbar styles */
@@ -45,7 +46,6 @@ body {
   color: #777;
 }
 
-/* Dropdown menu styles */
 .dropdown-menu {
   border-radius: 8px;
   box-shadow: 0 4px 8px var(--card-shadow);

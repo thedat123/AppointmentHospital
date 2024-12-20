@@ -21,19 +21,21 @@
             </div>
         </div>
 
-        <form id="bookingForm">
+        <form id="bookingForm" method="post">
+            <input type="hidden" id="doctorId" name="DoctorId" value="@Model.DoctorId" />
+            <input type="hidden" id="appointmentDateTime" name="AppointmentDateTime" value="@Model.AppointmentDateTime" />
+
             <div id="self-section" class="patient-section">
                 <h6 class="text-info">Symptoms</h6>
                 <div class="mb-3">
-                    <textarea class="form-control" rows="4" placeholder="Reason for Appointment"></textarea>
+                    <textarea class="form-control" rows="4" name="symptoms" placeholder="Reason for Appointment"></textarea>
                 </div>
             </div>
 
             <div id="other-section" class="patient-section" style="display: none;">
                 <h6 class="text-info">Patient's Information</h6>
                 <div class="mb-3">
-                    <input type="text" class="form-control" placeholder="Patient's Full Name (required)">
-                    <small class="form-text text-muted">Please use proper capitalization, e.g., John Doe</small>
+                    <input type="text" class="form-control" name="patientName" placeholder="Patient's Full Name (required)">
                 </div>
 
                 <div class="gender-selection mb-3">
@@ -53,30 +55,30 @@
 
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <input type="tel" class="form-control" placeholder="Patient's Phone Number">
+                        <input type="tel" class="form-control" name="phoneNumber" placeholder="Patient's Phone Number">
                     </div>
                     <div class="col-md-6">
-                        <input id="scheduleDate" type="date" class="form-control" 
-                                min="@DateTime.Now.ToString("yyyy-MM-dd")">
+                        <input id="scheduleDate" type="date" class="form-control" name="appointmentDate" 
+                            min="@DateTime.Now.ToString("yyyy-MM-dd")">
                     </div>
                 </div>
 
                 <div class="mb-3">
-                    <input type="text" class="form-control" placeholder="Identification Number">
+                    <input type="text" class="form-control" name="identificationNumber" placeholder="Identification Number">
                 </div>
 
                 <div class="mb-3">
-                    <input type="text" class="form-control" placeholder="Address">
+                    <input type="text" class="form-control" name="address" placeholder="Address">
                 </div>
 
                 <div class="mb-3">
-                    <textarea class="form-control" rows="4" placeholder="Reason for Appointment"></textarea>
+                    <textarea class="form-control" rows="4" name="reason" placeholder="Reason for Appointment"></textarea>
                 </div>
             </div>
         </form>
     </div>
     <div class="modal-footer">
-        <button type="button" class="btn btn-primary">Confirm Appointment</button>
+        <button type="button" class="btn btn-primary" onclick="submitBookingForm()">Confirm Appointment</button>
     </div>
 </div>
 
@@ -85,5 +87,13 @@
         const forSelf = document.getElementById('forSelf').checked;
         document.getElementById('self-section').style.display = forSelf ? 'block' : 'none';
         document.getElementById('other-section').style.display = forSelf ? 'none' : 'block';
+    }
+
+    function submitBookingForm() {
+        const form = document.getElementById('bookingForm');
+        const forSelf = document.getElementById('forSelf').checked;
+
+        form.action = forSelf ? '/Patient/BookForSelf' : '/Patient/BookForOther';
+        form.submit();
     }
 </script>
