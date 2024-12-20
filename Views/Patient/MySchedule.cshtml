@@ -1,0 +1,130 @@
+﻿@model List<Appointment>
+<link rel="stylesheet" href="~/css/my-schedule.css" asp-append-version="true" />
+    <div class="dashboard-container">
+        <div class="row g-4">
+            <div class="col-12 col-md-3">
+                <div class="sidebar">
+                    <h3 class="nav-title">
+                        <i class="fas fa-filter me-2"></i>Filter Status
+                    </h3>
+                    <ul class="nav-list">
+                        <li class="nav-item">
+                            <a class="nav-link active" asp-page="/User/Order/MyOrder">
+                                <i class="fas fa-th-list"></i>
+                                All Appointments
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-route-status="@((int)AppointmentHospital.EnumStatus.AppointmentStatus.Pending)">
+                                <i class="fas fa-clock"></i>
+                                Pending
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-route-status="@((int)AppointmentHospital.EnumStatus.AppointmentStatus.Canceled)">
+                                <i class="fas fa-times-circle"></i>
+                                Cancelled
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-route-status="@((int)AppointmentHospital.EnumStatus.AppointmentStatus.Confirmed)">
+                                <i class="fas fa-check-circle"></i>
+                                Confirmed
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-12 col-md-9">
+                <div class="main-content">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <i class="fas fa-calendar-alt me-2"></i>My Appointments
+                        </h2>
+                    </div>
+
+                    @if (Model != null && Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th><i class="fas fa-user-md me-2"></i>Doctor</th>
+                                        <th><i class="fas fa-notes-medical me-2">Specialist</i></th>
+                                        <th><i class="fas fa-clock me-2"></i>Appointment Time</th>
+                                        <th><i class="fas fa-notes-medical me-2"></i>Symptoms</th>
+                                        <th><i class="fas fa-info-circle me-2"></i>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var appointment in Model.OrderByDescending(a => a.AppointmentTime))
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <i class="fas fa-user-md text-primary"></i>
+                                                    <span>Dr. @appointment.Doctor.FullName</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <span>@appointment.Doctor.Specializaiton</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex flex-column">
+                                                    <span class="fw-bold">@appointment.AppointmentTime.ToString("dddd, MMMM d, yyyy")</span>
+                                                    <small class="text-muted">@appointment.AppointmentTime.ToString("h:mm tt")</small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="text-truncate" style="max-width: 200px;" title="@appointment.Symptoms">
+                                                    @appointment.Symptoms
+                                                </div>
+                                            </td>
+                                            <td>
+                                                @switch(appointment.Status)
+                                                {
+                                                    case AppointmentHospital.EnumStatus.AppointmentStatus.Confirmed:
+                                                        <span class="badge bg-success">
+                                                            <i class="fas fa-check-circle"></i>
+                                                            Confirmed
+                                                        </span>
+                                                        break;
+                                                    case AppointmentHospital.EnumStatus.AppointmentStatus.Pending:
+                                                        <span class="badge bg-warning">
+                                                            <i class="fas fa-clock"></i>
+                                                            Pending
+                                                        </span>
+                                                        break;
+                                                    default:
+                                                        <span class="badge bg-danger">
+                                                            <i class="fas fa-times-circle"></i>
+                                                            Cancelled
+                                                        </span>
+                                                        break;
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="empty-state">
+                            <i class="fas fa-calendar-times"></i>
+                            <h4>No Appointments Found</h4>
+                            <p>You don't have any appointments matching the selected criteria.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    

@@ -38,9 +38,9 @@ namespace AppointmentHospital.Models
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
 
         [ForeignKey("PatientId")]
-        public Patient Patient { get; set; }
+        public virtual Patient Patient { get; set; }
 
         [ForeignKey("DoctorId")]
-        public Doctor Doctor { get; set; }
+        public virtual Doctor Doctor { get; set; }
     }
 }

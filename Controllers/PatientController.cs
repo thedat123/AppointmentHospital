@@ -8,29 +8,38 @@ namespace AppointmentHospital.Controllers
 {
     public class PatientController : Controller
     {
-        private readonly AppDbContext appDbContext;
-        private readonly IDoctorService doctorService;
-        private readonly ILogger<DoctorController> _logger;
-        public PatientController(AppDbContext appDbContext, IDoctorService doctorService, ILogger<DoctorController> logger){
-            this.appDbContext = appDbContext;
-            this.doctorService = doctorService;
-            this._logger = logger;
+        private readonly IDoctorService _doctorService;
+        private readonly IHttpContextAccessor _contextAccessor;
+
+        private readonly IAppointmentDateService _appointmentDateService;
+        private readonly ILogger<PatientController> _logger;
+
+        // Constructor duy nhất
+        public PatientController(IDoctorService doctorService, ILogger<PatientController> logger, IHttpContextAccessor contextAccessor, IAppointmentDateService appointmentDateService)
+        {
+            _doctorService = doctorService;
+            _logger = logger;
+            _contextAccessor = contextAccessor;
+            _appointmentDateService = appointmentDateService;
         }
 
         public IActionResult Index()
         {
-            List<Doctor> doctors = appDbContext.Doctors.ToList(); 
+            List<Doctor> doctors = _doctorService.getAllDoctors();
             return View(doctors);
         }
 
         [HttpPost]
-        public IActionResult BookSchedule(Guid DoctorId, String selectedDate, String selectedTime){
+        public IActionResult BookSchedule(Guid DoctorId, string selectedDate, string selectedTime)
+        {
             DateTime appointmentDateTime = DateTime.Parse($"{selectedDate} {selectedTime}");
-            String DoctorName = doctorService.getDoctorNameByDoctorId(DoctorId);
+            string doctorName = _doctorService.getDoctorNameByDoctorId(DoctorId);
+
             var model = new
             {
-                DoctorName = DoctorName,
-                AppointmentDateTime = appointmentDateTime
+                DoctorName = doctorName,
+                AppointmentDateTime = appointmentDateTime,
+                DoctorId = DoctorId
             };
 
             return View(model);
@@ -38,8 +47,8 @@ namespace AppointmentHospital.Controllers
 
         public IActionResult DetailDoctor(Guid id)
         {
-            Doctor doctor = doctorService.getDoctorById(id);
-            List<TimeSlot> timeSlots = doctorService.getTimeSlotByDoctorId(id);
+            Doctor doctor = _doctorService.getDoctorById(id);
+            List<TimeSlot> timeSlots = _doctorService.getTimeSlotByDoctorId(id);
 
             var viewModel = new DoctorDetailViewModel
             {
@@ -49,5 +58,32 @@ namespace AppointmentHospital.Controllers
 
             return View(viewModel);
         }
+
+        [HttpPost]
+        public IActionResult BookForSelf(Guid DoctorId, DateTime AppointmentDateTime, String symptoms)
+        {
+            var patientId = _contextAccessor.HttpContext?.Session.GetString("PatientId");
+            var appointment = new Appointment
+            {
+                DoctorId = DoctorId,
+                PatientId = patientId != null ? Guid.Parse(patientId) : Guid.Empty,
+                AppointmentTime = AppointmentDateTime,
+                Symptoms = symptoms
+            };
+            _appointmentDateService.AddAppointment(appointment);
+            return RedirectToAction("Index", "Patient");
+        }
+
+        public IActionResult MySchedule()
+        {
+            var patientId = _contextAccessor.HttpContext?.Session.GetString("PatientId");
+            if (patientId != null)
+            {
+                var appointments = _appointmentDateService.GetAppointmentsByPatientId(Guid.Parse(patientId));
+                return View(appointments); 
+            }
+            return RedirectToAction("Index", "Patient");
+        }
     }
+
 }

@@ -62,12 +62,15 @@ namespace AppointmentHospital.Controllers
             {
                 return RedirectToAction("Index", "ManagingPatient", new { area = "Admin" });
             }
-            if (_contextAccessor.HttpContext.User.IsInRole("Patient"))
+            var user = await _userManager.FindByEmailAsync(request.Email);
+            if (user != null && _contextAccessor.HttpContext != null && _contextAccessor.HttpContext.User.IsInRole("Patient"))
             {
+                _contextAccessor.HttpContext.Session.SetString("PatientId", user.Id.ToString());
                 return RedirectToAction("Index", "Patient");
             }
-            if (_contextAccessor.HttpContext.User.IsInRole("Doctor"))
+            if (user != null && _contextAccessor.HttpContext != null && _contextAccessor.HttpContext.User.IsInRole("Doctor"))
             {
+                _contextAccessor.HttpContext.Session.SetString("DoctorId", user.Id.ToString());
                 return RedirectToAction("Index", "Doctor");
             }
             return View(request);
