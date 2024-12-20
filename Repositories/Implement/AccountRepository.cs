@@ -21,33 +21,53 @@ namespace AppointmentHospital.Repositories.Implement
         }
         public async Task<bool> LoginAsync(LoginUserRequest request)
         {
+            var user = await _userManager.FindByEmailAsync(request.Email);
+            if (user == null)
+            {
+                throw new Exception("Cannot find user");
+            }
+            if(!await _userManager.IsEmailConfirmedAsync(user))
+            {
+                return false;
+            }
             var signInResult = await _signInManager.PasswordSignInAsync(request.Email, request.Password, false, false);
             return signInResult.Succeeded;
         }
 
 
-        public async Task<bool> RegisterAsync(RegisterUserRequest request)
+        public async Task<User> RegisterAsync(RegisterUserRequest request)
         {
-            var user = new User
+            try
             {
-                Email = request.Email,
-                UserName = request.Email,
-                EmailConfirmed = true,
-            };
-            var patient = new Patient
-            {
-                FullName = request.FullName,
-                User = user
-            };
-            var result = await _userManager.CreateAsync(user, request.Password);
-            if (result.Succeeded)
-            {
-                await _userManager.AddToRoleAsync(user, "Patient");
+                var user = new User
+                {
+                    Email = request.Email,
+                    UserName = request.Email,
+                };
+                var result = await _userManager.CreateAsync(user, request.Password);
+                if (!result.Succeeded)
+                {
+                    throw new Exception("Cannot create new user");
+                }
+                var resultAddRole = await _userManager.AddToRoleAsync(user, "Patient");
+                if (!resultAddRole.Succeeded)
+                {
+                    throw new Exception("Failed to assign role to user");
+                }
+                var patient = new Patient
+                {
+                    FullName = request.FullName,
+                    User = user
+                };
                 await _appDbContext.Patients.AddAsync(patient);
                 await _appDbContext.SaveChangesAsync();
-                return true;
+                return user;
             }
-            return false;
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            
         }
     }
 }

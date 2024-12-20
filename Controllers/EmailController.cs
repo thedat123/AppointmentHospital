@@ -20,9 +20,14 @@ namespace AppointmentHospital.Controllers
         [HttpPost]
         public async Task<IActionResult> SendMail(DateTime appointmentTime, string doctorName, string fullUserName, string toEmail)
         {
-            var contentBody = await _emailService.GetCancelledTemplate(appointmentTime, doctorName, fullUserName);
+            var contentBody = await _emailService.GetBookingTemplate(appointmentTime, doctorName, fullUserName);
+            BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendMailAsync(toEmail, "Email booking", contentBody));
+            var remindDate = appointmentTime.AddDays(-1).Date.AddHours(20);
+            if(DateTime.Now < remindDate)
+            {
+                BackgroundJob.Schedule<IEmailService>(emailService => emailService.SendMailAsync(toEmail, "Reminded booking", contentBody), remindDate);
+            }
             var jobId = BackgroundJob.Schedule<IEmailService>( emailService => emailService.SendMailAsync(toEmail, "Đây là email huỷ lịch hẹn" , contentBody), TimeSpan.FromSeconds(15));
-            _backgroundJobClient.ContinueJobWith(jobId, () => Console.WriteLine($" Task {jobId} has finished"));
             return RedirectToAction("Index");
         }
     }

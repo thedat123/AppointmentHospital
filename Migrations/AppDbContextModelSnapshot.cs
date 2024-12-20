@@ -44,7 +44,43 @@ namespace AppointmentHospital.Migrations
 
                     b.HasIndex("DoctorId");
 
-                    b.ToTable("TimeSlots");
+                    b.ToTable("TimeSlots", (string)null);
+                });
+
+            modelBuilder.Entity("AppointmentHospital.Models.Acquaintance", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("DateOfBirth")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Gender")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("IdentificationNumber")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<Guid>("PatientId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PatientId");
+
+                    b.ToTable("Acquaintances");
                 });
 
             modelBuilder.Entity("AppointmentHospital.Models.Acquaintance", b =>
@@ -126,7 +162,7 @@ namespace AppointmentHospital.Migrations
 
                     b.HasIndex("PatientId");
 
-                    b.ToTable("Appointments");
+                    b.ToTable("Appointments", (string)null);
                 });
 
             modelBuilder.Entity("AppointmentHospital.Models.Doctor", b =>
@@ -166,7 +202,7 @@ namespace AppointmentHospital.Migrations
 
                     b.HasKey("DoctorId");
 
-                    b.ToTable("Doctors");
+                    b.ToTable("Doctors", (string)null);
                 });
 
             modelBuilder.Entity("AppointmentHospital.Models.Patient", b =>
@@ -188,7 +224,7 @@ namespace AppointmentHospital.Migrations
 
                     b.HasKey("PatientId");
 
-                    b.ToTable("Patients");
+                    b.ToTable("Patients", (string)null);
                 });
 
             modelBuilder.Entity("AppointmentHospital.Models.User", b =>

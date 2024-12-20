@@ -1,7 +1,10 @@
-﻿@using static AppointmentHospital.DTOs.Account.AccountRequest;
-@model LoginUserRequest;
+﻿@using static AppointmentHospital.DTOs.Account.AccountRequest
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<User> signInManager
+@model LoginUserRequest
 @{
     Layout = "_AccountLayout";
+    // var externalList = ViewBag.ExternalAuthen as List<Microsoft.AspNetCore.Authentication.AuthenticationScheme>;
 }
 
 <form method="post" asp-action="Login">
@@ -34,13 +37,32 @@
                 style="padding-left: 2.5rem; padding-right: 2.5rem;">
             Đăng nhập
         </button>
+      
         <p class="small fw-bold mt-2 pt-1 mb-0">
             Bạn chưa có tài khoản? <a asp-action="Register"
                                       class="link-danger">Đăng ký</a>
         </p>
         <p class="small fw-bold mt-2 pt-1 mb-0">
             Quên mật khẩu? <a asp-action="ForgetPassword"
-                                      class="link-danger">Đặt lại mật khẩu</a>
+                              class="link-danger">Đặt lại mật khẩu</a>
         </p>
     </div>
 </form>
+<div class="col-md-6 col-md-offset-2">
+    @{
+        var externalLogin = (await signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+        @if ((externalLogin?.Count ?? 0) != 0)
+        {
+            <form id="external-account" asp-action="ExternalLogin" method="post" class="form-horizontal">
+                <div>
+                    <p>
+                        @foreach (var provider in externalLogin)
+                        {
+                            <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
+                        }
+                    </p>
+                </div>
+            </form>
+        }
+    }
+</div>

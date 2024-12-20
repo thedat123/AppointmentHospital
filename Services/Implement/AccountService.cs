@@ -1,4 +1,5 @@
-﻿using AppointmentHospital.Repositories;
+﻿using AppointmentHospital.Models;
+using AppointmentHospital.Repositories;
 using AppointmentHospital.Services;
 using Microsoft.AspNetCore.Identity.Data;
 using static AppointmentHospital.DTOs.Account.AccountRequest;
@@ -19,7 +20,7 @@ namespace AppointmentHospital.Services.Implement
         }
 
 
-        public async Task<bool> RegisterAsync(RegisterUserRequest request)
+        public async Task<User> RegisterAsync(RegisterUserRequest request)
         {
             return await _accountRepository.RegisterAsync(request);
         }
