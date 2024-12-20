@@ -1,9 +1,5 @@
-﻿<<<<<<< HEAD
-﻿using AppointmentHospital.Entity;
-=======
-﻿using AppointmentHospital.DTOs.Patient;
+﻿﻿using AppointmentHospital.DTOs.Patient;
 using AppointmentHospital.Entity;
->>>>>>> aaee4d5 (add ForgetPassword)
 using AppointmentHospital.Models;
 using AppointmentHospital.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -25,8 +21,8 @@ namespace AppointmentHospital.Controllers
         // Constructor duy nhất
         public PatientController(AppDbContext appDbContext,IPatientService patientService ,IDoctorService doctorService, ILogger<PatientController> logger, IHttpContextAccessor contextAccessor, IAppointmentDateService appointmentDateService)
         {
-            _appDbContext = appDbContext,
-            _patientService = patientService
+            _appDbContext = appDbContext;
+            _patientService = patientService;
             _doctorService = doctorService;
             _logger = logger;
             _contextAccessor = contextAccessor;
@@ -60,7 +56,7 @@ namespace AppointmentHospital.Controllers
             if(User.HasClaim(c => c.Type == ClaimTypes.NameIdentifier))
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                var patient = await patientService.GetPatientById(Guid.Parse(userId));
+                var patient = await _patientService.GetPatientById(Guid.Parse(userId));
                 ViewBag.PatientInfo = patient;
                 return View(new PatientRequest());
             }
@@ -71,14 +67,14 @@ namespace AppointmentHospital.Controllers
         [HttpPost]
         public async Task<IActionResult> PersonalProfile(Guid patientId, PatientRequest request)
         {
-            var patient = await patientService.EditPatientInfo(patientId ,request);
+            var patient = await _patientService.EditPatientInfo(patientId ,request);
             ViewBag.PatientInfo = patient;
             return View(new PatientRequest());
         }
         public IActionResult DetailDoctor(Guid id)
         {
-            Doctor doctor = doctorService.getDoctorById(id);
-            List<TimeSlot> timeSlots = doctorService.getTimeSlotByDoctorId(id);
+            Doctor doctor = _doctorService.getDoctorById(id);
+            List<TimeSlot> timeSlots = _doctorService.getTimeSlotByDoctorId(id);
 
             var viewModel = new DoctorDetailViewModel
             {

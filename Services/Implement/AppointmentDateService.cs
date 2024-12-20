@@ -28,5 +28,4 @@ public class AppointmentDateService : IAppointmentDateService
     public List<Appointment> GetAppointmentsByDoctorId(Guid DoctorId){
         return appointmentRepository.GetAppointmentsByDoctorId(DoctorId);
     }
-
 }

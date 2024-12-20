@@ -14,12 +14,8 @@ namespace AppointmentHospital.Models
 
         [Required]
         public Guid DoctorId { get; set; }
-<<<<<<< HEAD
-        
 
         public Guid? AcquaintanceId { get; set; }
-=======
->>>>>>> aaee4d5 (add ForgetPassword)
 
         [Required]
         public DateTime AppointmentTime { get; set; }

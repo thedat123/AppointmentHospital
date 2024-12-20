@@ -55,23 +55,6 @@ namespace AppointmentHospital.DTOs.Account
             public string ConfirmPassword { set; get; }
             public string Code { set; get; }
         }
-        public class ForgetPasswordRequest
-        {
-            [Required(ErrorMessage = "Email is required")]
-            [EmailAddress(ErrorMessage = "Invalid email address")]
-            [Display(Name = "Email")]
-            public string EmailAddress { get; set; }
-        }
-        public class UnconfirmedEmailRequest
-        {
-            public string Email { set; get; }
-        }
-        public class ResetPasswordRequest
-        {
-            public string Email { set; get; }
-            public string Password { set; get; }
-            public string ConfirmPassword { set; get; }
-            public string Code { set; get; }
-        }
+      
     }
 }

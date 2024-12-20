@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity.Data;
-using Microsoft.AspNetCore.Mvc;
-using AppointmentHospital.DTOs.Account;
+﻿using Microsoft.AspNetCore.Mvc;
 using AppointmentHospital.Services;
 using static AppointmentHospital.DTOs.Account.AccountRequest;
 using Microsoft.AspNetCore.Identity;
@@ -54,8 +52,8 @@ namespace AppointmentHospital.Controllers
             }
             if (!await _accountService.LoginAsync(request))
             {
-                var user = await _userManager.FindByEmailAsync(request.Email);
-                await SendMail(user);
+                var userFounded = await _userManager.FindByEmailAsync(request.Email);
+                await SendMail(userFounded);
                 return View("ConfirmEmail", request.Email);
             }
             if (_contextAccessor.HttpContext.User.IsInRole("Admin"))

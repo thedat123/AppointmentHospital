@@ -28,6 +28,5 @@ namespace AppointmentHospital.Controllers
             var appointments = _appointmentDateService.GetAppointmentsByDoctorId(Guid.Parse(doctorId));
             return View(appointments); 
         }
-
     }
 }
