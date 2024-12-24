@@ -27,6 +27,7 @@ namespace AppointmentHospital
 
             var builder = WebApplication.CreateBuilder(args);
             Env.Load();
+            // Add services to the container.
             builder.Services.AddControllersWithViews();
             builder.Services.AddSession(options =>
             {
@@ -47,9 +48,17 @@ namespace AppointmentHospital
             builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
             builder.Services.AddScoped<IAppointmentStatisticService, AppointmentStatisticService>();
             builder.Services.AddScoped<IAppointmentStatisticRepository, AppointmentStatisticRepository>();
+            builder.Services.AddScoped<IPatientService, PatientService>();
+            builder.Services.AddScoped<IPatientRepository, PatientRepository>();
             builder.Services.Configure<EmailConfiguration>(configuration.GetSection("SMTP"));
             builder.Services.Configure<BaseUrl>(configuration.GetSection("BaseUrl"));
             builder.Services.AddTransient<IEmailService, EmailService>();
+            
+
+            builder.Services.AddScoped<IDoctorRepository, DoctorRepository>();
+            builder.Services.AddScoped<IDoctorService, DoctorService>();
+
+            builder.Services.AddScoped<IAppointmentDateRepository, AppointmentDateRepository>();
             
 
             builder.Services.AddScoped<IDoctorRepository, DoctorRepository>();
@@ -66,7 +75,6 @@ namespace AppointmentHospital
             builder.Services.AddScoped<IAppointmentDateRepository, AppointmentDateRepository>();
             builder.Services.AddScoped<IAppointmentDateService, AppointmentDateService>();
             
-
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("AppointmentHospitalDB")));
 

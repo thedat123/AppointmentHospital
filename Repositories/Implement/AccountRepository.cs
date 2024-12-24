@@ -30,7 +30,8 @@ namespace AppointmentHospital.Repositories.Implement
             {
                 return false;
             }
-            var signInResult = await _signInManager.PasswordSignInAsync(request.Email, request.Password, false, false);
+            var signInResult = await _signInManager.PasswordSignInAsync(user, request.Password, false, false);
+
             return signInResult.Succeeded;
         }
 
@@ -57,6 +58,11 @@ namespace AppointmentHospital.Repositories.Implement
                 var patient = new Patient
                 {
                     FullName = request.FullName,
+<<<<<<< HEAD
+                    Address = request.Address,
+                    DateOfBirth = request.DateOfBirth,
+=======
+>>>>>>> a516ef97e5f4253a2d1944b980410be18c85e55b
                     User = user
                 };
                 await _appDbContext.Patients.AddAsync(patient);
