@@ -110,7 +110,6 @@ namespace AppointmentHospital.Controllers
                     externalMail = info.Principal.FindFirstValue(ClaimTypes.Email) ?? "null";
                 }
                 var user = await _userManager.FindByEmailAsync(externalMail);
-                //User isn't existed -> Create new user - Confirmed email - Link
                 if (user == null)
                 {
                     if(user == null)
