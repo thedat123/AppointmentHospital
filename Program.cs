@@ -54,6 +54,8 @@ namespace AppointmentHospital
 
             builder.Services.AddScoped<IDoctorRepository, DoctorRepository>();
             builder.Services.AddScoped<IDoctorService, DoctorService>();
+            builder.Services.AddScoped<ITimeSlotRepository, TimeSlotRepository>();
+            builder.Services.AddScoped<ITimeSlotService, TimeSlotService>();
 
             builder.Services.AddAuthentication().AddGoogle(option =>
             {

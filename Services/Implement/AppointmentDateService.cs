@@ -1,5 +1,6 @@
 using System;
 using AppointmentHospital.Entity;
+using AppointmentHospital.EnumStatus;
 using AppointmentHospital.Models;
 using AppointmentHospital.Repositories;
 
@@ -27,5 +28,21 @@ public class AppointmentDateService : IAppointmentDateService
 
     public List<Appointment> GetAppointmentsByDoctorId(Guid DoctorId){
         return appointmentRepository.GetAppointmentsByDoctorId(DoctorId);
+    }
+
+    public List<Appointment> GetAppointmentsByDoctorId(Guid doctorId, AppointmentStatus status){
+        return appointmentRepository.GetAppointmentsByDoctorId(doctorId, status);
+    }
+
+    public Appointment GetAppointmentsById(Guid appointmentId){
+        return appointmentRepository.GetAppointmentsById(appointmentId);
+    }
+
+    public void UpdateStatusAppointment(Guid appointmentId, AppointmentStatus status){
+        appointmentRepository.UpdateStatusAppointment(appointmentId, status);
+    }
+
+    public List<Appointment> GetAllAppointments(){
+        return appointmentRepository.GetAllAppointments();
     }
 }

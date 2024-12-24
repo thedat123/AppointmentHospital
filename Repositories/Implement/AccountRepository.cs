@@ -30,7 +30,7 @@ namespace AppointmentHospital.Repositories.Implement
             {
                 return false;
             }
-            var signInResult = await _signInManager.PasswordSignInAsync(request.Email, request.Password, false, false);
+            var signInResult = await _signInManager.PasswordSignInAsync(user, request.Password, false, false);
             return signInResult.Succeeded;
         }
 

@@ -54,8 +54,8 @@ namespace AppointmentHospital.Controllers
             }
             if (!await _accountService.LoginAsync(request))
             {
-                var user = await _userManager.FindByEmailAsync(request.Email);
-                await SendMail(user);
+                var foundUser = await _userManager.FindByEmailAsync(request.Email);
+                await SendMail(foundUser);
                 return View("ConfirmEmail", request.Email);
             }
             if (_contextAccessor.HttpContext.User.IsInRole("Admin"))
