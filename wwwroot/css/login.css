@@ -1,0 +1,50 @@
+﻿.card {
+    border-radius: 1rem;
+}
+
+.form-control {
+    border-radius: 0.5rem;
+    padding: 1rem;
+}
+
+.form-floating label {
+    padding: 1rem;
+}
+
+.btn {
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+}
+
+.divider:after,
+.divider:before {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #eee;
+}
+
+/* Custom styles for social buttons */
+.btn-outline-primary {
+    transition: all 0.3s;
+}
+
+    .btn-outline-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+/* Animation for form inputs */
+.form-control:focus {
+    transform: translateY(-2px);
+    transition: all 0.3s;
+    border-color: #0d6efd;
+    box-shadow: 0 5px 15px rgba(13,110,253,0.1);
+}
+
+/* Custom checkbox style */
+.form-check-input:checked {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+

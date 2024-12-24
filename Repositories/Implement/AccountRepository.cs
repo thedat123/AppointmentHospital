@@ -57,6 +57,8 @@ namespace AppointmentHospital.Repositories.Implement
                 var patient = new Patient
                 {
                     FullName = request.FullName,
+                    Address = request.Address,
+                    DateOfBirth = request.DateOfBirth,
                     User = user
                 };
                 await _appDbContext.Patients.AddAsync(patient);

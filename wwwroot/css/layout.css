@@ -46,6 +46,7 @@ body {
   color: #777;
 }
 
+/* Dropdown menu styles */
 .dropdown-menu {
   border-radius: 8px;
   box-shadow: 0 4px 8px var(--card-shadow);

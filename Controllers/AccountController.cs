@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity.Data;
-using Microsoft.AspNetCore.Mvc;
-using AppointmentHospital.DTOs.Account;
+﻿using Microsoft.AspNetCore.Mvc;
 using AppointmentHospital.Services;
 using static AppointmentHospital.DTOs.Account.AccountRequest;
 using Microsoft.AspNetCore.Identity;
@@ -43,7 +41,7 @@ namespace AppointmentHospital.Controllers
         }
         public IActionResult Register()
         {
-            return View(new RegisterUserRequest() { ConfirmPassword = string.Empty, Email = string.Empty, FullName = string.Empty, Password = string.Empty });
+            return View(new RegisterUserRequest() { Email = string.Empty, FullName = string.Empty, Password = string.Empty, ConfirmPassword = string.Empty, Address = string.Empty });
         }
         [HttpPost]
         public async Task<IActionResult> Login(LoginUserRequest request)
@@ -54,8 +52,8 @@ namespace AppointmentHospital.Controllers
             }
             if (!await _accountService.LoginAsync(request))
             {
-                var foundUser = await _userManager.FindByEmailAsync(request.Email);
-                await SendMail(foundUser);
+                var userFounded = await _userManager.FindByEmailAsync(request.Email);
+                await SendMail(userFounded);
                 return View("ConfirmEmail", request.Email);
             }
             if (_contextAccessor.HttpContext.User.IsInRole("Admin"))
@@ -146,6 +144,7 @@ namespace AppointmentHospital.Controllers
                         return RedirectToAction("Login");
                     }
                     var addLoginResult = await _userManager.AddLoginAsync(user, info);
+                    await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, false);
                     if (!addLoginResult.Succeeded)
                     {
                         return RedirectToAction("Login");
@@ -154,6 +153,7 @@ namespace AppointmentHospital.Controllers
                 }
                 //Existed user but dont link with external provider
                 var addResult=  await _userManager.AddLoginAsync(user, info);
+                await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, false);
                 if(!addResult.Succeeded)
                 {
                     return RedirectToAction("Login");

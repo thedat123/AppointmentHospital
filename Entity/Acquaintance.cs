@@ -33,6 +33,8 @@ namespace AppointmentHospital.Models
 
         [ForeignKey("PatientId")]
         public virtual Patient Patient { get; set; } 
+
+        public virtual ICollection<Appointment> Appointment { get; set; }
     }
 }
 
