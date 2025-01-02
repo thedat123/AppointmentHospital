@@ -233,3 +233,9 @@
     outline: 2px solid #3498db;
     outline-offset: 2px;
 }
+
+.time-slot-card.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+    cursor: not-allowed;
+}

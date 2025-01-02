@@ -26,3 +26,24 @@
 .shadow-sm {
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
+
+.alert.alert-dismissible.alert-menu-edit {
+    z-index: 2;
+    right: 15px;
+    left: 35%;
+    top: 65px;
+    bottom: unset;
+    position: absolute;
+    padding: 10px 15px;
+    border-radius: 5px;
+}
+.alert i[class="fa-circle-xmark"] {
+    font-size: 1.5em;
+    line-height: 1;
+    margin-right: 10px;
+}
+
+.alert.alert-danger {
+    padding: 10px;
+    text-align: center;
+}

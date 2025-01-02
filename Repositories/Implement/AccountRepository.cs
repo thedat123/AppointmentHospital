@@ -69,7 +69,12 @@ namespace AppointmentHospital.Repositories.Implement
             {
                 throw new Exception(ex.Message);
             }
-            
+        }
+
+        public Guid GetIdByEmail(string email)
+        {
+            var user = _appDbContext.Users.FirstOrDefault(u => u.Email == email);
+            return user.Id;
         }
     }
 }

@@ -26,6 +26,10 @@ public class AppointmentDateService : IAppointmentDateService
         return appointmentRepository.GetAppointmentsByPatientId(PatientId);
     }
 
+    public List<Appointment> GetAppointmentsByPatientId(Guid PatientId, AppointmentStatus status){
+        return appointmentRepository.GetAppointmentsByPatientId(PatientId, status);
+    }
+
     public List<Appointment> GetAppointmentsByDoctorId(Guid DoctorId){
         return appointmentRepository.GetAppointmentsByDoctorId(DoctorId);
     }

@@ -8,5 +8,6 @@
         Task<string> GetCancelledTemplate(DateTime appointmentTime, string doctorName, string fullUserName);
         Task<string> GetConfirmedEmailTemplate(string fullUserName, string url);
         Task<string> GetResetPasswordTemplate(string fullUserName, string url);
+        Task<string> GetConfirmedTemplate(DateTime appointmentTime, string doctorName, string fullUserName);
     }
 }

@@ -29,8 +29,16 @@ namespace AppointmentHospital.Services.Implement
         {
             string content = await System.IO.File.ReadAllTextAsync(Path.Combine(_webHostEnvironment.WebRootPath, "assets", "template", "mails", "cancelledTemplate.html"));
             content = content.Replace("{{fullUserName}}", fullUserName);
-            content = content.Replace("{{appointmentTime}}", appointmentTime.ToString("dd/MM/yyyy HH:mm"));
-            content = content.Replace("{{doctorName}}", doctorName);
+            content = content.Replace("{{AppointmentTime}}", appointmentTime.ToString("dd/MM/yyyy HH:mm"));
+            content = content.Replace("{{DoctorName}}", doctorName);
+            return content;
+        }
+
+        public async Task<string> GetConfirmedTemplate(DateTime appointmentTime, string doctorName, string fullUserName){
+            string content = await System.IO.File.ReadAllTextAsync(Path.Combine(_webHostEnvironment.WebRootPath, "assets", "template", "mails", "confirmedTemplate.html"));
+            content = content.Replace("{{fullUserName}}", fullUserName);
+            content = content.Replace("{{AppointmentTime}}", appointmentTime.ToString("dd/MM/yyyy HH:mm"));
+            content = content.Replace("{{DoctorName}}", doctorName);
             return content;
         }
 

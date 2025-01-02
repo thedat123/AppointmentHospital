@@ -6,5 +6,6 @@ namespace AppointmentHospital.Services
     {
         Task<bool> LoginAsync(LoginUserRequest request);
         Task<User> RegisterAsync(RegisterUserRequest request);
+        Guid GetIdByEmail(string email);
     }
 }

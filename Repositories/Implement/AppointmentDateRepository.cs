@@ -40,6 +40,11 @@ namespace AppointmentHospital.Repositories.Implement
             return appointments;
         }
 
+        public List<Appointment> GetAppointmentsByPatientId(Guid patientId, AppointmentStatus status){
+            List<Appointment> appointments = _context.Appointments.Where(a => a.PatientId == patientId && a.Status == status).ToList();
+            return appointments;
+        }
+
         public List<Appointment> GetAppointmentsByDoctorId(Guid doctorId){
             List<Appointment> appointments = _context.Appointments.Where(a => a.DoctorId == doctorId).ToList();
             return appointments;

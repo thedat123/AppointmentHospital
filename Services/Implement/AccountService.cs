@@ -19,10 +19,14 @@ namespace AppointmentHospital.Services.Implement
             return signInResult;
         }
 
-
         public async Task<User> RegisterAsync(RegisterUserRequest request)
         {
             return await _accountRepository.RegisterAsync(request);
+        }
+
+        public Guid GetIdByEmail(string email)
+        {
+            return _accountRepository.GetIdByEmail(email);
         }
     }
 }

@@ -8,23 +8,50 @@
 
 <link rel="stylesheet" href="~/css/patientIndex.css" asp-append-version="true" />
 
-<div class="hero-section text-white text-center py-5" style="background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('@Url.Content("~/images/bookingcare-cove.jpg")');
-            background-size: cover; 
-            background-position: center; 
-            min-height: 75vh; 
-            display: flex; 
-            align-items: center;">
+<div class="hero-section text-white text-center py-5" 
+    style="background-image: url('@Url.Content("~/images/bookingcare-cove.jpg")'); 
+           background-size: cover; 
+           background-position: center; 
+           min-height: 90vh; 
+           display: flex; 
+           align-items: center;">
     <div class="container">
-        <h1 class="display-3 fw-bold mb-4" style="color: cyan; text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);">NỀN TẢNG Y
-            TẾ</h1>
-        <h2 class="h4 fw-light mb-5">Chăm sóc sức khỏe toàn diện cho mọi nhà</h2>
+        <!-- Title -->
+        <h1 class="display-3 fw-bold mb-4" 
+            style="color: cyan; text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);">
+            MEDICAL PLATFORM
+        </h1>
+        <h2 class="h4 fw-light mb-5">
+            Comprehensive healthcare for every family
+        </h2>
+
+        <!-- Search bar and additional features -->
         <div class="row justify-content-center">
-            <div class="col-md-8 col-lg-6">
-                <div class="input-group search-bar">
-                    <input type="text" class="form-control form-control-lg"
-                        placeholder="Tìm bác sĩ, chuyên khoa, bệnh viện..." />
-                    <button class="btn btn-primary" type="button">
-                        <i class="fas fa-search me-2"></i> Tìm kiếm
+            <div class="col-md-10 col-lg-8">
+                <!-- Search bar -->
+                <div class="input-group search-bar mb-4 shadow-lg">
+                    <input type="text" class="form-control form-control-lg" id="searchInput"
+                        placeholder="Search doctors, specialties, hospitals..."
+                        style="border-radius: 50px 0 0 50px; padding: 20px;" />
+                    <button class="btn btn-primary px-4" type="button" onclick="searchByText()" 
+                        style="border-radius: 0 50px 50px 0; font-size: 1.2rem;">
+                        <i class="fas fa-search me-2"></i> Search
+                    </button>
+                </div>
+
+                <!-- Additional options -->
+                <div class="d-flex justify-content-center gap-3">
+                    <!-- Upload image -->
+                    <button class="btn btn-secondary btn-lg d-flex align-items-center gap-2 px-4"
+                        type="button" onclick="triggerImageInput()" style="border-radius: 50px;">
+                        <i class="fas fa-image"></i> Upload Image
+                    </button>
+                    <input type="file" id="imageInput" class="form-control" accept="image/*" style="display: none;" />
+
+                    <!-- Voice search -->
+                    <button class="btn btn-info btn-lg d-flex align-items-center gap-2 px-4"
+                        type="button" onclick="startVoiceSearch()" style="border-radius: 50px;">
+                        <i class="fas fa-microphone"></i> Voice Search
                     </button>
                 </div>
             </div>
@@ -32,24 +59,31 @@
     </div>
 </div>
 
+
 <div class="container my-5">
-    <div class="row g-4 text-center service-icons">
-        @{
-            var services = new[] {
-        ("specialist.png", "Khám chuyên khoa"),
-        ("remote.png", "Khám từ xa"),
-        ("general.png", "Khám tổng quát"),
-        ("mental.png", "Sức khỏe tinh thần"),
-        };
-        }
-        @foreach (var (icon, label) in services)
-        {
-            <div class="service-icon p-4">
-                <img src="@Url.Content($"~/images/patient/{icon}")" alt="@label" class="img-fluid mb-3" />
-                <p class="mb-0">@label</p>
+    <section class="services-section">
+        <div class="container">
+            <div class="row g-4">
+                @{
+                    var services = new[] {
+                        ("specialist.png", "Khám chuyên khoa"),
+                        ("remote.png", "Khám từ xa"),
+                        ("general.png", "Khám tổng quát"),
+                        ("mental.png", "Sức khỏe tinh thần"),
+                    };
+                }
+                @foreach (var (icon, label) in services)
+                {
+                    <div class="col-md-3 col-sm-6">
+                        <div class="service-card">
+                            <img src="@Url.Content($"~/images/patient/{icon}")" alt="@label" class="service-icon">
+                            <h3 class="h5 mt-3">@label</h3>
+                        </div>
+                    </div>
+                }
             </div>
-        }
-    </div>
+        </div>
+    </section>
 
     <section class="doctors-section mt-5">
         <div class="d-flex justify-content-between align-items-center mb-4">

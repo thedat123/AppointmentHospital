@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thông báo xác nhận lịch hẹn khám bệnh</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            line-height: 1.6;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 0;
+        }
+
+        .email-container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #d1d9e6;
+            background-color: #ffffff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h2 {
+            color: #1976D2;
+            margin-bottom: 20px;
+        }
+
+        p {
+            margin: 10px 0;
+        }
+
+        .important {
+            font-weight: bold;
+            color: #388E3C;
+        }
+
+        .footer {
+            font-size: 0.9em;
+            color: #777;
+            margin-top: 20px;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #388E3C;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 14px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .button:hover {
+            background-color: #2E7D32;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <h2>Xác nhận lịch khám bệnh</h2>
+        <p>Chào <span class="important">{{fullUserName}}</span>,</p>
+        <p>Chúng tôi xin thông báo rằng lịch hẹn khám bệnh của bạn đã được xác nhận.</p>
+        <p><strong>Thông tin chi tiết:</strong></p>
+        <ul>
+            <li><strong>Thời gian:</strong> <span class="important">{{AppointmentTime}}</span></li>
+            <li><strong>Bác sĩ:</strong> <span class="important">{{DoctorName}}</span></li>
+        </ul>
+        <p>Vui lòng đến trước giờ hẹn để buổi khám đạt hiệu quả tốt nhất. Nếu có thắc mắc, vui lòng liên hệ lại với chúng tôi</p>
+        <p class="footer">Trân trọng
+    </div>
+</body>
+</html>

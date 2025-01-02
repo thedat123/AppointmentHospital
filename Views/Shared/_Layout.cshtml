@@ -14,7 +14,7 @@
     <header>
         <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom fixed-top">
             <div class="container">
-                <a class="navbar-brand" href="/">
+                <a class="navbar-brand" asp-action="Index" asp-controller="Patient">
                     <img src="~/images/logo.png" alt="BookingCare" height="40">
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
@@ -64,7 +64,7 @@
                                         </a>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="/Patient/MySchedule">
+                                        <a class="dropdown-item" asp-action="MySchedule" asp-controller="Patient">
                                             <i class="bi bi-person-circle"></i> My Schedule
                                         </a>
                                     </li>

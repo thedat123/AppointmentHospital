@@ -1,11 +1,9 @@
-/* Hero Section */
 .hero-section {
-    background-size: cover;
-    background-position: center;
-    min-height: 75vh;
-    display: flex;
+    background-size: cover;         
+    background-position: center;         
+    min-height: 90vh; 
+    display: flex; 
     align-items: center;
-    justify-content: center;
 }
 
 .hero-section h1 {
@@ -63,6 +61,31 @@
 .doctor-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.services-section {
+    padding: 4rem 0;
+    background: var(--bg-light);
+}
+
+.service-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: var(--transition);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.service-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.service-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1rem;
 }
 
 /* Responsive Design */

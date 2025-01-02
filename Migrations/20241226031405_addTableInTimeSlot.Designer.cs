@@ -4,6 +4,7 @@ using AppointmentHospital.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppointmentHospital.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241226031405_addTableInTimeSlot")]
+    partial class addTableInTimeSlot
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -92,7 +95,7 @@ namespace AppointmentHospital.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("AccquantanceId")
+                    b.Property<Guid?>("AcquaintanceId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("AppointmentTime")
@@ -106,9 +109,6 @@ namespace AppointmentHospital.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<Guid>("DoctorId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Notes")
@@ -131,9 +131,9 @@ namespace AppointmentHospital.Migrations
 
                     b.HasKey("AppointmentId");
 
-                    b.HasIndex("DoctorId");
+                    b.HasIndex("AcquaintanceId");
 
-                    b.HasIndex("Id");
+                    b.HasIndex("DoctorId");
 
                     b.HasIndex("PatientId");
 
@@ -423,16 +423,14 @@ namespace AppointmentHospital.Migrations
 
             modelBuilder.Entity("AppointmentHospital.Models.Appointment", b =>
                 {
+                    b.HasOne("AppointmentHospital.Models.Acquaintance", null)
+                        .WithMany("Appointment")
+                        .HasForeignKey("AcquaintanceId");
+
                     b.HasOne("AppointmentHospital.Models.Doctor", "Doctor")
                         .WithMany("Appointments")
                         .HasForeignKey("DoctorId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("AppointmentHospital.Models.Acquaintance", "Acquaintance")
-                        .WithMany("Appointment")
-                        .HasForeignKey("Id")
-                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("AppointmentHospital.Models.Patient", "Patient")
@@ -440,8 +438,6 @@ namespace AppointmentHospital.Migrations
                         .HasForeignKey("PatientId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("Acquaintance");
 
                     b.Navigation("Doctor");
 

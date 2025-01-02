@@ -115,7 +115,7 @@
                                             .OrderBy(slot => slot.StartTime))
                                         {
                                             <div class="col-md-3">
-                                                <div class="time-slot-card" 
+                                                <div class="time-slot-card @((slot.Available ? "" : "disabled"))" 
                                                     data-slot-id="@slot.TimeSlotId" 
                                                     data-start-time="@slot.StartTime.ToString("yyyy-MM-dd HH:mm:ss")" 
                                                     onclick="selectTimeSlot(this)">
@@ -145,24 +145,29 @@
             <input type="hidden" name="DoctorId" value="@Model.Doctor.DoctorId">
             <input type="hidden" name="SelectedDate" id="selectedDate">
             <input type="hidden" name="SelectedTime" id="selectedTime">
+            <input type="hidden" name="TimeSlotId" id="timeSlotId">
             <button type="submit" id="bookAppointmentButton" class="btn appointment-btn disabled" disabled>
                 <i class="fas fa-calendar-plus me-2"></i>Book Appointment
             </button>
         </form>
     </div>
 </div>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl('/scheduleHub')
+            .build();
+
         const dateSelector = document.getElementById('appointmentDate');
         const timeSlotGroups = document.querySelectorAll('.time-slots-for-date');
         const bookButton = document.getElementById('bookAppointmentButton');
         const formSelectedDate = document.getElementById('selectedDate');
         const formSelectedTime = document.getElementById('selectedTime');
-
-        function updateTimeSlots() {
+        const timeSlotIdFunc = document.getElementById('timeSlotId');
+        
+        window.updateTimeSlots = function () {
             const selectedDate = dateSelector.value;
-
             timeSlotGroups.forEach(group => {
                 if (group.getAttribute('data-date') === selectedDate) {
                     group.style.display = 'block';
@@ -170,15 +175,28 @@
                     group.style.display = 'none';
                 }
             });
-
             resetSelection();
+        };
+        function createDateContainer(date) {
+            const dateContainer = document.createElement('div');
+            dateContainer.classList.add('time-slots-for-date');
+            dateContainer.setAttribute('data-date', date);
+            dateContainer.style.display = 'none';
+
+            const dateLabel = document.createElement('h5');
+            dateLabel.textContent = `Available slots for ${new Date(date).toLocaleDateString()}`;
+            dateContainer.appendChild(dateLabel);
+
+            const slotsRow = document.createElement('div');
+            slotsRow.classList.add('row', 'g-3', 'mt-3');
+            dateContainer.appendChild(slotsRow);
+            return dateContainer;
         }
 
         function resetSelection() {
             document.querySelectorAll('.time-slot-card').forEach(slot => {
                 slot.classList.remove('selected');
             });
-
             bookButton.disabled = true;
             bookButton.classList.add('disabled');
             formSelectedDate.value = '';
@@ -188,26 +206,114 @@
         window.selectTimeSlot = function (timeSlotElement) {
             const parentGroup = timeSlotElement.closest('.time-slots-for-date');
             const allSlots = parentGroup.querySelectorAll('.time-slot-card');
-
             allSlots.forEach(slot => slot.classList.remove('selected'));
-
             timeSlotElement.classList.add('selected');
-
             const selectedDate = dateSelector.value;
             const selectedStartTime = timeSlotElement.getAttribute('data-start-time');
             const timeOnly = new Date(selectedStartTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const timeSlotId = timeSlotElement.getAttribute('data-slot-id');
 
             if (selectedDate && timeOnly) {
                 formSelectedDate.value = selectedDate;
                 formSelectedTime.value = timeOnly; 
-
+                timeSlotIdFunc.value = timeSlotId;
                 bookButton.disabled = false;
                 bookButton.classList.remove('disabled');
             }
         };
         dateSelector.addEventListener('change', updateTimeSlots);
         updateTimeSlots();
+
+        connection.start()
+        .then(() => {
+            console.log("Connected to SignalR Hub");
+            connection.on("ScheduleUpdated", function (doctorId, updatedDate) {
+                console.log("Schedule updated for doctor:", doctorId, "on date:", updatedDate);
+                const selectedDoctorId = document.querySelector('input[name="DoctorId"]').value;
+                const selectedDate = document.getElementById('appointmentDate').value;
+                if (selectedDoctorId === doctorId && selectedDate === updatedDate) {
+                    reloadScheduleForDate(doctorId, updatedDate);
+                }
+            });
+        })
+        .catch(err => console.error("SignalR connection error:", err));
+
+        function formatTime(time) {
+            return new Date(time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+        }
+
+        function updateSlotElement(slotElement, slot) {
+            const timeSlotId = slotElement.getAttribute('data-slot-id');
+            const isSelected = slot.selected;
+
+            if (isSelected) {
+                slotElement.classList.add('selected');
+            } else {
+                slotElement.classList.remove('selected');
+            }
+
+            const timeContent = slotElement.querySelector('.time-slot-content');
+            if (timeContent) {
+                const startTime = formatTime(slot.startTime);
+                const endTime = formatTime(slot.endTime);
+                timeContent.textContent = `${startTime} - ${endTime}`;
+            }
+
+            if (!slot.available) {
+                slotElement.classList.add('disabled');
+            } else {
+                slotElement.classList.remove('disabled');
+            }
+        }
+
+        function reloadScheduleForDate(doctorId, date) {
+            fetch(`/api/schedule?id=${doctorId}&date=${date}&isApiRequest=true`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Failed to fetch schedule: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    updateScheduleUIForDate(data, date);
+                })
+                .catch(err => console.error("Failed to reload schedule:", err));
+        }
+
+        function updateScheduleUIForDate(timeSlots, date) {
+            const dateSelector = document.getElementById('appointmentDate');
+            dateSelector.value = date;
+
+            updateTimeSlots();
+
+            const dateContainer = document.querySelector(`.time-slots-for-date[data-date="${date}"]`);
+            if (!dateContainer) {
+                console.error(`No container found for date: ${date}`);
+                return;
+            }
+
+            const slotsRow = dateContainer.querySelector('.row');
+            const existingSlots = slotsRow.querySelectorAll('.time-slot-card');
+
+            const existingSlotsMap = Array.from(existingSlots).reduce((acc, slot) => {
+                const slotId = slot.getAttribute('data-slot-id');
+                acc[slotId] = slot;
+                return acc;
+            }, {});
+
+            const slots = timeSlots.values.$values || [];
+            slots.forEach(slot => {
+                const slotElement = existingSlotsMap[slot.id];
+                
+                if (slotElement) {
+                    updateSlotElement(slotElement, slot);
+                }
+            });
+        }
     });
 
 </script>
+
+
+
 

@@ -72,7 +72,7 @@
                     })
                     {
                         <a asp-action="Index" asp-route-status="@status" 
-                           class="btn btn-outline-primary rounded-pill me-2 mb-2">
+                        class="btn @(ViewBag.SelectedStatus == status ? "btn-primary text-white shadow-lg" : "btn-outline-primary border-2") rounded-pill me-2 mb-2">
                             <i class="fas @icon me-1"></i> @status
                         </a>
                     }
@@ -112,22 +112,31 @@
                                         @appointment.Patient.DateOfBirth | @appointment.Patient.Address
                                     </div>
                                 </td>
-                                <td class="px-4 py-3 text-truncate" style="max-width: 200px;" 
-                                    title="@appointment.Symptoms">
+                                <td class="px-4 py-3 text-truncate" style="max-width: 200px;" title="@appointment.Symptoms">
                                     @appointment.Symptoms
                                 </td>
                                 <td class="px-4 py-3 text-center">
-                                    <form action="/Doctor/UpdateStatus" method="post" class="d-inline">
-                                        <input type="hidden" name="id" value="@appointment.AppointmentId" />
-                                        <button type="submit" name="status" value="1" 
-                                                class="btn btn-sm btn-success rounded-pill me-2">
-                                            <i class="fas fa-check me-1"></i> Confirm
-                                        </button>
-                                        <button type="submit" name="status" value="3" 
-                                                class="btn btn-sm btn-danger rounded-pill">
-                                            <i class="fas fa-times me-1"></i> Cancel
-                                        </button>
-                                    </form>
+                                    @if (appointment.Status == AppointmentHospital.EnumStatus.AppointmentStatus.Pending)
+                                    {
+                                        <form action="/Doctor/UpdateStatus" method="post" class="d-inline">
+                                            <input type="hidden" name="id" value="@appointment.AppointmentId" />
+                                            <button type="submit" name="status" value="1" 
+                                                    class="btn btn-sm btn-success rounded-pill me-2">
+                                                <i class="fas fa-check me-1"></i> Confirm
+                                            </button>
+                                            <button type="submit" name="status" value="3" 
+                                                    class="btn btn-sm btn-danger rounded-pill">
+                                                <i class="fas fa-times me-1"></i> Cancel
+                                            </button>
+                                        </form>
+                                    }
+                                    else if (appointment.Status == AppointmentHospital.EnumStatus.AppointmentStatus.Confirmed)
+                                    {
+                                        <a asp-asp-controller="Doctor" asp-action="StartDiagnosis" asp-route-id="@appointment.AppointmentId"
+                                        class="btn btn-sm btn-primary rounded-pill">
+                                            <i class="fas fa-stethoscope me-1"></i> Start diagnosis
+                                        </a>
+                                    }
                                 </td>
                             </tr>
                         }
@@ -148,3 +157,25 @@
         </div>
     </div>
 </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl('/scheduleHub')
+            .build();
+
+        connection.start()
+            .then(() => {
+                console.log("Connected to SignalR Hub");
+            })
+            .catch(err => console.error("SignalR connection error:", err));
+
+        connection.on("UpdateStatus", (appointmentId, status) => {
+            console.log(`Appointment ${appointmentId} updated to status ${status}`);
+
+            const scrollPosition = window.scrollY;
+            window.location.reload();
+            window.scrollTo(0, scrollPosition);
+        });
+    });
+</script>

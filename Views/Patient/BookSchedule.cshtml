@@ -24,6 +24,7 @@
         <form id="bookingForm" method="post">
             <input type="hidden" id="doctorId" name="DoctorId" value="@Model.DoctorId" />
             <input type="hidden" id="appointmentDateTime" name="AppointmentDateTime" value="@Model.AppointmentDateTime" />
+            <input type="hidden" id="timeSlotId" name="TimeSlotId" value="@Model.TimeSlotId" />
 
             <div id="self-section" class="patient-section">
                 <h6 class="text-info">Symptoms</h6>
@@ -72,7 +73,7 @@
                 </div>
 
                 <div class="mb-3">
-                    <textarea class="form-control" rows="4" name="reason" placeholder="Reason for Appointment"></textarea>
+                    <textarea class="form-control" rows="4" name="symptoms" placeholder="Reason for Appointment"></textarea>
                 </div>
             </div>
         </form>

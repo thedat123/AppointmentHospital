@@ -100,6 +100,8 @@ namespace AppointmentHospital.Controllers
             var loginResult = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, false);
             if(loginResult.Succeeded)
             {
+                var userId = _accountService.GetIdByEmail(info.Principal.FindFirstValue(ClaimTypes.Email));
+                _contextAccessor.HttpContext.Session.SetString("PatientId", userId.ToString());
                 return RedirectToAction("Index", "Patient");
             }
             else

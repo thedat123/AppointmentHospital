@@ -29,6 +29,14 @@ namespace AppointmentHospital
             Env.Load();
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+            builder.Services.AddControllers()
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+                options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+            });
+
+
             builder.Services.AddSession(options =>
             {
                 options.IdleTimeout = TimeSpan.FromMinutes(30);
@@ -122,6 +130,7 @@ namespace AppointmentHospital
                 .UseSqlServerStorage(configuration.GetConnectionString("AppointmentHospitalDB"));
             });
             builder.Services.AddHangfireServer();
+            builder.Services.AddSignalR();
 
             var app = builder.Build();
             using(var scope = app.Services.CreateScope())
@@ -143,6 +152,7 @@ namespace AppointmentHospital
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseHangfireDashboard();
+            app.MapHub<ScheduleHub>("/scheduleHub");
             app.MapAreaControllerRoute(
             name: "admin",
             areaName: "Admin",

@@ -1,120 +1,244 @@
 ﻿@using AppointmentHospital.Entity
 @model List<TimeSlot>
-<div class="container">
-    <h1 class="text-primary mt-4">Doctor Schedule Registration</h1>
+
+<div class="container py-4">
+    <h1 class="text-primary mb-4">Doctor Schedule Registration</h1>
     
-    <div class="card mb-4 p-4">
-        <h3>Doctor Information</h3>
-        <form method="post" asp-action="UpdateDoctorInfo">
-            <div class="form-group">
-                <label for="DoctorName">Full Name:</label>
-                @* <input type="text" class="form-control" id="DoctorName" name="DoctorName" value="@Model.DoctorName" /> *@
+    <div class="card shadow-sm mb-4">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                @TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-            <div class="form-group mt-2">
-                <label for="Specialty">Specialty:</label>
-                <select class="form-control" id="Specialty" name="Specialty">
-                    <option value="internal">Internal Medicine</option>
-                    <option value="surgery">Surgery</option>
-                    <option value="pediatrics">Pediatrics</option>
-                    <option value="obstetrics">Obstetrics and Gynecology</option>
-                </select>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                @TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-            <button type="submit" class="btn btn-primary mt-2">Save Information</button>
-        </form>
-    </div>
-    
-    <div class="card mb-4 p-4">
-        <h3>Regular Working Schedule</h3>
-        <form method="post" asp-action="UpdateRegularSchedule">
-            @* @foreach (var day in new[] { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" })
-            {
-                <div class="form-group mt-3">
-                    <div class="d-flex align-items-center">
-                        <div class="form-check">
-                            <input type="checkbox" class="form-check-input" id="@($"Enable{day}")" 
-                                name="@($"Enable{day}")" @(Model.EnabledDays.Contains(day) ? "checked" : "") />
-                            <label class="form-check-label" for="@($"Enable{day}")">@day</label>
+        }
+        <div class="card-header bg-white">
+            <h3 class="card-title mb-0">Doctor Information</h3>
+        </div>
+        <div class="card-body">
+            <form method="post" asp-action="UpdateDoctorInfo">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="DoctorName" class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="DoctorName" name="DoctorName" value="@ViewBag.DoctorName" disabled required />
                         </div>
-                        <div class="ms-4">
-                            <label for="@($"StartTime{day}")">From:</label>
-                            <input type="time" class="form-control" id="@($"StartTime{day}")" 
-                                name="@($"StartTime{day}")" value="@Model.StartTimes[day]" />
-                        </div>
-                        <div class="ms-2">
-                            <label for="@($"EndTime{day}")">To:</label>
-                            <input type="time" class="form-control" id="@($"EndTime{day}")" 
-                                name="@($"EndTime{day}")" value="@Model.EndTimes[day]" />
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="Specialty" class="form-label">Specialty</label>
+                            <input type="text" class="form-control" id="DoctorName" name="DoctorName" value="@ViewBag.Speciality" disabled required />
                         </div>
                     </div>
                 </div>
-            } *@
-            <button type="submit" class="btn btn-primary mt-3">Save Regular Schedule</button>
-        </form>
+            </form>
+        </div>
     </div>
-    
-    <div class="card mb-4 p-4">
-        <h3>Register Off Days/Special Schedule</h3>
-        <form method="post" asp-action="UpdateSpecialSchedule">
-            <div class="form-group">
-                <label for="SpecialDate">Date:</label>
-                <input type="date" class="form-control" id="SpecialDate" name="SpecialDate" />
-            </div>
-            <div class="form-group mt-2">
-                <label>Type:</label>
-                <div class="form-check">
-                    <input type="radio" class="form-check-input" id="TypeOff" name="ScheduleType" value="off" />
-                    <label class="form-check-label" for="TypeOff">Off</label>
-                </div>
-                <div class="form-check">
-                    <input type="radio" class="form-check-input" id="TypeSpecial" name="ScheduleType" value="special" />
-                    <label class="form-check-label" for="TypeSpecial">Special Schedule</label>
-                </div>
-            </div>
-            <div class="form-group mt-2" id="specialTimeSection">
-                <label for="SpecialStartTime">Time (if special schedule):</label>
-                <div class="d-flex">
-                    <input type="time" class="form-control" id="SpecialStartTime" name="SpecialStartTime" />
-                    <span class="mx-2 align-self-center">to</span>
-                    <input type="time" class="form-control" id="SpecialEndTime" name="SpecialEndTime" />
-                </div>
-            </div>
-            <div class="form-group mt-2">
-                <label for="Note">Note:</label>
-                <textarea class="form-control" id="Note" name="Note" rows="3"></textarea>
-            </div>
-            <button type="submit" class="btn btn-primary mt-2">Save Special Schedule</button>
-        </form>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white">
+            <h3 class="card-title mb-0">Regular Working Schedule</h3>
+        </div>
+        <div class="card-body">
+            <form method="post" asp-action="UpdateRegularSchedule">
+                @foreach (var day in Enum.GetValues<DayOfWeek>())
+                {
+                    <div class="row align-items-center mb-3">
+                        <div class="col-md-3">
+                            <div class="form-check">
+                                <input type="checkbox" 
+                                    class="form-check-input" 
+                                    id="@($"Enable{day}")" 
+                                    name="@($"Schedules[{(int)day}].Enabled")"
+                                    value="true" />
+                                <input type="hidden" 
+                                    name="@($"Schedules[{(int)day}].DayOfWeek")" 
+                                    value="@((int)day)" />
+                                <label class="form-check-label fw-bold" for="@($"Enable{day}")">
+                                    @day.ToString()
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <span class="input-group-text">From</span>
+                                <input type="time" 
+                                    class="form-control" 
+                                    id="@($"StartTime{day}")" 
+                                    name="@($"Schedules[{(int)day}].StartTime")" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <span class="input-group-text">To</span>
+                                <input type="time" 
+                                    class="form-control" 
+                                    id="@($"EndTime{day}")" 
+                                    name="@($"Schedules[{(int)day}].EndTime")" />
+                            </div>
+                        </div>
+                    </div>
+                }
+                
+                <button type="submit" class="btn btn-primary mt-3">Save Regular Schedule</button>
+            </form>
+        </div>
     </div>
-    
-    <div class="card mb-4 p-4">
-        <h3>Registered Schedules</h3>
-        <div class="table-responsive">
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Type</th>
-                        <th>Time</th>
-                        <th>Note</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var schedule in Model)
-                    {
+
+
+    <!-- Special Schedule Section -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white">
+            <h3 class="card-title mb-0">Register Off Days/Special Schedule</h3>
+        </div>
+        <div class="card-body">
+            <form method="post" asp-action="UpdateSpecialSchedule">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="SpecialDate" class="form-label">Date</label>
+                            <input type="date" class="form-control" id="SpecialDate" name="SpecialDate" required />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Type</label>
+                        <div class="d-flex gap-4">
+                            <div class="form-check">
+                                <input type="radio" class="form-check-input" id="TypeOff" name="ScheduleType" value="off" required />
+                                <label class="form-check-label" for="TypeOff">Off Day</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="radio" class="form-check-input" id="TypeSpecial" name="ScheduleType" value="special" />
+                                <label class="form-check-label" for="TypeSpecial">Special Schedule</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-3" id="specialTimeSection">
+                    <div class="col-md-12">
+                        <label class="form-label">Special Schedule Time</label>
+                        <div class="row">
+                            <div class="col-md-5">
+                                <div class="input-group">
+                                    <span class="input-group-text">From</span>
+                                    <input type="time" class="form-control" id="SpecialStartTime" name="SpecialStartTime" />
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="input-group">
+                                    <span class="input-group-text">To</span>
+                                    <input type="time" class="form-control" id="SpecialEndTime" name="SpecialEndTime" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3 mt-3">
+                    <label for="Note" class="form-label">Note</label>
+                    <textarea class="form-control" id="Note" name="Note" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Special Schedule</button>
+            </form>
+        </div>
+    </div>
+
+	
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-white">
+            <h3 class="card-title mb-0">Registered Schedules</h3>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-light">
                         <tr>
-                            <td>@schedule.StartTime</td>
-                            @* <td>@schedule.Type</td>
-                            <td>@schedule.TimeRange</td> *@
-                            <td>@schedule.EndTime</td>
-                            <td>
-                                <button class="btn btn-sm btn-danger" 
-                                    onclick="deleteSchedule('@schedule.TimeSlotId')">Delete</button>
-                            </td>
+                            <th>Days</th>
+                            <th>Start Time</th>
+                            <th>End Time</th>
+                            <th class="text-center">Actions</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach (var schedule in Model)
+                        {
+                            <tr>
+                                <!-- Days -->
+                                <td>@schedule.StartTime.ToString("dd/MM")</td>
+                                
+                                <!-- Start Time -->
+                                <td>@schedule.StartTime.ToString("HH:mm")</td>
+                                
+                                <!-- End Time -->
+                                <td>@schedule.EndTime.ToString("HH:mm")</td>
+                                
+                                <!-- Actions -->
+                                <td class="text-center">
+                                    <button class="btn btn-danger btn-sm" onclick="deleteSchedule('@schedule.TimeSlotId')">
+                                        <i class="bi bi-trash"></i> Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+            </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('input[name="ScheduleType"]').change(function() {
+                if ($(this).val() === 'special') {
+                    $('#specialTimeSection').show();
+                } else {
+                    $('#specialTimeSection').hide();
+                }
+            });
+
+            $('#specialTimeSection').hide();
+        });
+
+        function deleteSchedule(timeSlotId) {
+            if (confirm('Are you sure you want to delete this schedule?')) {
+            }
+        }
+
+        document.querySelectorAll('input[type="time"]').forEach(function (timeInput) {
+            timeInput.addEventListener('input', function () {
+                let [hour, minute] = this.value.split(':');
+                if (minute !== '00') {
+                    this.value = `${hour}:00`;
+                }
+            });
+        });
+
+        var alertElement = document.querySelectorAll(".alert-dismissible");
+        var hideTimeout =  null;
+
+        function hideAlert(){
+            alertElement[0].classList.remove('show');
+            alertElement[1].classList.remove('show');
+        }
+
+        function showAlert(){
+            if(hideTimeout){
+                clearTimeout(hideTimeout);
+            }
+            hideTimeout = setTimeout(hideAlert, 2000);
+        }
+    </script>
+}
