@@ -151,7 +151,7 @@ namespace AppointmentHospital.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> BookForOther(Guid DoctorId, DateTime AppointmentDateTime, string patientName, string gender, string symptoms, Guid TimeSlotId, string patientEmail)
+        public async Task<IActionResult> BookForOther(Guid DoctorId, DateTime AppointmentDateTime, string acquaintanceName, string gender, string symptom, Guid TimeSlotId, DateTime birthDate, int identificationNumber, string address)
         {
             var doctor = _doctorService.getDoctorById(DoctorId);
             if (doctor == null)
@@ -160,20 +160,43 @@ namespace AppointmentHospital.Controllers
                 return RedirectToAction("Index", "Patient");
             }
 
-            var patient = _patientService.GetPatientByEmail(patientEmail);
+            var patientId = _contextAccessor.HttpContext?.Session.GetString("PatientId");
+            var patient = await _patientService.GetPatientById(Guid.Parse(patientId));
             if (patient == null)
             {
                 TempData["ErrorMessage"] = "Patient not found.";
                 return RedirectToAction("Index", "Patient");
             }
 
+            var aquaintance = new Acquaintance
+            {
+                Name = acquaintanceName,
+                DateOfBirth = birthDate,
+                Gender = gender,
+                IdentificationNumber = identificationNumber,
+                Address = address,
+                PatientId = Guid.Parse(patientId)
+            };
+
+            _patientService.AddAcquaintance(aquaintance);
+
+            if (string.IsNullOrEmpty(symptom))
+            {
+                TempData["ErrorMessage"] = "Symptoms cannot be empty.";
+                Console.WriteLine("Symptoms cannot be empty.");
+                return RedirectToAction("Index", "Patient");
+            }
+
             var appointment = new Appointment
             {
                 DoctorId = DoctorId,
-                PatientId = patient.PatientId,
+                PatientId = Guid.Parse(patientId),
                 AppointmentTime = AppointmentDateTime,
-                Symptoms = symptoms,
+                Symptoms = symptom,
+                AcquaintanceId = aquaintance.Id
             };
+
+            Console.WriteLine($"Identification Number: {identificationNumber}, Address: {address}");
 
             try
             {
@@ -182,7 +205,7 @@ namespace AppointmentHospital.Controllers
                 string body = await _emailService.GetBookingTemplate(appointment.AppointmentTime, doctor.FullName, patient.FullName);
                 await _emailService.SendMailAsync(patient.EmailAddress, $"Medical Appointment Of ({patient.FullName})", body);
 
-                TempData["SuccessMessage"] = "The appointment has been booked successfully!";
+                TempData["SuccessMessage"] = "Appointment for acquaintance has been booked successfully!";
 
                 var updatedDate = appointment.AppointmentTime.Date.ToString("yyyy-MM-dd");
                 await _hubContext.Clients.All.SendAsync("ScheduleUpdated", DoctorId, updatedDate);

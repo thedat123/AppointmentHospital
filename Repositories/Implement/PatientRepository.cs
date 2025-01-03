@@ -83,5 +83,11 @@ namespace AppointmentHospital.Repositories.Implement
             };
             return patientResponse;
         }
+
+        public void AddAcquaintance(Acquaintance acquaintance)
+        {
+            appDbContext.Add(acquaintance);
+            appDbContext.SaveChanges();
+        }
     }
 }

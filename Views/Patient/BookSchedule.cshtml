@@ -36,7 +36,7 @@
             <div id="other-section" class="patient-section" style="display: none;">
                 <h6 class="text-info">Patient's Information</h6>
                 <div class="mb-3">
-                    <input type="text" class="form-control" name="patientName" placeholder="Patient's Full Name (required)">
+                    <input type="text" class="form-control" name="acquaintanceName" placeholder="Full Name (required)">
                 </div>
 
                 <div class="gender-selection mb-3">
@@ -59,13 +59,13 @@
                         <input type="tel" class="form-control" name="phoneNumber" placeholder="Patient's Phone Number">
                     </div>
                     <div class="col-md-6">
-                        <input id="scheduleDate" type="date" class="form-control" name="appointmentDate" 
+                        <input id="scheduleDate" type="date" class="form-control" name="birthDate" 
                             min="@DateTime.Now.ToString("yyyy-MM-dd")">
                     </div>
                 </div>
 
                 <div class="mb-3">
-                    <input type="text" class="form-control" name="identificationNumber" placeholder="Identification Number">
+                    <input type="number" class="form-control" name="identificationNumber" placeholder="Identification Number">
                 </div>
 
                 <div class="mb-3">
@@ -73,7 +73,7 @@
                 </div>
 
                 <div class="mb-3">
-                    <textarea class="form-control" rows="4" name="symptoms" placeholder="Reason for Appointment"></textarea>
+                    <textarea class="form-control" rows="4" name="symptom" placeholder="Reason for Appointment" required></textarea>
                 </div>
             </div>
         </form>
