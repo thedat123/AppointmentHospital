@@ -128,7 +128,7 @@
                                             @switch(appointment.Status)
                                             {
                                                 case AppointmentHospital.EnumStatus.AppointmentStatus.Pending:
-                                                    if ((appointment.AppointmentTime - DateTime.Now).TotalHours <= 24 && (appointment.AppointmentTime - DateTime.Now).TotalHours > 0)
+                                                    if ((appointment.AppointmentTime - DateTime.Now).TotalHours >= 24)
                                                     {
                                                         <form method="post" asp-action="CancelAppointment" asp-route-id="@appointment.AppointmentId">
                                                             <button type="submit" class="btn btn-danger btn-sm">
