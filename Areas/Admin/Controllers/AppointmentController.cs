@@ -17,6 +17,7 @@ namespace AppointmentHospital.Areas.Admin.Controllers
         }
         public async Task<IActionResult> Index(int? page, string? searchTerm, Specialization? specialization )
         {
+            // kẹp giá trị của Specialization hiện tại vào
             ViewData["StatusList"] = _appointmentService.GetStatus();
             ViewData["SpecializationList"] = _appointmentService.GetSpecialization();
             ViewData["SearchTerm"] = searchTerm;

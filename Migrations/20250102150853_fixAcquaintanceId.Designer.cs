@@ -4,6 +4,7 @@ using AppointmentHospital.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppointmentHospital.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250102150853_fixAcquaintanceId")]
+    partial class fixAcquaintanceId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -86,49 +89,13 @@ namespace AppointmentHospital.Migrations
                     b.ToTable("Acquaintances");
                 });
 
-            modelBuilder.Entity("AppointmentHospital.Models.Acquaintance", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime>("DateOfBirth")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Gender")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("IdentificationNumber")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<Guid>("PatientId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PatientId");
-
-                    b.ToTable("Acquaintances");
-                });
-
             modelBuilder.Entity("AppointmentHospital.Models.Appointment", b =>
                 {
                     b.Property<Guid>("AppointmentId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("AcquaintanceId")
+                    b.Property<Guid>("AcquaintanceId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("AppointmentTime")
@@ -173,50 +140,6 @@ namespace AppointmentHospital.Migrations
                     b.ToTable("Appointments");
                 });
 
-            modelBuilder.Entity("AppointmentHospital.Models.DiagnosisHistory", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("AcquaintanceId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("AppointmentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("DateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Diagnosis")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("DoctorId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("DoctorNote")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("PatientId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.PrimitiveCollection<string>("Prescription")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AppointmentId");
-
-                    b.HasIndex("DoctorId");
-
-                    b.HasIndex("PatientId");
-
-                    b.ToTable("DiagnosisHistory");
-                });
-
             modelBuilder.Entity("AppointmentHospital.Models.Doctor", b =>
                 {
                     b.Property<Guid>("DoctorId")
@@ -255,21 +178,6 @@ namespace AppointmentHospital.Migrations
                     b.HasKey("DoctorId");
 
                     b.ToTable("Doctors");
-                });
-
-            modelBuilder.Entity("AppointmentHospital.Models.Drug", b =>
-                {
-                    b.Property<Guid>("DrugId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("DrugName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("DrugId");
-
-                    b.ToTable("Drugs");
                 });
 
             modelBuilder.Entity("AppointmentHospital.Models.Patient", b =>
@@ -517,7 +425,9 @@ namespace AppointmentHospital.Migrations
                 {
                     b.HasOne("AppointmentHospital.Models.Acquaintance", "Acquaintance")
                         .WithMany("Appointment")
-                        .HasForeignKey("AcquaintanceId");
+                        .HasForeignKey("AcquaintanceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("AppointmentHospital.Models.Doctor", "Doctor")
                         .WithMany("Appointments")
@@ -532,33 +442,6 @@ namespace AppointmentHospital.Migrations
                         .IsRequired();
 
                     b.Navigation("Acquaintance");
-
-                    b.Navigation("Doctor");
-
-                    b.Navigation("Patient");
-                });
-
-            modelBuilder.Entity("AppointmentHospital.Models.DiagnosisHistory", b =>
-                {
-                    b.HasOne("AppointmentHospital.Models.Appointment", "Appointment")
-                        .WithMany()
-                        .HasForeignKey("AppointmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AppointmentHospital.Models.Doctor", "Doctor")
-                        .WithMany()
-                        .HasForeignKey("DoctorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AppointmentHospital.Models.Patient", "Patient")
-                        .WithMany()
-                        .HasForeignKey("PatientId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Appointment");
 
                     b.Navigation("Doctor");
 

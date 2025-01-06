@@ -21,15 +21,7 @@ namespace AppointmentHospital.Areas.Admin.Repositories.Implement
         }
         public async Task<Pagination<ManagingDoctorResponse>> GetAllDoctor(int page, string searchTerm, Specialization? specialization)
         {
-            var query = _context.Doctors.Include(d => d.User).Select(d => new ManagingDoctorResponse
-            {
-                EmailAddress = d.User.Email,
-                PhoneNumber = d.User.PhoneNumber,
-                FullName = d.FullName,
-                Id = d.DoctorId,
-                ExperienceYear = d.ExperienceYear,
-                Specializaiton = d.Specializaiton,
-            });
+            var query = _context.Doctors.AsQueryable();
             if (!string.IsNullOrEmpty(searchTerm) && specialization == null)
             {
                 query = query.Where(d => d.FullName.ToLower() == searchTerm.ToLower());
@@ -42,7 +34,18 @@ namespace AppointmentHospital.Areas.Admin.Repositories.Implement
             {
                 query = query.Where(d => d.FullName.ToLower() == searchTerm.ToLower() && d.Specializaiton == specialization);
             }
-                return await Pagination<ManagingDoctorResponse>.PaginatedList(query, page);
+            var paginatedList = await Pagination<Doctor>.PaginatedList(query, page);
+            var doctorList = paginatedList.Select(d => new ManagingDoctorResponse {
+                EmailAddress = d.User.Email,
+                PhoneNumber = d.User.PhoneNumber,
+                FullName = d.FullName,
+                Gender = d.Gender,
+                Degree = d.Degree,
+                Id = d.DoctorId,
+                ExperienceYear = d.ExperienceYear,
+                Specializaiton = EnumExtensions.GetDisplayName(d.Specializaiton)
+            }).ToList();
+            return new Pagination<ManagingDoctorResponse> (doctorList, page, paginatedList.TotalItems);
         }
 
         public List<SelectListItem> GetSpecialization()
@@ -97,7 +100,11 @@ namespace AppointmentHospital.Areas.Admin.Repositories.Implement
                 FullName = d.FullName,
                 EmailAddress = d.User.Email,
                 PhoneNumber = d.User.PhoneNumber,
-                Specializaiton = d.Specializaiton,
+                Degree = d.Degree,
+                Gender = d.Gender,
+                Description = d.Description,
+                ImagePath = d.ImagePath,
+                Specializaiton = EnumExtensions.GetDisplayName(d.Specializaiton),
                 ExperienceYear = d.ExperienceYear
             }).FirstOrDefaultAsync();
             return doctor;

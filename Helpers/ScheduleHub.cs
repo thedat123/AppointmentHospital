@@ -20,5 +20,4 @@ public class ScheduleHub : Hub
     public async Task NotifyPatientInfoUpdated(Patient patient){
         await Clients.All.SendAsync("UpdatePatientProfile", patient);
     }
-
 }

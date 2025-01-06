@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.WebUtilities;
 using System.Text;
 using Hangfire;
 using AppointmentHospital.Services.Implement;
-using ResetPasswordRequest = AppointmentHospital.DTOs.Account.AccountRequest.ResetPasswordRequest;
 using Microsoft.Extensions.Options;
 using AppointmentHospital.Configuration.BaseUrl;
 using System.Security.Claims;
@@ -22,7 +21,8 @@ namespace AppointmentHospital.Controllers
         private readonly SignInManager<User> _signInManager;
         private readonly IEmailService _emailService;
         private readonly IOptions<BaseUrl> _options;
-        public AccountController(IAccountService accountService, IOptions<BaseUrl> options ,IEmailService emailService, IHttpContextAccessor contextAccessor, UserManager<User> userManager, SignInManager<User> signInManager)
+        private readonly AppDbContext _appDbContext;
+        public AccountController(IAccountService accountService, AppDbContext appDbContext ,IOptions<BaseUrl> options ,IEmailService emailService, IHttpContextAccessor contextAccessor, UserManager<User> userManager, SignInManager<User> signInManager)
         {
             _accountService = accountService;
             _contextAccessor = contextAccessor;
@@ -30,6 +30,7 @@ namespace AppointmentHospital.Controllers
             _signInManager = signInManager;
             _emailService = emailService;
             _options = options;
+            _appDbContext = appDbContext;
         }
         public IActionResult ForgetPassword()
         {
@@ -50,11 +51,18 @@ namespace AppointmentHospital.Controllers
             {
                 return View(request);
             }
-            if (!await _accountService.LoginAsync(request))
+            var result = await _accountService.LoginAsync(request);
+            if(result.Status == 403)
             {
+                ModelState.AddModelError("", "Please confirmed before login");
                 var userFounded = await _userManager.FindByEmailAsync(request.Email);
                 await SendMail(userFounded);
-                return View("ConfirmEmail", request.Email);
+                return View(request);
+            }
+            if (result.Status == 400)
+            {
+                ModelState.AddModelError("", "Incorrect password, please write correct password");
+                return View(request);
             }
             if (_contextAccessor.HttpContext.User.IsInRole("Admin"))
             {
@@ -122,8 +130,16 @@ namespace AppointmentHospital.Controllers
                             Email = externalMail
                         };
                         var createResult = await _userManager.CreateAsync(newUser);
+                        var patient = new Patient
+                        {
+                            FullName = externalMail,
+                            User = newUser,
+                        };
                         if (createResult.Succeeded)
                         {
+                            await _userManager.AddToRoleAsync(newUser, "Patient");
+                            await _appDbContext.AddAsync(patient);
+                            await _appDbContext.SaveChangesAsync();
                             var addLoginNewUserResult = await _userManager.AddLoginAsync(newUser, info);
                             if (addLoginNewUserResult.Succeeded)
                             {

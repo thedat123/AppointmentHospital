@@ -72,7 +72,7 @@ namespace AppointmentHospital.Areas.Admin.Repositories.Implement
 
         public async Task<ManagingPatientResponse> GetPatientAsync(Guid id)
         {
-            var patient = await _context.Patients.Include(p => p.User).Where(p => p.PatientId == id).Select(p => new ManagingPatientResponse
+            var patient = await _context.Patients.Where(p => p.PatientId == id).Select(p => new ManagingPatientResponse
             {
                 Address = p.Address,
                 EmailAddress = p.User.Email,
@@ -84,7 +84,7 @@ namespace AppointmentHospital.Areas.Admin.Repositories.Implement
         }
         public async Task<Pagination<ManagingPatientResponse>> GetAllPatientAsync(int page, string searchTerm)
         {
-            var query =  _context.Patients.Include(p => p.User).Select(p => new ManagingPatientResponse
+            var query =  _context.Patients.Select(p => new ManagingPatientResponse
             {
                 Id = p.PatientId,
                 DateOfBirth = p.DateOfBirth,
@@ -97,7 +97,7 @@ namespace AppointmentHospital.Areas.Admin.Repositories.Implement
             {
                 query = query.Where(p => p.FullName.ToLower().Contains(searchTerm.ToLower()));
             }
-            var patientResponse = await Pagination<ManagingPatientResponse>.PaginatedList(query, searchTerm == null ? 1 : page);
+            var patientResponse = await Pagination<ManagingPatientResponse>.PaginatedList(query, page);
             return patientResponse;
         }
     }

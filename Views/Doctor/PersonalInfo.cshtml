@@ -1,0 +1,100 @@
+@using AppointmentHospital.Models;
+@using AppointmentHospital.EnumStatus;
+@model Doctor;
+@{
+    var specializations =  ViewBag.Specializaiton as List<SelectListItem>;
+}
+<div class="profile-container">
+    <div class="profile-header">
+        <div class="profile-avatar">
+            <img src="@Model.ImagePath" alt="Doctor Avatar" id="profile-image" />
+        </div>
+        <div class="profile-title">
+            <h2>@Model.FullName</h2>
+        </div>
+    </div>
+
+    <form asp-action="UpdateProfile" method="post" class="profile-form">
+        <div class="profile-section">
+            <h3>Personal Information</h3>
+            <div class="form-grid">
+                <input asp-for="@Model.DoctorId" class="form-control" type="hidden" value="@Model.DoctorId" />
+                <div class="form-group">
+                    <label asp-for="@Model.FullName">Full Name</label>
+                    <input asp-for="@Model.FullName" class="form-control" required />
+                </div>
+                <div class="form-group">
+                    <label asp-for="@Model.Gender">Gender</label>
+                    <select asp-for="@Model.Gender" class="form-select">
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label asp-for="@Model.DateOfBirth">Date of Birth</label>
+                    <input asp-for="@Model.DateOfBirth" type="date" class="form-control" />
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-section">
+            <h3>Professional Details</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label asp-for="@Model.Specializaiton">Specialization</label>
+                    <select asp-for="@Model.Specializaiton">
+                            <option value="" disabled selected>Choose specialization</option>
+                            @foreach(var specialization in specializations)
+                            {
+                                <option value="@specialization.Value">@specialization.Text</option>
+                            }
+                        </select>
+                </div>
+                <div class="form-group">
+                    <label asp-for="@Model.ExperienceYear">Years of Experience</label>
+                    <input asp-for="@Model.ExperienceYear" type="number" class="form-control" min="0" />
+                </div>
+                <div class="form-group">
+                    <label asp-for="@Model.Degree">Degree</label>
+                    <input asp-for="@Model.Degree" class="form-control" />
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-section">
+            <h3>Contact Information</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label asp-for="@Model.User.Email">Email</label>
+                    <input asp-for="@Model.User.Email" type="email" class="form-control" readonly />
+                </div>
+                <div class="form-group">
+                    <label asp-for="@Model.User.PhoneNumber">Phone Number</label>
+                    <input name="phoneNumber" value="@Model.User.PhoneNumber" class="form-control" />
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-section">
+            <h3>Professional Description</h3>
+            <div class="form-group">
+                <label asp-for="@Model.Description">About Me</label>
+                <textarea asp-for="@Model.Description" class="form-control" rows="4"></textarea>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Save Changes
+            </button>
+            <button type="reset" class="btn btn-secondary">
+                <i class="fas fa-undo"></i> Reset
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/doctor-profile.css" />
+}

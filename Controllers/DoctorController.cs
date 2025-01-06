@@ -1,8 +1,15 @@
+﻿<<<<<<< HEAD
+﻿using System.Security.Claims;
+using AppointmentHospital.Areas.Admin.Services;
+using AppointmentHospital.Entity;
+=======
 ﻿using AppointmentHospital.Entity;
+>>>>>>> develop
 using AppointmentHospital.EnumStatus;
 using AppointmentHospital.Helpers;
 using AppointmentHospital.Models;
 using AppointmentHospital.Services;
+using AppointmentHospital.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -20,8 +27,13 @@ namespace AppointmentHospital.Controllers
         private readonly IEmailService _emailService;
         private readonly IPatientService _patientService;
         private readonly IHubContext<ScheduleHub> _hubContext;
+<<<<<<< HEAD
+        private readonly IManagingDoctorService _managingDoctorService;
+        public DoctorController(ILogger<DoctorController> logger, IDoctorService doctorService, IHttpContextAccessor contextAccessor, IAppointmentDateService appointmentDateService, ITimeSlotService timeSlotService, IEmailService emailService, IPatientService patientService, IManagingDoctorService managingDoctorService ,IHubContext<ScheduleHub> hubContext)
+=======
         
         public DoctorController(ILogger<DoctorController> logger, IDoctorService doctorService, IHttpContextAccessor contextAccessor, IAppointmentDateService appointmentDateService, ITimeSlotService timeSlotService, IEmailService emailService, IPatientService patientService, IHubContext<ScheduleHub> hubContext)
+>>>>>>> develop
         {
             _logger = logger;
             this.doctorService = doctorService;
@@ -31,6 +43,10 @@ namespace AppointmentHospital.Controllers
             this._emailService = emailService;
             this._patientService = patientService;
             this._hubContext = hubContext;
+<<<<<<< HEAD
+            this._managingDoctorService = managingDoctorService;
+=======
+>>>>>>> develop
         }
 
         public IActionResult Index(AppointmentStatus? status = AppointmentStatus.Pending)
@@ -153,6 +169,24 @@ namespace AppointmentHospital.Controllers
             var appointment = _appointmentDateService.GetAppointmentsById(id);
             return View(appointment);
         }
+        public IActionResult PersonalInfo()
+         {
+            if(User.HasClaim(c => c.Type == ClaimTypes.NameIdentifier)){
+                var doctorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var doctor = doctorService.getDoctorById(Guid.Parse(doctorId));
+                ViewBag.Specializaiton = _managingDoctorService.GetSpecialization();
+                ViewBag.DoctorId = doctorId;
+                return View(doctor);
+            }
+            return RedirectToAction("Index");
+        }
+        [HttpPost]
+        public async Task<IActionResult> UpdateProfile(Doctor request, string phoneNumber, Specialization specialization) {
+             var doctor = await  doctorService.updateDoctor(request, phoneNumber);
+             ViewBag.Specializaiton = _managingDoctorService.GetSpecialization();
+             ViewBag.DoctorId = doctor.DoctorId;
+             return View("PersonalInfo", doctor);
+        } 
 
         public IActionResult Search(string query)
         {

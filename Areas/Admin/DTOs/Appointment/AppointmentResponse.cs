@@ -14,11 +14,9 @@ namespace AppointmentHospital.Areas.Admin.DTOs.Appointment
 
         public Guid DoctorId { get; set; } 
 
-        public Specialization Specialization { get; set; }
+        public string Specialization { get; set; }
 
         public DateTime AppointmentTime { get; set; }
-
-      
         public AppointmentStatus Status { get; set; } 
 
    
