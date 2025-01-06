@@ -29,7 +29,15 @@ public class DoctorService : IDoctorService
         return doctorRepository.getTimeSlotByDoctorId(doctorId);
     }
 
-    public String getDoctorNameByDoctorId(Guid doctorId){
+    public string getDoctorNameByDoctorId(Guid doctorId){
         return doctorRepository.getDoctorNameByDoctorId(doctorId);
+    }
+
+    public List<string> GetDrugNameSearch(string search){
+        return doctorRepository.GetDrugNameSearch(search);
+    }
+
+    public void AddDiagnosticHistory(DiagnosisHistory diagnosisHistory){
+        doctorRepository.AddDiagnosticHistory(diagnosisHistory);
     }
 }

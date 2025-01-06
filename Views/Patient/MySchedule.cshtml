@@ -23,19 +23,27 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link @(Context.Request.Query["status"] == ((int)AppointmentHospital.EnumStatus.AppointmentStatus.Canceled).ToString() ? "active" : "")" 
-                        asp-route-status="@((int)AppointmentHospital.EnumStatus.AppointmentStatus.Canceled)">
-                            <i class="fas fa-times-circle"></i>
-                            Cancelled
-                        </a>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link @(Context.Request.Query["status"] == ((int)AppointmentHospital.EnumStatus.AppointmentStatus.Confirmed).ToString() ? "active" : "")" 
                         asp-route-status="@((int)AppointmentHospital.EnumStatus.AppointmentStatus.Confirmed)">
                             <i class="fas fa-check-circle"></i>
                             Confirmed
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(Context.Request.Query["status"] == ((int)AppointmentHospital.EnumStatus.AppointmentStatus.Completed).ToString() ? "active" : "")" 
+                        asp-route-status="@((int)AppointmentHospital.EnumStatus.AppointmentStatus.Completed)">
+                            <i class="fas fa-calendar-alt"></i>
+                            Completed
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(Context.Request.Query["status"] == ((int)AppointmentHospital.EnumStatus.AppointmentStatus.Canceled).ToString() ? "active" : "")" 
+                        asp-route-status="@((int)AppointmentHospital.EnumStatus.AppointmentStatus.Canceled)">
+                            <i class="fas fa-times-circle"></i>
+                            Cancelled
+                        </a>
+                    </li>
+                    
                 </ul>
             </div>
         </div>
@@ -90,16 +98,22 @@
                                         <td>
                                             @switch(appointment.Status)
                                             {
+                                                case AppointmentHospital.EnumStatus.AppointmentStatus.Pending:
+                                                    <span class="badge bg-warning">
+                                                        <i class="fas fa-clock"></i>
+                                                        Pending
+                                                    </span>
+                                                    break;
                                                 case AppointmentHospital.EnumStatus.AppointmentStatus.Confirmed:
                                                     <span class="badge bg-success">
                                                         <i class="fas fa-check-circle"></i>
                                                         Confirmed
                                                     </span>
                                                     break;
-                                                case AppointmentHospital.EnumStatus.AppointmentStatus.Pending:
-                                                    <span class="badge bg-warning">
-                                                        <i class="fas fa-clock"></i>
-                                                        Pending
+                                                case AppointmentHospital.EnumStatus.AppointmentStatus.Completed:
+                                                    <span class="badge bg-success">
+                                                        <i class="fas fa-calendar-alt"></i>
+                                                        Completed
                                                     </span>
                                                     break;
                                                 default:

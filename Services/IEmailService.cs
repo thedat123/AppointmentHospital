@@ -9,5 +9,6 @@
         Task<string> GetConfirmedEmailTemplate(string fullUserName, string url);
         Task<string> GetResetPasswordTemplate(string fullUserName, string url);
         Task<string> GetConfirmedTemplate(DateTime appointmentTime, string doctorName, string fullUserName);
+        Task<string> GetCompletedTemplate(string fullUserName, string DoctorName, string DiagnosisDetails, string PrescribedMedicationsHtml, string DoctorNotes);
     }
 }

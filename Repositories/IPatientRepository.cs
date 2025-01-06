@@ -1,4 +1,6 @@
 ﻿using AppointmentHospital.DTOs.Patient;
+using AppointmentHospital.Migrations;
+using AppointmentHospital.Models;
 
 namespace AppointmentHospital.Repositories
 {
@@ -6,5 +8,6 @@ namespace AppointmentHospital.Repositories
     {
         Task<PatientResponse> GetPatientById(Guid userId);
         Task<PatientResponse> EditPatientInfo(Guid patientId ,PatientRequest request);  
+        void AddAcquaintance(Acquaintance acquaintance);
     }
 }

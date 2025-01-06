@@ -1,6 +1,10 @@
+﻿<<<<<<< HEAD
 ﻿using System.Security.Claims;
 using AppointmentHospital.Areas.Admin.Services;
 using AppointmentHospital.Entity;
+=======
+﻿using AppointmentHospital.Entity;
+>>>>>>> develop
 using AppointmentHospital.EnumStatus;
 using AppointmentHospital.Helpers;
 using AppointmentHospital.Models;
@@ -23,8 +27,13 @@ namespace AppointmentHospital.Controllers
         private readonly IEmailService _emailService;
         private readonly IPatientService _patientService;
         private readonly IHubContext<ScheduleHub> _hubContext;
+<<<<<<< HEAD
         private readonly IManagingDoctorService _managingDoctorService;
         public DoctorController(ILogger<DoctorController> logger, IDoctorService doctorService, IHttpContextAccessor contextAccessor, IAppointmentDateService appointmentDateService, ITimeSlotService timeSlotService, IEmailService emailService, IPatientService patientService, IManagingDoctorService managingDoctorService ,IHubContext<ScheduleHub> hubContext)
+=======
+        
+        public DoctorController(ILogger<DoctorController> logger, IDoctorService doctorService, IHttpContextAccessor contextAccessor, IAppointmentDateService appointmentDateService, ITimeSlotService timeSlotService, IEmailService emailService, IPatientService patientService, IHubContext<ScheduleHub> hubContext)
+>>>>>>> develop
         {
             _logger = logger;
             this.doctorService = doctorService;
@@ -34,7 +43,10 @@ namespace AppointmentHospital.Controllers
             this._emailService = emailService;
             this._patientService = patientService;
             this._hubContext = hubContext;
+<<<<<<< HEAD
             this._managingDoctorService = managingDoctorService;
+=======
+>>>>>>> develop
         }
 
         public IActionResult Index(AppointmentStatus? status = AppointmentStatus.Pending)
@@ -175,5 +187,61 @@ namespace AppointmentHospital.Controllers
              ViewBag.DoctorId = doctor.DoctorId;
              return View("PersonalInfo", doctor);
         } 
+
+        public IActionResult Search(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return BadRequest("Query cannot be empty.");
+            }
+
+            var searchDrugName = doctorService.GetDrugNameSearch(query);
+            if (searchDrugName == null || !searchDrugName.Any())
+            {
+                return Ok(new List<string>());
+            }
+            return Ok(searchDrugName);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SubmitDiagnosis(Guid AppointmentId, Guid PatientId, Guid DoctorId, Guid AcquaintanceId, string DiagnosisDetails, string PrescribedMedications, string DoctorNotes){
+
+            List<string> prescribedMedicationList = PrescribedMedications?.Split(',').ToList() ?? new List<string>();
+            DiagnosisHistory diagnosisHistory = new DiagnosisHistory{
+                AppointmentId = AppointmentId,
+                PatientId = PatientId,
+                DoctorId = DoctorId,
+                AcquaintanceId = AcquaintanceId,
+                Diagnosis = DiagnosisDetails,
+                Prescription = prescribedMedicationList,
+                DoctorNote = DoctorNotes
+            };
+
+            doctorService.AddDiagnosticHistory(diagnosisHistory);
+
+            List<(string Medication, int Quantity)> processedMedications = PrescribedMedications?
+            .Split(',')
+            .Select(item =>
+            {
+                var parts = item.Split('-');
+                return (
+                    Medication: parts[0],
+                    Quantity: parts.Length > 1 && int.TryParse(parts[1], out var qty) ? qty : 1
+                );
+            }).ToList() ?? new List<(string, int)>();
+
+            string PrescribedMedicationsHtml = string.Join("", processedMedications.Select(m =>
+                $"<li><strong>Tên thuốc:</strong> {m.Medication}<br><strong>Số lượng:</strong> {m.Quantity}</li>"
+            ));
+
+            var patient = await _patientService.GetPatientById(PatientId);
+
+            string body = await _emailService.GetCompletedTemplate(patient.FullName, doctorService.getDoctorById(DoctorId).FullName, DiagnosisDetails, PrescribedMedicationsHtml, DoctorNotes);
+            await _emailService.SendMailAsync(patient.EmailAddress, $"Medical Appointment Of ({patient.FullName})", body);
+
+            _appointmentDateService.UpdateStatusAppointment(AppointmentId, AppointmentStatus.Completed);
+            await _hubContext.Clients.All.SendAsync("UpdateStatus", AppointmentId, AppointmentStatus.Completed);
+            return RedirectToAction("Index");
+        }
     }
 }

@@ -11,5 +11,7 @@ public interface IDoctorService
     public List<Doctor> getAllDoctors();
     public Task<Doctor> updateDoctor(Doctor request, string phoneNumber);
     public List<TimeSlot> getTimeSlotByDoctorId(Guid doctorId);
-    public String getDoctorNameByDoctorId(Guid doctorId);
+    public string getDoctorNameByDoctorId(Guid doctorId);
+    public List<string> GetDrugNameSearch(string search);
+    public void AddDiagnosticHistory(DiagnosisHistory diagnosisHistory);
 }

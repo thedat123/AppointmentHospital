@@ -14,7 +14,9 @@ namespace AppointmentHospital.Models
 
         [Required]
         public Guid DoctorId { get; set; }
+
         public Guid? AcquaintanceId { get; set; }
+
         [Required]
         public DateTime AppointmentTime { get; set; }
 

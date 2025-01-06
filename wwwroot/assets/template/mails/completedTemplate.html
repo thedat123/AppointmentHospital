@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thông báo kết quả chuẩn đoán</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            color: #2d3748;
+            line-height: 1.8;
+            margin: 0;
+            padding: 0;
+            background-color: #f7fafc;
+        }
+
+        .email-container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 32px;
+            border-radius: 12px;
+            background-color: #ffffff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        h2 {
+            color: #2b6cb0;
+            font-size: 24px;
+            margin: 0 0 16px 0;
+        }
+
+        .logo {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 16px;
+        }
+
+        .content {
+            padding: 0 16px;
+        }
+
+        .diagnosis-box {
+            background-color: #f8fafc;
+            border-left: 4px solid #2b6cb0;
+            padding: 16px;
+            margin: 16px 0;
+            border-radius: 4px;
+        }
+
+        .medications-box {
+            background-color: #f0fff4;
+            border-left: 4px solid #38a169;
+            padding: 16px;
+            margin: 16px 0;
+            border-radius: 4px;
+        }
+
+        .footer {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+            color: #718096;
+        }
+
+        .highlight {
+            color: #2b6cb0;
+            font-weight: 600;
+        }
+
+        ul {
+            padding-left: 20px;
+            margin: 0;
+        }
+
+        ul li {
+            margin-bottom: 8px;
+        }
+
+        @media (max-width: 600px) {
+            .email-container {
+                margin: 20px;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h2>Thông báo kết quả chuẩn đoán</h2>
+        </div>
+
+        <div class="content">
+            <p>Kính gửi <span class="highlight">{{fullUserName}}</span>,</p>
+            
+            <p>Bác sĩ <span class="highlight">{{DoctorName}}</span> đã hoàn thành việc chuẩn đoán và gửi đến bạn kết quả như sau:</p>
+            
+            <div class="diagnosis-box">
+                <strong>Kết quả chuẩn đoán:</strong><br>
+                <em>{{DiagnosisDetails}}</em>
+            </div>
+
+            <div class="medications-box">
+                <strong>Đơn thuốc:</strong>
+                <ul>
+                    <ul>
+                        {{PrescribedMedicationsHtml}}
+                    </ul>                    
+                </ul>
+            </div>
+
+            <div class="medications-box">
+                <strong>Ghi chú:</strong><br>
+                <em>{{DoctorNotes}}</em>
+            </div>
+
+            <p>Để đảm bảo quá trình điều trị hiệu quả, chúng tôi khuyến nghị bạn:</p>
+            <ul>
+                <li>Tuân thủ chặt chẽ phác đồ điều trị của bác sĩ</li>
+                <li>Uống thuốc đúng liều lượng và thời gian</li>
+                <li>Theo dõi và ghi nhận các phản ứng (nếu có)</li>
+            </ul>
+
+            <p>Nếu có bất kỳ thắc mắc nào, vui lòng liên hệ với chúng tôi qua:</p>
+        </div>
+
+        <div class="footer">
+            <p>Trân trọng,</p>
+            <p><strong>Đội ngũ chăm sóc khách hàng</strong></p>
+            <small>© 2025 Tên Bệnh Viện. Mọi quyền được bảo lưu.</small>
+        </div>
+    </div>
+</body>
+</html>

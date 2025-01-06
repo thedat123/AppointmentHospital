@@ -59,7 +59,9 @@ namespace AppointmentHospital.Repositories.Implement
 
         public async Task<PatientResponse> GetPatientById(Guid userId)
         {
-            var patient = await appDbContext.Patients.Where(p => p.PatientId == userId)
+            var patient = await appDbContext.Patients.Include(p => p.Acquaintances)
+                                                     .Include(p => p.User)
+                                                     .Where(p => p.PatientId == userId)
                                                      .FirstOrDefaultAsync();
             var patientResponse = new PatientResponse
             {
@@ -80,6 +82,12 @@ namespace AppointmentHospital.Repositories.Implement
                 }).ToList()
             };
             return patientResponse;
+        }
+
+        public void AddAcquaintance(Acquaintance acquaintance)
+        {
+            appDbContext.Add(acquaintance);
+            appDbContext.SaveChanges();
         }
     }
 }
