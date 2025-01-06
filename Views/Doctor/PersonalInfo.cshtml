@@ -2,7 +2,7 @@
 @using AppointmentHospital.EnumStatus;
 @model Doctor;
 @{
-    var specializations =  ViewBag.Specializaiton as List<SelectListItem>;
+    var specializations = ViewBag.Specializaiton as List<SelectListItem>;
 }
 <div class="profile-container">
     <div class="profile-header">
@@ -43,13 +43,13 @@
             <div class="form-grid">
                 <div class="form-group">
                     <label asp-for="@Model.Specializaiton">Specialization</label>
-                    <select asp-for="@Model.Specializaiton">
-                            <option value="" disabled selected>Choose specialization</option>
-                            @foreach(var specialization in specializations)
-                            {
-                                <option value="@specialization.Value">@specialization.Text</option>
-                            }
-                        </select>
+                    <select asp-for="@Model.Specializaiton" class="form-select">
+                        <option value="" disabled selected>Choose specialization</option>
+                        @foreach (var specialization in specializations)
+                        {
+                            <option value="@specialization.Value">@specialization.Text</option>
+                        }
+                    </select>
                 </div>
                 <div class="form-group">
                     <label asp-for="@Model.ExperienceYear">Years of Experience</label>
