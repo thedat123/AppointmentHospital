@@ -162,12 +162,8 @@ namespace AppointmentHospital
 
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Account}/{action=Login}/{id?}");
-            
-            app.MapControllerRoute(
-                name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
-
+                pattern: "{controller=Patient}/{action=Index}/{id?}");
+                
             app.MapHangfireDashboard("/hangfire");
 
             app.Run();
