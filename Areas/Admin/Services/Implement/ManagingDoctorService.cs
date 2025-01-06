@@ -29,7 +29,7 @@ namespace AppointmentHospital.Areas.Admin.Services.Implement
             await _managingDoctorRepository.EditDoctorAsync(id, request);
         }
 
-        public async Task<Pagination<ManagingDoctorResponse>> GetAllDoctor(int page, string searchTerm, Specialization? specialization)
+        public async Task<Pagination<ManagingDoctorResponse> > GetAllDoctor(int page, string searchTerm, Specialization? specialization)
         {
             return  await _managingDoctorRepository.GetAllDoctor(page, searchTerm, specialization);
         }

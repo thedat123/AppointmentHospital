@@ -30,7 +30,8 @@ namespace AppointmentHospital.Helpers
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
                 CancellationReason = null,
-                Status = AppointmentStatus.Pending,
+                Status = AppointmentStatus.Completed,
+                Symptoms = "Headache"
             };
             _context.Appointments.Add(appointment);
             await _context.SaveChangesAsync();
@@ -40,10 +41,10 @@ namespace AppointmentHospital.Helpers
         {
             var fakeTimeSlot = new Faker<TimeSlot>()
                     .RuleFor(ts => ts.DoctorId, f => doctor.DoctorId)
-                    .RuleFor(ts => ts.StartTime, f => new DateTime(2024, 12, f.Random.Int(1, 30), 9, 0, 0))
+                    .RuleFor(ts => ts.StartTime, f => new DateTime(2024, f.Random.Int(6,12), f.Random.Int(1, 30), 9, 0, 0))
                     .RuleFor(ts => ts.EndTime, (f, ts) => ts.StartTime.AddHours(1));
             
-               var timeSlot =  fakeTimeSlot.Generate(new Faker().Random.Int(2,6));
+               var timeSlot =  fakeTimeSlot.Generate(new Faker().Random.Int(20,30));
                await _context.TimeSlots.AddRangeAsync(timeSlot);
                await _context.SaveChangesAsync();
         }
@@ -117,6 +118,10 @@ namespace AppointmentHospital.Helpers
                         Specializaiton = Specialization.NgoaiKhoa,
                         ExperienceYear = 3,
                         User = user2,
+                        Degree = "PhD",
+                        ImagePath = "~/images/doctor",
+                        Description = "Tôi là bác sĩ John Bracker",
+                        Gender = "Female"
                     };
                     _context.Doctors.Add(doctor);
                     await _context.SaveChangesAsync();
@@ -159,10 +164,19 @@ namespace AppointmentHospital.Helpers
                         var fakeDoctor = new Faker<Doctor>()
                        .RuleFor(d => d.FullName, f => f.Name.FullName())
                        .RuleFor(d => d.Specializaiton, f => f.PickRandom<Specialization>())
-                       .RuleFor(d => d.ExperienceYear, f => f.Random.Int(1, 5));
-                       
+                       .RuleFor(d => d.ExperienceYear, f => f.Random.Int(1, 5))
+                       .RuleFor(d => d.Gender, f => f.PickRandom(new List<string> { "Male", "Female"}))
+                       .RuleFor(d => d.Description, f => f.Lorem.Sentence(10))
+                       .RuleFor(d => d.Degree, f => f.PickRandom(new List<string>
+                        {
+                            "MD",
+                            "DO",
+                            "MBBS",
+                            "PhD"
+                        }));
                         var doctorFaker = fakeDoctor.Generate();
                         doctorFaker.DoctorId = doctorFake.Id;
+                        doctorFaker.ImagePath = "~/images/doctor";
                         _context.Doctors.Add(doctorFaker);
                         await _context.SaveChangesAsync();
                         await CreateDoctorTimeSlot(doctorFaker);
@@ -170,7 +184,7 @@ namespace AppointmentHospital.Helpers
                     }
                 }
                 var faker = new Faker();
-                var ramdomInt = faker.Random.Int(1, 3);
+                var ramdomInt = faker.Random.Int(10,15);
 
                 foreach ( var patient in patientList )
                 {

@@ -29,6 +29,12 @@ namespace AppointmentHospital
             Env.Load();
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+            //builder.Services.AddControllers()
+            //.AddJsonOptions(options =>
+            //{
+            //    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+            //    options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+            //});
             builder.Services.AddControllers()
             .AddJsonOptions(options =>
             {
@@ -52,10 +58,11 @@ namespace AppointmentHospital
             builder.Services.AddScoped<IManagingPatientService, ManagingPatientService>();
             builder.Services.AddScoped<IManagingDoctorRepository, ManagingDoctorRepository>();
             builder.Services.AddScoped<IManagingDoctorService, ManagingDoctorService>();
+            builder.Services.AddScoped<IStatisticService, StatisticService>();
+            builder.Services.AddScoped<IStatisticRepository, StatisticRepository>();
             builder.Services.AddScoped<IAppointmentService, AppointmentService>();
             builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
-            builder.Services.AddScoped<IAppointmentStatisticService, AppointmentStatisticService>();
-            builder.Services.AddScoped<IAppointmentStatisticRepository, AppointmentStatisticRepository>();
+     
             builder.Services.AddScoped<IPatientService, PatientService>();
             builder.Services.AddScoped<IPatientRepository, PatientRepository>();
             builder.Services.Configure<EmailConfiguration>(configuration.GetSection("SMTP"));
@@ -69,6 +76,7 @@ namespace AppointmentHospital
             builder.Services.AddScoped<ITimeSlotService, TimeSlotService>();
 
             builder.Services.AddScoped<IAppointmentDateRepository, AppointmentDateRepository>();
+            builder.Services.AddScoped<IAppointmentDateService, AppointmentDateService>();
             
 
             builder.Services.AddScoped<IDoctorRepository, DoctorRepository>();
@@ -117,7 +125,7 @@ namespace AppointmentHospital
             });
             builder.Services.ConfigureApplicationCookie(options =>
             {
-                options.ExpireTimeSpan = TimeSpan.FromMinutes(15);
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(45);
                 options.LoginPath = "/Identity/Account/Login";
                 options.LogoutPath = "/Identity/Account/Logout";
             });

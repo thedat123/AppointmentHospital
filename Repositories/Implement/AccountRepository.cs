@@ -1,5 +1,7 @@
-﻿using AppointmentHospital.Models;
+﻿using AppointmentHospital.DTOs.Account;
+using AppointmentHospital.Models;
 using AppointmentHospital.Repositories;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
 using static AppointmentHospital.DTOs.Account.AccountRequest;
@@ -19,7 +21,7 @@ namespace AppointmentHospital.Repositories.Implement
             _signInManager = signInManager;
             _appDbContext = appDbContext;
         }
-        public async Task<bool> LoginAsync(LoginUserRequest request)
+        public async Task<AccountResponse> LoginAsync(LoginUserRequest request)
         {
             var user = await _userManager.FindByEmailAsync(request.Email);
             if (user == null)
@@ -28,12 +30,15 @@ namespace AppointmentHospital.Repositories.Implement
             }
             if(!await _userManager.IsEmailConfirmedAsync(user))
             {
-                return false;
+                return new AccountResponse { Success = false, Status = 403 };
+            }
+            if(!await _userManager.CheckPasswordAsync(user, request.Password))
+            {
+                return new AccountResponse { Success = false, Status = 400 };
             }
             var signInResult = await _signInManager.PasswordSignInAsync(user, request.Password, false, false);
-            return signInResult.Succeeded;
+            return new AccountResponse { Status = 200, Success = true };
         }
-
 
         public async Task<User> RegisterAsync(RegisterUserRequest request)
         {

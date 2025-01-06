@@ -51,7 +51,7 @@
                                 <option value="@specialization.Value">@specialization.Text</option>
                             }
                         }
-                        else
+                        else 
                         {
                             <option value="@specialization.Value">@specialization.Text</option>
                         }
@@ -120,9 +120,10 @@
                                 var colorBadge = response.Status.ToString() switch
                                 {
                                     "Pending" => "secondary",
-                                    "Confimed" => "success",
+                                    "Confimed" => "info",
                                     "Canceled" => "danger", 
-                                                };
+                                    "Completed" => "success"
+                                };
                             }
                             <td>
                                 <span class="badge bg-@colorBadge ">@response.Status</span>
@@ -141,16 +142,18 @@
         @{
             <ul class="pagination">
                 <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "") ">
-                    <a class="page-link" asp-action="Index" asp-route-page="@(Model.CurrentPage-1)">Previous</a>
+                    <a class="page-link" asp-action="Index" asp-route-page="@(Model.CurrentPage-1)" asp-route-specialization="@(specializationViewData)" asp-route-searchTerm="@(searchTerm)" >Previous</a>
                 </li>
                 @for (int i = 1; i <= Model.TotalPage; i++)
                 {
                     <li class="page-item @(Model.CurrentPage == @i ? "active": "" )">
-                        <a class="page-link" asp-action="Index" as asp-route-page="@i">@i</a>
+                        <a class="page-link" asp-action="Index" 
+                                            asp-route-page="@i" 
+                                            asp-route-specialization="@(specializationViewData)" asp-route-searchTerm="@(searchTerm)">@i</a>
                     </li>
                 }
                 <li class="page-item  @(!Model.HasNextPage? "disabled": "")">
-                    <a class="page-link" asp-action="Index" asp-route-page="@(Model.CurrentPage+1)">Next</a>
+                    <a class="page-link" asp-action="Index" asp-route-page="@(Model.CurrentPage+1)" asp-route-specialization="@(specializationViewData)" asp-route-searchTerm="@(searchTerm)">Next</a>
                 </li>
             </ul>
         }

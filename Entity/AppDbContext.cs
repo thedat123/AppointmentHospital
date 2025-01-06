@@ -58,6 +58,5 @@ namespace AppointmentHospital.Models
         {
             optionsBuilder.UseLazyLoadingProxies();
         }
-
     }
 }

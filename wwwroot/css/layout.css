@@ -17,6 +17,7 @@ body {
   padding-top: 60px;
   background-color: var(--gray-light);
   line-height: 1.6;
+  margin: 0;
 }
 
 /* Navbar Styles */

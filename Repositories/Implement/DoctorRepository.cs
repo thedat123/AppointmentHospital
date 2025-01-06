@@ -1,6 +1,7 @@
 using System;
 using AppointmentHospital.Entity;
 using AppointmentHospital.Models;
+using AppointmentHospital.ViewModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace AppointmentHospital.Repositories.Implement;
@@ -20,6 +21,20 @@ public class DoctorRepository : IDoctorRepository
         return _context.Doctors
         .Include(d => d.User)
         .FirstOrDefault(d => d.DoctorId == doctorId)!;
+    }
+    public async Task<Doctor> updateDoctor(Doctor request, string phoneNumber) {
+        var doctor = _context.Doctors.Where(d => d.DoctorId == request.DoctorId).FirstOrDefault();
+        doctor.DateOfBirth = request.DateOfBirth;
+        doctor.Description = request.Description;
+        doctor.FullName = request.FullName;
+        doctor.ExperienceYear = request.ExperienceYear;
+        doctor.Gender = request.Gender;
+        doctor.Degree = request.Degree;
+        doctor.Specializaiton = request.Specializaiton;
+        doctor.User.PhoneNumber = phoneNumber;
+        _context.Update(doctor);
+        await _context.SaveChangesAsync();
+        return doctor;
     }
 
     public List<TimeSlot> getTimeSlotByDoctorId(Guid doctorId){

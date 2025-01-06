@@ -1,4 +1,5 @@
-﻿using AppointmentHospital.Models;
+﻿using AppointmentHospital.DTOs.Account;
+using AppointmentHospital.Models;
 using AppointmentHospital.Repositories;
 using AppointmentHospital.Services;
 using Microsoft.AspNetCore.Identity.Data;
@@ -13,7 +14,7 @@ namespace AppointmentHospital.Services.Implement
         {
             _accountRepository = accountRepository;
         }
-        public async Task<bool> LoginAsync(LoginUserRequest request)
+        public async Task<AccountResponse> LoginAsync(LoginUserRequest request)
         {
             var signInResult = await _accountRepository.LoginAsync(request);
             return signInResult;

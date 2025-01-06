@@ -8,12 +8,14 @@ namespace AppointmentHospital.Helpers
         public const int PAGE_SIZE = 10;
         public int TotalPage { set; get; }
         public int CurrentPage { set; get; }
+        public int TotalItems {set;get;}
         
         public Pagination(List<T> item, int currentPage, int totalItems)
         {
             this.AddRange(item);
-            TotalPage = (int)Math.Ceiling(totalItems /(double) PAGE_SIZE) ;
+            TotalPage = (int)Math.Ceiling(totalItems /(double) PAGE_SIZE);
             CurrentPage = currentPage;
+            TotalItems = totalItems;
         }
         public bool HasPreviousPage => CurrentPage > 1;
         public bool HasNextPage => CurrentPage < TotalPage;
