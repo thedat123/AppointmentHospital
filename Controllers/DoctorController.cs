@@ -1,10 +1,6 @@
-﻿<<<<<<< HEAD
-﻿using System.Security.Claims;
+﻿﻿using System.Security.Claims;
 using AppointmentHospital.Areas.Admin.Services;
 using AppointmentHospital.Entity;
-=======
-﻿using AppointmentHospital.Entity;
->>>>>>> develop
 using AppointmentHospital.EnumStatus;
 using AppointmentHospital.Helpers;
 using AppointmentHospital.Models;
@@ -27,13 +23,8 @@ namespace AppointmentHospital.Controllers
         private readonly IEmailService _emailService;
         private readonly IPatientService _patientService;
         private readonly IHubContext<ScheduleHub> _hubContext;
-<<<<<<< HEAD
         private readonly IManagingDoctorService _managingDoctorService;
         public DoctorController(ILogger<DoctorController> logger, IDoctorService doctorService, IHttpContextAccessor contextAccessor, IAppointmentDateService appointmentDateService, ITimeSlotService timeSlotService, IEmailService emailService, IPatientService patientService, IManagingDoctorService managingDoctorService ,IHubContext<ScheduleHub> hubContext)
-=======
-        
-        public DoctorController(ILogger<DoctorController> logger, IDoctorService doctorService, IHttpContextAccessor contextAccessor, IAppointmentDateService appointmentDateService, ITimeSlotService timeSlotService, IEmailService emailService, IPatientService patientService, IHubContext<ScheduleHub> hubContext)
->>>>>>> develop
         {
             _logger = logger;
             this.doctorService = doctorService;
@@ -43,10 +34,7 @@ namespace AppointmentHospital.Controllers
             this._emailService = emailService;
             this._patientService = patientService;
             this._hubContext = hubContext;
-<<<<<<< HEAD
             this._managingDoctorService = managingDoctorService;
-=======
->>>>>>> develop
         }
 
         public IActionResult Index(AppointmentStatus? status = AppointmentStatus.Pending)

@@ -137,18 +137,11 @@ namespace AppointmentHospital.Controllers
                 _timeSlotService.UpdateTimeSlotAvalableStatusByTimeSlotID(TimeSlotId);
                 string body = await _emailService.GetBookingTemplate(appointment.AppointmentTime, doctor.FullName, patient.FullName);
                 await _emailService.SendMailAsync(patient.EmailAddress, $"Medical Appointment Of ({patient.FullName})", body);
-<<<<<<< HEAD
-=======
-
->>>>>>> develop
                 TempData["SuccessMessage"] = "Your appointment has been booked successfully!";
 
                 var updatedDate = appointment.AppointmentTime.Date.ToString("yyyy-MM-dd");
                 await _hubContext.Clients.All.SendAsync("ScheduleUpdated", DoctorId, updatedDate);
-<<<<<<< HEAD
                 await _hubContext.Clients.All.SendAsync("UpdateStatistics");
-=======
->>>>>>> develop
                 return RedirectToAction("Index", "Patient");
             }
             catch (Exception ex)
@@ -158,52 +151,6 @@ namespace AppointmentHospital.Controllers
             }
         }
 
-<<<<<<< HEAD
-        //[HttpPost]
-        //public async Task<IActionResult> BookForOther(Guid DoctorId, DateTime AppointmentDateTime, string patientName, string gender, string symptoms, Guid TimeSlotId, string patientEmail)
-        //{
-        //    var doctor = _doctorService.getDoctorById(DoctorId);
-        //    if (doctor == null)
-        //    {
-        //        TempData["ErrorMessage"] = "Doctor not found.";
-        //        return RedirectToAction("Index", "Patient");
-        //    }
-
-        //    var patient = _patientService.GetPatientByEmail(patientEmail);
-        //    if (patient == null)
-        //    {
-        //        TempData["ErrorMessage"] = "Patient not found.";
-        //        return RedirectToAction("Index", "Patient");
-        //    }
-
-        //    var appointment = new Appointment
-        //    {
-        //        DoctorId = DoctorId,
-        //        PatientId = patient.PatientId,
-        //        AppointmentTime = AppointmentDateTime,
-        //        Symptoms = symptoms,
-        //    };
-
-        //    try
-        //    {
-        //        _appointmentDateService.AddAppointment(appointment);
-        //        _timeSlotService.UpdateTimeSlotAvalableStatusByTimeSlotID(TimeSlotId);
-        //        string body = await _emailService.GetBookingTemplate(appointment.AppointmentTime, doctor.FullName, patient.FullName);
-        //        await _emailService.SendMailAsync(patient.EmailAddress, $"Medical Appointment Of ({patient.FullName})", body);
-
-        //        TempData["SuccessMessage"] = "The appointment has been booked successfully!";
-
-        //        var updatedDate = appointment.AppointmentTime.Date.ToString("yyyy-MM-dd");
-        //        await _hubContext.Clients.All.SendAsync("ScheduleUpdated", DoctorId, updatedDate);
-        //        return RedirectToAction("Index", "Patient");
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        TempData["ErrorMessage"] = $"An error occurred while booking the appointment: {ex.Message}";
-        //        return RedirectToAction("Index", "Patient");
-        //    }
-        //}
-=======
         [HttpPost]
         public async Task<IActionResult> BookForOther(Guid DoctorId, DateTime AppointmentDateTime, string acquaintanceName, string gender, string symptom, Guid TimeSlotId, DateTime birthDate, int identificationNumber, string address)
         {
@@ -271,7 +218,6 @@ namespace AppointmentHospital.Controllers
                 return RedirectToAction("Index", "Patient");
             }
         }
->>>>>>> develop
 
         [HttpGet("/api/schedule")]
         public IActionResult GetSchedule(Guid id, DateTime date, bool isApiRequest = false)
