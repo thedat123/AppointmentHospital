@@ -4,6 +4,7 @@ using AppointmentHospital.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppointmentHospital.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250103094336_addDiagnosisTable7")]
+    partial class addDiagnosisTable7
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -171,6 +174,8 @@ namespace AppointmentHospital.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AcquaintanceId");
 
                     b.HasIndex("AppointmentId");
 
@@ -504,6 +509,11 @@ namespace AppointmentHospital.Migrations
 
             modelBuilder.Entity("AppointmentHospital.Models.DiagnosisHistory", b =>
                 {
+                    b.HasOne("AppointmentHospital.Models.Acquaintance", "Acquaintance")
+                        .WithMany()
+                        .HasForeignKey("AcquaintanceId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("AppointmentHospital.Models.Appointment", "Appointment")
                         .WithMany()
                         .HasForeignKey("AppointmentId")
@@ -521,6 +531,8 @@ namespace AppointmentHospital.Migrations
                         .HasForeignKey("PatientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Acquaintance");
 
                     b.Navigation("Appointment");
 

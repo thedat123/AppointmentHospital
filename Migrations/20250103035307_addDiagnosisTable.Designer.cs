@@ -4,6 +4,7 @@ using AppointmentHospital.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppointmentHospital.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250103035307_addDiagnosisTable")]
+    partial class addDiagnosisTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -143,14 +146,8 @@ namespace AppointmentHospital.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("AcquaintanceId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid>("AppointmentId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("DateTime")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("Diagnosis")
                         .IsRequired()
@@ -166,9 +163,8 @@ namespace AppointmentHospital.Migrations
                     b.Property<Guid>("PatientId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.PrimitiveCollection<string>("Prescription")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime>("dateTime")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -227,11 +223,22 @@ namespace AppointmentHospital.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("DiagnosisHistoryId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("DrugName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<double>("UnitPrice")
+                        .HasColumnType("float");
+
                     b.HasKey("DrugId");
+
+                    b.HasIndex("DiagnosisHistoryId");
 
                     b.ToTable("Drugs");
                 });
@@ -540,6 +547,13 @@ namespace AppointmentHospital.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("AppointmentHospital.Models.Drug", b =>
+                {
+                    b.HasOne("AppointmentHospital.Models.DiagnosisHistory", null)
+                        .WithMany("Prescription")
+                        .HasForeignKey("DiagnosisHistoryId");
+                });
+
             modelBuilder.Entity("AppointmentHospital.Models.Patient", b =>
                 {
                     b.HasOne("AppointmentHospital.Models.User", "User")
@@ -605,6 +619,11 @@ namespace AppointmentHospital.Migrations
             modelBuilder.Entity("AppointmentHospital.Models.Acquaintance", b =>
                 {
                     b.Navigation("Appointment");
+                });
+
+            modelBuilder.Entity("AppointmentHospital.Models.DiagnosisHistory", b =>
+                {
+                    b.Navigation("Prescription");
                 });
 
             modelBuilder.Entity("AppointmentHospital.Models.Doctor", b =>

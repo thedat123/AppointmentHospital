@@ -67,6 +67,17 @@ namespace AppointmentHospital.Services.Implement
             return content;
         }
 
+        public async Task<string> GetCompletedTemplate(string fullUserName, string DoctorName, string DiagnosisDetails, string PrescribedMedicationsHtml, string DoctorNotes)
+        {
+            var content = await System.IO.File.ReadAllTextAsync(Path.Combine(_webHostEnvironment.WebRootPath, "assets", "template", "mails", "completedTemplate.html"));
+            content = content.Replace("{{fullUserName}}", fullUserName);
+            content = content.Replace("{{DoctorName}}", DoctorName);
+            content = content.Replace("{{DiagnosisDetails}}", DiagnosisDetails);
+            content = content.Replace("{{PrescribedMedicationsHtml}}", PrescribedMedicationsHtml);
+            content = content.Replace("{{DoctorNotes}}", DoctorNotes);
+            return content;
+        }
+
         public async Task SendMailAsync(string toEmail, string subject, string body)
         {
             try

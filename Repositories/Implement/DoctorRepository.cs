@@ -26,7 +26,24 @@ public class DoctorRepository : IDoctorRepository
         return _context.TimeSlots.Where(x => x.DoctorId == doctorId).ToList();
     }
 
-    public String getDoctorNameByDoctorId(Guid doctorId){
-        return _context.Doctors.Find(doctorId)!.FullName;
+    public string getDoctorNameByDoctorId(Guid doctorId){
+        return _context.Doctors.Find(doctorId)?.FullName ?? string.Empty;
     }
+
+    public List<string> GetDrugNameSearch(string search)
+    {
+        if (string.IsNullOrWhiteSpace(search))
+            return new List<string>();
+
+        return _context.Drugs
+            .Where(drug => EF.Functions.Like(drug.DrugName, $"%{search}%"))
+            .Select(drug => drug.DrugName)
+            .ToList() ?? new List<string>();
+    }
+
+    public void AddDiagnosticHistory(DiagnosisHistory diagnosisHistory){
+        _context.DiagnosisHistory.Add(diagnosisHistory);
+        _context.SaveChanges();
+    }
+
 }

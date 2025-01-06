@@ -14,74 +14,85 @@
     <header>
         <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom fixed-top">
             <div class="container">
-                <a class="navbar-brand" asp-action="Index" asp-controller="Patient">
+                <a class="navbar-brand d-flex align-items-center" asp-action="Index" asp-controller="Patient">
                     <img src="~/images/logo.png" alt="BookingCare" height="40">
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarMain">
-                    <ul class="navbar-nav me-auto">
-                        <li class="nav-item dropdown">
-                            <a class="nav-link" href="/specialties">
-                                Specialties
+                    <ul class="navbar-nav mx-auto">
+                        <li class="nav-item">
+                            <a class="nav-link d-flex flex-column align-items-center" href="/specialties">
+                                <i class="fas fa-stethoscope mb-1"></i>
+                                <span>Specialties</span>
                             </a>
                         </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link" href="/medical-facilities">
-                                Medical Facilities
+                        <li class="nav-item">
+                            <a class="nav-link d-flex flex-column align-items-center" href="/medical-facilities">
+                                <i class="fas fa-hospital mb-1"></i>
+                                <span>Facilities</span>
                             </a>
                         </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link" href="/doctors">
-                                Doctors
+                        <li class="nav-item">
+                            <a class="nav-link d-flex flex-column align-items-center" href="/doctors">
+                                <i class="fas fa-user-md mb-1"></i>
+                                <span>Doctors</span>
                             </a>
                         </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link" href="/health-packages">
-                                Health Packages
+                        <li class="nav-item">
+                            <a class="nav-link d-flex flex-column align-items-center" href="/health-packages">
+                                <i class="fas fa-heartbeat mb-1"></i>
+                                <span>Health Packages</span>
                             </a>
                         </li>
                     </ul>
-                    <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center">
                         <div class="dropdown me-3">
-                            <select class="form-select form-select-sm border-primary">
+                            <select class="form-select form-select-sm border-primary rounded-pill">
                                 <option value="en">EN</option>
                                 <option value="vi">VN</option>
                             </select>
                         </div>
                         @if (User.Identity.IsAuthenticated)
                         {
-                            <div class="dropdown">
-                                <a class="nav-link dropdown-toggle text-primary" href="#" id="userDropdown" role="button" 
-                                data-bs-toggle="dropdown" aria-expanded="false">
-                                    Hi, @User.Identity?.Name!
+                            <div class="dropdown user-dropdown">
+                                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" 
+                                   data-bs-toggle="dropdown" aria-expanded="false">
+                                    <img src="~/images/user-default.png" class="rounded-circle me-2" width="32" height="32" alt="User">
+                                    <span class="text-primary">Hi, @User.Identity.Name</span>
                                 </a>
-                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                     <li>
                                         <a class="dropdown-item" asp-action="PersonalProfile" asp-controller="Patient">
-                                            <i class="bi bi-person-circle"></i> Profile
+                                            <i class="fas fa-user-circle me-2"></i> Profile
                                         </a>
                                     </li>
                                     <li>
                                         <a class="dropdown-item" asp-action="MySchedule" asp-controller="Patient">
-                                            <i class="bi bi-person-circle"></i> My Schedule
+                                            <i class="fas fa-calendar-alt me-2"></i> My Schedule
                                         </a>
                                     </li>
                                     <li>
                                         <a class="dropdown-item" href="/settings">
-                                            <i class="bi bi-gear"></i> Settings
+                                            <i class="fas fa-cog me-2"></i> Settings
                                         </a>
                                     </li>
+                                    <li><hr class="dropdown-divider"></li>
                                     <li>
-                                        <form asp-action="Logout" asp-controller="Account" method="post" class="dropdown-item m-0 p-0">
-                                            <button class="btn btn-link text-danger w-100 text-start">
-                                                <i class="bi bi-box-arrow-right"></i> Logout
+                                        <form asp-action="Logout" asp-controller="Account" method="post" class="m-0">
+                                            <button class="dropdown-item text-danger">
+                                                <i class="fas fa-sign-out-alt me-2"></i> Logout
                                             </button>
                                         </form>
                                     </li>
                                 </ul>
                             </div>
+                        }
+                        else
+                        {
+                            <a href="/login" class="btn btn-outline-primary rounded-pill me-2">Sign In</a>
+                            <a href="/register" class="btn btn-primary rounded-pill">Register</a>
                         }
                     </div>
                 </div>
@@ -89,9 +100,53 @@
         </nav>
     </header>
 
-    <main role="main">
+    <main role="main" class="main-content">
         @RenderBody()
     </main>
+
+    <footer class="footer bg-white border-top py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5 class="text-primary">BookingCare</h5>
+                    <p class="text-muted">Making healthcare accessible for everyone</p>
+                    <div class="social-links">
+                        <a href="#" class="text-muted me-3"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="text-muted me-3"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-muted"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h6>Quick Links</h6>
+                            <ul class="list-unstyled">
+                                <li><a href="/about" class="text-muted">About Us</a></li>
+                                <li><a href="/contact" class="text-muted">Contact</a></li>
+                                <li><a href="/faq" class="text-muted">FAQs</a></li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4">
+                            <h6>For Patients</h6>
+                            <ul class="list-unstyled">
+                                <li><a href="/find-doctor" class="text-muted">Find a Doctor</a></li>
+                                <li><a href="/book-appointment" class="text-muted">Book Appointment</a></li>
+                                <li><a href="/health-blog" class="text-muted">Health Blog</a></li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4">
+                            <h6>For Doctors</h6>
+                            <ul class="list-unstyled">
+                                <li><a href="/doctor-register" class="text-muted">Join as a Doctor</a></li>
+                                <li><a href="/doctor-login" class="text-muted">Doctor Login</a></li>
+                                <li><a href="/doctor-dashboard" class="text-muted">Doctor Dashboard</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

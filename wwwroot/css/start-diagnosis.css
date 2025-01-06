@@ -111,3 +111,19 @@
         width: 100%;
     }
 }
+
+.drug-suggestions {
+    list-style-type: none;
+    padding-left: 0;
+    cursor: pointer;
+}
+
+.drug-suggestions li {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.drug-suggestions li:hover {
+    background-color: #f1f1f1;
+}
