@@ -153,10 +153,24 @@ namespace AppointmentHospital.Controllers
             return RedirectToAction("Calendar");
         }
 
-        public IActionResult StartDiagnosis(Guid id){
+        public IActionResult StartDiagnosis(Guid id)
+        {
             var appointment = _appointmentDateService.GetAppointmentsById(id);
+            var diagnosisHistory = new List<DiagnosisHistory>();
+
+            if (appointment.AcquaintanceId == null || appointment.AcquaintanceId == Guid.Empty)
+            {
+                diagnosisHistory = _patientService.GetDiagnosisHistoriesByPatientId(appointment.PatientId);
+            }
+            else
+            {
+                diagnosisHistory = _patientService.GetDiagnosisHistoriesByAcquaintanceId(appointment.AcquaintanceId.Value);
+            }
+
+            ViewData["DiagnosisHistory"] = diagnosisHistory;
             return View(appointment);
         }
+
         public IActionResult PersonalInfo()
          {
             if(User.HasClaim(c => c.Type == ClaimTypes.NameIdentifier)){
@@ -166,13 +180,17 @@ namespace AppointmentHospital.Controllers
                 ViewBag.DoctorId = doctorId;
                 return View(doctor);
             }
+            
             return RedirectToAction("Index");
         }
+
         [HttpPost]
         public async Task<IActionResult> UpdateProfile(Doctor request, string phoneNumber, Specialization specialization) {
              var doctor = await  doctorService.updateDoctor(request, phoneNumber);
              ViewBag.Specializaiton = _managingDoctorService.GetSpecialization();
              ViewBag.DoctorId = doctor.DoctorId;
+
+             await _hubContext.Clients.All.SendAsync("UpdateDoctorProfile", doctor);
              return View("PersonalInfo", doctor);
         } 
 
@@ -193,7 +211,6 @@ namespace AppointmentHospital.Controllers
 
         [HttpPost]
         public async Task<IActionResult> SubmitDiagnosis(Guid AppointmentId, Guid PatientId, Guid DoctorId, Guid AcquaintanceId, string DiagnosisDetails, string PrescribedMedications, string DoctorNotes){
-
             List<string> prescribedMedicationList = PrescribedMedications?.Split(',').ToList() ?? new List<string>();
             DiagnosisHistory diagnosisHistory = new DiagnosisHistory{
                 AppointmentId = AppointmentId,
@@ -202,7 +219,7 @@ namespace AppointmentHospital.Controllers
                 AcquaintanceId = AcquaintanceId,
                 Diagnosis = DiagnosisDetails,
                 Prescription = prescribedMedicationList,
-                DoctorNote = DoctorNotes
+                DoctorNote = DoctorNotes,
             };
 
             doctorService.AddDiagnosticHistory(diagnosisHistory);

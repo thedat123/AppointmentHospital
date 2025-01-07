@@ -1,4 +1,7 @@
 ﻿@model AppointmentHospital.Models.Appointment
+@{
+    var diagnosisHistory = ViewData["DiagnosisHistory"] as List<DiagnosisHistory>;
+}
 <link rel="stylesheet" href="~/css/start-diagnosis.css" asp-append-version="true" />    
 
 <div class="diagnosis-container">
@@ -10,8 +13,6 @@
             <h1 class="mb-0">Patient Diagnosis</h1>
         </div>
     </div>
-
-    <!-- Patient Card -->
     <div class="patient-card mb-4">
         <div class="card shadow-sm">
             <div class="card-header bg-primary text-white">
@@ -65,9 +66,7 @@
         </div>
     </div>
 
-    <!-- Symptoms & Diagnosis Section -->
     <div class="row g-4 mb-4">
-        <!-- Symptoms Card -->
         <div class="col-md-4">
             <div class="card shadow-sm h-100">
                 <div class="card-header bg-info text-white">
@@ -128,7 +127,6 @@
                                             required />
                                     </div>
 
-                                    <!-- Remove Button -->
                                     <button type="button" class="btn btn-danger remove-row">Remove</button>
                                 </div>
                             </div>
@@ -169,20 +167,47 @@
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th>Date</th>
+                            <th>Patient Name</th>
                             <th>Diagnosis</th>
+                            <th>Doctor Note</th>
+                            <th>Prescription</th>
+                            <th>Date</th>
                             <th>Doctor</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @* @if (Model.Patient.MedicalHistory != null && Model.Patient.MedicalHistory.Any())
+                        @if (diagnosisHistory != null)
                         {
-                            @foreach (var history in Model.Patient.MedicalHistory)
+                            @foreach (var history in diagnosisHistory)
                             {
                                 <tr>
-                                    <td>@history.DiagnosisDate.ToString("MM/dd/yyyy")</td>
-                                    <td>@history.Details</td>
-                                    <td>Dr. @history.Doctor</td>
+                                    <td>@(
+                                        @Model.Acquaintance?.Name != null 
+                                        ? @Model.Acquaintance.Name
+                                        : @Model.Patient.FullName
+                                    )</td>
+                                    <td>@history.Diagnosis</td>
+                                    <td>@history.DoctorNote</td>
+                                    <td>
+                                        @if (history.Prescription != null && history.Prescription.Any())
+                                        {
+                                            <ul>
+                                                @foreach (var medication in history.Prescription)
+                                                {
+                                                    var parts = medication.Split('-');
+                                                    var name = parts[0];
+                                                    var quantity = parts.Length > 1 ? parts[1] : "N/A";
+                                                    <li>@name - Quantity: @quantity</li>
+                                                }
+                                            </ul>
+                                        }
+                                        else
+                                        {
+                                            <span>No prescription available</span>
+                                        }
+                                    </td>
+                                    <td>@history.DateTime.ToString("yyyy-MM-dd")</td>
+                                    <td>Dr. @history.Doctor.FullName</td>
                                 </tr>
                             }
                         }
@@ -194,7 +219,7 @@
                                     No medical history available
                                 </td>
                             </tr>
-                        } *@
+                        }
                     </tbody>
                 </table>
             </div>

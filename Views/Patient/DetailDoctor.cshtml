@@ -227,16 +227,30 @@
         connection.start()
         .then(() => {
             console.log("Connected to SignalR Hub");
-            connection.on("ScheduleUpdated", function (doctorId, updatedDate) {
+
+            connection.on("UpdateDoctorProfile", (doctor) => {
+                console.log("Doctor detail is updated");
+
+                const scrollPosition = window.scrollY;
+                window.location.reload();
+                window.scrollTo(0, scrollPosition);
+            });
+
+            connection.on("ScheduleUpdated", (doctorId, updatedDate) => {
                 console.log("Schedule updated for doctor:", doctorId, "on date:", updatedDate);
+
                 const selectedDoctorId = document.querySelector('input[name="DoctorId"]').value;
                 const selectedDate = document.getElementById('appointmentDate').value;
+
                 if (selectedDoctorId === doctorId && selectedDate === updatedDate) {
                     reloadScheduleForDate(doctorId, updatedDate);
                 }
             });
+
+            
         })
         .catch(err => console.error("SignalR connection error:", err));
+
 
         function formatTime(time) {
             return new Date(time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
@@ -311,7 +325,6 @@
             });
         }
     });
-
 </script>
 
 

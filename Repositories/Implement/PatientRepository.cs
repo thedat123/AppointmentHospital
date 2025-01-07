@@ -89,5 +89,15 @@ namespace AppointmentHospital.Repositories.Implement
             appDbContext.Add(acquaintance);
             appDbContext.SaveChanges();
         }
+
+        public List<DiagnosisHistory> GetDiagnosisHistoriesByPatientId(Guid patientId)
+        {
+            return appDbContext.DiagnosisHistory.Where(d => d.PatientId == patientId).ToList();
+        }
+
+        public List<DiagnosisHistory> GetDiagnosisHistoriesByAcquaintanceId(Guid acquaintanceId)
+        {
+            return appDbContext.DiagnosisHistory.Where(d => d.AcquaintanceId == acquaintanceId).ToList();
+        }
     }
 }
