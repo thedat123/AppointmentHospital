@@ -16,4 +16,5 @@ public interface IAppointmentDateRepository
     public void UpdateStatusAppointment(Guid appointmentId, AppointmentStatus status);
     public List<Appointment> GetAllAppointments();
     public List<Appointment> GetAppointmentsByPatientId(Guid patientId, AppointmentStatus status);
+    public Appointment GetAppointmentsByDoctorIdAndStartTime(Guid doctorId, DateTime StartTime); 
 }

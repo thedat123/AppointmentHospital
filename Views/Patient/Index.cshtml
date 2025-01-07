@@ -29,7 +29,7 @@
                 <form action="/Patient/Predict" method="post">
                     <div class="input-group search-bar mb-4 shadow-lg"> 
                         <input type="text" class="form-control form-control-lg" id="searchInput"
-                            placeholder="Search Symtomps" name="symptoms" 
+                            placeholder="Search Symptoms" name="symptoms" 
                             style="border-radius: 50px 0 0 50px; padding: 20px;" />
                         <button class="btn btn-primary px-4" type="submit" 
                             style="border-radius: 0 50px 50px 0; font-size: 1.2rem;">
@@ -93,8 +93,66 @@
                             </p>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col-md-6 d-flex flex-column align-items-center border-end">
+                            <div class="text-center mb-3">
+                                
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+        }
+
+        @if (TempData["Disease"] != null)
+        {
+            @{
+                var department = AppointmentHospital.Helpers.DepartmentDisease.GetDiseaseByDepartment()
+                                .FirstOrDefault(d => d.Value.Contains(TempData["Disease"]?.ToString()));
+
+                var departmentName = department.Key;
+
+                var doctorsInDepartment = Model.Where(d => d.Specializaiton.ToString() == departmentName).ToList();
+            }
+
+            @if (doctorsInDepartment.Any())
+            {
+                <section class="doctors-section mt-5">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="h4 fw-bold">Recommended Doctor</h2>
+                        <a href="#" class="link-primary text-decoration-none">See more</a>
+                    </div>
+
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+                        @foreach (var doctor in doctorsInDepartment)
+                        {
+                            <div class="col">
+                                <div class="card doctor-card border-0">
+                                    <div class="card-body text-center">
+                                        <div class="mb-3 mx-auto rounded-circle overflow-hidden" style="width: 120px; height: 120px;">
+                                            <img src="@Url.Content(string.IsNullOrEmpty(doctor.ImagePath) ? "~/images/user-default.png" : $"~/images/{doctor.ImagePath}")"
+                                                alt="@doctor.FullName" class="w-100 h-100 object-fit-cover">
+                                        </div>
+                                        <h5 class="card-title text-dark">@doctor.FullName</h5>
+                                        <p class="card-text text-muted small">@doctor.Specializaiton</p>
+
+                                        <a href="@Url.Action("DetailDoctor", "Patient", new { id = doctor.DoctorId })"
+                                            class="btn btn-primary mt-3">
+                                            View Details
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </section>
+            }
+            else
+            {
+                <div class="alert alert-warning mt-4">
+                    No doctors found in this department.
+                </div>
+            }
         }
     </div>
 </div>
@@ -144,7 +202,7 @@
                             <h5 class="card-title text-dark">@doctor.FullName</h5>
                             <p class="card-text text-muted small">@doctor.Specializaiton.GetDisplayName()</p>
 
-                            <a onclick="@(User.Identity.IsAuthenticated? "return true" : "showLoginAlert(); return false")" href="@Url.Action("DetailDoctor", "Patient", new { id = doctor.DoctorId })"
+                            <a href="@Url.Action("DetailDoctor", "Patient", new { id = doctor.DoctorId })"
                                 class="btn btn-primary mt-3">
                                 View Details
                             </a>

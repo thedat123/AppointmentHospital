@@ -78,6 +78,15 @@ namespace AppointmentHospital.Services.Implement
             return content;
         }
 
+        public async Task<string> GetCancelAndSuggestTemplate(DateTime AppointmentTime, string DoctorName, string fullUserName, DateTime SuggestedDate){
+            var content = await System.IO.File.ReadAllTextAsync(Path.Combine(_webHostEnvironment.WebRootPath, "assets", "template", "mails", "cancelAndSuggestTimeTemplate.html"));
+            content = content.Replace("{{fullUserName}}", fullUserName);
+            content = content.Replace("{{DoctorName}}", DoctorName);
+            content = content.Replace("{{AppointmentTime}}", AppointmentTime.ToString("dd/MM/yyyy HH:mm"));
+            content = content.Replace("{{SuggestedDate}}", SuggestedDate.ToString("dd/MM/yyyy"));
+            return content;
+        }
+
         public async Task SendMailAsync(string toEmail, string subject, string body)
         {
             try

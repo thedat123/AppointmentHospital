@@ -248,5 +248,41 @@ namespace AppointmentHospital.Controllers
             await _hubContext.Clients.All.SendAsync("UpdateStatus", AppointmentId, AppointmentStatus.Completed);
             return RedirectToAction("Index");
         }
+
+        public IActionResult DeleteTimeSlot(Guid id){
+            var timeSlot = _timeSlotService.GetTimeSlotById(id);
+            _timeSlotService.DeleteTimeSlot(id);
+            return RedirectToAction("Calendar");
+        }
+
+        [HttpPost]
+        public IActionResult RegisterOffDay(DateTime offDate){
+            var timeList = _timeSlotService.GetAllTimeSlotByParticularDate(offDate);
+            if(timeList.Count != 0){
+                foreach(var timeSlot in timeList){
+                    _timeSlotService.DeleteTimeSlot(timeSlot.TimeSlotId);
+                }
+            }
+            return RedirectToAction("Calendar");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SuggestDay(Guid timeSlotId, DateTime suggestDate){
+            var doctorId = _contextAccessor.HttpContext?.Session.GetString("DoctorId");
+            var timeSlot = _timeSlotService.GetTimeSlotById(timeSlotId);
+
+            var appointment = _appointmentDateService.GetAppointmentsByDoctorIdAndStartTime(Guid.Parse(doctorId), timeSlot.StartTime);
+            var patient = await _patientService.GetPatientById(appointment.PatientId);
+
+            if(appointment != null){
+                _appointmentDateService.UpdateStatusAppointment(appointment.AppointmentId, AppointmentStatus.Canceled);
+                _timeSlotService.DeleteTimeSlot(timeSlot.TimeSlotId);
+
+                string body = await _emailService.GetCancelAndSuggestTemplate(appointment.AppointmentTime, appointment.Doctor.FullName, appointment.Patient.FullName, suggestDate);
+                await _emailService.SendMailAsync(patient.EmailAddress, $"Medical Appointment Of ({patient.FullName})", body);
+            }
+
+            return RedirectToAction("Calendar");
+        }
     }
 }
