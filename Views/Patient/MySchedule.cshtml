@@ -1,5 +1,7 @@
 ﻿@model List<Appointment>
-<link rel="stylesheet" href="~/css/my-schedule.css" asp-append-version="true" />
+@section Styles {
+    <link href="~/css/my-schedule.css" rel="stylesheet" />
+}
 <div class="dashboard-container">
     <div class="row g-4">
         <div class="col-12 col-md-3">
@@ -148,15 +150,21 @@
         </div>
     </div>
 </div>
-<!-- #Modal >-->
-<div class="modal fade" id="feedbackModal" tabindex="-1">
+<!-- Feedback Modal -->
+<div class="modal fade" id="feedbackModal" tabindex="-1" 
+     aria-labelledby="feedbackModalLabel" 
+     role="dialog">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">
-                    <i class="fas fa-comment-medical me-2"></i>Appointment Feedback
+                <h5 class="modal-title" id="feedbackModalLabel">
+                    <span class="fas fa-comment-medical me-2" role="presentation"></span>
+                    Appointment Feedback
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <button type="button" 
+                        class="btn-close btn-close-white" 
+                        data-bs-dismiss="modal"
+                        aria-label="Close feedback form"></button>
             </div>
             <div class="modal-body">
                 <div class="appointment-summary mb-4">
@@ -243,6 +251,57 @@
                 <button type="button" class="btn btn-primary" id="submitFeedback">
                     <i class="fas fa-paper-plane me-2"></i>Submit Feedback
                 </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- View Feedback Modal -->
+<div class="modal fade" id="viewFeedbackModal" tabindex="-1" 
+     aria-labelledby="viewFeedbackModalLabel" 
+     role="dialog"
+    >
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="viewFeedbackModalLabel">
+                    <span class="fas fa-comment-dots me-2" role="presentation"></span>
+                    Feedback Details
+                </h5>
+                <button type="button" 
+                        class="btn-close btn-close-white" 
+                        data-bs-dismiss="modal"
+                        aria-label="Close feedback details"></button>
+            </div>
+            <div class="modal-body">
+                <div class="doctor-info mb-4">
+                    <div class="d-flex align-items-center">
+                        <div class="doctor-avatar me-3" role="img" aria-label="doctor avatar">
+                            <span class="fas fa-user-md fa-3x"></span>
+                        </div>
+                        <div>
+                            <h6 id="doctorName" class="mb-1"></h6>
+                            <p id="doctorSpecialization" class="text-muted mb-0"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ratings-grid mb-4">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="rating-card">
+                                <h6 class="text-muted">Overall Rating</h6>
+                                <div id="overallRating" class="rating-stars" role="img" aria-label="rating stars"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="rating-card">
+                                <h6 class="text-muted">Professional Skills</h6>
+                                <div id="professionalRating" class="rating-stars" role="img" aria-label="professional skills rating"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

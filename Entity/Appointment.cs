@@ -17,6 +17,8 @@ namespace AppointmentHospital.Models
 
         public Guid? AcquaintanceId { get; set; }
 
+        public Guid? FeedbackId { get; set; }
+
         [Required]
         public DateTime AppointmentTime { get; set; }
 
@@ -47,5 +49,9 @@ namespace AppointmentHospital.Models
 
         [ForeignKey("AcquaintanceId")]
         public virtual Acquaintance Acquaintance { get; set; }
+
+        [ForeignKey("FeedbackId")]
+        public virtual Feedback Feedback { get; set; }
+
     }
 }

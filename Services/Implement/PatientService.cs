@@ -26,5 +26,11 @@ namespace AppointmentHospital.Services.Implement
         {
             _patientRepository.AddAcquaintance(acquaintance);
         }
+        public async Task AddFeedback(FeedbackRequest request) {
+            await _patientRepository.AddFeedback(request);
+        }
+        public async Task<FeedbackResponse> GetFeedback(Guid appointmentId){
+           return await _patientRepository.GetFeedback(appointmentId);
+        }
     }
 }

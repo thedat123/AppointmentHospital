@@ -18,6 +18,8 @@ namespace AppointmentHospital.Models
         public DbSet<Drug> Drugs { get; set; }
         public DbSet<DiagnosisHistory> DiagnosisHistory { get; set; }
 
+        public DbSet<Feedback> Feedbacks { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -51,7 +53,6 @@ namespace AppointmentHospital.Models
                 .HasForeignKey(a => a.DoctorId)
                 .OnDelete(DeleteBehavior.Restrict);
             });
-
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

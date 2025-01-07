@@ -50,7 +50,7 @@ namespace AppointmentHospital.Repositories.Implement
                 };
                 return patientResponse;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
@@ -88,6 +88,49 @@ namespace AppointmentHospital.Repositories.Implement
         {
             appDbContext.Add(acquaintance);
             appDbContext.SaveChanges();
+        }
+        public async Task AddFeedback(FeedbackRequest request)
+        {
+            try
+            {
+                var appointment = await appDbContext.Appointments.Where(a => a.AppointmentId == request.AppointmentId).FirstOrDefaultAsync();
+                if (appointment == null)
+                {
+                    throw new Exception("Cannot find appointment");
+                }
+                var feedback = new Feedback
+                {
+                    AppointmentId = request.AppointmentId,
+                    DoctorId = appointment.DoctorId,
+                    PatientId = appointment.PatientId,
+                    Rating = request.Rating,
+                    Comment = request.Comment,
+                    Communication = request.Communication,
+                    ProfessionalSkills = request.ProfessionalSkills,
+                    CreatedAt = DateTime.Now
+                };
+                await appDbContext.AddAsync(feedback);
+                await appDbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+        public async Task<FeedbackResponse> GetFeedback(Guid appointmentId) {
+            var feedback = await appDbContext.Feedbacks.Where(f => f.AppointmentId == appointmentId).Select(f => new FeedbackResponse
+            {
+                AppointmentId = f.AppointmentId,
+                Comment = f.Comment,
+                Communication = f.Communication,
+                Rating = f.Rating,
+                ProfessionalSkills = f.ProfessionalSkills,
+                CreatedAt = f.CreatedAt,
+                DoctorName = f.Doctor.FullName,
+                DoctorSpecialization = EnumExtensions.GetDisplayName(f.Doctor.Specializaiton),
+            }).FirstOrDefaultAsync();
+            return feedback;
+                                          
         }
     }
 }

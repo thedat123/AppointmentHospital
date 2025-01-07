@@ -274,7 +274,17 @@ namespace AppointmentHospital.Controllers
             return RedirectToAction("MySchedule");
         }
 
-    
+        [HttpPost]
+        public async Task<IActionResult> SubmitFeedback([FromForm] FeedbackRequest request )
+        {
+            await _patientService.AddFeedback(request);
+            return Ok();
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetFeedback(Guid appointmentId) {
+            var feedback = await _patientService.GetFeedback(appointmentId);
+            return Json(feedback);
+        }
     }
 
 }

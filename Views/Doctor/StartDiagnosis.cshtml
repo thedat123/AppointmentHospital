@@ -1,5 +1,5 @@
 ﻿@model AppointmentHospital.Models.Appointment
-<link rel="stylesheet" href="~/css/start-diagnosis.css" asp-append-version="true" />    
+<link rel="stylesheet" href="~/css/start-diagnosis.css" asp-append-version="true" />
 
 <div class="diagnosis-container">
     <div class="header-section">
@@ -26,21 +26,21 @@
                         <div class="info-group">
                             <label>Full Name</label>
                             <p class="info-value">@(
-                                                    @Model.Acquaintance?.Name != null 
-                                                    ? @Model.Acquaintance.Name
-                                                    : @Model.Patient.FullName
-                                                )</p>
+                                @Model.Acquaintance?.Name != null
+                                ? @Model.Acquaintance.Name
+                                : @Model.Patient.FullName
+                                )</p>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="info-group">
                             <label>Date of Birth</label>
                             <p class="info-value">
-                                                @(
-                                                    @Model.Acquaintance?.DateOfBirth != null 
-                                                    ? @Model.Acquaintance.DateOfBirth.ToString("MMMM d, yyyy")
-                                                    : @Model.Patient.DateOfBirth?.ToString("MMMM d, yyyy")
-                                                )
+                                @(
+                                    @Model.Acquaintance?.DateOfBirth != null
+                                    ? @Model.Acquaintance.DateOfBirth.ToString("MMMM d, yyyy")
+                                    : @Model.Patient.DateOfBirth?.ToString("MMMM d, yyyy")
+                                    )
                             </p>
                         </div>
                     </div>
@@ -54,10 +54,10 @@
                         <div class="info-group">
                             <label>Address</label>
                             <p class="info-value">@(
-                                                    @Model.Acquaintance?.Address != null 
-                                                    ? @Model.Acquaintance.Address
-                                                    : @Model.Patient.Address
-                                                )</p>
+                                @Model.Acquaintance?.Address != null
+                                ? @Model.Acquaintance.Address
+                                : @Model.Patient.Address
+                                )</p>
                         </div>
                     </div>
                 </div>
@@ -91,19 +91,16 @@
                     </h5>
                 </div>
                 <div class="card-body">
-                    <form asp-controller="Doctor" asp-action="SubmitDiagnosis" method="post" enctype="multipart/form-data">
+                    <form asp-controller="Doctor" id="submitForm" asp-action="SubmitDiagnosis" method="post"
+                        enctype="multipart/form-data">
                         <input type="hidden" name="AppointmentId" value="@Model.AppointmentId" />
                         <input type="hidden" name="PatientId" value="@Model.PatientId" />
                         <input type="hidden" name="DoctorId" value="@Model.DoctorId" />
                         <input type="hidden" name="AcquaintanceId" value="@(Model.AcquaintanceId ?? null)" />
 
                         <div class="mb-3">
-                            <textarea 
-                                name="DiagnosisDetails" 
-                                class="form-control diagnosis-textarea" 
-                                rows="6" 
-                                placeholder="Enter your detailed diagnosis here..."
-                                required></textarea>
+                            <textarea name="DiagnosisDetails" class="form-control diagnosis-textarea" rows="6"
+                                placeholder="Enter your detailed diagnosis here..." required></textarea>
                         </div>
 
                         <div class="mb-3">
@@ -111,42 +108,35 @@
                             <div id="prescribedMedicationsContainer" name="PrescribedMedications">
                                 <div class="d-flex mb-2 medication-row">
                                     <div class="position-relative flex-grow-1 me-2">
-                                        <input 
-                                            type="text" 
-                                            class="form-control drug-input" 
-                                            placeholder="Enter drug name..." 
-                                            required />
-                                        <ul class="drug-suggestions dropdown-menu" style="display: none; max-height: 200px; overflow-y: auto; z-index: 1000;"></ul>
+                                        <input type="text" class="form-control drug-input"
+                                            placeholder="Enter drug name..." required />
+                                        <ul class="drug-suggestions dropdown-menu"
+                                            style="display: none; max-height: 200px; overflow-y: auto; z-index: 1000;">
+                                        </ul>
                                     </div>
 
                                     <div class="flex-shrink-0 me-2" style="width: 100px;">
-                                        <input 
-                                            type="number" 
-                                            class="form-control quantity-input" 
-                                            placeholder="Qty" 
-                                            min="1" 
-                                            required />
+                                        <input type="number" class="form-control quantity-input" placeholder="Qty"
+                                            min="1" required />
                                     </div>
 
                                     <!-- Remove Button -->
                                     <button type="button" class="btn btn-danger remove-row">Remove</button>
                                 </div>
                             </div>
-                            <button type="button" class="btn btn-primary mt-2" id="addMedication">Add Medication</button>
+                            <button type="button" class="btn btn-primary mt-2" id="addMedication">Add
+                                Medication</button>
                             <input type="hidden" id="PrescribedMedications" name="PrescribedMedications" />
                         </div>
 
                         <div class="mb-3">
                             <label for="DoctorNotes" class="form-label">Doctor's Notes</label>
-                            <textarea 
-                                name="DoctorNotes" 
-                                class="form-control" 
-                                rows="3" 
+                            <textarea name="DoctorNotes" class="form-control" rows="3"
                                 placeholder="Enter any additional notes or reminders for the patient..."></textarea>
                         </div>
 
                         <div class="text-end">
-                            <button type="submit" class="btn btn-success btn-lg">
+                            <button type="submit" id="buttonSubmit" class="btn btn-success btn-lg">
                                 <i class="fas fa-save me-2"></i>
                                 Save Diagnosis
                             </button>
@@ -225,32 +215,53 @@
     });
 
     document.addEventListener('DOMContentLoaded', function () {
-    const container = document.getElementById('prescribedMedicationsContainer');
-    const addButton = document.getElementById('addMedication');
-    const hiddenInput = document.getElementById('PrescribedMedications');
+        const container = document.getElementById('prescribedMedicationsContainer');
+        const addButton = document.getElementById('addMedication');
+        const hiddenInput = document.getElementById('PrescribedMedications');
+        const buttonSubmit = document.getElementById('buttonSubmit');
+        const submitForm = document.getElementById('submitForm');
+        if (buttonSubmit && submitForm) {
+            buttonSubmit.addEventListener('click', function (e) {
+                 e.preventDefault();
+                buttonSubmit.disabled = true;
+                Swal.fire({
+                    title: 'Confirm Diagnosis',
+                    text: 'Are you sure to confirm this diagnosis?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Accept',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        submitForm.submit();
+                    }
+                });
+                buttonSubmit.disabled = false;
+            });
+        }
 
-    function updateHiddenInput() {
-        const rows = container.querySelectorAll('.medication-row');
-        const prescriptions = [];
+        function updateHiddenInput() {
+            const rows = container.querySelectorAll('.medication-row');
+            const prescriptions = [];
 
-        rows.forEach(row => {
-            const drugName = row.querySelector('.drug-input').value.trim();
-            const quantity = row.querySelector('.quantity-input').value.trim();
+            rows.forEach(row => {
+                const drugName = row.querySelector('.drug-input').value.trim();
+                const quantity = row.querySelector('.quantity-input').value.trim();
 
-            if (drugName && quantity) {
-                prescriptions.push(`${drugName}-${quantity}`);
-            }
-        });
+                if (drugName && quantity) {
+                    prescriptions.push(`${drugName}-${quantity}`);
+                }
+            });
 
-        hiddenInput.value = prescriptions.join(',');
-    }
+            hiddenInput.value = prescriptions.join(',');
+        }
 
 
-    addButton.addEventListener('click', function () {
-        const newRow = document.createElement('div');
-        newRow.classList.add('d-flex', 'mb-2', 'medication-row');
+        addButton.addEventListener('click', function () {
+            const newRow = document.createElement('div');
+            newRow.classList.add('d-flex', 'mb-2', 'medication-row');
 
-        newRow.innerHTML = `
+            newRow.innerHTML = `
             <div class="position-relative flex-grow-1 me-2">
                 <input 
                     type="text" 
@@ -270,111 +281,111 @@
             <button type="button" class="btn btn-danger remove-row">Remove</button>
         `;
 
-        container.appendChild(newRow);
-        updateHiddenInput();
-    });
-
-    container.addEventListener('click', function (e) {
-        if (e.target.classList.contains('remove-row')) {
-            const row = e.target.closest('.medication-row');
-            container.removeChild(row);
+            container.appendChild(newRow);
             updateHiddenInput();
-        }
-    });
+        });
 
-    container.addEventListener('input', async function (e) {
-        if (e.target.classList.contains('drug-input')) {
-            const drugInput = e.target;
-            const suggestions = drugInput.nextElementSibling;
-            const query = drugInput.value.trim();
+        container.addEventListener('click', function (e) {
+            if (e.target.classList.contains('remove-row')) {
+                const row = e.target.closest('.medication-row');
+                container.removeChild(row);
+                updateHiddenInput();
+            }
+        });
 
-            if (query) {
-                try {
-                    const response = await fetch(`/Doctor/Search?query=${encodeURIComponent(query)}`);
-                    const data = await response.json();
-                    const drugs = data.$values;
-                    suggestions.innerHTML = '';
+        container.addEventListener('input', async function (e) {
+            if (e.target.classList.contains('drug-input')) {
+                const drugInput = e.target;
+                const suggestions = drugInput.nextElementSibling;
+                const query = drugInput.value.trim();
 
-                    if (drugs.length === 0) {
-                        suggestions.style.display = 'none';
-                        return;
-                    }
-                    drugs.forEach(drug => {
-                        const listItem = document.createElement('li');
-                        listItem.textContent = drug;
-                        listItem.classList.add('dropdown-item');
-                        listItem.style.cursor = 'pointer';
-                        suggestions.appendChild(listItem);
+                if (query) {
+                    try {
+                        const response = await fetch(`/Doctor/Search?query=${encodeURIComponent(query)}`);
+                        const data = await response.json();
+                        const drugs = data.$values;
+                        suggestions.innerHTML = '';
 
-                        listItem.addEventListener('click', () => {
-                            drugInput.value = drug;
+                        if (drugs.length === 0) {
                             suggestions.style.display = 'none';
-                        });
-                    });
+                            return;
+                        }
+                        drugs.forEach(drug => {
+                            const listItem = document.createElement('li');
+                            listItem.textContent = drug;
+                            listItem.classList.add('dropdown-item');
+                            listItem.style.cursor = 'pointer';
+                            suggestions.appendChild(listItem);
 
-                    suggestions.style.display = 'block';
-                } catch (error) {
-                    console.error('Error fetching drug suggestions:', error);
+                            listItem.addEventListener('click', () => {
+                                drugInput.value = drug;
+                                suggestions.style.display = 'none';
+                            });
+                        });
+
+                        suggestions.style.display = 'block';
+                    } catch (error) {
+                        console.error('Error fetching drug suggestions:', error);
+                        suggestions.style.display = 'none';
+                    }
+                } else {
                     suggestions.style.display = 'none';
                 }
-            } else {
-                suggestions.style.display = 'none';
             }
-        }
-    });
+        });
 
-    container.addEventListener('input', function () {
-        updateHiddenInput();
-    });
+        container.addEventListener('input', function () {
+            updateHiddenInput();
+        });
 
-    container.addEventListener('keydown', function (e) {
-        if (e.target.classList.contains('drug-input')) {
-            const drugInput = e.target;
-            const suggestions = drugInput.nextElementSibling; // UL element
+        container.addEventListener('keydown', function (e) {
+            if (e.target.classList.contains('drug-input')) {
+                const drugInput = e.target;
+                const suggestions = drugInput.nextElementSibling; // UL element
 
-            if (suggestions.style.display === 'block') {
-                const items = suggestions.querySelectorAll('li');
-                let selectedIndex = Array.from(items).findIndex(item => item.classList.contains('active'));
+                if (suggestions.style.display === 'block') {
+                    const items = suggestions.querySelectorAll('li');
+                    let selectedIndex = Array.from(items).findIndex(item => item.classList.contains('active'));
 
-                if (e.key === 'ArrowDown') {
-                    e.preventDefault();
-                    if (selectedIndex < items.length - 1) {
-                        if (selectedIndex >= 0) items[selectedIndex].classList.remove('active');
-                        selectedIndex++;
-                        items[selectedIndex].classList.add('active');
-                        items[selectedIndex].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-                    } else if (selectedIndex === -1 && items.length > 0) {
-                        selectedIndex = 0;
-                        items[selectedIndex].classList.add('active');
-                        items[selectedIndex].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-                    }
-                } else if (e.key === 'ArrowUp') {
-                    e.preventDefault();
-                    if (selectedIndex > 0) {
-                        items[selectedIndex].classList.remove('active');
-                        selectedIndex--;
-                        items[selectedIndex].classList.add('active');
-                        items[selectedIndex].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-                    }
-                } else if (e.key === 'Enter') {
-                    e.preventDefault();
-                    if (selectedIndex >= 0) {
-                        drugInput.value = items[selectedIndex].textContent;
-                        suggestions.style.display = 'none';
+                    if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        if (selectedIndex < items.length - 1) {
+                            if (selectedIndex >= 0) items[selectedIndex].classList.remove('active');
+                            selectedIndex++;
+                            items[selectedIndex].classList.add('active');
+                            items[selectedIndex].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                        } else if (selectedIndex === -1 && items.length > 0) {
+                            selectedIndex = 0;
+                            items[selectedIndex].classList.add('active');
+                            items[selectedIndex].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                        }
+                    } else if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        if (selectedIndex > 0) {
+                            items[selectedIndex].classList.remove('active');
+                            selectedIndex--;
+                            items[selectedIndex].classList.add('active');
+                            items[selectedIndex].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                        }
+                    } else if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (selectedIndex >= 0) {
+                            drugInput.value = items[selectedIndex].textContent;
+                            suggestions.style.display = 'none';
+                        }
                     }
                 }
             }
-        }
-    });
+        });
 
-    // Ẩn danh sách khi nhấp ra ngoài
-    document.addEventListener('click', function (e) {
-        const isInsideContainer = container.contains(e.target);
-        if (!isInsideContainer) {
-            const allSuggestions = container.querySelectorAll('.drug-suggestions');
-            allSuggestions.forEach(suggestions => suggestions.style.display = 'none');
-        }
+        // Ẩn danh sách khi nhấp ra ngoài
+        document.addEventListener('click', function (e) {
+            const isInsideContainer = container.contains(e.target);
+            if (!isInsideContainer) {
+                const allSuggestions = container.querySelectorAll('.drug-suggestions');
+                allSuggestions.forEach(suggestions => suggestions.style.display = 'none');
+            }
+        });
     });
-});
 
 </script>

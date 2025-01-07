@@ -8,5 +8,7 @@ namespace AppointmentHospital.Services
         Task<PatientResponse> GetPatientById(Guid userId);
         Task<PatientResponse> EditPatientInfo(Guid patientId , PatientRequest request);
         void AddAcquaintance(Acquaintance acquaintance);
+        Task AddFeedback(FeedbackRequest request);
+        Task<FeedbackResponse> GetFeedback(Guid appointmentId);
     }
 }

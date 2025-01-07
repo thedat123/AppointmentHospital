@@ -48,7 +48,7 @@
             <h3 class="card-title mb-0">Regular Working Schedule</h3>
         </div>
         <div class="card-body">
-            <form method="post" asp-action="UpdateRegularSchedule">
+            <form method="post" id="updateRegularScheduleForm" asp-action="UpdateRegularSchedule">
                 @foreach (var day in Enum.GetValues<DayOfWeek>())
                 {
                     <div class="row align-items-center mb-3">
@@ -88,7 +88,7 @@
                     </div>
                 }
                 
-                <button type="submit" class="btn btn-primary mt-3">Save Regular Schedule</button>
+                <button type="submit" id="saveRegularScheduleButton" class="btn btn-primary mt-3">Save Regular Schedule</button>
             </form>
         </div>
     </div>
@@ -100,7 +100,7 @@
             <h3 class="card-title mb-0">Register Off Days/Special Schedule</h3>
         </div>
         <div class="card-body">
-            <form method="post" asp-action="UpdateSpecialSchedule">
+            <form id="updateSpecialScheduleForm" method="post" asp-action="UpdateSpecialSchedule">
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
@@ -147,7 +147,7 @@
                     <label for="Note" class="form-label">Note</label>
                     <textarea class="form-control" id="Note" name="Note" rows="3"></textarea>
                 </div>
-                <button type="submit" class="btn btn-primary">Save Special Schedule</button>
+                <button id="saveSpecialScheduleButton" type="submit" class="btn btn-primary">Save Special Schedule</button>
             </form>
         </div>
     </div>
@@ -211,6 +211,32 @@
 
             $('#specialTimeSection').hide();
         });
+
+        const saveRegularScheduleButton = document.getElementById('saveRegularScheduleButton');
+        const updateRegularScheduleForm = document.getElementById('updateRegularScheduleForm');
+        const saveSpecialScheduleButton = document.getElementById('saveSpecialScheduleButton');
+        const updateSpecialScheduleForm = document.getElementById('updateSpecialScheduleForm');
+        if(saveRegularScheduleButton && updateRegularScheduleForm) {
+            saveRegularScheduleButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                saveRegularScheduleButton.disabled = true;
+                Swal.fire({
+                        title: 'Update Schedule',
+                        text: 'Are you sure to update schedule?',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Accept',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            updateRegularScheduleForm.submit();
+                        }
+                    });
+                saveRegularScheduleButton.disabled = false;
+            })
+        }
+
+        if()
 
         function deleteSchedule(timeSlotId) {
             if (confirm('Are you sure you want to delete this schedule?')) {

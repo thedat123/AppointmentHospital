@@ -93,8 +93,18 @@
     function submitBookingForm() {
         const form = document.getElementById('bookingForm');
         const forSelf = document.getElementById('forSelf').checked;
+        Swal.fire({
+            title: 'Confirm Booking',
+            text: 'Are you sure you want to book this appointment?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Accept',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.action = forSelf ? '/Patient/BookForSelf' : '/Patient/BookForOther';
+                form.submit();
+            }});
 
-        form.action = forSelf ? '/Patient/BookForSelf' : '/Patient/BookForOther';
-        form.submit();
     }
 </script>
