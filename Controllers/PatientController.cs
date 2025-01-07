@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
 using AppointmentHospital.EnumStatus;
 using Hangfire;
+using AppointmentHospital.Services.Implement;
 
 namespace AppointmentHospital.Controllers
 {
@@ -26,8 +27,9 @@ namespace AppointmentHospital.Controllers
         private readonly IEmailService _emailService;
         private readonly ITimeSlotService _timeSlotService;
         private readonly IHubContext<ScheduleHub> _hubContext;
+        private readonly IDiseasePredictionService _predictionService;
 
-        public PatientController(AppDbContext appDbContext,IPatientService patientService ,IDoctorService doctorService, ILogger<PatientController> logger, IHttpContextAccessor contextAccessor, IAppointmentDateService appointmentDateService, IEmailService emailService, ITimeSlotService timeSlotService, IHubContext<ScheduleHub> hubContext)
+        public PatientController(AppDbContext appDbContext,IPatientService patientService ,IDoctorService doctorService, ILogger<PatientController> logger, IHttpContextAccessor contextAccessor, IAppointmentDateService appointmentDateService, IEmailService emailService, ITimeSlotService timeSlotService, IHubContext<ScheduleHub> hubContext, IDiseasePredictionService diseasePredictionService)
         {
             _appDbContext = appDbContext;
             _patientService = patientService;
@@ -38,6 +40,7 @@ namespace AppointmentHospital.Controllers
             _emailService = emailService;
             _timeSlotService = timeSlotService;
             _hubContext = hubContext;
+            _predictionService = diseasePredictionService;
         }
 
         public IActionResult Index()
@@ -274,7 +277,34 @@ namespace AppointmentHospital.Controllers
             return RedirectToAction("MySchedule");
         }
 
-    
+        [HttpPost]
+        public async Task<ActionResult> Predict(string[] symptoms)
+        {
+            if (symptoms == null || symptoms.Length == 0)
+            {
+                TempData["Error"] = "No symptoms provided.";
+                return RedirectToAction("Index", "Patient");
+            }
+
+            var result = await _predictionService.PredictDiseaseAsync(symptoms);
+
+            if (result != null)
+            {
+                TempData["Disease"] = result.disease.ToString();
+                TempData["ProbabilityPercentage"] = (Convert.ToDouble(result.probability) * 100).ToString("F2");
+                TempData["Probability"] = TempData["ProbabilityPercentage"];
+                TempData["Description"] = result.description.ToString();
+                TempData["Precautions"] = result.precautions?.ToString();
+            }
+            else
+            {
+                TempData["Error"] = "Failed to fetch prediction.";
+            }
+
+            return RedirectToAction("Index", "Patient");
+        }
+
+
     }
 
 }

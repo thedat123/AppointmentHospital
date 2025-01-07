@@ -33,4 +33,16 @@ public class TimeSlotService : ITimeSlotService
     public List<TimeSlot> GetTimeSlotsByDoctorAndDate(Guid id, DateTime date){
         return timeSlotRepository.GetTimeSlotsByDoctorAndDate(id, date);
     }
+
+    public void DeleteTimeSlot(Guid timeSlotId){
+        timeSlotRepository.DeleteTimeSlot(timeSlotId);
+    }
+
+    public TimeSlot GetTimeSlotById(Guid timeSlotId){
+        return timeSlotRepository.GetTimeSlotById(timeSlotId);
+    }
+
+    public List<TimeSlot> GetAllTimeSlotByParticularDate(DateTime date){
+        return timeSlotRepository.GetAllTimeSlotByParticularDate(date);
+    }
 }

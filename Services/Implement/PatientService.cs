@@ -26,5 +26,13 @@ namespace AppointmentHospital.Services.Implement
         {
             _patientRepository.AddAcquaintance(acquaintance);
         }
+
+        public List<DiagnosisHistory> GetDiagnosisHistoriesByPatientId(Guid patientId){
+            return _patientRepository.GetDiagnosisHistoriesByPatientId(patientId);
+        }
+
+        public List<DiagnosisHistory> GetDiagnosisHistoriesByAcquaintanceId(Guid acquaintanceId){
+            return _patientRepository.GetDiagnosisHistoriesByAcquaintanceId(acquaintanceId);
+        }
     }
 }

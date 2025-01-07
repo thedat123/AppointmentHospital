@@ -16,7 +16,6 @@
            display: flex; 
            align-items: center;">
     <div class="container">
-        <!-- Title -->
         <h1 class="display-3 fw-bold mb-4" 
             style="color: cyan; text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);">
             MEDICAL PLATFORM
@@ -25,35 +24,136 @@
             Comprehensive healthcare for every family
         </h2>
 
-        <!-- Search bar and additional features -->
         <div class="row justify-content-center">
             <div class="col-md-10 col-lg-8">
-                <!-- Search bar -->
-                <div class="input-group search-bar mb-4 shadow-lg">
-                    <input type="text" class="form-control form-control-lg" id="searchInput"
-                        placeholder="Search doctors, specialties, hospitals..."
-                        style="border-radius: 50px 0 0 50px; padding: 20px;" />
-                    <button class="btn btn-primary px-4" type="button" onclick="searchByText()" 
-                        style="border-radius: 0 50px 50px 0; font-size: 1.2rem;">
-                        <i class="fas fa-search me-2"></i> Search
-                    </button>
-                </div>
+                <form action="/Patient/Predict" method="post">
+                    <div class="input-group search-bar mb-4 shadow-lg"> 
+                        <input type="text" class="form-control form-control-lg" id="searchInput"
+                            placeholder="Search Symptoms" name="symptoms" 
+                            style="border-radius: 50px 0 0 50px; padding: 20px;" />
+                        <button class="btn btn-primary px-4" type="submit" 
+                            style="border-radius: 0 50px 50px 0; font-size: 1.2rem;">
+                            <i class="fas fa-search me-2"></i> Search
+                        </button>
+                    </div>
 
-                <!-- Additional options -->
-                <div class="d-flex justify-content-center gap-3">
-                    <!-- Upload image -->
-                    <button class="btn btn-secondary btn-lg d-flex align-items-center gap-2 px-4"
-                        type="button" onclick="triggerImageInput()" style="border-radius: 50px;">
-                        <i class="fas fa-image"></i> Upload Image
-                    </button>
-                    <input type="file" id="imageInput" class="form-control" accept="image/*" style="display: none;" />
-                    <button class="btn btn-info btn-lg d-flex align-items-center gap-2 px-4"
-                        type="button" onclick="startVoiceSearch()" style="border-radius: 50px;">
-                        <i class="fas fa-microphone"></i> Voice Search
-                    </button>
-                </div>
+                    <div class="d-flex justify-content-center gap-3">
+                        <input type="file" id="imageInput" class="form-control" accept="image/*" style="display: none;" />
+                        <button class="btn btn-info btn-lg d-flex align-items-center gap-2 px-4"
+                            type="button" onclick="startVoiceSearch()" style="border-radius: 50px;">
+                            <i class="fas fa-microphone"></i> Voice Search
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger mt-4 shadow-lg rounded-4 d-flex align-items-center gap-3 p-3">
+                <div class="icon-container text-white bg-danger d-flex align-items-center justify-content-center rounded-circle" 
+                    style="width: 50px; height: 50px;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 1.5rem;"></i>
+                </div>
+                <div class="text-container flex-grow-1">
+                    <h5 class="fw-bold text-danger mb-1">An Error Occurred</h5>
+                    <p class="mb-0">@TempData["Error"]</p>
+                </div>
+            </div>
+        }
+
+        @if (TempData["Disease"] != null && TempData["Probability"] != null)
+        {
+            <div class="card text-dark bg-light mt-4 shadow-lg rounded-4">
+                <div class="card-header bg-primary text-white fw-bold d-flex align-items-center gap-2 rounded-top-4">
+                    <i class="fas fa-stethoscope"></i>
+                    <span>Prediction Details</span>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 d-flex flex-column align-items-center border-end">
+                            <div class="text-center mb-3">
+                                <h5 class="fw-bold text-danger">Disease Detected:</h5>
+                                <h4 class="badge bg-danger text-white py-2 px-3" style="font-size: 1.2rem;">
+                                    @TempData["Disease"]
+                                </h4>
+                            </div>
+                            <div class="text-center">
+                                <h5 class="fw-bold text-success">Probability:</h5>
+                                <h4 class="text-success fw-bold">
+                                    <i class="fas fa-chart-bar me-2"></i>@TempData["ProbabilityPercentage"] %
+                                </h4>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 d-flex flex-column justify-content-center">
+                            <h5 class="fw-bold text-info text-center mb-3">Disease Description</h5>
+                            <p class="card-text text-center">
+                                <i class="fas fa-paragraph text-primary me-2"></i>@TempData["Description"]
+                            </p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 d-flex flex-column align-items-center border-end">
+                            <div class="text-center mb-3">
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (TempData["Disease"] != null)
+        {
+            @{
+                var department = AppointmentHospital.Helpers.DepartmentDisease.GetDiseaseByDepartment()
+                                .FirstOrDefault(d => d.Value.Contains(TempData["Disease"]?.ToString()));
+
+                var departmentName = department.Key;
+
+                var doctorsInDepartment = Model.Where(d => d.Specializaiton.ToString() == departmentName).ToList();
+            }
+
+            @if (doctorsInDepartment.Any())
+            {
+                <section class="doctors-section mt-5">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="h4 fw-bold">Recommended Doctor</h2>
+                        <a href="#" class="link-primary text-decoration-none">See more</a>
+                    </div>
+
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+                        @foreach (var doctor in doctorsInDepartment)
+                        {
+                            <div class="col">
+                                <div class="card doctor-card border-0">
+                                    <div class="card-body text-center">
+                                        <div class="mb-3 mx-auto rounded-circle overflow-hidden" style="width: 120px; height: 120px;">
+                                            <img src="@Url.Content(string.IsNullOrEmpty(doctor.ImagePath) ? "~/images/user-default.png" : $"~/images/{doctor.ImagePath}")"
+                                                alt="@doctor.FullName" class="w-100 h-100 object-fit-cover">
+                                        </div>
+                                        <h5 class="card-title text-dark">@doctor.FullName</h5>
+                                        <p class="card-text text-muted small">@doctor.Specializaiton</p>
+
+                                        <a href="@Url.Action("DetailDoctor", "Patient", new { id = doctor.DoctorId })"
+                                            class="btn btn-primary mt-3">
+                                            View Details
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </section>
+            }
+            else
+            {
+                <div class="alert alert-warning mt-4">
+                    No doctors found in this department.
+                </div>
+            }
+        }
     </div>
 </div>
 
@@ -102,7 +202,7 @@
                             <h5 class="card-title text-dark">@doctor.FullName</h5>
                             <p class="card-text text-muted small">@doctor.Specializaiton.GetDisplayName()</p>
 
-                            <a onclick="@(User.Identity.IsAuthenticated? "return true" : "showLoginAlert(); return false")" href="@Url.Action("DetailDoctor", "Patient", new { id = doctor.DoctorId })"
+                            <a href="@Url.Action("DetailDoctor", "Patient", new { id = doctor.DoctorId })"
                                 class="btn btn-primary mt-3">
                                 View Details
                             </a>

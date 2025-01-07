@@ -49,4 +49,8 @@ public class AppointmentDateService : IAppointmentDateService
     public List<Appointment> GetAllAppointments(){
         return appointmentRepository.GetAllAppointments();
     }
+
+    public Appointment GetAppointmentsByDoctorIdAndStartTime(Guid doctorId, DateTime StartTime){
+        return appointmentRepository.GetAppointmentsByDoctorIdAndStartTime(doctorId, StartTime);
+    }
 }

@@ -48,4 +48,26 @@ public class TimeSlotRepository : ITimeSlotRepository
         .Where(x => x.DoctorId == id && x.StartTime.Date == date.Date)
         .ToList();
     }
+
+    public void DeleteTimeSlot(Guid timeSlotId)
+    {
+        var timeSlot = _context.TimeSlots.Find(timeSlotId);
+        if (timeSlot != null)
+        {
+            _context.TimeSlots.Remove(timeSlot);
+            _context.SaveChanges();
+        }
+        else
+        {
+            throw new ArgumentException("TimeSlot not found with the specified ID.");
+        }
+    }
+
+    public TimeSlot GetTimeSlotById(Guid timeSlotId){
+        return _context.TimeSlots.Find(timeSlotId);
+    }
+
+    public List<TimeSlot> GetAllTimeSlotByParticularDate(DateTime date){
+        return _context.TimeSlots.Where(x => x.StartTime.Date == date || x.EndTime.Date == date).ToList();
+    }
 }
