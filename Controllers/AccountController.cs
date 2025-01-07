@@ -215,7 +215,7 @@ namespace AppointmentHospital.Controllers
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
-            return RedirectToAction("Login");
+            return RedirectToAction("Index", "Patient");
         }
         [HttpPost]
         public async Task<IActionResult> ForgotPassword(ForgetPasswordRequest request)

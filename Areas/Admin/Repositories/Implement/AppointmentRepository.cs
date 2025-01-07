@@ -33,7 +33,7 @@ namespace AppointmentHospital.Areas.Admin.Repositories.Implement
            }
            var paginatedList = await Pagination<Appointment>.PaginatedList(query, page);
            var appointmentList = paginatedList.Select(a => new AppointmentResponse {
-          
+                
                 AppointmentId = a.AppointmentId,
                 AppointmentTime = a.AppointmentTime,
                 DoctorId = a.DoctorId,
@@ -74,10 +74,10 @@ namespace AppointmentHospital.Areas.Admin.Repositories.Implement
 
        public async Task<AppointmentResponse> GetAppointmentAsync(Guid id)
        {
-           var appointment = await _context.Appointments.Include(a => a.Patient).Include(a => a.Doctor).Select(a => new AppointmentResponse
+           var appointment = await _context.Appointments.Include(a => a.Patient).Include(a => a.Doctor).Include(a => a.Acquaintance).Select(a => new AppointmentResponse
            {
-               PatientId = a.PatientId,
-               PatientName = a.Patient.FullName,
+               PatientId = a.AcquaintanceId.HasValue ? a.Acquaintance.Id : a.Patient.PatientId,
+               PatientName = a.AcquaintanceId.HasValue ? a.Acquaintance.Name : a.Patient.FullName,
                DoctorId = a.DoctorId,
                Specialization = EnumExtensions.GetDisplayName(a.Doctor.Specializaiton),
                AppointmentId = a.AppointmentId,

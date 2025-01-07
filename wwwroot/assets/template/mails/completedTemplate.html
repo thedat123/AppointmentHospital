@@ -6,134 +6,103 @@
     <title>Thông báo kết quả chuẩn đoán</title>
     <style>
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            color: #2d3748;
-            line-height: 1.8;
-            margin: 0;
-            padding: 0;
-            background-color: #f7fafc;
+            font-family: Arial, sans-serif;
+            color: #333;
+            line-height: 1.6;
         }
 
         .email-container {
             max-width: 600px;
-            margin: 40px auto;
-            padding: 32px;
-            border-radius: 12px;
-            background-color: #ffffff;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 32px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            background-color: #f9f9f9;
         }
 
         h2 {
-            color: #2b6cb0;
-            font-size: 24px;
-            margin: 0 0 16px 0;
+            color: #007BFF;
         }
 
-        .logo {
-            width: 120px;
-            height: 120px;
-            margin-bottom: 16px;
-        }
-
-        .content {
-            padding: 0 16px;
-        }
-
-        .diagnosis-box {
-            background-color: #f8fafc;
-            border-left: 4px solid #2b6cb0;
-            padding: 16px;
-            margin: 16px 0;
-            border-radius: 4px;
+        .diagnosis-box, .medications-box {
+            background-color: #fff;
+            border-left: 4px solid #007BFF;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
         }
 
         .medications-box {
-            background-color: #f0fff4;
-            border-left: 4px solid #38a169;
-            padding: 16px;
-            margin: 16px 0;
-            border-radius: 4px;
-        }
-
-        .footer {
-            margin-top: 32px;
-            padding-top: 24px;
-            border-top: 1px solid #e2e8f0;
-            text-align: center;
-            color: #718096;
+            border-left-color: #28a745;
         }
 
         .highlight {
-            color: #2b6cb0;
+            color: #007BFF;
             font-weight: 600;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .footer {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            text-align: center;
+            color: #666;
         }
 
         ul {
             padding-left: 20px;
-            margin: 0;
+            margin: 10px 0;
         }
 
         ul li {
             margin-bottom: 8px;
         }
-
-        @media (max-width: 600px) {
-            .email-container {
-                margin: 20px;
-                padding: 20px;
-            }
-        }
     </style>
 </head>
 <body>
     <div class="email-container">
-        <div class="header">
-            <h2>Thông báo kết quả chuẩn đoán</h2>
+        <h2>Thông báo kết quả chuẩn đoán</h2>
+        <p>Kính gửi <strong>{{fullUserName}}</strong>,</p>
+        
+        <p>Bác sĩ <strong>{{DoctorName}}</strong> đã hoàn thành việc chuẩn đoán và gửi đến bạn kết quả như sau:</p>
+        
+        <div class="diagnosis-box">
+            <strong>Kết quả chuẩn đoán:</strong><br>
+            <em>{{DiagnosisDetails}}</em>
         </div>
 
-        <div class="content">
-            <p>Kính gửi <span class="highlight">{{fullUserName}}</span>,</p>
-            
-            <p>Bác sĩ <span class="highlight">{{DoctorName}}</span> đã hoàn thành việc chuẩn đoán và gửi đến bạn kết quả như sau:</p>
-            
-            <div class="diagnosis-box">
-                <strong>Kết quả chuẩn đoán:</strong><br>
-                <em>{{DiagnosisDetails}}</em>
-            </div>
-
-            <div class="medications-box">
-                <strong>Đơn thuốc:</strong>
-                <ul>
-                    <ul>
-                        {{PrescribedMedicationsHtml}}
-                    </ul>                    
-                </ul>
-            </div>
-
-            <div class="medications-box">
-                <strong>Ghi chú:</strong><br>
-                <em>{{DoctorNotes}}</em>
-            </div>
-
-            <p>Để đảm bảo quá trình điều trị hiệu quả, chúng tôi khuyến nghị bạn:</p>
+        <div class="medications-box">
+            <strong>Đơn thuốc:</strong>
             <ul>
-                <li>Tuân thủ chặt chẽ phác đồ điều trị của bác sĩ</li>
-                <li>Uống thuốc đúng liều lượng và thời gian</li>
-                <li>Theo dõi và ghi nhận các phản ứng (nếu có)</li>
+                {{PrescribedMedicationsHtml}}
             </ul>
-
-            <p>Nếu có bất kỳ thắc mắc nào, vui lòng liên hệ với chúng tôi qua:</p>
         </div>
 
+        <div class="medications-box">
+            <strong>Ghi chú:</strong><br>
+            <em>{{DoctorNotes}}</em>
+        </div>
+
+        <p>Để đảm bảo quá trình điều trị hiệu quả, chúng tôi khuyến nghị bạn:</p>
+        <ul>
+            <li>Tuân thủ chặt chẽ phác đồ điều trị của bác sĩ</li>
+            <li>Uống thuốc đúng liều lượng và thời gian</li>
+            <li>Theo dõi và ghi nhận các phản ứng (nếu có)</li>
+        </ul>
+
+        <p>Nếu có bất kỳ thắc mắc nào, vui lòng liên hệ với chúng tôi.</p>
         <div class="footer">
-            <p>Trân trọng,</p>
-            <p><strong>Đội ngũ chăm sóc khách hàng</strong></p>
-            <small>© 2025 Tên Bệnh Viện. Mọi quyền được bảo lưu.</small>
+            <p>Trân trọng,<br>
+            <strong>Đội ngũ chăm sóc khách hàng MedicalCare</strong></p>
+            <small>© 2025 MedicalCare. Mọi quyền được bảo lưu.</small>
         </div>
     </div>
 </body>

@@ -4,31 +4,39 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewBag.Title</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet"/>
     <link rel="stylesheet" href="~/css/account.css"/>
+    @await RenderSectionAsync("Styles", false)
 </head>
 <body>
-    <section class="vh-100">
-        <div class="container-fluid h-custom">
-            <div class="row d-flex justify-content-center align-items-center w-100">
-                <div class="col-md-9 col-lg-6 col-xl-5 text-center">
-                    <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp"
-                         class="img-fluid" alt="Sample image">
+    <div class="wave"></div>
+    <div class="wave"></div>
+    <div class="wave"></div>
+    
+    <section class="vh-100 login-section mt-5">
+        <div class="container-fluid d-flex justify-content-between h-custom">
+            <div class="row d-flex justify-content-center align-items-center h-100">
+                <div class="col-md-9 col-lg-6 col-xl-5 text-center welcome-section">
+                    <img src="~/images/MedicalCarelogo-slogan.png" class="img-fluid hover-effect" alt="Hospital Image">
                 </div>
                 <div class="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
-                    <div class="login-container">
+                    <div class="glass-card">
                         @RenderBody()
                     </div>
                 </div>
             </div>
         </div>
+        
         <footer class="footer">
-            <div class="footer-container text-center">
-                &copy; @DateTime.Now.Year ManagingLibrary <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <div class="footer-wave"></div>
+            <div class="footer-content">
+                <div>&copy; @DateTime.Now.Year MedicalCare</div>
+                <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy Policy</a>
             </div>
         </footer>
     </section>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
