@@ -106,14 +106,12 @@
 
         @if (TempData["Disease"] != null)
         {
-            @{
-                var department = AppointmentHospital.Helpers.DepartmentDisease.GetDiseaseByDepartment()
+            var department = AppointmentHospital.Helpers.DepartmentDisease.GetDiseaseByDepartment()
                                 .FirstOrDefault(d => d.Value.Contains(TempData["Disease"]?.ToString()));
 
-                var departmentName = department.Key;
+            var departmentName = department.Key;
 
-                var doctorsInDepartment = Model.Where(d => d.Specializaiton.ToString() == departmentName).ToList();
-            }
+            var doctorsInDepartment = Model.Where(d => d.Specializaiton.ToString() == departmentName).ToList();
 
             @if (doctorsInDepartment.Any())
             {
