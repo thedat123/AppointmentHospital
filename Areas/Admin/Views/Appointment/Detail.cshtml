@@ -1,146 +1,111 @@
 ﻿@using AppointmentHospital.Areas.Admin.DTOs.Appointment
-@using AppointmentHospital.EnumStatus;
-@model AppointmentResponse;
+@model AppointmentResponse
 
-<div class="container-fluid py-4">
-    <div class="row">
-        <div class="col-lg-8 offset-lg-2">
-            <div class="card shadow-lg">
-                <div class="card-header bg-primary text-white">
-                    <h2 class="mt-2 text-white">
-                        Appointment Details
-                    </h2>
-                </div>
-
-                <div class="card-body">
-                    <div class="row g-4">
-                        <div class="col-md-6">
-                            <div class="card h-100 border-0">
-                                <div class="card-body bg-light rounded">
-                                    <h5 class="card-title text-primary mb-3">
-                                        <i class="bi bi-person-circle me-2"></i>Patient Information
-                                    </h5>
-                                    <div class="mb-2">
-                                        <strong>Name:</strong>
-                                        <span>@Model.PatientName</span>
-                                    </div>
-                                    <div>
-                                        <strong>Patient ID:</strong>
-                                        <span>@Model.PatientId</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="card h-100 border-0">
-                                <div class="card-body bg-light rounded">
-                                    <h5 class="card-title text-primary mb-3">
-                                        <i class="bi bi-person-badge me-2"></i>Doctor Information
-                                    </h5>
-                                    <div class="mb-2">
-                                        <strong>Name:</strong>
-                                        <span>@Model.DoctorName</span>
-                                    </div>
-                                    <div>
-                                        <strong>Specialization:</strong>
-                                        <span>@Model.Specialization.ToString()</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-12">
-                            <div class="card">
-                                <div class="card-body bg-light rounded">
-                                    <h5 class="card-title text-primary mb-3">
-                                        <i class="bi bi-clock me-2"></i>Appointment Details
-                                    </h5>
-                                    <div class="row">
-                                        <div class="col-md-4 mb-2">
-                                            <strong>Appointment ID:</strong>
-                                            <span>@Model.AppointmentId</span>
-                                        </div>
-                                        <div class="col-md-4 mb-2">
-                                            <strong>Date & Time:</strong>
-                                            <span>@Model.AppointmentTime.ToString("f")</span>
-                                        </div>
-                                        <div class="col-md-4 mb-2">
-                                            <strong>Status:</strong>
-                                            @{
-                                                var statusColor = Model.Status switch
-                                                {
-                                                    AppointmentStatus.Pending => "bg-primary",
-                                                    AppointmentStatus.Confirmed => "bg-success",
-                                                    AppointmentStatus.Canceled => "bg-danger"
-                                                };
-                                            }
-                                            <span class="badge @statusColor">
-                                                @Model.Status.ToString()
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        @if (!string.IsNullOrEmpty(Model.CancellationReason))
-                        {
-                            <div class="col-12">
-                                <div class="card border-warning">
-                                    <div class="card-body bg-light">
-                                        <h5 class="card-title text-warning">
-                                            <i class="bi bi-exclamation-triangle me-2"></i>Cancellation Details
-                                        </h5>
-                                        <p class="text-muted">@Model.CancellationReason</p>
-                                    </div>
-                                </div>
-                            </div>
-                        }
-
-                        @if (!string.IsNullOrEmpty(Model.Notes))
-                        {
-                            <div class="col-12">
-                                <div class="card">
-                                    <div class="card-body bg-light">
-                                        <h5 class="card-title text-primary">
-                                            <i class="bi bi-sticky me-2"></i>Additional Notes
-                                        </h5>
-                                        <p class="text-muted">@Model.Notes</p>
-                                    </div>
-                                </div>
-                            </div>
-                        }
-
-                        <div class="col-12">
-                            <div class="card">
-                                <div class="card-body bg-light">
-                                    <h5 class="card-title text-muted">
-                                        <i class="bi bi-calendar-plus me-2"></i>Created At
-                                    </h5>
-                                    <p class="text-muted">@Model.AppointmentTime.ToString("F")</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card-footer">
-                    <div class="d-flex flex-md-row-reverse">
-                        <a asp-action="Index" class="btn btn-secondary">
-                            <i class="bi bi-list me-2"></i>Back to List
-                        </a>
-                    </div>
+<div class="appointment-detail">
+    <div class="glass-card main-card">
+        <div class="card-header">
+            <div class="header-content">
+                <h2 class="text-white">
+                    <i class="bi bi-calendar2-check"></i>
+                    Appointment Details
+                </h2>
+                <div class="appointment-status @Model.Status.ToString().ToLower()">
+                    <span class="status-badge">@Model.Status.ToString()</span>
                 </div>
             </div>
         </div>
+
+        <div class="card-content">
+            <div class="info-section">
+                <div class="info-card patient-info">
+                    <div class="info-header">
+                        <i class="bi bi-person-circle"></i>
+                        <h3>Patient Information</h3>
+                    </div>
+                    <div class="info-body">
+                        <p><strong>Name:</strong> @Model.PatientName</p>
+                        <p><strong>ID:</strong> @Model.PatientId</p>
+                    </div>
+                </div>
+
+                <div class="info-card doctor-info">
+                    <div class="info-header">
+                        <i class="bi bi-person-badge"></i>
+                        <h3>Doctor Information</h3>
+                    </div>
+                    <div class="info-body">
+                        <p><strong>Name:</strong> @Model.DoctorName</p>
+                        <p><strong>Specialization:</strong> @Model.Specialization</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <div class="info-card appointment-time">
+                    <div class="info-header">
+                        <i class="bi bi-clock-history"></i>
+                        <h3>Appointment Schedule</h3>
+                    </div>
+                    <div class="info-body">
+                        <div class="time-details">
+                            <p><i class="bi bi-calendar-event"></i> @Model.AppointmentTime.ToString("dddd, MMMM dd, yyyy")</p>
+                            <p><i class="bi bi-clock"></i> @Model.AppointmentTime.ToString("hh:mm tt")</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Notes))
+            {
+                <div class="info-section">
+                    <div class="info-card notes">
+                        <div class="info-header">
+                            <i class="bi bi-journal-text"></i>
+                            <h3>Additional Notes</h3>
+                        </div>
+                        <div class="info-body">
+                            <p>@Model.Notes</p>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.CancellationReason))
+            {
+                <div class="info-section">
+                    <div class="info-card cancellation">
+                        <div class="info-header warning">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            <h3>Cancellation Reason</h3>
+                        </div>
+                        <div class="info-body">
+                            <p>@Model.CancellationReason</p>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <div class="created-info">
+                <small>
+                    <i class="bi bi-clock-history"></i>
+                    Created on @Model.CreatedAt.ToString("MMMM dd, yyyy") at @Model.CreatedAt.ToString("hh:mm tt")
+                </small>
+            </div>
+        </div>
+
+        <div class="card-actions">
+            <a href="@Url.Action("Index")" class="btn-back">
+                <i class="bi bi-arrow-left"></i> Back to List
+            </a>
+        </div>
     </div>
 </div>
-
+@section Styles {
+    <link rel="stylesheet" href="~/css/detail-appointment.css" />
+}
 @section Scripts {
     <script>
         $(document).ready(function() {
-            // Optional: Add some subtle animations or interactions
             $('.card').hover(
                 function() { $(this).addClass('shadow-lg'); },
                 function() { $(this).removeClass('shadow-lg'); }

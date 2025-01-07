@@ -15,7 +15,7 @@
         <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom fixed-top">
             <div class="container">
                 <a class="navbar-brand d-flex align-items-center" asp-action="Index" asp-controller="Patient">
-                    <img src="~/images/logo.png" alt="BookingCare" height="40">
+                    <img src="~/images/MedicalCarelogo.png" alt="BookingCare" height="40">MedicalCare
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
                     <span class="navbar-toggler-icon"></span>
@@ -23,25 +23,25 @@
                 <div class="collapse navbar-collapse" id="navbarMain">
                     <ul class="navbar-nav mx-auto">
                         <li class="nav-item">
-                            <a class="nav-link d-flex flex-column align-items-center" href="/specialties">
+                            <a class="nav-link d-flex flex-column align-items-center" onclick="@(User.Identity.IsAuthenticated ? "return true" : "showLoginAlert(); return false" )"  href="/specialties">
                                 <i class="fas fa-stethoscope mb-1"></i>
                                 <span>Specialties</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link d-flex flex-column align-items-center" href="/medical-facilities">
+                            <a class="nav-link d-flex flex-column align-items-center" onclick="@(User.Identity.IsAuthenticated ? "return true" : "showLoginAlert(); return false" )"  href="/medical-facilities">
                                 <i class="fas fa-hospital mb-1"></i>
                                 <span>Facilities</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link d-flex flex-column align-items-center" href="/doctors">
+                            <a class="nav-link d-flex flex-column align-items-center" onclick="@(User.Identity.IsAuthenticated ? "return true" : "showLoginAlert(); return false" )"  href="/doctors">
                                 <i class="fas fa-user-md mb-1"></i>
                                 <span>Doctors</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link d-flex flex-column align-items-center" href="/health-packages">
+                            <a class="nav-link d-flex flex-column align-items-center" onclick="@(User.Identity.IsAuthenticated ? "return true" : "showLoginAlert(); return false" )"  href="/health-packages">
                                 <i class="fas fa-heartbeat mb-1"></i>
                                 <span>Health Packages</span>
                             </a>
@@ -91,8 +91,8 @@
                         }
                         else
                         {
-                            <a href="/login" class="btn btn-outline-primary rounded-pill me-2">Sign In</a>
-                            <a href="/register" class="btn btn-primary rounded-pill">Register</a>
+                            <a asp-action="Login" asp-controller="Account" class="btn btn-outline-primary rounded-pill me-2">Sign In</a>
+                            <a asp-action="Register" asp-controller="Account" class="btn btn-primary rounded-pill">Register</a>
                         }
                     </div>
                 </div>
@@ -151,6 +151,23 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+          function showLoginAlert() {
+            Swal.fire({
+                title: 'Authentication Required',
+                text: 'Please sign in to access this feature',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sign In',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '/Account/Login';
+                }
+            });
+        }
+    </script>
     @RenderSection("Scripts", required: false)
 </body>
 </html>

@@ -144,7 +144,7 @@
                             <h5 class="card-title text-dark">@doctor.FullName</h5>
                             <p class="card-text text-muted small">@doctor.Specializaiton.GetDisplayName()</p>
 
-                            <a href="@Url.Action("DetailDoctor", "Patient", new { id = doctor.DoctorId })"
+                            <a onclick="@(User.Identity.IsAuthenticated? "return true" : "showLoginAlert(); return false")" href="@Url.Action("DetailDoctor", "Patient", new { id = doctor.DoctorId })"
                                 class="btn btn-primary mt-3">
                                 View Details
                             </a>

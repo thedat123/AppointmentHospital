@@ -6,7 +6,7 @@
 }
 
 <div class="card shadow-sm mb-4">
-    <div class="card-body">
+    <div class="card-body search-wrapper">
         <form method="get" asp-action="Index" class="row g-3 align-items-end justify-content-center">
             <div asp-validation-summary="ModelOnly"></div>
             <div class="col-md-5">
@@ -15,10 +15,8 @@
                     <span class="input-group-text">
                         <i class="bi bi-search"></i>
                     </span>
-                    <input name="searchTerm"
-                           class="form-control"
-                           placeholder="Enter author or title..."
-                           value="@searchTerm">
+                    <input name="searchTerm" class="form-control" placeholder="Enter author or title..."
+                        value="@searchTerm">
                 </div>
             </div>
             <div class="col-md-2">
@@ -34,7 +32,7 @@
     <div class="card-header bg-white py-3">
         <div class="row align-items-center">
             <div class="col">
-                <h5 class="mb-0">Dashboard Patients</h5>
+                <h5 class="mb-0 text-white">Dashboard Patients</h5>
             </div>
             <div class="col-auto">
                 <a asp-action="CreatePatient" class="btn btn-primary btn-sm">Add New Patient</a>
@@ -76,13 +74,11 @@
                                 @patient.PhoneNumber
                             </td>
                             <td>
-                                <div class="d-flex justify-content-end gap-2">
-                                    <a asp-action="EditPatient" asp-route-id="@patient.Id"
-                                       class="btn btn-outline-primary btn-sm">
+                                <div class="d-flex justify-content-end gap-2 action-buttons">
+                                    <a asp-action="EditPatient" asp-route-id="@patient.Id" class="btn btn-outline-primary">
                                         <i class="bi bi-pencil-square"></i>
                                     </a>
-                                    <a asp-action="DeletePatient" asp-route-id="@patient.Id"
-                                       class="btn btn-outline-danger btn-sm">
+                                    <a asp-action="DeletePatient" asp-route-id="@patient.Id" class="btn btn-outline-danger">
                                         <i class="bi bi-trash"></i>
                                     </a>
                                 </div>
@@ -103,11 +99,11 @@
                 @for (int i = 1; i <= patientList.TotalPage; i++)
                 {
                     <li class="page-item @(patientList.CurrentPage == @i ? "active": "" )">
-                        <a class="page-link"  asp-action="Index" as asp-route-page="@i">@i</a>
+                        <a class="page-link" asp-action="Index" as asp-route-page="@i">@i</a>
                     </li>
                 }
                 <li class="page-item  @(!patientList.HasNextPage? "disabled": "")">
-                    <a class="page-link"  asp-action="Index" asp-route-page="@(patientList.CurrentPage+1)">Next</a>
+                    <a class="page-link" asp-action="Index" asp-route-page="@(patientList.CurrentPage+1)">Next</a>
                 </li>
             </ul>
         }
@@ -117,4 +113,5 @@
 
 @section Styles {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/managing-patient.css" />
 }

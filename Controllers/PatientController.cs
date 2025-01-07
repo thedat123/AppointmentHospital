@@ -140,7 +140,6 @@ namespace AppointmentHospital.Controllers
                 _timeSlotService.UpdateTimeSlotAvalableStatusByTimeSlotID(TimeSlotId);
                 string body = await _emailService.GetBookingTemplate(appointment.AppointmentTime, doctor.FullName, patient.FullName);
                 await _emailService.SendMailAsync(patient.EmailAddress, $"Medical Appointment Of ({patient.FullName})", body);
-
                 TempData["SuccessMessage"] = "Your appointment has been booked successfully!";
 
                 var updatedDate = appointment.AppointmentTime.Date.ToString("yyyy-MM-dd");

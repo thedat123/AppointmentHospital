@@ -1,50 +1,118 @@
-﻿.card {
-    border-radius: 1rem;
+﻿.login-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 2rem;
 }
 
-.form-control {
-    border-radius: 0.5rem;
-    padding: 1rem;
+.login-container h2 {
+    color: #1976D2;
+    margin-bottom: 2rem;
+    font-weight: 600;
+}
+                    
+.form-floating {
+    position: relative;
+}
+
+.form-floating input {
+    height: 60px;
+    border-radius: 10px;
+    border: 2px solid #e0e0e0;
+    padding-left: 45px;
+    transition: all 0.3s ease;
+}
+
+.form-floating input:focus {
+    border-color: #1976D2;
+    box-shadow: 0 0 0 0.2rem rgba(25, 118, 210, 0.25);
 }
 
 .form-floating label {
-    padding: 1rem;
+    padding-left: 45px;
 }
 
-.btn {
-    border-radius: 0.5rem;
-    padding: 0.75rem;
+.form-floating label i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #757575;
 }
 
-.divider:after,
-.divider:before {
-    content: "";
+.btn-primary {
+    height: 50px;
+    border-radius: 10px;
+}
+
+.social-login {
+    margin-top: 2rem;
+}
+.links-section a {
+    text-decoration: none;
+    color: #1976D2;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 1.5rem 0;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
     flex: 1;
-    height: 1px;
-    background: #eee;
+    border-bottom: 1px solid #e0e0e0;
 }
 
-/* Custom styles for social buttons */
-.btn-outline-primary {
-    transition: all 0.3s;
+.divider span {
+    padding: 0 1rem;
+    color: #757575;
+    font-size: 0.9rem;
 }
 
-    .btn-outline-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+.btn-outline-secondary {
+    height: 50px;
+    border-radius: 10px;
+    border: 2px solid #e0e0e0;
+    color: #333;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-secondary:hover {
+    background: #f5f5f5;
+    border-color: #1976D2;
+    color: #1976D2;
+    transform: translateY(-2px);
+}
+
+.btn-outline-secondary i {
+    font-size: 1.2rem;
+}
+
+.fa-google {
+    color: #DB4437;
+}
+
+.fa-facebook {
+    color: #4267B2;
+}
+
+.fa-twitter {
+    color: #1DA1F2;
+}
+
+@media (max-width: 576px) {
+    .login-container {
+        padding: 1rem;
     }
 
-/* Animation for form inputs */
-.form-control:focus {
-    transform: translateY(-2px);
-    transition: all 0.3s;
-    border-color: #0d6efd;
-    box-shadow: 0 5px 15px rgba(13,110,253,0.1);
+    .btn-outline-secondary {
+        height: 45px;
+        font-size: 0.9rem;
+    }
 }
-
-/* Custom checkbox style */
-.form-check-input:checked {
-    background-color: #0d6efd;
-    border-color: #0d6efd;
-}
-
