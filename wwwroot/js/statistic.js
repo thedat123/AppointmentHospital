@@ -163,24 +163,41 @@ radioButton.forEach(radio => {
         let weekSelect = document.getElementById("weekSelect");
         let yearInput = document.getElementById("yearInput");
 
+        let rangeInput = document.getElementById("rangeInput");
+        let startDate = document.getElementById('startDate');
+        let endDate = document.getElementById('endDate');
+
         dayInput.style.display = 'none';
         weekInput.style.display = 'none';
         monthInput.style.display = 'none';
         yearInput.style.display = 'none';
+        rangeInput.style.display = 'none';
 
         if (this.value === 'day') {
             dayInput.style.display = 'block';
             monthSelect.value = null;
             weekSelect.value = null;
+            startDate.value = null;
+            endDate.value =  null;
+
         } else if (this.value === 'week') {
             weekInput.style.display = 'block';
             yearInput.style.display = 'block';
             singleDate.value = null;
             monthSelect.value = null;
+            startDate.value = null;
+            endDate.value =  null;
         } else if (this.value === 'month') {
             monthInput.style.display = 'block';
             yearInput.style.display = 'block';
             singleDate.value = null;
+            weekSelect.value = null;
+            startDate.value = null;
+            endDate.value =  null;
+        } else if(this.value === 'range'){
+            rangeInput.style.display = 'block'
+            singleDate.value = null;
+            monthSelect.value = null;
             weekSelect.value = null;
         }
     })
@@ -198,13 +215,20 @@ async function submitStatistic() {
         const day = String(dateObj.getDate()).padStart(2, '0');
         date = `${month}/${day}`;
     }
-    console.log('Date', date);
+    let startDate = document.getElementById('startDate');
+    console.log('startDate', startDate);
+    let endDate = document.getElementById('endDate');
+    console.log('endDate', endDate);
+
+    
+
     let monthSelect = document.getElementById("monthSelect").value;
     console.log('Month', monthSelect);
     let weekSelect = document.getElementById("weekSelect").value;
     console.log('Week', weekSelect);
     let yearSelect = document.getElementById("yearSelect").value;
-    singleDate ? dateFilter = date : monthSelect ? dateFilter = monthSelect : dateFilter = weekSelect;
+
+    singleDate ? dateFilter = date : monthSelect ? dateFilter = monthSelect : weekSelect ? dateFilter = weekSelect : dateFilter = `${startDate}|${endDate}`;
     console.log("dateFilter", dateFilter);
     let url = '/Statistic/Statistic?';
     if (singleDate) {
