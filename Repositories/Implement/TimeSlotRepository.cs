@@ -1,5 +1,6 @@
 using System;
 using AppointmentHospital.Entity;
+using AppointmentHospital.Helpers;
 using AppointmentHospital.Models;
 
 namespace AppointmentHospital.Repositories.Implement;
@@ -11,8 +12,10 @@ public class TimeSlotRepository : ITimeSlotRepository
         _context = context; 
     }
 
-    public List<TimeSlot> GetTimeSlotByDoctorId(Guid doctorId){
-        return _context.TimeSlots.Where(x => x.DoctorId == doctorId).ToList();
+    public async Task<Pagination<TimeSlot>> GetTimeSlotByDoctorId(Guid doctorId, int page){
+        var timeSlots = _context.TimeSlots.Where(x => x.DoctorId == doctorId);
+        var paginatedTimeSlots = await Pagination<TimeSlot>.PaginatedList(timeSlots, page);
+        return paginatedTimeSlots;
     }
 
     public void AddTimeSlot(TimeSlot timeSlot){

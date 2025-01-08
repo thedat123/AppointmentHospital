@@ -77,6 +77,11 @@ namespace AppointmentHospital.Areas.Admin.Repositories.Implement
                 Specializaiton = request.Specializaiton,
                 ExperienceYear = request.ExperienceYear,
                 FullName = request.FullName,
+                Degree = request.Degree,
+                Description = request.Description,
+                DateOfBirth = request.DateOfBirth,
+                Gender = request.Gender,
+                ImagePath = "~/images/doctor.png",
                 User = user
             };
             await _userManager.CreateAsync(user, "Doctor123#");
@@ -105,7 +110,8 @@ namespace AppointmentHospital.Areas.Admin.Repositories.Implement
                 Description = d.Description,
                 ImagePath = d.ImagePath,
                 Specializaiton = EnumExtensions.GetDisplayName(d.Specializaiton),
-                ExperienceYear = d.ExperienceYear
+                ExperienceYear = d.ExperienceYear,
+                Id = d.DoctorId
             }).FirstOrDefaultAsync();
             return doctor;
         }

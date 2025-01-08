@@ -1,5 +1,6 @@
 ﻿﻿@using AppointmentHospital.EnumStatus
-@model List<AppointmentHospital.Models.Appointment>
+@using AppointmentHospital.Helpers
+@model Pagination<AppointmentHospital.Models.Appointment>
 
 <link rel="stylesheet" href="~/css/doctor-calendar.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/css/doctor-index.css" asp-append-version="true" />
@@ -165,7 +166,8 @@
                                         if (appointment.FeedbackId.HasValue)
                                         {
                                             <div id="Feedback">
-                                                <button onclick="ViewFeedback()" id="viewFeedback" type="button" class="btn btn-primary btn-sm btn-rounded"
+                                                <button onclick="ViewFeedback()" id="viewFeedback" type="button"
+                                                    class="btn btn-primary btn-sm btn-rounded"
                                                     data-appointment-id="@appointment.AppointmentId">
                                                     View Feedback
                                                 </button>
@@ -191,6 +193,38 @@
                     }
                 </tbody>
             </table>
+            <div class="d-flex justify-content-center align-items-center p-4">
+                <nav aria-label="Page navigation" class="mx-auto">
+                    <ul class="pagination pagination-rounded mb-0">
+                        @if (Model.HasPreviousPage)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="javascript:void(0)"
+                                    onclick="changePage(@(Model.CurrentPage - 1))" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                        }
+
+                        @for (int i = 1; i <= Model.TotalPage; i++)
+                        {
+                            <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                <a class="page-link" href="javascript:void(0)" onclick="changePage(@i)">@i</a>
+                            </li>
+                        }
+
+                        @if (Model.HasNextPage)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="javascript:void(0)"
+                                    onclick="changePage(@(Model.CurrentPage + 1))" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            </div>
         </div>
     </div>
 </div>
@@ -285,6 +319,29 @@
             min-height: 100px;
             white-space: pre-line;
         }
+
+        .pagination-rounded .page-link {
+            border-radius: 30px;
+            margin: 0 3px;
+            min-width: 40px;
+            text-align: center;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, .1);
+            border: none;
+        }
+
+        .page-link {
+            color: #4e73df;
+        }
+
+        .page-item.active .page-link {
+            background-color: #4e73df;
+            border-color: #4e73df;
+        }
+
+        .page-link:hover {
+            background-color: #4e73df;
+            color: white;
+        }
     </style>
 }
 
@@ -314,31 +371,42 @@
                 window.location.reload();
                 window.scrollTo(0, scrollPosition);
             });
-           
-        });
-        function ViewFeedback() {
-               const viewFeedbackButton = document.getElementById('viewFeedback');
-                const appointmentId = viewFeedbackButton.dataset.appointmentId;
-                console.log("appointmentId", appointmentId);
-                fetch(`Patient/GetFeedback/${appointmentId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        document.getElementById('patientName').textContent = data.patientName;
-                        document.getElementById('overallRating').innerHTML = createStarRating(data.rating);
-                        document.getElementById('professionalRating').innerHTML = createStarRating(data.professionalSkills);
-                        document.getElementById('communicationRating').innerHTML = createStarRating(data.communication);
-                        document.getElementById('feedbackComment').textContent = data.comment;
-                        document.getElementById('feedbackDate').textContent = new Date(data.createdAt);
-                    });
-                const modal = new bootstrap.Modal(document.getElementById('viewFeedbackModal'));
-                modal.show();
 
-            };
-            function createStarRating(rating) {
-                return Array(5).fill(0)
-                    .map((_, index) => `<i class="fas fa-star${index < rating ? ' text-warning' : ' text-muted'}"></i>`)
-                    .join('');
+        });
+        function changePage(page) {
+            localStorage.setItem('scrollPosition', window.scrollY);
+            window.location.href = '@Url.Action("Index")?status=@ViewBag.SelectedStatus&page=' + page;
+        }
+        window.onload = function () {
+            const scrollPosition = localStorage.getItem('scrollPosition');
+            if (scrollPosition) {
+                window.scrollTo(0, parseInt(scrollPosition));
+                localStorage.removeItem('scrollPosition');
             }
+        }
+        function ViewFeedback() {
+            const viewFeedbackButton = document.getElementById('viewFeedback');
+            const appointmentId = viewFeedbackButton.dataset.appointmentId;
+            console.log("appointmentId", appointmentId);
+            fetch(`Patient/GetFeedback/${appointmentId}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('patientName').textContent = data.patientName;
+                    document.getElementById('overallRating').innerHTML = createStarRating(data.rating);
+                    document.getElementById('professionalRating').innerHTML = createStarRating(data.professionalSkills);
+                    document.getElementById('communicationRating').innerHTML = createStarRating(data.communication);
+                    document.getElementById('feedbackComment').textContent = data.comment;
+                    document.getElementById('feedbackDate').textContent = new Date(data.createdAt);
+                });
+            const modal = new bootstrap.Modal(document.getElementById('viewFeedbackModal'));
+            modal.show();
+
+        };
+        function createStarRating(rating) {
+            return Array(5).fill(0)
+                .map((_, index) => `<i class="fas fa-star${index < rating ? ' text-warning' : ' text-muted'}"></i>`)
+                .join('');
+        }
     </script>
     <script src="~/js/addFeedbackDoctor.js"></script>
 }

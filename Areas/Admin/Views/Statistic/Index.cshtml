@@ -97,14 +97,14 @@
     <div id="statistic-table">
         <div class="stats-section">
             <h2 class="section-title">Appointment Statistics</h2>
-            <div class="charts-grid">
+            <div  id="appointmentChartsContainer" class="charts-grid">
                 <div class="chart-card">
                     <h3 class="chart-title">Current Period</h3>
                     <div class="chart-container">
                         <canvas id="amountAppointment"></canvas>
                     </div>
                 </div>
-                <div class="chart-card">
+                <div id="periodComparison" class="chart-card">
                     <h3 class="chart-title">Period Comparison</h3>
                     <div class="chart-container">
                         <canvas id="compareAmountAppointment"></canvas>
@@ -114,14 +114,14 @@
         </div>
         <div class="stats-section">
             <h2 class="section-title">User Statistics</h2>
-            <div class="charts-grid">
+            <div id="userChartsContainer" class="charts-grid">
                 <div class="chart-card">
                     <h3 class="chart-title">Current Users</h3>
                     <div class="chart-container">
                         <canvas id="oldAndNewUser"></canvas>
                     </div>
                 </div>
-                <div class="chart-card">
+                <div  id="userTrends" class="chart-card">
                     <h3 class="chart-title">User Trends</h3>
                     <div class="chart-container">
                         <canvas id="compareOldAndNewUser"></canvas>

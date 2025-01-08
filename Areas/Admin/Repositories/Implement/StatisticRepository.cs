@@ -2,6 +2,7 @@
 using AppointmentHospital.EnumStatus;
 using AppointmentHospital.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 using System.Net.WebSockets;
 using System.Numerics;
 
@@ -15,7 +16,7 @@ namespace AppointmentHospital.Areas.Admin.Repositories.Implement
             _appDbContext = appDbContext;
         }
 
-        public async Task<Dictionary<string, int>> GetAmountAppointment(DateTime? singleDate, Dictionary<int, List<DateTime>>? startAndLastDay)
+        public async Task<Dictionary<string, int>> GetAmountAppointment(DateTime? singleDate, Dictionary<int, List<DateTime>>? startAndLastDay, string customRange)
         {
             Dictionary<string, int> amountAppointmentByRangeDate = new Dictionary<string, int>();
             var keys = startAndLastDay.Keys;
@@ -26,34 +27,46 @@ namespace AppointmentHospital.Areas.Admin.Repositories.Implement
             }
             else
             {
-                DateTime startDate = new DateTime();
-                DateTime endDate = new DateTime();
-
-                foreach (var key in keys)
+                 DateTime startDate = new DateTime();
+                 DateTime endDate = new DateTime();
+                if (startAndLastDay.Keys.Count > 0)
                 {
-                    var listDate = startAndLastDay[key];
-                    startDate = listDate[0];
-                    endDate = listDate[1];
+                    foreach (var key in keys)
+                    {
+                        var listDate = startAndLastDay[key];
+                        startDate = listDate[0];
+                        endDate = listDate[1];
+                    }
+                }
+                else
+                {
+                    var dateRange = customRange.Split('|').Select(date => DateTime.Parse(date)).ToList();
+                    startDate = dateRange[0];
+                    endDate = dateRange[1];
                 }
                 query = query.Where(a => a.AppointmentTime.Date >= startDate.Date && a.AppointmentTime.Date <= endDate.Date);
             }
             var amountAppointment = await query.CountAsync();
-            amountAppointmentByRangeDate.Add(singleDate.HasValue ? singleDate.Value.ToString("MM/dd") : startAndLastDay.FirstOrDefault().Key.ToString(), amountAppointment);
+            amountAppointmentByRangeDate.Add(singleDate.HasValue ? singleDate.Value.ToString("MM/dd") : startAndLastDay.Keys.Count > 0 ? startAndLastDay.FirstOrDefault().Key.ToString() : customRange, amountAppointment);
             return amountAppointmentByRangeDate;
         }
 
-        public async Task<Dictionary<string, List<int>>> GetOldAndNewUser(DateTime? singleDate, Dictionary<int, List<DateTime>>? startAndLastDay)
+        public async Task<Dictionary<string, List<int>>> GetOldAndNewUser(DateTime? singleDate, Dictionary<int, List<DateTime>>? startAndLastDay, string customRange)
         {
             Dictionary<string, List<int>> amountOldAndNewUser = new Dictionary<string, List<int>>();
+
             var query = _appDbContext.Appointments.AsQueryable();
+            var beforeParticularAppointmentDate = _appDbContext.Appointments.AsQueryable();
             var keys = startAndLastDay.Keys;
+            int queryNewUser = 0;
+            int queryOldUser = 0;
 
             if (singleDate.HasValue)
             {
-                var beforeParticularAppointmentDate = query.Where(a => a.AppointmentTime < singleDate.Value);
-                var queryNewUser = await query.Where(a => a.AppointmentTime.Date == singleDate.Value.Date && !beforeParticularAppointmentDate.Any(ab => ab.PatientId == a.PatientId))
+                beforeParticularAppointmentDate = beforeParticularAppointmentDate.Where(a => a.AppointmentTime < singleDate.Value);
+                queryNewUser = await query.Where(a => a.AppointmentTime.Date == singleDate.Value.Date && !beforeParticularAppointmentDate.Any(ab => ab.PatientId == a.PatientId))
                                               .GroupBy(a => a.PatientId).CountAsync();
-                var queryOldUser = await query.Where(a => a.AppointmentTime.Date == singleDate.Value.Date && beforeParticularAppointmentDate.Any(ab => ab.PatientId == a.PatientId))
+                queryOldUser = await query.Where(a => a.AppointmentTime.Date == singleDate.Value.Date && beforeParticularAppointmentDate.Any(ab => ab.PatientId == a.PatientId))
                                               .GroupBy(a => a.PatientId).CountAsync();
                 amountOldAndNewUser.Add(singleDate.Value.ToString("MM/dd"), new List<int> { queryNewUser, queryOldUser });
             }
@@ -61,25 +74,31 @@ namespace AppointmentHospital.Areas.Admin.Repositories.Implement
             {
                 DateTime startDate = new DateTime();
                 DateTime endDate = new DateTime();
-
-                foreach (var key in keys)
+                if (startAndLastDay.Keys.Count > 0)
                 {
-                    var listDate = startAndLastDay[key];
-                    startDate = listDate[0];
-                    endDate = listDate[1];
+                    foreach (var key in keys)
+                    {
+                        var listDate = startAndLastDay[key];
+                        startDate = listDate[0];
+                        endDate = listDate[1];
+                    }
                 }
-
-                var beforeParticularAppointmentDate = query.Where(a => a.AppointmentTime.Date < startDate.Date);
-                var queryNewUser = await query.Where(a => a.AppointmentTime.Date >= startDate.Date && a.AppointmentTime.Date <= endDate.Date && !beforeParticularAppointmentDate.Any(ab => ab.PatientId == a.PatientId))
+                else
+                {
+                    var dateRange = customRange.Split('|').Select(date => DateTime.Parse(date)).ToList();
+                    startDate = dateRange[0];
+                    endDate = dateRange[1];
+                }
+                beforeParticularAppointmentDate = query.Where(a => a.AppointmentTime.Date < startDate.Date);
+                queryNewUser = await query.Where(a => a.AppointmentTime.Date >= startDate.Date && a.AppointmentTime.Date <= endDate.Date && !beforeParticularAppointmentDate.Any(ab => ab.PatientId == a.PatientId))
                                         .GroupBy(a => a.PatientId).CountAsync();
-                var queryOldUser = await query.Where(a => a.AppointmentTime.Date >= startDate.Date && a.AppointmentTime.Date <= endDate.Date && beforeParticularAppointmentDate.Any(ab => ab.PatientId == a.PatientId))
-                                        .GroupBy(a => a.PatientId).CountAsync();
-                amountOldAndNewUser.Add(startAndLastDay.FirstOrDefault().Key.ToString(), new List<int> { queryNewUser, queryOldUser });
+                queryOldUser = await query.Where(a => a.AppointmentTime.Date >= startDate.Date && a.AppointmentTime.Date <= endDate.Date && beforeParticularAppointmentDate.Any(ab => ab.PatientId == a.PatientId))
+                                            .GroupBy(a => a.PatientId).CountAsync();
+                amountOldAndNewUser.Add(startAndLastDay.Keys.Count > 0 ? startAndLastDay.FirstOrDefault().Key.ToString() : customRange, new List<int> { queryNewUser, queryOldUser });
             }
             return amountOldAndNewUser;
         }
-
-        public async Task<Dictionary<string, List<TopDoctorStatistic>>> GetTopDoctorAppointment(DateTime? singleDate, Dictionary<int, List<DateTime>> startAndLastDay)
+        public async Task<Dictionary<string, List<TopDoctorStatistic>>> GetTopDoctorAppointment(DateTime? singleDate, Dictionary<int, List<DateTime>> startAndLastDay, string customRange)
         {
             var query = _appDbContext.Appointments.AsQueryable();
 
@@ -91,12 +110,22 @@ namespace AppointmentHospital.Areas.Admin.Repositories.Implement
             {
                 DateTime startDay = new DateTime();
                 DateTime endDay = new DateTime();
-                foreach (var item in startAndLastDay)
+                if (startAndLastDay.Keys.Count > 0)
                 {
-                    var itemValue = item.Value;
-                    startDay = itemValue[0];
-                    endDay = itemValue[1];
+                    foreach (var item in startAndLastDay)
+                    {
+                        var itemValue = item.Value;
+                        startDay = itemValue[0];
+                        endDay = itemValue[1];
+                    }
                 }
+                else
+                {
+                    var dateRange = customRange.Split('|').Select(date => DateTime.Parse(date)).ToList();
+                    startDay = dateRange[0];
+                    endDay = dateRange[1];
+                }
+
                 query = query.Where(a => a.AppointmentTime.Date >= startDay.Date && a.AppointmentTime.Date <= endDay.Date && a.Status == AppointmentStatus.Completed);
             }
             // Step 1: Query for top doctor per specialization
@@ -117,7 +146,7 @@ namespace AppointmentHospital.Areas.Admin.Repositories.Implement
             .Select(g => g.OrderByDescending(g => g.AmountAppointment).FirstOrDefault())
             .Select(g => new TopDoctorStatistic { AppointmentAmount = g.AmountAppointment, DoctorName = g.DoctorName, Specialization = g.Specialization.ToString() }).ToList();
 
-            var key = singleDate.HasValue ? singleDate.Value.ToString("MM/dd") : startAndLastDay.First().Key.ToString();
+            var key = singleDate.HasValue ? singleDate.Value.ToString("MM/dd") : startAndLastDay.Keys.Count > 0 ? startAndLastDay.FirstOrDefault().Key.ToString() : customRange;
 
             // Tạo Dictionary
             return new Dictionary<string, List<TopDoctorStatistic>>()
