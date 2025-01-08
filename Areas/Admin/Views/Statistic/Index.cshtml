@@ -7,27 +7,27 @@
     <div class="filter-section">
         <h2 class="filter-title">Statistics Filter</h2>
 
-        
-            <div id="yearInput">
-                <select id="yearSelect" class="form-input">
-                    @{
-                        int currentYear = DateTime.Now.Year - 1;
-                        for (int year = currentYear - 4; year <= currentYear + 2; year++)
+
+        <div id="yearInput">
+            <select id="yearSelect" class="form-input">
+                @{
+                    int currentYear = DateTime.Now.Year - 1;
+                    for (int year = currentYear - 4; year <= currentYear + 2; year++)
+                    {
+                        if (year == currentYear)
                         {
-                            if (year == currentYear)
-                            {
-                                <option value="@year" selected>@year</option>
-                            }
-                            else
-                            {
-                                <option value="@year">@year</option>
-                            }
+                            <option value="@year" selected>@year</option>
+                        }
+                        else
+                        {
+                            <option value="@year">@year</option>
                         }
                     }
-                </select>
-                <label for="yearSelect">Select Year</label>
-            </div>
-        
+                }
+            </select>
+            <label for="yearSelect">Select Year</label>
+        </div>
+
         <div class="radio-group">
             <label class="radio-label">
                 <input type="radio" name="statisticType" value="day" checked>
@@ -40,6 +40,10 @@
             <label class="radio-label">
                 <input type="radio" name="statisticType" value="month">
                 <span class="radio-text">Monthly</span>
+            </label>
+            <label class="radio-label">
+                <input type="radio" name="statisticType" value="range">
+                <span class="radio-text">Custom</span>
             </label>
         </div>
 
@@ -71,6 +75,19 @@
                 <label for="monthSelect">Select Month</label>
             </div>
 
+            <div id="rangeInput" class="floating-input date-range" style="display: none;">
+                <div class="range-container">
+                    <div class="range-input">
+                        <input type="date" id="startDate" name="startDate" class="form-input" required>
+                        <label for="startDate">Start Date</label>
+                    </div>
+                    <div class="range-input">
+                        <input type="date" id="endDate" name="endDate" class="form-input" required>
+                        <label for="endDate">End Date</label>
+                    </div>
+                </div>
+            </div>
+
             <button class="btn-submit" onclick="submitStatistic()">
                 <i class="fas fa-chart-line"></i>
                 <span>Generate Report</span>
@@ -80,14 +97,14 @@
     <div id="statistic-table">
         <div class="stats-section">
             <h2 class="section-title">Appointment Statistics</h2>
-            <div class="charts-grid">
+            <div  id="appointmentChartsContainer" class="charts-grid">
                 <div class="chart-card">
                     <h3 class="chart-title">Current Period</h3>
                     <div class="chart-container">
                         <canvas id="amountAppointment"></canvas>
                     </div>
                 </div>
-                <div class="chart-card">
+                <div id="periodComparison" class="chart-card">
                     <h3 class="chart-title">Period Comparison</h3>
                     <div class="chart-container">
                         <canvas id="compareAmountAppointment"></canvas>
@@ -97,14 +114,14 @@
         </div>
         <div class="stats-section">
             <h2 class="section-title">User Statistics</h2>
-            <div class="charts-grid">
+            <div id="userChartsContainer" class="charts-grid">
                 <div class="chart-card">
                     <h3 class="chart-title">Current Users</h3>
                     <div class="chart-container">
                         <canvas id="oldAndNewUser"></canvas>
                     </div>
                 </div>
-                <div class="chart-card">
+                <div  id="userTrends" class="chart-card">
                     <h3 class="chart-title">User Trends</h3>
                     <div class="chart-container">
                         <canvas id="compareOldAndNewUser"></canvas>

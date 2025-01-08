@@ -20,7 +20,7 @@
                     </span>
                     <input name="searchTerm"
                            class="form-control"
-                           placeholder="Enter author or title..."
+                           placeholder="Enter doctor name...."
                            value="@searchTerm">
                 </div>
             </div>
@@ -29,11 +29,11 @@
                 <select name="specialization" class="form-select">
                     @if(!specializationViewData.HasValue)
                     {
-                        <option value="" disabled selected>Chọn chuyên khoa</option>
+                        <option value="" disabled selected>Choose specialization</option>
                     }
                     else
                     {
-                        <option value="" disabled>Chọn chuyên khoa</option>
+                        <option value="" disabled>Choose specialization</option>
                     }
                     
                     @foreach (var specialization in specializations)

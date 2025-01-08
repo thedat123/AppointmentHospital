@@ -1,69 +1,32 @@
 ﻿
-.form-container {
-    max-width: 600px;
-    margin: 2rem auto;
-    padding: 2rem;
-    background-color: #f4f4f4;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+.form-floating > .form-control {
+    height: calc(3.5rem + 2px);
+    line-height: 1.25;
 }
 
-.form-title {
-    color: var(--primary-color);
-    text-align: center;
-    margin-bottom: 1.5rem;
-    font-weight: bold;
+.form-floating > label {
+    padding: 1rem 0.75rem;
 }
 
-.form-group {
-    margin-bottom: 1rem;
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label {
+    transform: scale(.85) translateY(-0.5rem) translateX(0.15rem);
 }
 
-.form-control {
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    transition: border-color 0.3s ease;
-}
-
-    .form-control:focus {
-        border-color: var(--primary-color);
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
-    }
-
-.form-label {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: var(--secondary-color);
-    font-weight: 600;
+.card {
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
 }
 
 .btn {
-    display: block;
-    width: 100%;
-    padding: 0.75rem;
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+    border-radius: 25px;
+    font-weight: 500;
+    transition: all 0.3s ease;
 }
 
-    .btn:hover {
-        background-color: #2980b9;
-    }
-
-.validation-summary-errors {
-    color: #d9534f;
-    margin-bottom: 1rem;
-}
-
-.field-validation-error {
-    color: #d9534f;
-    font-size: 0.9rem;
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 
 

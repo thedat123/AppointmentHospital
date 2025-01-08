@@ -31,11 +31,11 @@
                     <select name="specialization" class="form-select">
                         @if (!specializationViewData.HasValue)
                         {
-                            <option value="" disabled selected>Chọn chuyên khoa</option>
+                            <option value="" disabled selected>Choose specialization</option>
                         }
                         else
                         {
-                            <option value="" disabled>Chọn chuyên khoa</option>
+                        <option value="" disabled>Choose specialization</option>
                         }
 
                         @foreach (var specialization in specializationList)
@@ -129,7 +129,7 @@
                                 <span class="badge bg-@colorBadge ">@response.Status</span>
                             </td>
                             <td>
-                                <a asp-action="Detail" asp-route-id ="@response.AppointmentId">Xem chi tiết</a>
+                                <a asp-action="Detail" asp-route-id ="@response.AppointmentId">View Detail</a>
                             </td>
                         </tr>
                     }

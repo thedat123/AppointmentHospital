@@ -1,5 +1,6 @@
 using System;
 using AppointmentHospital.Entity;
+using AppointmentHospital.Helpers;
 using AppointmentHospital.Models;
 using AppointmentHospital.Repositories;
 
@@ -13,9 +14,9 @@ public class TimeSlotService : ITimeSlotService
         timeSlotRepository = _timeslotRepository;
     }
 
-    public List<TimeSlot> GetTimeSlotByDoctorId(Guid doctorId)
+    public async Task<Pagination<TimeSlot>> GetTimeSlotByDoctorId(Guid doctorId, int page)
     {
-        return timeSlotRepository.GetTimeSlotByDoctorId(doctorId);
+        return await timeSlotRepository.GetTimeSlotByDoctorId(doctorId, page);
     }
 
     public void AddTimeSlot(TimeSlot timeSlot)

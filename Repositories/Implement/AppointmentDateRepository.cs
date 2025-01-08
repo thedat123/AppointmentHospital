@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AppointmentHospital.Entity;
 using AppointmentHospital.EnumStatus;
+using AppointmentHospital.Helpers;
 using AppointmentHospital.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -45,14 +46,16 @@ namespace AppointmentHospital.Repositories.Implement
             return appointments;
         }
 
-        public List<Appointment> GetAppointmentsByDoctorId(Guid doctorId){
-            List<Appointment> appointments = _context.Appointments.Where(a => a.DoctorId == doctorId).ToList();
-            return appointments;
+        public async Task<Pagination<Appointment>> GetAppointmentsByDoctorId(Guid doctorId, int page){
+            var appointments = _context.Appointments.Where(a => a.DoctorId == doctorId);
+            var paginatedAppointments = await Pagination<Appointment>.PaginatedList(appointments, page);
+            return paginatedAppointments;
         }
 
-        public List<Appointment> GetAppointmentsByDoctorId(Guid doctorId, AppointmentStatus status){
-            List<Appointment> appointments = _context.Appointments.Where(a => a.DoctorId == doctorId && a.Status == status).ToList();
-            return appointments;
+        public async Task<Pagination<Appointment>> GetAppointmentsByDoctorId(Guid doctorId, AppointmentStatus status, int page){
+            var appointments = _context.Appointments.Where(a => a.DoctorId == doctorId && a.Status == status);
+            var paginatedAppointments = await Pagination<Appointment>.PaginatedList(appointments, page);
+            return paginatedAppointments;
         }
 
         public Appointment GetAppointmentsById(Guid appointmentId){

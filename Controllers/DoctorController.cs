@@ -37,7 +37,7 @@ namespace AppointmentHospital.Controllers
             this._managingDoctorService = managingDoctorService;
         }
 
-        public IActionResult Index(AppointmentStatus? status = AppointmentStatus.Pending)
+        public async Task<IActionResult> Index(AppointmentStatus? status = AppointmentStatus.Pending, int page = 1)
         {
             var doctorId = _contextAccessor.HttpContext?.Session.GetString("DoctorId");
 
@@ -47,18 +47,18 @@ namespace AppointmentHospital.Controllers
                 return NotFound("Doctor not found.");
             }
 
-            var allAppointments = _appointmentDateService.GetAppointmentsByDoctorId(Guid.Parse(doctorId));
+            var allAppointments = await _appointmentDateService.GetAppointmentsByDoctorId(Guid.Parse(doctorId), page);
 
             var stats = new
             {
-                PendingCount = allAppointments.Count(a => a.Status == AppointmentStatus.Pending),
+                PendingCount =  allAppointments.Count(a => a.Status == AppointmentStatus.Pending),
                 ConfirmedCount = allAppointments.Count(a => a.Status == AppointmentStatus.Confirmed),
                 CompletedCount = allAppointments.Count(a => a.Status == AppointmentStatus.Completed),
                 CanceledCount = allAppointments.Count(a => a.Status == AppointmentStatus.Canceled)
             };
 
             var filteredAppointments = status.HasValue
-                ? _appointmentDateService.GetAppointmentsByDoctorId(Guid.Parse(doctorId), status.Value)
+                ? await _appointmentDateService.GetAppointmentsByDoctorId(Guid.Parse(doctorId), status.Value, page)
                 : allAppointments;
 
             ViewBag.Stats = stats;
@@ -87,14 +87,14 @@ namespace AppointmentHospital.Controllers
             return RedirectToAction("Index");
         }
 
-        public IActionResult Calendar()
+        public async Task<IActionResult> Calendar(int page = 1)
         {
             var doctorId = _contextAccessor.HttpContext?.Session.GetString("DoctorId");
             var doctor = doctorService.getDoctorById(Guid.Parse(doctorId));
             ViewBag.DoctorName = doctor.FullName ?? "Unknown Doctor";
             ViewBag.Speciality = doctor.Specializaiton.GetDisplayName().ToString() ?? "Unknown Speciality";
 
-            var timeSlot = _timeSlotService.GetTimeSlotByDoctorId(Guid.Parse(doctorId));
+            var timeSlot = await _timeSlotService.GetTimeSlotByDoctorId(Guid.Parse(doctorId), page);
             return View(timeSlot);
         }
 
