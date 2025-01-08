@@ -14,7 +14,7 @@ public class DiseasePredictionService : IDiseasePredictionService
 
     public async Task<dynamic> PredictDiseaseAsync(string[] symptoms)
     {
-        var url = "http://192.168.0.92:5005/predict";
+        var url = "http://127.0.0.1:5005/predict";
         var data = new
         {
             symptoms = symptoms

@@ -117,7 +117,7 @@
             {
                 <section class="doctors-section mt-5">
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h2 class="h4 fw-bold">Recommended Doctor</h2>
+                        <h2 class="h4 fw-bold" style="color: black;">Recommended Doctor</h2>
                         <a href="#" class="link-primary text-decoration-none">See more</a>
                     </div>
 
@@ -132,7 +132,7 @@
                                                 alt="@doctor.FullName" class="w-100 h-100 object-fit-cover">
                                         </div>
                                         <h5 class="card-title text-dark">@doctor.FullName</h5>
-                                        <p class="card-text text-muted small">@doctor.Specializaiton</p>
+                                        <p class="card-text text-muted small">@doctor.Specializaiton.GetDisplayName()</p>
 
                                         <a href="@Url.Action("DetailDoctor", "Patient", new { id = doctor.DoctorId })"
                                             class="btn btn-primary mt-3">
