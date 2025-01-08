@@ -210,13 +210,14 @@ namespace AppointmentHospital.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> SubmitDiagnosis(Guid AppointmentId, Guid PatientId, Guid DoctorId, Guid AcquaintanceId, string DiagnosisDetails, string PrescribedMedications, string DoctorNotes){
+        public async Task<IActionResult> SubmitDiagnosis(Guid AppointmentId, Guid PatientId, Guid DoctorId, Guid AcquaintanceId, DateTime DateTime, string DiagnosisDetails, string PrescribedMedications, string DoctorNotes){
             List<string> prescribedMedicationList = PrescribedMedications?.Split(',').ToList() ?? new List<string>();
             DiagnosisHistory diagnosisHistory = new DiagnosisHistory{
                 AppointmentId = AppointmentId,
                 PatientId = PatientId,
                 DoctorId = DoctorId,
                 AcquaintanceId = AcquaintanceId,
+                DateTime = DateTime,
                 Diagnosis = DiagnosisDetails,
                 Prescription = prescribedMedicationList,
                 DoctorNote = DoctorNotes,
