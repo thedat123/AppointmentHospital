@@ -21,6 +21,8 @@ namespace AppointmentHospital.Entity
 
         [Required]
         public Boolean Available { get; set; }
+
+        public string? Note { get; set; }
     }
 }
 

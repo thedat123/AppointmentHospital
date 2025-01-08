@@ -46,4 +46,7 @@ public class TimeSlotService : ITimeSlotService
     public List<TimeSlot> GetAllTimeSlotByParticularDate(DateTime date){
         return timeSlotRepository.GetAllTimeSlotByParticularDate(date);
     }
+    public void UpdateNoteInTimeSlot(Guid timeSlotId, string note){
+        timeSlotRepository.UpdateNoteInTimeSlot(timeSlotId, note);
+    }
 }

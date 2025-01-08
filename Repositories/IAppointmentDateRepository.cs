@@ -18,4 +18,6 @@ public interface IAppointmentDateRepository
     public List<Appointment> GetAllAppointments();
     public List<Appointment> GetAppointmentsByPatientId(Guid patientId, AppointmentStatus status);
     public Appointment GetAppointmentsByDoctorIdAndStartTime(Guid doctorId, DateTime StartTime); 
+    public List<Appointment> GetAppointmentsByDoctorIdAndDate(Guid doctorId, DateTime date);
+    public DiagnosisHistory GetDiagnosisHistoriesByAppointmentID(Guid appointmentId);
 }

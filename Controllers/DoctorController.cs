@@ -257,15 +257,105 @@ namespace AppointmentHospital.Controllers
         }
 
         [HttpPost]
-        public IActionResult RegisterOffDay(DateTime offDate){
+        public IActionResult RegisterOffDay(DateTime offDate, string Note)
+        {
             var timeList = _timeSlotService.GetAllTimeSlotByParticularDate(offDate);
-            if(timeList.Count != 0){
-                foreach(var timeSlot in timeList){
+
+            if (timeList.Count != 0)
+            {
+                bool hasAvailable = true;
+                List<Guid> notifyPatientSlots = new List<Guid>();
+
+                foreach (var timeSlot in timeList)
+                {
+                    if (timeSlot.Available)
+                    {
+                        _timeSlotService.UpdateNoteInTimeSlot(timeSlot.TimeSlotId, Note);
+                        _timeSlotService.DeleteTimeSlot(timeSlot.TimeSlotId);
+                    }
+                    else
+                    {
+                        hasAvailable = false;
+                        notifyPatientSlots.Add(timeSlot.TimeSlotId);
+                    }
+                }
+
+                if (!hasAvailable)
+                {
+                    TempData["ShowSuggestModal"] = true;
+                    TempData["timeSlotIds"] = JsonConvert.SerializeObject(notifyPatientSlots);
+                    TempData["offDate"] = offDate;
+                    TempData["note"] = Note;
+                    return RedirectToAction("Calendar");
+                }
+
+                TempData["SuccessMessage"] = "Off day registered successfully!";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "No time slots available for the selected date.";
+            }
+
+            return RedirectToAction("Calendar");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> SuggestDayForMultiplePatients(DateTime suggestDate)
+        {
+            var timeSlotIdsJson = TempData["timeSlotIds"]?.ToString();
+            var offDateStr = TempData["offDate"]?.ToString();
+            var note = TempData["note"]?.ToString();
+
+            if (string.IsNullOrEmpty(timeSlotIdsJson) || string.IsNullOrEmpty(offDateStr))
+            {
+                return RedirectToAction("Calendar");
+            }
+
+            var timeSlotIds = JsonConvert.DeserializeObject<List<Guid>>(timeSlotIdsJson);
+            var offDate = DateTime.Parse(offDateStr);
+
+            var doctorId = Guid.Parse(_contextAccessor.HttpContext?.Session.GetString("DoctorId")!);
+            var patientEmails = new HashSet<string>();
+
+            foreach (var timeSlotId in timeSlotIds)
+            {
+                var timeSlot = _timeSlotService.GetTimeSlotById(timeSlotId);
+
+                if (timeSlot != null)
+                {
+                    var appointments = _appointmentDateService.GetAppointmentsByDoctorIdAndDate(doctorId, offDate);
+
+                    foreach (var appointment in appointments)
+                    {
+                        var patient = await _patientService.GetPatientById(appointment.PatientId);
+
+                        if (patient != null && !patientEmails.Contains(patient.EmailAddress))
+                        {
+                            patientEmails.Add(patient.EmailAddress);
+
+                            _appointmentDateService.UpdateStatusAppointment(appointment.AppointmentId, AppointmentStatus.Canceled);
+                            string body = await _emailService.GetCancelAndSuggestTemplate(
+                                appointment.AppointmentTime,
+                                appointment.Doctor.FullName,
+                                patient.FullName,
+                                suggestDate
+                            );
+
+                            await _emailService.SendMailAsync(
+                                patient.EmailAddress,
+                                $"Medical Appointment Of ({patient.FullName})",
+                                body
+                            );
+                        }
+                    }
+
                     _timeSlotService.DeleteTimeSlot(timeSlot.TimeSlotId);
                 }
             }
+
             return RedirectToAction("Calendar");
         }
+
 
         [HttpPost]
         public async Task<IActionResult> SuggestDay(Guid timeSlotId, DateTime suggestDate){

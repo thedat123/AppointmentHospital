@@ -5,24 +5,24 @@
 namespace AppointmentHospital.Migrations
 {
     /// <inheritdoc />
-    public partial class addDiagnosisTable3 : Migration
+    public partial class addNewdata : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.RenameColumn(
-                name: "dateTime",
-                table: "DiagnosisHistory",
-                newName: "DateTime");
+            migrationBuilder.DropColumn(
+                name: "Note",
+                table: "TimeSlots");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.RenameColumn(
-                name: "DateTime",
-                table: "DiagnosisHistory",
-                newName: "dateTime");
+            migrationBuilder.AddColumn<string>(
+                name: "Note",
+                table: "TimeSlots",
+                type: "nvarchar(max)",
+                nullable: true);
         }
     }
 }

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppointmentHospital.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250103083428_addDiagnosisTable5")]
-    partial class addDiagnosisTable5
+    [Migration("20250108134244_addNoteEntity")]
+    partial class addNoteEntity
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -42,6 +42,9 @@ namespace AppointmentHospital.Migrations
 
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime2");
@@ -111,6 +114,9 @@ namespace AppointmentHospital.Migrations
                     b.Property<Guid>("DoctorId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("FeedbackId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(max)");
 
@@ -134,6 +140,10 @@ namespace AppointmentHospital.Migrations
                     b.HasIndex("AcquaintanceId");
 
                     b.HasIndex("DoctorId");
+
+                    b.HasIndex("FeedbackId")
+                        .IsUnique()
+                        .HasFilter("[FeedbackId] IS NOT NULL");
 
                     b.HasIndex("PatientId");
 
@@ -174,8 +184,6 @@ namespace AppointmentHospital.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AcquaintanceId");
 
                     b.HasIndex("AppointmentId");
 
@@ -236,15 +244,50 @@ namespace AppointmentHospital.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.Property<double>("UnitPrice")
-                        .HasColumnType("float");
-
                     b.HasKey("DrugId");
 
                     b.ToTable("Drugs");
+                });
+
+            modelBuilder.Entity("AppointmentHospital.Models.Feedback", b =>
+                {
+                    b.Property<Guid>("FeedbackId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("AppointmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("Communication")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("DoctorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("PatientId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("ProfessionalSkills")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.HasKey("FeedbackId");
+
+                    b.HasIndex("DoctorId");
+
+                    b.HasIndex("PatientId");
+
+                    b.ToTable("Feedbacks");
                 });
 
             modelBuilder.Entity("AppointmentHospital.Models.Patient", b =>
@@ -500,6 +543,10 @@ namespace AppointmentHospital.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("AppointmentHospital.Models.Feedback", "Feedback")
+                        .WithOne("Appointment")
+                        .HasForeignKey("AppointmentHospital.Models.Appointment", "FeedbackId");
+
                     b.HasOne("AppointmentHospital.Models.Patient", "Patient")
                         .WithMany("Appointments")
                         .HasForeignKey("PatientId")
@@ -510,15 +557,13 @@ namespace AppointmentHospital.Migrations
 
                     b.Navigation("Doctor");
 
+                    b.Navigation("Feedback");
+
                     b.Navigation("Patient");
                 });
 
             modelBuilder.Entity("AppointmentHospital.Models.DiagnosisHistory", b =>
                 {
-                    b.HasOne("AppointmentHospital.Models.Acquaintance", "Acquaintance")
-                        .WithMany()
-                        .HasForeignKey("AcquaintanceId");
-
                     b.HasOne("AppointmentHospital.Models.Appointment", "Appointment")
                         .WithMany()
                         .HasForeignKey("AppointmentId")
@@ -537,8 +582,6 @@ namespace AppointmentHospital.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Acquaintance");
-
                     b.Navigation("Appointment");
 
                     b.Navigation("Doctor");
@@ -555,6 +598,21 @@ namespace AppointmentHospital.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("AppointmentHospital.Models.Feedback", b =>
+                {
+                    b.HasOne("AppointmentHospital.Models.Doctor", "Doctor")
+                        .WithMany("Feedbacks")
+                        .HasForeignKey("DoctorId");
+
+                    b.HasOne("AppointmentHospital.Models.Patient", "Patient")
+                        .WithMany("Feedbacks")
+                        .HasForeignKey("PatientId");
+
+                    b.Navigation("Doctor");
+
+                    b.Navigation("Patient");
                 });
 
             modelBuilder.Entity("AppointmentHospital.Models.Patient", b =>
@@ -628,7 +686,15 @@ namespace AppointmentHospital.Migrations
                 {
                     b.Navigation("Appointments");
 
+                    b.Navigation("Feedbacks");
+
                     b.Navigation("TimeSlots");
+                });
+
+            modelBuilder.Entity("AppointmentHospital.Models.Feedback", b =>
+                {
+                    b.Navigation("Appointment")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("AppointmentHospital.Models.Patient", b =>
@@ -636,6 +702,8 @@ namespace AppointmentHospital.Migrations
                     b.Navigation("Acquaintances");
 
                     b.Navigation("Appointments");
+
+                    b.Navigation("Feedbacks");
                 });
 
             modelBuilder.Entity("AppointmentHospital.Models.User", b =>

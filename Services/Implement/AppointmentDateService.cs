@@ -54,4 +54,12 @@ public class AppointmentDateService : IAppointmentDateService
     public Appointment GetAppointmentsByDoctorIdAndStartTime(Guid doctorId, DateTime StartTime){
         return appointmentRepository.GetAppointmentsByDoctorIdAndStartTime(doctorId, StartTime);
     }
+
+    public DiagnosisHistory GetDiagnosisHistoriesByAppointmentID(Guid appointmentId){
+        return appointmentRepository.GetDiagnosisHistoriesByAppointmentID(appointmentId);
+    }
+
+    public List<Appointment> GetAppointmentsByDoctorIdAndDate(Guid doctorId, DateTime date){
+        return appointmentRepository.GetAppointmentsByDoctorIdAndDate(doctorId, date);
+    }
 }

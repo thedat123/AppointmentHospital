@@ -131,7 +131,6 @@
                                             data-appointment-time="@appointment.AppointmentTime.ToString("o")";
                                         >
                                         </td>
-
                                     </tr>
                                 }
                             </tbody>
@@ -150,7 +149,6 @@
         </div>
     </div>
 </div>
-<!-- Feedback Modal -->
 <div class="modal fade" id="feedbackModal" tabindex="-1" 
      aria-labelledby="feedbackModalLabel" 
      role="dialog">
@@ -256,7 +254,6 @@
     </div>
 </div>
 
-<!-- View Feedback Modal -->
 <div class="modal fade" id="viewFeedbackModal" tabindex="-1" aria-labelledby="viewFeedbackModalLabel" role="dialog">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -268,7 +265,6 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <!-- Doctor Info Section -->
                 <div class="doctor-info mb-4">
                     <div class="d-flex align-items-center">
                         <div class="doctor-avatar me-3">
@@ -281,7 +277,6 @@
                     </div>
                 </div>
 
-                <!-- Ratings Section -->
                 <div class="ratings-section mb-4">
                     <div class="row g-3">
                         <div class="col-md-4">
@@ -317,6 +312,7 @@
         </div>
     </div>
 </div>
+
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
     <script src="~/js/myschedule.js"></script>
