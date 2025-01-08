@@ -314,9 +314,11 @@
                 window.location.reload();
                 window.scrollTo(0, scrollPosition);
             });
-            function ViewFeedback() {
-
-                var appointmentId = viewFeedbackButton.dataset.appointmentId;
+           
+        });
+        function ViewFeedback() {
+               const viewFeedbackButton = document.getElementById('viewFeedback');
+                const appointmentId = viewFeedbackButton.dataset.appointmentId;
                 console.log("appointmentId", appointmentId);
                 fetch(`Patient/GetFeedback/${appointmentId}`)
                     .then(response => response.json())
@@ -337,7 +339,6 @@
                     .map((_, index) => `<i class="fas fa-star${index < rating ? ' text-warning' : ' text-muted'}"></i>`)
                     .join('');
             }
-        });
     </script>
     <script src="~/js/addFeedbackDoctor.js"></script>
 }
