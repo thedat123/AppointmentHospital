@@ -7,7 +7,8 @@
 <div class="profile-container">
     <div class="profile-header">
         <div class="profile-avatar">
-            <img src="@Model.ImagePath" alt="Doctor Avatar" id="profile-image" />
+            <img src="@Url.Content(string.IsNullOrEmpty(Model.ImagePath) ? "~/images/user-default.png" : $"~/images/{Model.ImagePath}")"
+                                    alt="@Model.FullName" class="w-100 h-100 object-fit-cover">
         </div>
         <div class="profile-title">
             <h2>@Model.FullName</h2>

@@ -11,5 +11,8 @@ namespace AppointmentHospital.Repositories
         void AddAcquaintance(Acquaintance acquaintance);
         Task AddFeedback(FeedbackRequest request);
         Task<FeedbackResponse> GetFeedback(Guid appointmentId);
+        Task<bool> HasFeedback(Guid appointmentId);
+        List<DiagnosisHistory> GetDiagnosisHistoriesByPatientId(Guid patientId);
+        List<DiagnosisHistory> GetDiagnosisHistoriesByAcquaintanceId(Guid acquaintanceId);
     }
 }

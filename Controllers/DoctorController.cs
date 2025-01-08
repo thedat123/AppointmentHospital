@@ -153,10 +153,24 @@ namespace AppointmentHospital.Controllers
             return RedirectToAction("Calendar");
         }
 
-        public IActionResult StartDiagnosis(Guid id){
+        public IActionResult StartDiagnosis(Guid id)
+        {
             var appointment = _appointmentDateService.GetAppointmentsById(id);
+            var diagnosisHistory = new List<DiagnosisHistory>();
+
+            if (appointment.AcquaintanceId == null || appointment.AcquaintanceId == Guid.Empty)
+            {
+                diagnosisHistory = _patientService.GetDiagnosisHistoriesByPatientId(appointment.PatientId);
+            }
+            else
+            {
+                diagnosisHistory = _patientService.GetDiagnosisHistoriesByAcquaintanceId(appointment.AcquaintanceId.Value);
+            }
+
+            ViewData["DiagnosisHistory"] = diagnosisHistory;
             return View(appointment);
         }
+
         public IActionResult PersonalInfo()
          {
             if(User.HasClaim(c => c.Type == ClaimTypes.NameIdentifier)){
@@ -166,13 +180,17 @@ namespace AppointmentHospital.Controllers
                 ViewBag.DoctorId = doctorId;
                 return View(doctor);
             }
+            
             return RedirectToAction("Index");
         }
+
         [HttpPost]
         public async Task<IActionResult> UpdateProfile(Doctor request, string phoneNumber, Specialization specialization) {
              var doctor = await  doctorService.updateDoctor(request, phoneNumber);
              ViewBag.Specializaiton = _managingDoctorService.GetSpecialization();
              ViewBag.DoctorId = doctor.DoctorId;
+
+             await _hubContext.Clients.All.SendAsync("UpdateDoctorProfile", doctor);
              return View("PersonalInfo", doctor);
         } 
 
@@ -193,7 +211,6 @@ namespace AppointmentHospital.Controllers
 
         [HttpPost]
         public async Task<IActionResult> SubmitDiagnosis(Guid AppointmentId, Guid PatientId, Guid DoctorId, Guid AcquaintanceId, string DiagnosisDetails, string PrescribedMedications, string DoctorNotes){
-
             List<string> prescribedMedicationList = PrescribedMedications?.Split(',').ToList() ?? new List<string>();
             DiagnosisHistory diagnosisHistory = new DiagnosisHistory{
                 AppointmentId = AppointmentId,
@@ -202,7 +219,7 @@ namespace AppointmentHospital.Controllers
                 AcquaintanceId = AcquaintanceId,
                 Diagnosis = DiagnosisDetails,
                 Prescription = prescribedMedicationList,
-                DoctorNote = DoctorNotes
+                DoctorNote = DoctorNotes,
             };
 
             doctorService.AddDiagnosticHistory(diagnosisHistory);
@@ -230,6 +247,42 @@ namespace AppointmentHospital.Controllers
             _appointmentDateService.UpdateStatusAppointment(AppointmentId, AppointmentStatus.Completed);
             await _hubContext.Clients.All.SendAsync("UpdateStatus", AppointmentId, AppointmentStatus.Completed);
             return RedirectToAction("Index");
+        }
+
+        public IActionResult DeleteTimeSlot(Guid id){
+            var timeSlot = _timeSlotService.GetTimeSlotById(id);
+            _timeSlotService.DeleteTimeSlot(id);
+            return RedirectToAction("Calendar");
+        }
+
+        [HttpPost]
+        public IActionResult RegisterOffDay(DateTime offDate){
+            var timeList = _timeSlotService.GetAllTimeSlotByParticularDate(offDate);
+            if(timeList.Count != 0){
+                foreach(var timeSlot in timeList){
+                    _timeSlotService.DeleteTimeSlot(timeSlot.TimeSlotId);
+                }
+            }
+            return RedirectToAction("Calendar");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SuggestDay(Guid timeSlotId, DateTime suggestDate){
+            var doctorId = _contextAccessor.HttpContext?.Session.GetString("DoctorId");
+            var timeSlot = _timeSlotService.GetTimeSlotById(timeSlotId);
+
+            var appointment = _appointmentDateService.GetAppointmentsByDoctorIdAndStartTime(Guid.Parse(doctorId), timeSlot.StartTime);
+            var patient = await _patientService.GetPatientById(appointment.PatientId);
+
+            if(appointment != null){
+                _appointmentDateService.UpdateStatusAppointment(appointment.AppointmentId, AppointmentStatus.Canceled);
+                _timeSlotService.DeleteTimeSlot(timeSlot.TimeSlotId);
+
+                string body = await _emailService.GetCancelAndSuggestTemplate(appointment.AppointmentTime, appointment.Doctor.FullName, appointment.Patient.FullName, suggestDate);
+                await _emailService.SendMailAsync(patient.EmailAddress, $"Medical Appointment Of ({patient.FullName})", body);
+            }
+
+            return RedirectToAction("Calendar");
         }
     }
 }

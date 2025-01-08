@@ -100,7 +100,7 @@ namespace AppointmentHospital.Repositories.Implement
                 }
                 var feedback = new Feedback
                 {
-                    AppointmentId = request.AppointmentId,
+                    AppointmentId = appointment.AppointmentId,
                     DoctorId = appointment.DoctorId,
                     PatientId = appointment.PatientId,
                     Rating = request.Rating,
@@ -110,6 +110,9 @@ namespace AppointmentHospital.Repositories.Implement
                     CreatedAt = DateTime.Now
                 };
                 await appDbContext.AddAsync(feedback);
+
+                appointment.FeedbackId = feedback.FeedbackId;
+                appDbContext.Update(appointment);
                 await appDbContext.SaveChangesAsync();
             }
             catch (Exception ex)
@@ -127,10 +130,24 @@ namespace AppointmentHospital.Repositories.Implement
                 ProfessionalSkills = f.ProfessionalSkills,
                 CreatedAt = f.CreatedAt,
                 DoctorName = f.Doctor.FullName,
+                PatientName = f.Appointment.AcquaintanceId.HasValue ? f.Appointment.Acquaintance.Name : f.Patient.FullName,
                 DoctorSpecialization = EnumExtensions.GetDisplayName(f.Doctor.Specializaiton),
             }).FirstOrDefaultAsync();
             return feedback;
-                                          
+        }
+
+        public async Task<bool> HasFeedback(Guid appointmentId){
+            return await appDbContext.Feedbacks.AnyAsync(f => f.AppointmentId == appointmentId);
+        }                               
+
+        public List<DiagnosisHistory> GetDiagnosisHistoriesByPatientId(Guid patientId)
+        {
+            return appDbContext.DiagnosisHistory.Where(d => d.PatientId == patientId).ToList();
+        }
+
+        public List<DiagnosisHistory> GetDiagnosisHistoriesByAcquaintanceId(Guid acquaintanceId)
+        {
+            return appDbContext.DiagnosisHistory.Where(d => d.AcquaintanceId == acquaintanceId).ToList();
         }
     }
 }

@@ -172,8 +172,8 @@
                         <div class="col-md-4">
                             <div class="doctor-profile text-center">
                                 <img src="" id="doctorImage" class="rounded-circle mb-2" alt="Doctor" />
-                                <h6 id="doctorName" class="mb-1"></h6>
-                                <small id="doctorSpecialization" class="text-muted"></small>
+                                <h6 id="doctorNameView" class="mb-1"></h6>
+                                <small id="doctorSpecializationView" class="text-muted"></small>
                             </div>
                         </div>
                         <div class="col-md-8">
@@ -257,27 +257,22 @@
 </div>
 
 <!-- View Feedback Modal -->
-<div class="modal fade" id="viewFeedbackModal" tabindex="-1" 
-     aria-labelledby="viewFeedbackModalLabel" 
-     role="dialog"
-    >
+<div class="modal fade" id="viewFeedbackModal" tabindex="-1" aria-labelledby="viewFeedbackModalLabel" role="dialog">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-success text-white">
                 <h5 class="modal-title" id="viewFeedbackModalLabel">
-                    <span class="fas fa-comment-dots me-2" role="presentation"></span>
+                    <i class="fas fa-comment-dots me-2"></i>
                     Feedback Details
                 </h5>
-                <button type="button" 
-                        class="btn-close btn-close-white" 
-                        data-bs-dismiss="modal"
-                        aria-label="Close feedback details"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
+                <!-- Doctor Info Section -->
                 <div class="doctor-info mb-4">
                     <div class="d-flex align-items-center">
-                        <div class="doctor-avatar me-3" role="img" aria-label="doctor avatar">
-                            <span class="fas fa-user-md fa-3x"></span>
+                        <div class="doctor-avatar me-3">
+                            <i class="fas fa-user-md fa-3x"></i>
                         </div>
                         <div>
                             <h6 id="doctorName" class="mb-1"></h6>
@@ -286,21 +281,37 @@
                     </div>
                 </div>
 
-                <div class="ratings-grid mb-4">
+                <!-- Ratings Section -->
+                <div class="ratings-section mb-4">
                     <div class="row g-3">
                         <div class="col-md-4">
-                            <div class="rating-card">
-                                <h6 class="text-muted">Overall Rating</h6>
-                                <div id="overallRating" class="rating-stars" role="img" aria-label="rating stars"></div>
+                            <div class="rating-card p-3 border rounded">
+                                <h6 class="text-muted mb-2">Overall Rating</h6>
+                                <div id="overallRating" class="rating-stars"></div>
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="rating-card">
-                                <h6 class="text-muted">Professional Skills</h6>
-                                <div id="professionalRating" class="rating-stars" role="img" aria-label="professional skills rating"></div>
+                            <div class="rating-card p-3 border rounded">
+                                <h6 class="text-muted mb-2">Professional Skills</h6>
+                                <div id="professionalRating" class="rating-stars"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="rating-card p-3 border rounded">
+                                <h6 class="text-muted mb-2">Communication</h6>
+                                <div id="communicationRating" class="rating-stars"></div>
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <!-- Comments Section -->
+                <div class="comments-section">
+                    <h6 class="text-muted mb-2">Comments</h6>
+                    <div id="feedbackComment" class="p-3 bg-light rounded"></div>
+                    <small class="text-muted mt-2 d-block">
+                        Submitted on <span id="feedbackDate"></span>
+                    </small>
                 </div>
             </div>
         </div>

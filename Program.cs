@@ -35,7 +35,6 @@ namespace AppointmentHospital
                 options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
             });
 
-
             builder.Services.AddSession(options =>
             {
                 options.IdleTimeout = TimeSpan.FromMinutes(30);
@@ -74,6 +73,8 @@ namespace AppointmentHospital
 
             builder.Services.AddScoped<IDoctorRepository, DoctorRepository>();
             builder.Services.AddScoped<IDoctorService, DoctorService>();
+
+            builder.Services.AddScoped<IDiseasePredictionService, DiseasePredictionService>();
 
             builder.Services.AddAuthentication().AddGoogle(option =>
             {
@@ -131,7 +132,10 @@ namespace AppointmentHospital
                 .UseSqlServerStorage(configuration.GetConnectionString("AppointmentHospitalDB"));
             });
             builder.Services.AddHangfireServer();
-            builder.Services.AddSignalR();
+            builder.Services.AddSignalR().AddNewtonsoftJsonProtocol(options =>
+            {
+                options.PayloadSerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            });;
 
             var app = builder.Build();
             using(var scope = app.Services.CreateScope())

@@ -54,7 +54,6 @@ namespace AppointmentHospital.DTOs.Account
             public string Password { set; get; }
             public string ConfirmPassword { set; get; }
             public string Code { set; get; }
-        }
-      
+        }     
     }
 }

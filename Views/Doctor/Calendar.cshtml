@@ -3,7 +3,7 @@
 
 <div class="container py-4">
     <h1 class="text-primary mb-4">Doctor Schedule Registration</h1>
-    
+
     <div class="card shadow-sm mb-4">
         @if (TempData["SuccessMessage"] != null)
         {
@@ -29,13 +29,15 @@
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label for="DoctorName" class="form-label">Full Name</label>
-                            <input type="text" class="form-control" id="DoctorName" name="DoctorName" value="@ViewBag.DoctorName" disabled required />
+                            <input type="text" class="form-control" id="DoctorName" name="DoctorName"
+                                value="@ViewBag.DoctorName" disabled required />
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label for="Specialty" class="form-label">Specialty</label>
-                            <input type="text" class="form-control" id="DoctorName" name="DoctorName" value="@ViewBag.Speciality" disabled required />
+                            <input type="text" class="form-control" id="DoctorName" name="DoctorName"
+                                value="@ViewBag.Speciality" disabled required />
                         </div>
                     </div>
                 </div>
@@ -54,14 +56,9 @@
                     <div class="row align-items-center mb-3">
                         <div class="col-md-3">
                             <div class="form-check">
-                                <input type="checkbox" 
-                                    class="form-check-input" 
-                                    id="@($"Enable{day}")" 
-                                    name="@($"Schedules[{(int)day}].Enabled")"
-                                    value="true" />
-                                <input type="hidden" 
-                                    name="@($"Schedules[{(int)day}].DayOfWeek")" 
-                                    value="@((int)day)" />
+                                <input type="checkbox" class="form-check-input" id="@($"Enable{day}")"
+                                    name="@($"Schedules[{(int)day}].Enabled")" value="true" />
+                                <input type="hidden" name="@($"Schedules[{(int)day}].DayOfWeek")" value="@((int)day)" />
                                 <label class="form-check-label fw-bold" for="@($"Enable{day}")">
                                     @day.ToString()
                                 </label>
@@ -70,89 +67,54 @@
                         <div class="col-md-4">
                             <div class="input-group">
                                 <span class="input-group-text">From</span>
-                                <input type="time" 
-                                    class="form-control" 
-                                    id="@($"StartTime{day}")" 
+                                <input type="time" class="form-control" id="@($"StartTime{day}")"
                                     name="@($"Schedules[{(int)day}].StartTime")" />
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="input-group">
                                 <span class="input-group-text">To</span>
-                                <input type="time" 
-                                    class="form-control" 
-                                    id="@($"EndTime{day}")" 
+                                <input type="time" class="form-control" id="@($"EndTime{day}")"
                                     name="@($"Schedules[{(int)day}].EndTime")" />
                             </div>
                         </div>
                     </div>
                 }
-                
-                <button type="submit" id="saveRegularScheduleButton" class="btn btn-primary mt-3">Save Regular Schedule</button>
+
+                <button type="submit" id="saveRegularScheduleButton" class="btn btn-primary mt-3">Save Regular
+                    Schedule</button>
             </form>
         </div>
     </div>
 
-
-    <!-- Special Schedule Section -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-white">
-            <h3 class="card-title mb-0">Register Off Days/Special Schedule</h3>
-        </div>
-        <div class="card-body">
-            <form id="updateSpecialScheduleForm" method="post" asp-action="UpdateSpecialSchedule">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="SpecialDate" class="form-label">Date</label>
-                            <input type="date" class="form-control" id="SpecialDate" name="SpecialDate" required />
+    <div class="container py-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h3 class="card-title mb-0">Register Off Day</h3>
+            </div>
+            <div class="card-body">
+                <form method="post" asp-controller="Doctor" asp-action="RegisterOffDay">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="offDate" class="form-label">Off Date</label>
+                            <input type="date" class="form-control" id="offDate" name="offDate" required>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Type</label>
-                        <div class="d-flex gap-4">
-                            <div class="form-check">
-                                <input type="radio" class="form-check-input" id="TypeOff" name="ScheduleType" value="off" required />
-                                <label class="form-check-label" for="TypeOff">Off Day</label>
-                            </div>
-                            <div class="form-check">
-                                <input type="radio" class="form-check-input" id="TypeSpecial" name="ScheduleType" value="special" />
-                                <label class="form-check-label" for="TypeSpecial">Special Schedule</label>
-                            </div>
-                        </div>
+                    <div class="mb-3">
+                        <label for="Note" class="form-label">Reason for Off Day</label>
+                        <textarea class="form-control" id="Note" name="Note" rows="3"
+                            placeholder="Please provide a reason for the off day request..."></textarea>
                     </div>
-                </div>
 
-                <div class="row mt-3" id="specialTimeSection">
-                    <div class="col-md-12">
-                        <label class="form-label">Special Schedule Time</label>
-                        <div class="row">
-                            <div class="col-md-5">
-                                <div class="input-group">
-                                    <span class="input-group-text">From</span>
-                                    <input type="time" class="form-control" id="SpecialStartTime" name="SpecialStartTime" />
-                                </div>
-                            </div>
-                            <div class="col-md-5">
-                                <div class="input-group">
-                                    <span class="input-group-text">To</span>
-                                    <input type="time" class="form-control" id="SpecialEndTime" name="SpecialEndTime" />
-                                </div>
-                            </div>
-                        </div>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="submit" class="btn btn-primary px-4">
+                            Register Off Day
+                        </button>
                     </div>
-                </div>
-
-                <div class="mb-3 mt-3">
-                    <label for="Note" class="form-label">Note</label>
-                    <textarea class="form-control" id="Note" name="Note" rows="3"></textarea>
-                </div>
-                <button id="saveSpecialScheduleButton" type="submit" class="btn btn-primary">Save Special Schedule</button>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
-
-	
 
     <div class="card shadow-sm">
         <div class="card-header bg-white">
@@ -173,18 +135,13 @@
                         @foreach (var schedule in Model)
                         {
                             <tr>
-                                <!-- Days -->
                                 <td>@schedule.StartTime.ToString("dd/MM")</td>
-                                
-                                <!-- Start Time -->
                                 <td>@schedule.StartTime.ToString("HH:mm")</td>
-                                
-                                <!-- End Time -->
                                 <td>@schedule.EndTime.ToString("HH:mm")</td>
-                                
-                                <!-- Actions -->
                                 <td class="text-center">
-                                    <button class="btn btn-danger btn-sm" onclick="deleteSchedule('@schedule.TimeSlotId')">
+                                    <button type="button" id="deleteButton" class="btn btn-danger btn-sm delete-btn"
+                                        data-id="@schedule.TimeSlotId" data-available="@schedule.Available"
+                                        data-starttime="@schedule.StartTime" data-endtime="@schedule.EndTime">
                                         <i class="bi bi-trash"></i> Delete
                                     </button>
                                 </td>
@@ -192,7 +149,27 @@
                         }
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
 
+    <div class="modal fade" id="suggestModal" tabindex="-1" aria-labelledby="suggestModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="suggestModalLabel">Suggest New Date</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="suggestForm" asp-controller="Doctor" asp-action="SuggestDay">
+                        <input type="hidden" id="timeSlotId" name="timeSlotId" />
+                        <div class="mb-3">
+                            <label for="suggestDate" class="form-label">New Date</label>
+                            <input type="date" id="suggestDate" name="suggestDate" class="form-control" required />
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit Suggestion</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -200,8 +177,8 @@
 
 @section Scripts {
     <script>
-        $(document).ready(function() {
-            $('input[name="ScheduleType"]').change(function() {
+        $(document).ready(function () {
+            $('input[name="ScheduleType"]').change(function () {
                 if ($(this).val() === 'special') {
                     $('#specialTimeSection').show();
                 } else {
@@ -214,33 +191,24 @@
 
         const saveRegularScheduleButton = document.getElementById('saveRegularScheduleButton');
         const updateRegularScheduleForm = document.getElementById('updateRegularScheduleForm');
-        const saveSpecialScheduleButton = document.getElementById('saveSpecialScheduleButton');
-        const updateSpecialScheduleForm = document.getElementById('updateSpecialScheduleForm');
-        if(saveRegularScheduleButton && updateRegularScheduleForm) {
-            saveRegularScheduleButton.addEventListener('click', function(e) {
+        if (saveRegularScheduleButton && updateRegularScheduleForm) {
+            saveRegularScheduleButton.addEventListener('click', function (e) {
                 e.preventDefault();
                 saveRegularScheduleButton.disabled = true;
                 Swal.fire({
-                        title: 'Update Schedule',
-                        text: 'Are you sure to update schedule?',
-                        icon: 'question',
-                        showCancelButton: true,
-                        confirmButtonText: 'Accept',
-                        cancelButtonText: 'Cancel'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            updateRegularScheduleForm.submit();
-                        }
-                    });
+                    title: 'Update Schedule',
+                    text: 'Are you sure to update schedule?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Accept',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        updateRegularScheduleForm.submit();
+                    }
+                });
                 saveRegularScheduleButton.disabled = false;
-            })
-        }
-
-        if()
-
-        function deleteSchedule(timeSlotId) {
-            if (confirm('Are you sure you want to delete this schedule?')) {
-            }
+            });
         }
 
         document.querySelectorAll('input[type="time"]').forEach(function (timeInput) {
@@ -252,19 +220,61 @@
             });
         });
 
-        var alertElement = document.querySelectorAll(".alert-dismissible");
-        var hideTimeout =  null;
+        var alertElements = document.querySelectorAll(".alert-dismissible");
+        var hideTimeout = null;
 
-        function hideAlert(){
-            alertElement[0].classList.remove('show');
-            alertElement[1].classList.remove('show');
+        function hideAlert() {
+            alertElements.forEach(alert => alert.classList.remove('show'));
         }
 
-        function showAlert(){
-            if(hideTimeout){
+        function showAlert() {
+            if (hideTimeout) {
                 clearTimeout(hideTimeout);
             }
             hideTimeout = setTimeout(hideAlert, 2000);
         }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const deleteButtons = document.querySelectorAll(".delete-btn");
+            const suggestModal = new bootstrap.Modal(document.getElementById("suggestModal"));
+
+            deleteButtons.forEach(button => {
+                button.addEventListener("click", () => {
+                    const { id: timeSlotId, available, starttime } = button.dataset;
+                    const startTime = new Date(starttime);
+
+                    if (available === "False" && startTime > new Date()) {
+                        document.getElementById("timeSlotId").value = timeSlotId;
+                        Swal.fire({
+                            title: 'Change Schedule',
+                            text: 'This schedule has been booked. Do you want to change to another appointment?',
+                            icon: 'question',
+                            showCancelButton: true,
+                            confirmButtonText: 'Accept',
+                            cancelButtonText: 'Cancel'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                suggestModal.show();
+                            }
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Delete Schedule',
+                            text: 'Are you sure to delete this schedule?',
+                            icon: 'question',
+                            showCancelButton: true,
+                            confirmButtonText: 'Accept',
+                            cancelButtonText: 'Cancel'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = `/Doctor/DeleteTimeSlot/${timeSlotId}`;
+                            }
+                        });
+                    }
+                });
+            });
+        });
+
+
     </script>
 }

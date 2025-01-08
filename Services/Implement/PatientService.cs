@@ -32,5 +32,16 @@ namespace AppointmentHospital.Services.Implement
         public async Task<FeedbackResponse> GetFeedback(Guid appointmentId){
            return await _patientRepository.GetFeedback(appointmentId);
         }
+        public async Task<bool> HasFeedback(Guid appointmentId) {
+            return await _patientRepository.HasFeedback(appointmentId);
+        }
+
+        public List<DiagnosisHistory> GetDiagnosisHistoriesByPatientId(Guid patientId){
+            return _patientRepository.GetDiagnosisHistoriesByPatientId(patientId);
+        }
+
+        public List<DiagnosisHistory> GetDiagnosisHistoriesByAcquaintanceId(Guid acquaintanceId){
+            return _patientRepository.GetDiagnosisHistoriesByAcquaintanceId(acquaintanceId);
+        }
     }
 }
