@@ -1,12 +1,13 @@
 using System;
 using AppointmentHospital.Entity;
+using AppointmentHospital.Helpers;
 using AppointmentHospital.Models;
 
 namespace AppointmentHospital.Repositories;
 
 public interface ITimeSlotRepository
 {
-    public List<TimeSlot> GetTimeSlotByDoctorId(Guid doctorId);
+    public Task<Pagination<TimeSlot>> GetTimeSlotByDoctorId(Guid doctorId, int page);
     public void AddTimeSlot(TimeSlot timeSlot);
 
     public List<DateTime> GetRemainingDaysInMonth(DateTime startDate, DateTime endOfMonth, List<DaySchedule> schedules);

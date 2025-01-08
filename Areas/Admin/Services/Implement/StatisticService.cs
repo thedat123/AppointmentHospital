@@ -1,6 +1,7 @@
 ﻿using AppointmentHospital.Areas.Admin.DTOs.Statistic;
 using AppointmentHospital.Areas.Admin.Repositories;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.IdentityModel.Tokens;
 using System.Globalization;
 
 namespace AppointmentHospital.Areas.Admin.Services.Implement
@@ -72,7 +73,7 @@ namespace AppointmentHospital.Areas.Admin.Services.Implement
         }
 
 
-        public async Task<Dictionary<string, int>> GetAmountAppointment(DateTime? singleDate, int? month, int? week, int? year)
+        public async Task<Dictionary<string, int>> GetAmountAppointment(DateTime? singleDate, int? month, int? week, int? year,string dateRange)
         {
 
             Dictionary<int, List<DateTime>> startAndLastDay = new Dictionary<int, List<DateTime>>();
@@ -84,8 +85,7 @@ namespace AppointmentHospital.Areas.Admin.Services.Implement
             {
                 startAndLastDay = GetStartAndLastDay(month, week, year);
             }
-            var amountAppointment = await _statisticRepository.GetAmountAppointment(singleDate, startAndLastDay);
-
+            var amountAppointment = await _statisticRepository.GetAmountAppointment(singleDate, startAndLastDay, dateRange);
             return amountAppointment;
         }
 
@@ -151,9 +151,10 @@ namespace AppointmentHospital.Areas.Admin.Services.Implement
             return dateDictionary;
         }
 
-        public async Task<Dictionary<string, List<int>>> GetNewAndOldUser(DateTime? singleDate, int? month, int? week, int? year)
+        public async Task<Dictionary<string, List<int>>> GetNewAndOldUser(DateTime? singleDate, int? month, int? week, int? year,string dateRange)
         {
             Dictionary<int, List<DateTime>> startAndLastDate = new Dictionary<int, List<DateTime>>();
+            List<DateTime> customRange = new List<DateTime>();
             if (month != null)
             {
                 startAndLastDate = GetStartAndLastDay(month, week, year);
@@ -162,7 +163,7 @@ namespace AppointmentHospital.Areas.Admin.Services.Implement
             {
                 startAndLastDate = GetStartAndLastDay(month, week, year);
             }
-            var oldAndNewUser = await _statisticRepository.GetOldAndNewUser(singleDate, startAndLastDate);
+            var oldAndNewUser = await _statisticRepository.GetOldAndNewUser(singleDate, startAndLastDate, dateRange);
             return oldAndNewUser;
         }
 
@@ -182,9 +183,10 @@ namespace AppointmentHospital.Areas.Admin.Services.Implement
 
         }
 
-        public async Task<Dictionary<string, List<TopDoctorStatistic>>> GetTopDoctorAppointment(DateTime? singleDate, int? month, int? week, int? year)
+        public async Task<Dictionary<string, List<TopDoctorStatistic>>> GetTopDoctorAppointment(DateTime? singleDate, int? month, int? week, int? year, string dateRange)
         {
             Dictionary<int, List<DateTime>> startAndLastDay = new Dictionary<int, List<DateTime>>();
+            List<DateTime> customRange = new List<DateTime>();
             if (week != null)
             {
                 startAndLastDay = GetStartAndLastDay(month, week, year);
@@ -193,7 +195,7 @@ namespace AppointmentHospital.Areas.Admin.Services.Implement
             {
                 startAndLastDay = GetStartAndLastDay(month, week, year);
             }
-            var response = await _statisticRepository.GetTopDoctorAppointment(singleDate, startAndLastDay);
+            var response = await _statisticRepository.GetTopDoctorAppointment(singleDate, startAndLastDay, dateRange);
             return response;
         }
 

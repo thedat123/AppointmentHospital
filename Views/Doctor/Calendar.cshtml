@@ -1,5 +1,6 @@
 ﻿@using AppointmentHospital.Entity
-@model List<TimeSlot>
+@using AppointmentHospital.Helpers
+@model Pagination<TimeSlot>
 
 <div class="container py-4">
     <h1 class="text-primary mb-4">Doctor Schedule Registration</h1>
@@ -120,14 +121,24 @@
         <div class="card-header bg-white">
             <h3 class="card-title mb-0">Registered Schedules</h3>
         </div>
+
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-striped table-hover">
                     <thead class="table-light">
                         <tr>
-                            <th>Days</th>
-                            <th>Start Time</th>
-                            <th>End Time</th>
+                            <th class="sortable" onclick="sortTable(0)">
+                                Days
+                                <i class="bi bi-arrow-down-up ms-1"></i>
+                            </th>
+                            <th class="sortable" onclick="sortTable(1)">
+                                Start Time
+                                <i class="bi bi-arrow-down-up ms-1"></i>
+                            </th>
+                            <th class="sortable" onclick="sortTable(2)">
+                                End Time
+                                <i class="bi bi-arrow-down-up ms-1"></i>
+                            </th>
                             <th class="text-center">Actions</th>
                         </tr>
                     </thead>
@@ -149,6 +160,38 @@
                         }
                     </tbody>
                 </table>
+                <div class="d-flex justify-content-center align-items-center p-4">
+                    <nav aria-label="Page navigation" class="mx-auto">
+                        <ul class="pagination pagination-rounded mb-0">
+                            @if (Model.HasPreviousPage)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="javascript:void(0)"
+                                        onclick="changeSchedulePage(@(Model.CurrentPage - 1))" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                            }
+
+                            @for (int i = 1; i <= Model.TotalPage; i++)
+                            {
+                                <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                    <a class="page-link" href="javascript:void(0)" onclick="changeSchedulePage(@i)">@i</a>
+                                </li>
+                            }
+
+                            @if (Model.HasNextPage)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="javascript:void(0)"
+                                        onclick="changeSchedulePage(@(Model.CurrentPage + 1))" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                </div>
             </div>
         </div>
     </div>
@@ -174,7 +217,56 @@
         </div>
     </div>
 </div>
+@section Styles {
+    <style>
+        .pagination-rounded .page-link {
+            border-radius: 30px;
+            margin: 0 3px;
+            min-width: 40px;
+            text-align: center;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, .1);
+            border: none;
+        }
 
+        .page-link {
+            color: #4e73df;
+        }
+
+        .page-item.active .page-link {
+            background-color: #4e73df;
+            border-color: #4e73df;
+        }
+
+        .page-link:hover {
+            background-color: #4e73df;
+            color: white;
+        }
+
+        .form-floating>.form-control {
+            height: calc(3.5rem + 2px);
+        }
+
+        .form-floating>label {
+            padding: 1rem 0.75rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+        }
+
+        .sortable {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .sortable:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+
+    </style>
+}
 @section Scripts {
     <script>
         $(document).ready(function () {
@@ -188,6 +280,62 @@
 
             $('#specialTimeSection').hide();
         });
+        function changeSchedulePage(page) {
+            localStorage.setItem('scrollPosition', window.scrollY);
+            window.location.href = '@Url.Action("Calendar")?page=' + page;
+        }
+
+        window.onload = function () {
+            const scrollPosition = localStorage.getItem('scrollPosition');
+            if (scrollPosition) {
+                window.scrollTo(0, parseInt(scrollPosition));
+                localStorage.removeItem('scrollPosition');
+            }
+        }
+        let currentSort = {
+            column: -1,
+            direction: 'asc'
+        };
+
+        function sortTable(column) {
+            const table = document.querySelector('table');
+            const headers = table.querySelectorAll('th');
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+
+            headers.forEach(header => {
+                header.classList.remove('sort-asc', 'sort-desc');
+            });
+
+            if (currentSort.column === column) {
+                currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort.column = column;
+                currentSort.direction = 'asc';
+            }
+
+            headers[column].classList.add(`sort-${currentSort.direction}`);
+
+            const sortedRows = rows.sort((a, b) => {
+                const aValue = a.cells[column].textContent.trim();
+                const bValue = b.cells[column].textContent.trim();
+
+                if (column === 0) {
+                    const [aDay, aMonth] = aValue.split('/').map(Number);
+                    const [bDay, bMonth] = bValue.split('/').map(Number);
+                    return currentSort.direction === 'asc'
+                        ? (aMonth - bMonth || aDay - bDay)
+                        : (bMonth - aMonth || bDay - aDay);
+                } else {
+                    return currentSort.direction === 'asc'
+                        ? aValue.localeCompare(bValue)
+                        : bValue.localeCompare(aValue);
+                }
+            });
+
+            tbody.innerHTML = '';
+            sortedRows.forEach(row => tbody.appendChild(row));
+        }
 
         const saveRegularScheduleButton = document.getElementById('saveRegularScheduleButton');
         const updateRegularScheduleForm = document.getElementById('updateRegularScheduleForm');

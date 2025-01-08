@@ -1,6 +1,7 @@
 using System;
 using AppointmentHospital.Entity;
 using AppointmentHospital.EnumStatus;
+using AppointmentHospital.Helpers;
 using AppointmentHospital.Models;
 using AppointmentHospital.Repositories;
 
@@ -30,12 +31,12 @@ public class AppointmentDateService : IAppointmentDateService
         return appointmentRepository.GetAppointmentsByPatientId(PatientId, status);
     }
 
-    public List<Appointment> GetAppointmentsByDoctorId(Guid DoctorId){
-        return appointmentRepository.GetAppointmentsByDoctorId(DoctorId);
+    public async Task<Pagination<Appointment>> GetAppointmentsByDoctorId(Guid DoctorId, int page){
+        return await appointmentRepository.GetAppointmentsByDoctorId(DoctorId, page);
     }
 
-    public List<Appointment> GetAppointmentsByDoctorId(Guid doctorId, AppointmentStatus status){
-        return appointmentRepository.GetAppointmentsByDoctorId(doctorId, status);
+    public async Task<Pagination<Appointment>> GetAppointmentsByDoctorId(Guid doctorId, AppointmentStatus status, int page){
+        return await appointmentRepository.GetAppointmentsByDoctorId(doctorId, status, page);
     }
 
     public Appointment GetAppointmentsById(Guid appointmentId){

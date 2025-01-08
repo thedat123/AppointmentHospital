@@ -38,7 +38,7 @@ function initializeSignalR() {
 
         connection.start();
         console.log("SignalR Connected successfully");
-    } catch(error) {
+    } catch (error) {
         console.error("SignalR Connection Error:", error);
     }
 }
@@ -47,7 +47,7 @@ document.getElementById('yearSelect').addEventListener('change', async function 
     const year = this.value;
     try {
         const response = await fetch(`/Statistic/GetWeeksByYear?year=${year}`);
-        if(!response.ok){
+        if (!response.ok) {
             throw new Error('Network response was not ok');
         }
         var weeks = await response.json();
@@ -61,7 +61,7 @@ document.getElementById('yearSelect').addEventListener('change', async function 
             weekSelect.appendChild(option);
         });
     }
-    catch(error) {
+    catch (error) {
         console.log('Error fetching weeks', error);
     }
 });
@@ -71,10 +71,20 @@ function getCurrentDateFilter() {
     const singleDate = document.getElementById("singleDate").value;
     const monthSelect = document.getElementById("monthSelect").value;
     const weekSelect = document.getElementById("weekSelect").value;
+    const startDate = document.getElementById("startDate").value;
+    const endDate = document.getElementById("endDate").value;
+
+    console.log(`startDate ${startDate}, endDate ${endDate}`);
+    console.log('SingleDate', singleDate);
     let dateFilter = null;
     let filterType = '';
-
+    if (startDate && endDate) {
+        console.log(`startDate ${startDate}, endDate ${endDate}`);
+        dateFilter = `${startDate}|${endDate}`;
+        filterType = 'custom'
+    }
     if (singleDate) {
+        console.log('SingleDate', singleDate);
         dateFilter = singleDate;
         filterType = 'day';
     } else if (monthSelect) {
@@ -83,12 +93,6 @@ function getCurrentDateFilter() {
     } else if (weekSelect) {
         dateFilter = weekSelect;
         filterType = 'week';
-    } else {
-        const today = new Date();
-        const currentMonth = String(today.getMonth() + 1).padStart(2, '0');
-        const currentDay = String(today.getDate()).padStart(2, '0');
-        dateFilter = `${currentMonth}/${currentDay}`;
-        filterType = 'day';
     }
     console.log(`dateFilter ${dateFilter}, filterType ${filterType}`);
 
@@ -100,47 +104,54 @@ async function updateChart(dateFilter) {
     document.getElementById('statistic-table').style.display = 'block';
     let url = '/Statistic/Statistic?';
     console.log(dateFilter);
-    if(dateFilter.filterType == 'day') {
+    if (dateFilter.filterType == 'day') {
         url = `${url}singleDate=${encodeURIComponent(dateFilter.dateFilter)}`;
     } else if (dateFilter.filterType === 'week') {
         url = `${url}week=${encodeURIComponent(dateFilter.dateFilter)}&&year=${yearSelect}`;
     } else if (dateFilter.filterType === 'month') {
         url = `${url}month=${encodeURIComponent(dateFilter.dateFilter)}&&year=${yearSelect}`;
+    } else if (dateFilter.filterType === 'custom') {
+        // const parts = dateFilter.dateFilter.split("|");
+        // console.log('Parts', parts);
+        // const startDate = parts[0];
+        // const endDate = parts[1];
+        // const customDate = `${startDate}%7C${endDate}`
+        url = `${url}dateRange=${encodeURIComponent(dateFilter.dateFilter)}`
     }
     try {
-        const response =  await fetch(url);
-        if(!response.ok) {
+        const response = await fetch(url);
+        if (!response.ok) {
             throw new Error(`Http error! Status ${response.status}`)
         }
-        var data =  await response.json();
-        if(dateFilter.filterType == 'day') {
+        var data = await response.json();
+        if (dateFilter.filterType == 'day') {
             const dateObj = new Date(dateFilter.dateFilter);
             const month = String(dateObj.getMonth() + 1).padStart(2, '0');
             const day = String(dateObj.getDate()).padStart(2, '0');
             dateFilter.dateFilter = `${month}/${day}`;
             console.log(`DateFilter ${dateFilter.dateFilter}`);
         }
-        if(data.amountAppointment && amountAppointmentChart) {
+        if (data.amountAppointment && amountAppointmentChart) {
             amountAppointmentChart.data.datasets[0].data = [data.amountAppointment[dateFilter.dateFilter]]
             amountAppointmentChart.update();
         }
-        if(data.oldAndNewUser && oldAndNewUserChart) {
+        if (data.oldAndNewUser && oldAndNewUserChart) {
             oldAndNewUserChart.data.datasets[0].data = [data.oldAndNewUser[dateFilter.dateFilter][1]];
             oldAndNewUserChart.data.datasets[1].data = [data.oldAndNewUser[dateFilter.dateFilter][0]];
             oldAndNewUserChart.update();
         }
-        if(data.topDoctorAppointment && topDoctorAmountAppointment){
+        if (data.topDoctorAppointment && topDoctorAmountAppointment) {
             const doctorData = data.topDoctorAppointment[dateFilter.dateFilter];
             topDoctorAmountAppointment.data.labels = doctorData.map(doctor => doctor.specialization);
             topDoctorAmountAppointment.data.datasets[0].data = doctorData.map(doctor => doctor.appointmentAmount);
             topDoctorAmountAppointment.update();
         }
-        if(data.compareAmountAppointment && compareAmountAppointment) {
+        if (data.compareAmountAppointment && compareAmountAppointment) {
             compareAmountAppointment.data.labels = Object.keys(data.compareAmountAppointment);
             compareAmountAppointment.data.datasets[0].data = Object.values(data.compareAmountAppointment);
             compareAmountAppointment.update();
         }
-        if(data.compareAmountOldAndNewUser && compareOldAndNewUser){
+        if (data.compareAmountOldAndNewUser && compareOldAndNewUser) {
             const compareData = data.compareAmountOldAndNewUser;
             compareOldAndNewUser.data.datasets[0].data = Object.values(compareData).map(d => d[0]);
             compareOldAndNewUser.data.datasets[1].data = Object.values(compareData).map(d => d[1]);
@@ -148,10 +159,10 @@ async function updateChart(dateFilter) {
         }
 
     }
-    catch(error) {
+    catch (error) {
         console.error('Error: ', error)
     }
-    
+
 }
 
 
@@ -167,6 +178,10 @@ radioButton.forEach(radio => {
         let startDate = document.getElementById('startDate');
         let endDate = document.getElementById('endDate');
 
+        const periodComparison = document.getElementById("period-comparison");
+        const userTrends = document.getElementById("user-trends");
+        document.getElementById('statistic-table').style.display = 'none'
+
         dayInput.style.display = 'none';
         weekInput.style.display = 'none';
         monthInput.style.display = 'none';
@@ -178,7 +193,7 @@ radioButton.forEach(radio => {
             monthSelect.value = null;
             weekSelect.value = null;
             startDate.value = null;
-            endDate.value =  null;
+            endDate.value = null;
 
         } else if (this.value === 'week') {
             weekInput.style.display = 'block';
@@ -186,15 +201,15 @@ radioButton.forEach(radio => {
             singleDate.value = null;
             monthSelect.value = null;
             startDate.value = null;
-            endDate.value =  null;
+            endDate.value = null;
         } else if (this.value === 'month') {
             monthInput.style.display = 'block';
             yearInput.style.display = 'block';
             singleDate.value = null;
             weekSelect.value = null;
             startDate.value = null;
-            endDate.value =  null;
-        } else if(this.value === 'range'){
+            endDate.value = null;
+        } else if (this.value === 'range') {
             rangeInput.style.display = 'block'
             singleDate.value = null;
             monthSelect.value = null;
@@ -205,6 +220,7 @@ radioButton.forEach(radio => {
 
 async function submitStatistic() {
     document.getElementById('statistic-table').style.display = 'block'
+
     let dateFilter;
     let singleDate = document.getElementById("singleDate").value;
     let date;
@@ -215,12 +231,10 @@ async function submitStatistic() {
         const day = String(dateObj.getDate()).padStart(2, '0');
         date = `${month}/${day}`;
     }
-    let startDate = document.getElementById('startDate');
+    let startDate = document.getElementById('startDate').value
     console.log('startDate', startDate);
-    let endDate = document.getElementById('endDate');
+    let endDate = document.getElementById('endDate').value;
     console.log('endDate', endDate);
-
-    
 
     let monthSelect = document.getElementById("monthSelect").value;
     console.log('Month', monthSelect);
@@ -231,15 +245,31 @@ async function submitStatistic() {
     singleDate ? dateFilter = date : monthSelect ? dateFilter = monthSelect : weekSelect ? dateFilter = weekSelect : dateFilter = `${startDate}|${endDate}`;
     console.log("dateFilter", dateFilter);
     let url = '/Statistic/Statistic?';
+    if (startDate && endDate) {
+        customRange = `${startDate}%7C${endDate}`;
+        url = `${url}dateRange=${customRange}`;
+        const periodComparison = document.getElementById('periodComparison');
+        const userTrends = document.getElementById('userTrends');
+  
+        periodComparison.style.display = 'none';
+        userTrends.style.display = 'none';
+        document.getElementById('amountAppointment').parentElement.classList.add('center-chart');
+        document.getElementById('oldAndNewUser').parentElement.classList.add('center-chart');
+    }
     if (singleDate) {
         url = `${url}singleDate=${encodeURIComponent(singleDate)}`;
+        periodComparison.style.display = 'block';
+        userTrends.style.display = 'block';
     }
     if (monthSelect) {
         url = `${url}month=${encodeURIComponent(monthSelect)}&&year=${yearSelect}`;
-
+        periodComparison.style.display = 'block';
+        userTrends.style.display = 'block';
     }
     if (weekSelect) {
         url = `${url}week=${encodeURIComponent(weekSelect)}&&year=${yearSelect}`;
+        periodComparison.style.display = 'block';
+        userTrends.style.display = 'block';
     }
     try {
 

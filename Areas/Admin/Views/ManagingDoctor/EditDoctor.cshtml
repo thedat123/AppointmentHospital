@@ -1,58 +1,120 @@
 ﻿@using AppointmentHospital.Areas.Admin.DTOs.ManagingDoctor;
 @model ManagingDoctorResponse;
 @{
+    ViewData["Title"] = "Edit Doctor";
     var specializationList = ViewData["SpecializationList"] as List<SelectListItem>;
 }
-<div class="container">
-    <div class="row">
-        <div class="col-md-5 me-5 d-flex align-items-center">
-            <img src="~/images//hospital.png" />
-        </div>
-        <div class="col-md-5 ms-5">
-            <div class="form-container">
-                <h2 class="form-title">Edit Doctor</h2>
-                <form asp-action="EditDoctor" method="post" class="patient-form">
-                    <div class="validation-summary-errors">
-                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Full Name</label>
-                        <input asp-for="@Model.FullName" class="form-control" type="text" />
-                        <span asp-validation-for="@Model.FullName" class="field-validation-error"></span>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Email Address</label>
-                        <input asp-for="@Model.EmailAddress" class="form-control" type="text" />
-                        <span asp-validation-for="@Model.EmailAddress" class="field-validation-error"></span>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Phone Number</label>
-                        <input asp-for="@Model.PhoneNumber" class="form-control" type="text" />
-                        <span asp-validation-for="@Model.PhoneNumber" class="field-validation-error"></span>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Choose specialization</label>
-                        <select asp-for="@Model.Specializaiton">
-                            <option value="" disabled selected>Choose specialization</option>
-                            @foreach(var specialization in specializationList)
-                            {
-                                <option value="@specialization.Value">@specialization.Text</option>
-                            }
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Experience Year</label>
-                        <input asp-for="@Model.ExperienceYear" class="form-control" type="number" />
-                        <span asp-validation-for="@Model.ExperienceYear" class="field-validation-error"></span>
-                    </div>
-                    <button type="submit" class="btn">
-                        Submit
-                    </button>
-                </form>
+<div class="container-fluid py-4">
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+            <div class="row">
+                <div class="col-12 col-lg-8 mx-auto">
+                    <form asp-action="EditDoctor" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        <input type="hidden" name="id" value="@Model.Id"/>
+                        <input type="hidden" asp-for="ImagePath" value="@Model.ImagePath" />
+
+                        <div class="text-center mb-4">
+                            <h3 class="text-primary fw-bold">Edit Doctor Profile</h3>
+                            <p class="text-muted">Update doctor's information below</p>
+                        </div>
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="@Model.FullName" class="form-control" placeholder="Full Name" required />
+                                    <label asp-for="@Model.FullName">Full Name</label>
+                                    <span asp-validation-for="@Model.FullName" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="@Model.EmailAddress" class="form-control" placeholder="Email" required />
+                                    <label asp-for="@Model.EmailAddress">Email Address</label>
+                                    <span asp-validation-for="@Model.EmailAddress" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="@Model.PhoneNumber" class="form-control" placeholder="Phone" required />
+                                    <label asp-for="@Model.PhoneNumber">Phone Number</label>
+                                    <span asp-validation-for="@Model.PhoneNumber" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select asp-for="@Model.Specializaiton" class="form-select" required>
+                                        @foreach(var specialization in specializationList)
+                                        {
+                                            if(specialization.Text == Model.Specializaiton)
+                                            {
+                                                <option value="@specialization.Value" selected>@specialization.Text</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@specialization.Value">@specialization.Text</option>
+                                            }
+                                        }
+                                    </select>
+                                    <label asp-for="@Model.Specializaiton">Specialization</label>
+                                    <span asp-validation-for="@Model.Specializaiton" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="@Model.ExperienceYear" class="form-control" placeholder="Experience" required />
+                                    <label asp-for="@Model.ExperienceYear">Years of Experience</label>
+                                    <span asp-validation-for="@Model.ExperienceYear" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select asp-for="@Model.Gender" class="form-select" required>
+                                        <option value="">Select Gender</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                    <label asp-for="@Model.Gender">Gender</label>
+                                    <span asp-validation-for="@Model.Gender" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <input asp-for="@Model.Degree" class="form-control" placeholder="Degree" required />
+                                    <label asp-for="@Model.Degree">Degree</label>
+                                    <span asp-validation-for="@Model.Degree" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <textarea asp-for="@Model.Description" class="form-control" style="height: 120px" placeholder="Description" required></textarea>
+                                    <label asp-for="@Model.Description">Description</label>
+                                    <span asp-validation-for="@Model.Description" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-12 text-center mt-4">
+                                <button type="submit" class="btn btn-primary px-5 py-2 me-2">
+                                    <i class="fas fa-save me-2"></i>Save Changes
+                                </button>
+                                <a asp-action="Index" class="btn btn-outline-secondary px-4 py-2">
+                                    <i class="fas fa-arrow-left me-2"></i>Back
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
 
 @section Styles {
     <link rel="stylesheet" href="~/css/create.css" />

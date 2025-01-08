@@ -5,7 +5,7 @@ namespace AppointmentHospital.Helpers
 {
     public class Pagination<T> : List<T> 
     {
-        public const int PAGE_SIZE = 10;
+        public const int PAGE_SIZE = 20;
         public int TotalPage { set; get; }
         public int CurrentPage { set; get; }
         public int TotalItems {set;get;}
