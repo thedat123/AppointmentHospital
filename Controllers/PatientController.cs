@@ -321,6 +321,14 @@ namespace AppointmentHospital.Controllers
             return RedirectToAction("Index", "Patient");
         }
 
+        public IActionResult DiagnosisDetail(Guid id)
+        {
+            var appointment = _appointmentDateService.GetAppointmentsById(id);
+            var diagnosisHistory = _appointmentDateService.GetDiagnosisHistoriesByAppointmentID(appointment.AppointmentId);
+
+            ViewData["DiagnosisHistory"] = diagnosisHistory;
+            return View(appointment);
+        }
 
     }
 

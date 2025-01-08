@@ -22,7 +22,7 @@ namespace AppointmentHospital
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
 
             var builder = WebApplication.CreateBuilder(args);
@@ -75,6 +75,7 @@ namespace AppointmentHospital
             builder.Services.AddScoped<IDoctorService, DoctorService>();
 
             builder.Services.AddScoped<IDiseasePredictionService, DiseasePredictionService>();
+            builder.Services.AddScoped<ICronTimeSlotService, CronTimeSlotService>();
 
             builder.Services.AddAuthentication().AddGoogle(option =>
             {
@@ -157,6 +158,13 @@ namespace AppointmentHospital
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseHangfireDashboard();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var cronTimeSlotService = scope.ServiceProvider.GetRequiredService<ICronTimeSlotService>();
+                await cronTimeSlotService.DeleteOldSchedules();
+            }
+
             app.MapHub<ScheduleHub>("/scheduleHub");
             app.MapAreaControllerRoute(
             name: "admin",

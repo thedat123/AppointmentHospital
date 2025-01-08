@@ -14,4 +14,5 @@ public interface ITimeSlotService
     public void DeleteTimeSlot(Guid timeSlotId);
     public TimeSlot GetTimeSlotById(Guid timeSlotId);
     public List<TimeSlot> GetAllTimeSlotByParticularDate(DateTime date);
+    public void UpdateNoteInTimeSlot(Guid timeSlotId, string note);
 }

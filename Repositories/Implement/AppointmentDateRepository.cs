@@ -86,5 +86,14 @@ namespace AppointmentHospital.Repositories.Implement
                             a.AppointmentTime.Minute == startTime.Minute)
                 .FirstOrDefault();
         }
+
+        public DiagnosisHistory GetDiagnosisHistoriesByAppointmentID(Guid appointmentId)
+        {
+            return _context.DiagnosisHistory.Where(d => d.AppointmentId == appointmentId).FirstOrDefault();
+        }
+
+        public List<Appointment> GetAppointmentsByDoctorIdAndDate(Guid doctorId, DateTime date){
+            return _context.Appointments.Where(a => a.DoctorId == doctorId && a.AppointmentTime.Date == date.Date).ToList();    
+        }
     }
 }

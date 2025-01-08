@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', function () {
-    console.log("Run myschedule.js");
     function getHoursDifference(appointmentTime) {
         const appointmentDate = new Date(appointmentTime);
         const now = new Date();
@@ -33,35 +32,39 @@ document.addEventListener('DOMContentLoaded', function () {
                     actionCell.appendChild(form);
                 }
                 else {
-                    createButton(actionCell, "Cancel");
+                    createButton(actionCell, "Cancel", appointmentId);
                 }
                 break;
             case 'Confirmed':
-                createButton(actionCell, "Cancel");
+                createButton(actionCell, "Cancel", appointmentId);
                 break;
 
             case 'Cancelled':
-                createButton(actionCell, "Cancelled");
+                createButton(actionCell, "Cancelled", appointmentId);
                 break;
             case 'Completed':
                 checkFeedbackStatus(appointmentId, actionCell);
+                createButton(actionCell, "Details", appointmentId);
                 break;
-
         }
 
     });
-    function createButton(parent, text) {
+    function createButton(parent, text, appointmentId) {
         const button = document.createElement('button');
-        button.className = text === "Feedback" ? "btn btn-info btn-sm" : "btn btn-danger btn-sm";
+        if (text === "Feedback") {
+            button.className = "btn btn-info btn-sm";
+        } else if (text === "Details") {
+            button.className = "btn btn-primary btn-sm";
+        } else {
+            button.className = "btn btn-danger btn-sm";
+        }
+
         button.type = 'button';
-        button.disabled = text == "Feedback" ? false : true;
-        button.style.opacity = text == "Feedback" ? '1' : '0.5';
-
-        // Add proper ARIA labels
+        button.disabled = text == "Feedback" || text == "Details" ? false : true;
+        button.style.opacity = text == "Feedback" || text == "Details" ? '1' : '0.5';
+        button.style.marginBottom = '5px';
         button.setAttribute('aria-label', text === 'Feedback' ? 'Give feedback' : text);
-
-        // Use role="presentation" for icons
-        button.innerHTML = text == 'Feedback' ?
+        button.innerHTML = text == 'Feedback' || text == "Details" ?
             `<i class="fa fa-commenting" role="presentation"></i> ${text}` :
             `<i class="fas fa-times-circle" role="presentation"></i> ${text}`;
 
@@ -76,6 +79,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 var modal = new bootstrap.Modal(document.getElementById('feedbackModal'));
                 modal.show();
             }
+        } else if(text === 'Details') {
+            button.addEventListener('click', function () {
+                window.location.href = `/Patient/DiagnosisDetail?id=${appointmentId}`;
+            });
         }
         parent.appendChild(button);
     }
@@ -109,22 +116,16 @@ document.addEventListener('DOMContentLoaded', function () {
         const formData = new FormData(form);
         this.disabled = true;
 
-        // Store reference to modal
         const modalEl = document.getElementById('feedbackModal');
         const modal = bootstrap.Modal.getInstance(modalEl);
-        console.log("a");
-        console.log("b");
-        console.log("Call API");
         fetch(`/Patient/SubmitFeedback`, {
             method: 'POST',
             body: formData
         }).then(response => {
             console.log("Response", response)
             if (response.ok) {
-                // Properly hide modal
                 modal.hide();
 
-                // Remove modal backdrop if present
                 const backdrop = document.querySelector('.modal-backdrop');
                 if (backdrop) {
                     backdrop.remove();
@@ -169,14 +170,12 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     function checkFeedbackStatus(appointmentId, parent) {
-        console.log("AppointmentIDDDDD", appointmentId);
         fetch(`/Patient/HasFeedback/${appointmentId}`)
         .then(response => {
             console.log(response);
             return response.json();
         })
         .then(hasFeedback => {
-            console.log(hasFeedback);
             if(hasFeedback) {
                 createViewFeedbackButton(parent);
             }
@@ -186,7 +185,7 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .catch(error => {
             console.error('Error checking feedback status:', error);
-            createFeedbackButton(parent); // Default to feedback button
+            createFeedbackButton(parent);
         });
     }
 
@@ -211,7 +210,6 @@ document.addEventListener('DOMContentLoaded', function () {
                         return;
                     }
 
-                    // Update modal content
                     doctorName.textContent = data.doctorName;
                     doctorSpec.textContent = data.doctorSpecialization;
                     document.getElementById('overallRating').innerHTML = createStarRating(data.rating);

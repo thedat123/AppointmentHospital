@@ -70,4 +70,24 @@ public class TimeSlotRepository : ITimeSlotRepository
     public List<TimeSlot> GetAllTimeSlotByParticularDate(DateTime date){
         return _context.TimeSlots.Where(x => x.StartTime.Date == date || x.EndTime.Date == date).ToList();
     }
+
+    public void UpdateNoteInTimeSlot(Guid timeSlotId, string note){
+        var timeSlot = _context.TimeSlots.Find(timeSlotId);
+        if(timeSlot != null){
+            timeSlot.Note = note;
+            _context.SaveChanges();
+        }
+    }
+
+    public void DeleteOldTimeSlot(){
+        var today = DateTime.Today;
+        var yesterday = today.AddDays(-1);
+
+        var schedulesToDelete = _context.TimeSlots
+                                        .Where(s => s.EndTime.Date <= yesterday.Date)
+                                        .ToList();
+
+        _context.TimeSlots.RemoveRange(schedulesToDelete);
+        _context.SaveChangesAsync();
+    }
 }
