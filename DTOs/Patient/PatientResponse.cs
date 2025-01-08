@@ -22,4 +22,16 @@ namespace AppointmentHospital.DTOs.Patient
         public int IdentificationNumber { get; set; }
         public string Address { get; set; }
     }
+        public class FeedbackResponse
+    {
+        public Guid? AppointmentId { get; set; }
+        public int Rating { get; set; }
+        public int ProfessionalSkills { get; set; }
+        public int Communication { get; set; }
+        public string Comment { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public string DoctorName { get; set; }
+        public string PatientName {get;set;}
+        public string DoctorSpecialization { get; set; }
+    }
 }

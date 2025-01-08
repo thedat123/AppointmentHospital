@@ -20,5 +20,6 @@ namespace AppointmentHospital.Models
         public virtual ICollection<Appointment> Appointments { set; get; }
 
         public virtual ICollection<Acquaintance> Acquaintances { get; set; }
+        public virtual ICollection<Feedback> Feedbacks { set; get; }
     }
 }

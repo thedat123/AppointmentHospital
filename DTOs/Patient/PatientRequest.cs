@@ -28,4 +28,25 @@ namespace AppointmentHospital.DTOs.Patient
         [Display(Name = "Email Address")]
         public string EmailAddress { get; set; }
     }
+    public class FeedbackRequest
+    {
+        [Required]
+        public Guid AppointmentId { get; set; }
+
+        [Required]
+        [Range(1, 5, ErrorMessage = "Please select a rating between 1 and 5")]
+        public int Rating { get; set; }
+
+        [Required]
+        [Range(1, 5, ErrorMessage = "Please rate professional skills")]
+        public int ProfessionalSkills { get; set; }
+
+        [Required]
+        [Range(1, 5, ErrorMessage = "Please rate communication")]
+        public int Communication { get; set; }
+
+        [Required]
+        [StringLength(500, MinimumLength = 10, ErrorMessage = "Comment must be between 10 and 500 characters")]
+        public string Comment { get; set; }
+    }
 }

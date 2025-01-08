@@ -50,7 +50,7 @@ namespace AppointmentHospital.Repositories.Implement
                 };
                 return patientResponse;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
@@ -89,6 +89,56 @@ namespace AppointmentHospital.Repositories.Implement
             appDbContext.Add(acquaintance);
             appDbContext.SaveChanges();
         }
+        public async Task AddFeedback(FeedbackRequest request)
+        {
+            try
+            {
+                var appointment = await appDbContext.Appointments.Where(a => a.AppointmentId == request.AppointmentId).FirstOrDefaultAsync();
+                if (appointment == null)
+                {
+                    throw new Exception("Cannot find appointment");
+                }
+                var feedback = new Feedback
+                {
+                    AppointmentId = appointment.AppointmentId,
+                    DoctorId = appointment.DoctorId,
+                    PatientId = appointment.PatientId,
+                    Rating = request.Rating,
+                    Comment = request.Comment,
+                    Communication = request.Communication,
+                    ProfessionalSkills = request.ProfessionalSkills,
+                    CreatedAt = DateTime.Now
+                };
+                await appDbContext.AddAsync(feedback);
+
+                appointment.FeedbackId = feedback.FeedbackId;
+                appDbContext.Update(appointment);
+                await appDbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+        public async Task<FeedbackResponse> GetFeedback(Guid appointmentId) {
+            var feedback = await appDbContext.Feedbacks.Where(f => f.AppointmentId == appointmentId).Select(f => new FeedbackResponse
+            {
+                AppointmentId = f.AppointmentId,
+                Comment = f.Comment,
+                Communication = f.Communication,
+                Rating = f.Rating,
+                ProfessionalSkills = f.ProfessionalSkills,
+                CreatedAt = f.CreatedAt,
+                DoctorName = f.Doctor.FullName,
+                PatientName = f.Appointment.AcquaintanceId.HasValue ? f.Appointment.Acquaintance.Name : f.Patient.FullName,
+                DoctorSpecialization = EnumExtensions.GetDisplayName(f.Doctor.Specializaiton),
+            }).FirstOrDefaultAsync();
+            return feedback;
+        }
+
+        public async Task<bool> HasFeedback(Guid appointmentId){
+            return await appDbContext.Feedbacks.AnyAsync(f => f.AppointmentId == appointmentId);
+        }                               
 
         public List<DiagnosisHistory> GetDiagnosisHistoriesByPatientId(Guid patientId)
         {

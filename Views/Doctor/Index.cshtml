@@ -1,8 +1,8 @@
 ﻿﻿@using AppointmentHospital.EnumStatus
 @model List<AppointmentHospital.Models.Appointment>
 
-<link rel="stylesheet" href="~/css/doctor-calendar.css" asp-append-version="true" />    
-<link rel="stylesheet" href="~/css/doctor-index.css" asp-append-version="true" />  
+<link rel="stylesheet" href="~/css/doctor-calendar.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/doctor-index.css" asp-append-version="true" />
 
 <div class="container py-5">
     <div class="mb-5">
@@ -29,11 +29,11 @@
         @{
             var statCards = new[]
             {
-                (AppointmentStatus.Pending, (int)ViewBag.Stats.PendingCount, "fa-clock", "#FFA500", "#FFF5E6"),
-                (AppointmentStatus.Confirmed, (int)ViewBag.Stats.ConfirmedCount, "fa-check-circle", "#10B981", "#ECFDF5"),
-                (AppointmentStatus.Completed, (int)ViewBag.Stats.CompletedCount, "fa-check-double", "#3B82F6", "#EFF6FF"),
-                (AppointmentStatus.Canceled, (int)ViewBag.Stats.CanceledCount, "fa-times-circle", "#6B7280", "#F3F4F6")
-            };
+        (AppointmentStatus.Pending, (int)ViewBag.Stats.PendingCount, "fa-clock", "#FFA500", "#FFF5E6"),
+        (AppointmentStatus.Confirmed, (int)ViewBag.Stats.ConfirmedCount, "fa-check-circle", "#10B981", "#ECFDF5"),
+        (AppointmentStatus.Completed, (int)ViewBag.Stats.CompletedCount, "fa-check-double", "#3B82F6", "#EFF6FF"),
+        (AppointmentStatus.Canceled, (int)ViewBag.Stats.CanceledCount, "fa-times-circle", "#6B7280", "#F3F4F6")
+        };
         }
         @foreach (var (status, count, icon, color, bgColor) in statCards)
         {
@@ -59,24 +59,20 @@
                 <div class="col-md-6">
                     <div class="search-box">
                         <i class="fas fa-search"></i>
-                        <input type="text" 
-                               class="form-control form-control-lg border-0 bg-light" 
-                               id="searchInput" 
-                               placeholder="Search patients or symptoms...">
+                        <input type="text" class="form-control form-control-lg border-0 bg-light" id="searchInput"
+                            placeholder="Search patients or symptoms...">
                     </div>
                 </div>
                 <div class="col-md-6 text-md-end">
                     @foreach (var (status, icon) in new[]
                     {
-                        (AppointmentStatus.Pending, "fa-clock"),
-                        (AppointmentStatus.Confirmed, "fa-check-circle"),
-                        (AppointmentStatus.Completed, "fa-check-double"),
-                        (AppointmentStatus.Canceled, "fa-times-circle")
+                    (AppointmentStatus.Pending, "fa-clock"),
+                    (AppointmentStatus.Confirmed, "fa-check-circle"),
+                    (AppointmentStatus.Completed, "fa-check-double"),
+                    (AppointmentStatus.Canceled, "fa-times-circle")
                     })
                     {
-                        <a asp-action="Index" 
-                           asp-route-status="@status" 
-                           class="btn @(ViewBag.SelectedStatus == status 
+                        <a asp-action="Index" asp-route-status="@status" class="btn @(ViewBag.SelectedStatus == status 
                                       ? "btn-primary" 
                                       : "btn-outline-primary") 
                                   btn-rounded me-2 mb-2">
@@ -115,32 +111,32 @@
                                 <td>
                                     <div class="fw-semibold">
                                         @(
-                                            appointment.Acquaintance?.Name != null 
-                                            ? appointment.Acquaintance.Name 
+                                            appointment.Acquaintance?.Name != null
+                                            ? appointment.Acquaintance.Name
                                             : appointment.Patient.FullName
-                                        )
+                                            )
                                     </div>
                                     <div class="small text-muted">
                                         @(
-                                            appointment.Acquaintance?.DateOfBirth != null 
+                                            appointment.Acquaintance?.DateOfBirth != null
                                             ? appointment.Acquaintance.DateOfBirth
                                             : appointment.Patient.DateOfBirth
-                                        ) 
-                                        | 
+                                            )
+                                        |
                                         @(
-                                            !string.IsNullOrEmpty(appointment.Acquaintance?.Address) 
-                                            ? appointment.Acquaintance.Address 
+                                            !string.IsNullOrEmpty(appointment.Acquaintance?.Address)
+                                            ? appointment.Acquaintance.Address
                                             : appointment.Patient.Address
-                                        )
+                                            )
                                     </div>
                                 </td>
                                 <td>
                                     <div class="text-truncate" style="max-width: 200px;" title="@appointment.Symptoms">
                                         @(
-                                            !string.IsNullOrEmpty(appointment.Symptoms) 
-                                            ? appointment.Symptoms 
+                                            !string.IsNullOrEmpty(appointment.Symptoms)
+                                            ? appointment.Symptoms
                                             : "No Symptoms Provided"
-                                        )
+                                            )
                                     </div>
                                 </td>
                                 <td class="text-center">
@@ -148,29 +144,36 @@
                                     {
                                         <form action="/Doctor/UpdateStatus" method="post" class="d-inline-flex gap-2">
                                             <input type="hidden" name="id" value="@appointment.AppointmentId" />
-                                            <button type="submit" 
-                                                    name="status" 
-                                                    value="1" 
-                                                    class="btn btn-success btn-sm btn-rounded">
+                                            <button type="submit" name="status" value="1"
+                                                class="btn btn-success btn-sm btn-rounded">
                                                 <i class="fas fa-check me-1"></i> Confirm
                                             </button>
-                                            <button type="submit" 
-                                                    name="status" 
-                                                    value="3" 
-                                                    class="btn btn-danger btn-sm btn-rounded">
+                                            <button type="submit" name="status" value="3" class="btn btn-danger btn-sm btn-rounded">
                                                 <i class="fas fa-times me-1"></i> Cancel
                                             </button>
                                         </form>
                                     }
                                     else if (appointment.Status == AppointmentHospital.EnumStatus.AppointmentStatus.Confirmed)
                                     {
-                                        <a asp-controller="Doctor" 
-                                           asp-action="StartDiagnosis" 
-                                           asp-route-id="@appointment.AppointmentId"
-                                           class="btn btn-primary btn-sm btn-rounded">
+                                        <a asp-controller="Doctor" asp-action="StartDiagnosis"
+                                            asp-route-id="@appointment.AppointmentId" class="btn btn-primary btn-sm btn-rounded">
                                             <i class="fas fa-stethoscope me-1"></i> Start diagnosis
                                         </a>
                                     }
+                                    else if (appointment.Status == AppointmentHospital.EnumStatus.AppointmentStatus.Completed)
+                                    {
+                                        if (appointment.FeedbackId.HasValue)
+                                        {
+                                            <div id="Feedback">
+                                                <button onclick="ViewFeedback()" id="viewFeedback" type="button" class="btn btn-primary"
+                                                    data-appointment-id="@appointment.AppointmentId">
+                                                    View Feedback
+                                                </button>
+                                            </div>
+                                        }
+
+                                    }
+
                                 </td>
                             </tr>
                         }
@@ -191,25 +194,151 @@
         </div>
     </div>
 </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const connection = new signalR.HubConnectionBuilder()
-            .withUrl('/scheduleHub')
-            .build();
 
-        connection.start()
-            .then(() => {
-                console.log("Connected to SignalR Hub");
-            })
-            .catch(err => console.error("SignalR connection error:", err));
+<!-- View Feedback Modal -->
+<div class="modal fade" id="viewFeedbackModal" tabindex="-1" aria-labelledby="viewFeedbackModalLabel" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="viewFeedbackModalLabel">
+                    <i class="fas fa-comment-dots me-2"></i>Patient Feedback
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Patient Info Section -->
+                <div class="patient-info mb-4">
+                    <div class="d-flex align-items-center">
+                        <div class="patient-avatar me-3">
+                            <i class="fas fa-user-circle fa-3x text-primary"></i>
+                        </div>
+                        <div>
+                            <h6 id="patientName" class="mb-1"></h6>
+                            <p id="appointmentDate" class="text-muted mb-0"></p>
+                        </div>
+                    </div>
+                </div>
 
-        connection.on("UpdateStatus", (appointmentId, status) => {
-            console.log(`Appointment ${appointmentId} updated to status ${status}`);
+                <!-- Ratings Grid -->
+                <div class="ratings-grid mb-4">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="rating-card p-3 border rounded bg-light">
+                                <h6 class="text-muted mb-2">Overall Rating</h6>
+                                <div id="overallRating" class="rating-stars"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="rating-card p-3 border rounded bg-light">
+                                <h6 class="text-muted mb-2">Professional Skills</h6>
+                                <div id="professionalRating" class="rating-stars"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="rating-card p-3 border rounded bg-light">
+                                <h6 class="text-muted mb-2">Communication</h6>
+                                <div id="communicationRating" class="rating-stars"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-            const scrollPosition = window.scrollY;
-            window.location.reload();
-            window.scrollTo(0, scrollPosition);
+                <!-- Comment Section -->
+                <div class="comment-section">
+                    <h6 class="text-muted mb-2">Patient Comments</h6>
+                    <div id="feedbackComment" class="p-3 bg-light rounded"></div>
+                    <small class="text-muted mt-2 d-block">
+                        Submitted on <span id="feedbackDate"></span>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .rating-stars {
+            color: #ffc107;
+            font-size: 1.2rem;
+        }
+
+        .rating-card {
+            transition: all 0.3s ease;
+        }
+
+        .rating-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .patient-avatar {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #feedbackComment {
+            min-height: 100px;
+            white-space: pre-line;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl('/scheduleHub')
+                .build();
+
+            connection.start()
+                .then(() => {
+                    console.log("Connected to SignalR Hub");
+                })
+                .catch(err => console.error("SignalR connection error:", err));
+
+            connection.on("UpdateStatus", (appointmentId, status) => {
+                console.log(`Appointment ${appointmentId} updated to status ${status}`);
+
+                const scrollPosition = window.scrollY;
+                window.location.reload();
+                window.scrollTo(0, scrollPosition);
+            });
+            connection.on("UpdateFeedback", () => {
+                const scrollPosition = window.scrollY;
+                window.location.reload();
+                window.scrollTo(0, scrollPosition);
+            });
+           
         });
-    });
-</script>
+        function ViewFeedback() {
+               const viewFeedbackButton = document.getElementById('viewFeedback');
+                const appointmentId = viewFeedbackButton.dataset.appointmentId;
+                console.log("appointmentId", appointmentId);
+                fetch(`Patient/GetFeedback/${appointmentId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('patientName').textContent = data.patientName;
+                        document.getElementById('overallRating').innerHTML = createStarRating(data.rating);
+                        document.getElementById('professionalRating').innerHTML = createStarRating(data.professionalSkills);
+                        document.getElementById('communicationRating').innerHTML = createStarRating(data.communication);
+                        document.getElementById('feedbackComment').textContent = data.comment;
+                        document.getElementById('feedbackDate').textContent = new Date(data.createdAt);
+                    });
+                const modal = new bootstrap.Modal(document.getElementById('viewFeedbackModal'));
+                modal.show();
+
+            };
+            function createStarRating(rating) {
+                return Array(5).fill(0)
+                    .map((_, index) => `<i class="fas fa-star${index < rating ? ' text-warning' : ' text-muted'}"></i>`)
+                    .join('');
+            }
+    </script>
+    <script src="~/js/addFeedbackDoctor.js"></script>
+}

@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AppointmentHospital.Models
@@ -26,12 +26,15 @@ namespace AppointmentHospital.Models
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
-        [ForeignKey("Appointment")]
-        public Guid AppointmentId { get; set; }
+        [ForeignKey("AppointmentId")]
+        public Guid? AppointmentId { get; set; }
         public virtual Appointment Appointment { get; set; }
 
         [ForeignKey("Doctor")]
-        public Guid DoctorId { get; set; }
+        public Guid? DoctorId { get; set; }
         public virtual Doctor Doctor { get; set; }
+        [ForeignKey("PatientId")]
+        public Guid? PatientId { get; set; }
+        public virtual Patient Patient { get; set; }
     }
 }

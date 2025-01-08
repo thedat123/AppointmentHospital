@@ -278,6 +278,23 @@ namespace AppointmentHospital.Controllers
         }
 
         [HttpPost]
+        public async Task<IActionResult> SubmitFeedback([FromForm] FeedbackRequest request )
+        {
+            await _patientService.AddFeedback(request);
+            await _hubContext.Clients.All.SendAsync("UpdateFeedback");
+            return Ok();
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetFeedback(Guid id) {
+            var feedback = await _patientService.GetFeedback(id);
+            return Json(feedback);
+        }
+        [HttpGet]
+        public async Task<IActionResult> HasFeedback(Guid id)
+        {
+            var result = await _patientService.HasFeedback(id);
+            return Json(result);
+        }
         public async Task<ActionResult> Predict(string[] symptoms)
         {
             if (symptoms == null || symptoms.Length == 0)
