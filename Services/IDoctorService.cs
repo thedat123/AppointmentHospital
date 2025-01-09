@@ -8,7 +8,7 @@ namespace AppointmentHospital.Services;
 public interface IDoctorService
 {
     public Doctor getDoctorById(Guid doctorId);
-    public List<Doctor> getAllDoctors();
+    public Task<List<Doctor>> getAllDoctors(string? selectSpec);
     public Task<Doctor> updateDoctor(Doctor request, string phoneNumber);
     public List<TimeSlot> getTimeSlotByDoctorId(Guid doctorId);
     public string getDoctorNameByDoctorId(Guid doctorId);
