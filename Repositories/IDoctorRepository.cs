@@ -7,7 +7,7 @@ namespace AppointmentHospital.Repositories;
 
 public interface IDoctorRepository
 {
-    public List<Doctor> getAllDoctors();
+    public Task<List<Doctor>> getAllDoctors(string selectSpec);
     public Doctor getDoctorById(Guid doctorId);
     public List<TimeSlot> getTimeSlotByDoctorId(Guid doctorId);
     public Task<Doctor> updateDoctor(Doctor request, string phoneNumber);

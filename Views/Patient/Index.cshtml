@@ -4,20 +4,16 @@
 @{
     ViewData["Title"] = "Trang chủ";
     Layout = "_Layout";
+    var specializations = ViewBag.Specialization as List<SelectListItem>;
 }
-
-<link rel="stylesheet" href="~/css/patientIndex.css" asp-append-version="true" />
-
-<div class="hero-section text-white text-center py-5" 
-    style="background-image: url('@Url.Content("~/images/bookingcare-cove.jpg")'); 
+<div class="hero-section text-white text-center py-5" style="background-image: url('@Url.Content("~/images/bookingcare-cove.jpg")'); 
            background-size: cover; 
            background-position: center; 
            min-height: 90vh; 
            display: flex; 
            align-items: center;">
     <div class="container">
-        <h1 class="display-3 fw-bold mb-4" 
-            style="color: cyan; text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);">
+        <h1 class="display-3 fw-bold mb-4" style="color: cyan; text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);">
             MEDICAL PLATFORM
         </h1>
         <h2 class="h4 fw-light mb-5">
@@ -27,20 +23,21 @@
         <div class="row justify-content-center">
             <div class="col-md-10 col-lg-8">
                 <form action="/Patient/Predict" method="post">
-                    <div class="input-group search-bar mb-4 shadow-lg"> 
+                    <div class="input-group search-bar mb-4 shadow-lg">
                         <input type="text" class="form-control form-control-lg" id="searchInput"
-                            placeholder="Search Symptoms" name="symptoms" 
+                            placeholder="Search Symptoms" name="symptoms"
                             style="border-radius: 50px 0 0 50px; padding: 20px;" />
-                        <button class="btn btn-primary px-4" type="submit" 
+                        <button class="btn btn-primary px-4" type="submit"
                             style="border-radius: 0 50px 50px 0; font-size: 1.2rem;">
                             <i class="fas fa-search me-2"></i> Search
                         </button>
                     </div>
 
                     <div class="d-flex justify-content-center gap-3">
-                        <input type="file" id="imageInput" class="form-control" accept="image/*" style="display: none;" />
-                        <button class="btn btn-info btn-lg d-flex align-items-center gap-2 px-4"
-                            type="button" onclick="startVoiceSearch()" style="border-radius: 50px;">
+                        <input type="file" id="imageInput" class="form-control" accept="image/*"
+                            style="display: none;" />
+                        <button class="btn btn-info btn-lg d-flex align-items-center gap-2 px-4" type="button"
+                            onclick="startVoiceSearch()" style="border-radius: 50px;">
                             <i class="fas fa-microphone"></i> Voice Search
                         </button>
                     </div>
@@ -51,7 +48,7 @@
         @if (TempData["Error"] != null)
         {
             <div class="alert alert-danger mt-4 shadow-lg rounded-4 d-flex align-items-center gap-3 p-3">
-                <div class="icon-container text-white bg-danger d-flex align-items-center justify-content-center rounded-circle" 
+                <div class="icon-container text-white bg-danger d-flex align-items-center justify-content-center rounded-circle"
                     style="width: 50px; height: 50px;">
                     <i class="fas fa-exclamation-triangle" style="font-size: 1.5rem;"></i>
                 </div>
@@ -96,7 +93,7 @@
                     <div class="row">
                         <div class="col-md-6 d-flex flex-column align-items-center border-end">
                             <div class="text-center mb-3">
-                                
+
                             </div>
                         </div>
                     </div>
@@ -107,7 +104,7 @@
         @if (TempData["Disease"] != null)
         {
             var department = AppointmentHospital.Helpers.DepartmentDisease.GetDiseaseByDepartment()
-                                .FirstOrDefault(d => d.Value.Contains(TempData["Disease"]?.ToString()));
+            .FirstOrDefault(d => d.Value.Contains(TempData["Disease"]?.ToString()));
 
             var departmentName = department.Key;
 
@@ -127,7 +124,8 @@
                             <div class="col">
                                 <div class="card doctor-card border-0">
                                     <div class="card-body text-center">
-                                        <div class="mb-3 mx-auto rounded-circle overflow-hidden" style="width: 120px; height: 120px;">
+                                        <div class="mb-3 mx-auto rounded-circle overflow-hidden"
+                                            style="width: 120px; height: 120px;">
                                             <img src="@Url.Content(string.IsNullOrEmpty(doctor.ImagePath) ? "~/images/user-default.png" : $"~/images/{doctor.ImagePath}")"
                                                 alt="@doctor.FullName" class="w-100 h-100 object-fit-cover">
                                         </div>
@@ -135,7 +133,8 @@
                                         <p class="card-text text-muted small">@doctor.Specializaiton.GetDisplayName()</p>
 
                                         <a href="@Url.Action("DetailDoctor", "Patient", new { id = doctor.DoctorId })"
-                                            onclick="@(!User.Identity.IsAuthenticated ? "showLoginAlert()" : "")" class="btn btn-primary mt-3">
+                                            onclick="@(!User.Identity.IsAuthenticated ? "showLoginAlert()" : "")"
+                                            class="btn btn-primary mt-3">
                                             View Details
                                         </a>
                                     </div>
@@ -162,11 +161,11 @@
             <div class="row g-4">
                 @{
                     var services = new[] {
-                        ("specialist.png", "Khám chuyên khoa"),
-                        ("remote.png", "Khám từ xa"),
-                        ("general.png", "Khám tổng quát"),
-                        ("mental.png", "Sức khỏe tinh thần"),
-                    };
+                ("specialist.png", "Khám chuyên khoa"),
+                ("remote.png", "Khám từ xa"),
+                ("general.png", "Khám tổng quát"),
+                ("mental.png", "Sức khỏe tinh thần"),
+                };
                 }
                 @foreach (var (icon, label) in services)
                 {
@@ -182,9 +181,20 @@
     </section>
 
     <section class="doctors-section mt-5">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="h4 fw-bold">Doctor List</h2>
-            <a href="#" class="link-primary text-decoration-none">See more</a>
+
+        <div class="filter-section mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="h4 fw-bold mb-0">Doctor List</h2>
+                <div class="specialization-filter" style="width: 250px;">
+                    <select id="specializationFilter" class="form-select">
+                        <option value="">All Specializations</option>
+                        @foreach (var spec in specializations)
+                        {
+                            <option value="@spec.Value">@spec.Text</option>
+                        }
+                    </select>
+                </div>
+            </div>
         </div>
 
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
@@ -200,7 +210,8 @@
                             <h5 class="card-title text-dark">@doctor.FullName</h5>
                             <p class="card-text text-muted small">@doctor.Specializaiton.GetDisplayName()</p>
 
-                            <a  onclick="@(User.Identity.IsAuthenticated ? "return true" : "showLoginAlert(); return false" )" href="@Url.Action("DetailDoctor", "Patient", new { id = doctor.DoctorId })"
+                            <a onclick="@(User.Identity.IsAuthenticated ? "return true" : "showLoginAlert(); return false" )"
+                                href="@Url.Action("DetailDoctor", "Patient", new { id = doctor.DoctorId })"
                                 class="btn btn-primary mt-3">
                                 View Details
                             </a>
@@ -211,3 +222,67 @@
         </div>
     </section>
 </div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/patientIndex.css" asp-append-version="true" />
+    <style>
+        .specialization-filter select {
+            height: 45px;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            padding: 0 1rem;
+            background-color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .specialization-filter select:focus {
+            border-color: #4e73df;
+            box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+        }
+
+        .doctor-card {
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+    </style>
+}
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const specializationFilter = document.getElementById('specializationFilter');
+            const doctorContainer = document.querySelector('.row');
+            specializationFilter.addEventListener('change', function () {
+                const selectSpec = this.value;
+                fetch(`Patient/Index?selectSpec=${selectSpec}`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            doctorContainer.innerHTML = data.doctors.map(doctor => `
+                        <div class="col">
+                            <div class="card doctor-card border-0">
+                                <div class="card-body text-center">
+                                    <div class="mb-3 mx-auto rounded-circle overflow-hidden" style="width: 120px; height: 120px;">
+                                        <img src="images/doctor/doctor1.png" alt="${doctor.name}" class="w-100 h-100 object-fit-cover">
+                                    </div>
+                                    <h5 class="card-title text-dark">${doctor.name}</h5>
+                                    <p class="card-text text-muted small">${doctor.specialization}</p>
+                                    <a onclick="${!document.querySelector('body').classList.contains('logged-in') ? 'showLoginAlert(); return false' : 'return true'}"
+                                       href="/Patient/DetailDoctor/${doctor.id}"
+                                       class="btn btn-primary mt-3">
+                                        View Details
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                        }
+                    }).catch(error => console.error('Error:', error));
+            });
+        });
+    </script>
+}

@@ -13,6 +13,7 @@ using System.Security.Claims;
 using AppointmentHospital.EnumStatus;
 using Hangfire;
 using AppointmentHospital.Services.Implement;
+using AppointmentHospital.Areas.Admin.Services;
 
 namespace AppointmentHospital.Controllers
 {
@@ -30,7 +31,9 @@ namespace AppointmentHospital.Controllers
         private readonly IHubContext<ScheduleHub> _hubContext;
         private readonly IDiseasePredictionService _predictionService;
 
-        public PatientController(AppDbContext appDbContext,IPatientService patientService ,IDoctorService doctorService, ILogger<PatientController> logger, IHttpContextAccessor contextAccessor, IAppointmentDateService appointmentDateService, IEmailService emailService, ITimeSlotService timeSlotService, IHubContext<ScheduleHub> hubContext, IDiseasePredictionService diseasePredictionService)
+        private readonly IManagingDoctorService _managingDoctorService;
+
+        public PatientController(AppDbContext appDbContext,IPatientService patientService ,IDoctorService doctorService, ILogger<PatientController> logger, IHttpContextAccessor contextAccessor, IAppointmentDateService appointmentDateService, IEmailService emailService, ITimeSlotService timeSlotService, IHubContext<ScheduleHub> hubContext, IDiseasePredictionService diseasePredictionService, IManagingDoctorService managingDoctorService)
         {
             _appDbContext = appDbContext;
             _patientService = patientService;
@@ -42,12 +45,23 @@ namespace AppointmentHospital.Controllers
             _timeSlotService = timeSlotService;
             _hubContext = hubContext;
             _predictionService = diseasePredictionService;
+            _managingDoctorService = managingDoctorService;
         }
 
         [AllowAnonymous]
-        public IActionResult Index()
+        public async Task<IActionResult> Index(string? selectSpec)
         {
-            List<Doctor> doctors = _doctorService.getAllDoctors();
+            List<Doctor> doctors = await _doctorService.getAllDoctors(selectSpec);
+            ViewBag.Specialization = _managingDoctorService.GetSpecialization();
+             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest"){
+                var doctorDtos = doctors.Select(d => new {
+                    id = d.DoctorId,
+                    name = d.FullName,
+                    specialization = EnumExtensions.GetDisplayName(d.Specializaiton),
+                    imagePath = "~/images/doctor/doctor1"
+                });
+                return Json(new {success = true, doctors = doctorDtos});
+             }
             return View(doctors);
         }
 
@@ -287,6 +301,8 @@ namespace AppointmentHospital.Controllers
             return Ok();
         }
         [HttpGet]
+        [AllowAnonymous]
+        [Authorize(Roles = "Patient,Doctor")]
         public async Task<IActionResult> GetFeedback(Guid id) {
             var feedback = await _patientService.GetFeedback(id);
             return Json(feedback);

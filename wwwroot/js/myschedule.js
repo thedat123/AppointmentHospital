@@ -143,6 +143,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (actionCell) {
                         actionCell.innerHTML = '';
                         console.log(actionCell);
+                        createButton(actionCell, 'Details', appointmentId);
                         createViewFeedbackButton(actionCell);
                     }
                     else {

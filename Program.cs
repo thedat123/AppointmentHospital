@@ -96,26 +96,26 @@ namespace AppointmentHospital
                             .AddDefaultTokenProviders();
             builder.Services.Configure<IdentityOptions>(options => {
                 // Thiết lập về Password
-                options.Password.RequireDigit = false; // Không bắt phải có số
-                options.Password.RequireLowercase = false; // Không bắt phải có chữ thường
-                options.Password.RequireNonAlphanumeric = false; // Không bắt ký tự đặc biệt
-                options.Password.RequireUppercase = false; // Không bắt buộc chữ in
-                options.Password.RequiredLength = 3; // Số ký tự tối thiểu của password
-                options.Password.RequiredUniqueChars = 1; // Số ký tự riêng biệt
+                options.Password.RequireDigit = false;
+                options.Password.RequireLowercase = false; 
+                options.Password.RequireNonAlphanumeric = false; 
+                options.Password.RequireUppercase = false; 
+                options.Password.RequiredLength = 3;
+                options.Password.RequiredUniqueChars = 1; 
 
-                // Cấu hình Lockout - khóa user
-                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5); // Khóa 5 phút
-                options.Lockout.MaxFailedAccessAttempts = 5; // Thất bại 5 lầ thì khóa
+                
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+                options.Lockout.MaxFailedAccessAttempts = 5; 
                 options.Lockout.AllowedForNewUsers = true;
 
                 // Cấu hình về User.
-                options.User.AllowedUserNameCharacters = // các ký tự đặt tên user
+                options.User.AllowedUserNameCharacters = 
                     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
-                options.User.RequireUniqueEmail = true;  // Email là duy nhất
+                options.User.RequireUniqueEmail = true;  
 
                 // Cấu hình đăng nhập.
-                options.SignIn.RequireConfirmedEmail = true;            // Cấu hình xác thực địa chỉ email (email phải tồn tại)
-                options.SignIn.RequireConfirmedPhoneNumber = false;     // Xác thực số điện thoại
+                options.SignIn.RequireConfirmedEmail = true;            
+                options.SignIn.RequireConfirmedPhoneNumber = false;    
 
             });
             builder.Services.ConfigureApplicationCookie(options =>

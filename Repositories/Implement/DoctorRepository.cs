@@ -1,8 +1,10 @@
 using System;
 using AppointmentHospital.Entity;
+using AppointmentHospital.EnumStatus;
 using AppointmentHospital.Models;
 using AppointmentHospital.ViewModels;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace AppointmentHospital.Repositories.Implement;
 
@@ -13,8 +15,14 @@ public class DoctorRepository : IDoctorRepository
         _context = context; 
     }
 
-    public List<Doctor> getAllDoctors(){
-        return _context.Doctors.ToList();
+    public async Task<List<Doctor>> getAllDoctors(string selectSpec){
+        var query = _context.Doctors.AsQueryable();
+        if(!selectSpec.IsNullOrEmpty()){
+            int.TryParse(selectSpec, out int selectSpecInt);
+            Specialization spec = (Specialization)Enum.ToObject(typeof(Specialization), selectSpecInt);
+            query = query.Where(d => d.Specializaiton == spec);
+        }
+        return await query.ToListAsync();
     }
 
     public Doctor getDoctorById(Guid doctorId){
