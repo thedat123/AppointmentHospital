@@ -7,7 +7,7 @@ namespace AppointmentHospital.Services;
 
 public interface ITimeSlotService
 {
-    public Task<Pagination<TimeSlot>> GetTimeSlotByDoctorId(Guid doctorId, int page);
+    public Task<Pagination<TimeSlot>> GetTimeSlotByDoctorId(Guid doctorId, int page, string sortBy, string sortOrder, DateTime? filterDate);
     public void AddTimeSlot(TimeSlot timeSlot);
     public List<DateTime> GetRemainingDaysInMonth(DateTime startDate, DateTime endOfMonth, List<DaySchedule> schedules);
     public void UpdateTimeSlotAvalableStatusByTimeSlotID(Guid timeSlotID);

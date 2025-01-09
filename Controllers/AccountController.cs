@@ -10,6 +10,7 @@ using AppointmentHospital.Services.Implement;
 using Microsoft.Extensions.Options;
 using AppointmentHospital.Configuration.BaseUrl;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AppointmentHospital.Controllers
 {
@@ -22,7 +23,7 @@ namespace AppointmentHospital.Controllers
         private readonly IEmailService _emailService;
         private readonly IOptions<BaseUrl> _options;
         private readonly AppDbContext _appDbContext;
-        public AccountController(IAccountService accountService, AppDbContext appDbContext ,IOptions<BaseUrl> options ,IEmailService emailService, IHttpContextAccessor contextAccessor, UserManager<User> userManager, SignInManager<User> signInManager)
+        public AccountController(IAccountService accountService, AppDbContext appDbContext, IOptions<BaseUrl> options, IEmailService emailService, IHttpContextAccessor contextAccessor, UserManager<User> userManager, SignInManager<User> signInManager)
         {
             _accountService = accountService;
             _contextAccessor = contextAccessor;
@@ -52,7 +53,7 @@ namespace AppointmentHospital.Controllers
                 return View(request);
             }
             var result = await _accountService.LoginAsync(request);
-            if(result.Status == 403)
+            if (result.Status == 403)
             {
                 ModelState.AddModelError("", "Please confirmed before login");
                 var userFounded = await _userManager.FindByEmailAsync(request.Email);
@@ -101,12 +102,12 @@ namespace AppointmentHospital.Controllers
         {
             string externalMail = null;
             var info = await _signInManager.GetExternalLoginInfoAsync();
-            if(info == null)
+            if (info == null)
             {
                 return RedirectToAction("Login");
             }
             var loginResult = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, false);
-            if(loginResult.Succeeded)
+            if (loginResult.Succeeded)
             {
                 var userId = _accountService.GetIdByEmail(info.Principal.FindFirstValue(ClaimTypes.Email));
                 _contextAccessor.HttpContext.Session.SetString("PatientId", userId.ToString());
@@ -122,7 +123,7 @@ namespace AppointmentHospital.Controllers
                 var user = await _userManager.FindByEmailAsync(externalMail);
                 if (user == null)
                 {
-                    if(user == null)
+                    if (user == null)
                     {
                         var newUser = new User
                         {
@@ -152,7 +153,7 @@ namespace AppointmentHospital.Controllers
                     }
                 }
                 //Existed user but dont confiremed email -> Confirmed email - Link
-                if (!( await _userManager.IsEmailConfirmedAsync(user)))
+                if (!(await _userManager.IsEmailConfirmedAsync(user)))
                 {
                     var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     var identityResult = await _userManager.ConfirmEmailAsync(user, token);
@@ -169,9 +170,9 @@ namespace AppointmentHospital.Controllers
                     return RedirectToAction("Index", "Patient");
                 }
                 //Existed user but dont link with external provider
-                var addResult=  await _userManager.AddLoginAsync(user, info);
+                var addResult = await _userManager.AddLoginAsync(user, info);
                 await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, false);
-                if(!addResult.Succeeded)
+                if (!addResult.Succeeded)
                 {
                     return RedirectToAction("Login");
                 }
@@ -210,7 +211,7 @@ namespace AppointmentHospital.Controllers
             }
             return View("ConfirmedEmail");
         }
-        
+
         [HttpPost]
         public async Task<IActionResult> Logout()
         {
@@ -246,7 +247,7 @@ namespace AppointmentHospital.Controllers
 
         public IActionResult ResetPassword(string code, string email)
         {
-            if(code == null)
+            if (code == null)
             {
                 return NotFound("Cannot find the token");
             }
@@ -257,12 +258,12 @@ namespace AppointmentHospital.Controllers
         [HttpPost]
         public async Task<IActionResult> ResetPassword(ResetPasswordRequest request)
         {
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 return View();
             }
             var user = await _userManager.FindByEmailAsync(request.Email);
-            if(user == null)
+            if (user == null)
             {
                 ModelState.AddModelError("ResetPassword", "Cannot find user");
                 return View();
@@ -273,7 +274,7 @@ namespace AppointmentHospital.Controllers
                 ModelState.AddModelError("ResetPassword", "Cannot reset pasword");
                 return View();
             }
-            return View("Login", new LoginUserRequest { Email = string.Empty, Password = string.Empty});
+            return View("Login", new LoginUserRequest { Email = string.Empty, Password = string.Empty });
         }
 
         [HttpPost]
@@ -291,7 +292,7 @@ namespace AppointmentHospital.Controllers
             await SendMail(user);
             return View("ConfirmEmail", email);
         }
-        private  async Task SendMail(User user)
+        private async Task SendMail(User user)
         {
             var tokenConfirmedEmail = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(tokenConfirmedEmail));
@@ -299,6 +300,11 @@ namespace AppointmentHospital.Controllers
             var url = $"{_options.Value.LocalHost}{urlBase}";
             var body = await _emailService.GetConfirmedEmailTemplate(user.UserName, url);
             BackgroundJob.Enqueue<IEmailService>(es => es.SendMailAsync(user.Email, "Xác thực email", body));
+        }
+        [AllowAnonymous]
+        public IActionResult AccessDeny()
+        {
+            return View();
         }
     }
 }

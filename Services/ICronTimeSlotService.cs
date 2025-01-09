@@ -4,5 +4,5 @@ namespace AppointmentHospital.Services;
 
 public interface ICronTimeSlotService
 {
-    Task DeleteOldSchedules();
+    public Task DeleteOldTimeSlotAsync();
 }

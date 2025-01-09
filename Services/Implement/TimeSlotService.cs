@@ -14,9 +14,9 @@ public class TimeSlotService : ITimeSlotService
         timeSlotRepository = _timeslotRepository;
     }
 
-    public async Task<Pagination<TimeSlot>> GetTimeSlotByDoctorId(Guid doctorId, int page)
+    public async Task<Pagination<TimeSlot>> GetTimeSlotByDoctorId(Guid doctorId, int page, string sortBy, string sortOrder, DateTime? filterDate)
     {
-        return await timeSlotRepository.GetTimeSlotByDoctorId(doctorId, page);
+        return await timeSlotRepository.GetTimeSlotByDoctorId(doctorId, page, sortBy, sortOrder, filterDate);
     }
 
     public void AddTimeSlot(TimeSlot timeSlot)
