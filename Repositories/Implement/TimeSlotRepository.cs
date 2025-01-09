@@ -2,6 +2,7 @@ using System;
 using AppointmentHospital.Entity;
 using AppointmentHospital.Helpers;
 using AppointmentHospital.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace AppointmentHospital.Repositories.Implement;
 
@@ -12,9 +13,21 @@ public class TimeSlotRepository : ITimeSlotRepository
         _context = context; 
     }
 
-    public async Task<Pagination<TimeSlot>> GetTimeSlotByDoctorId(Guid doctorId, int page){
-        var timeSlots = _context.TimeSlots.Where(x => x.DoctorId == doctorId);
-        var paginatedTimeSlots = await Pagination<TimeSlot>.PaginatedList(timeSlots, page);
+    public async Task<Pagination<TimeSlot>> GetTimeSlotByDoctorId(Guid doctorId, int page,string sortBy, string sortOrder, DateTime? filterDate){
+        var query = _context.TimeSlots.Where(x => x.DoctorId == doctorId);
+        query = sortBy.ToLower() switch {
+            "days" => sortOrder == "asc" ? query = query.OrderBy(t => t.StartTime.Date)
+                                         : query = query.OrderByDescending(t => t.StartTime.Date),
+            "starttime" => sortOrder == "asc" ? query = query.OrderBy(t => t.StartTime.TimeOfDay)
+                                              : query = query.OrderByDescending(t => t.StartTime.TimeOfDay),
+            "endtime" => sortOrder == "asc" ? query = query.OrderBy(t => t.EndTime.TimeOfDay)
+                                           : query = query.OrderByDescending(t => t.EndTime.TimeOfDay)
+        };
+        if(filterDate.HasValue)
+        {
+            query = query.Where(t => t.StartTime.Date == filterDate.Value.Date);
+        }
+        var paginatedTimeSlots = await Pagination<TimeSlot>.PaginatedList(query, page);
         return paginatedTimeSlots;
     }
 
@@ -82,15 +95,11 @@ public class TimeSlotRepository : ITimeSlotRepository
         }
     }
 
-    public void DeleteOldTimeSlot(){
-        var today = DateTime.Today;
-        var yesterday = today.AddDays(-1);
+    public async Task DeleteOldTimeSlotAsync()
+    {
+        var yesterday = DateTime.Today.AddDays(-1);
 
-        var schedulesToDelete = _context.TimeSlots
-                                        .Where(s => s.EndTime.Date <= yesterday.Date)
-                                        .ToList();
-
-        _context.TimeSlots.RemoveRange(schedulesToDelete);
-        _context.SaveChangesAsync();
+        await _context.Database.ExecuteSqlRawAsync(
+            "DELETE FROM TimeSlots WHERE EndTime <= {0}", yesterday);
     }
 }

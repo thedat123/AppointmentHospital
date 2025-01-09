@@ -10,10 +10,9 @@ public class CronTimeSlotService : ICronTimeSlotService
         _timeSlotRepository = timeSlotRepository;
     }
 
-    public Task DeleteOldSchedules()
+    public async Task DeleteOldTimeSlotAsync()
     {
-        _timeSlotRepository.DeleteOldTimeSlot();
+        await _timeSlotRepository.DeleteOldTimeSlotAsync();
         Console.WriteLine($"Deleted schedule(s) from yesterday at {DateTime.Now}");
-        return Task.CompletedTask;
     }
 }

@@ -121,8 +121,9 @@ namespace AppointmentHospital
             builder.Services.ConfigureApplicationCookie(options =>
             {
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(45);
-                options.LoginPath = "/Identity/Account/Login";
-                options.LogoutPath = "/Identity/Account/Logout";
+                options.LoginPath = "/Account/Login";
+                options.LogoutPath = "/Account/Logout";
+                options.AccessDeniedPath = "/Account/AccessDeny";
             });
 
             builder.Services.AddHangfire(config =>
@@ -162,7 +163,7 @@ namespace AppointmentHospital
             using (var scope = app.Services.CreateScope())
             {
                 var cronTimeSlotService = scope.ServiceProvider.GetRequiredService<ICronTimeSlotService>();
-                await cronTimeSlotService.DeleteOldSchedules();
+                await cronTimeSlotService.DeleteOldTimeSlotAsync();
             }
 
             app.MapHub<ScheduleHub>("/scheduleHub");

@@ -16,6 +16,7 @@ using AppointmentHospital.Services.Implement;
 
 namespace AppointmentHospital.Controllers
 {
+    [Authorize(Roles ="Patient")]
     public class PatientController : Controller
     {
         private readonly IDoctorService _doctorService;
@@ -43,6 +44,7 @@ namespace AppointmentHospital.Controllers
             _predictionService = diseasePredictionService;
         }
 
+        [AllowAnonymous]
         public IActionResult Index()
         {
             List<Doctor> doctors = _doctorService.getAllDoctors();

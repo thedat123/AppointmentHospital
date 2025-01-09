@@ -13,6 +13,7 @@ using Newtonsoft.Json;
 
 namespace AppointmentHospital.Controllers
 {
+    [Authorize(Roles = "Doctor")]
     public class DoctorController : Controller
     {
         private readonly IDoctorService doctorService;
@@ -24,7 +25,7 @@ namespace AppointmentHospital.Controllers
         private readonly IPatientService _patientService;
         private readonly IHubContext<ScheduleHub> _hubContext;
         private readonly IManagingDoctorService _managingDoctorService;
-        public DoctorController(ILogger<DoctorController> logger, IDoctorService doctorService, IHttpContextAccessor contextAccessor, IAppointmentDateService appointmentDateService, ITimeSlotService timeSlotService, IEmailService emailService, IPatientService patientService, IManagingDoctorService managingDoctorService ,IHubContext<ScheduleHub> hubContext)
+        public DoctorController(ILogger<DoctorController> logger, IDoctorService doctorService, IHttpContextAccessor contextAccessor, IAppointmentDateService appointmentDateService, ITimeSlotService timeSlotService, IEmailService emailService, IPatientService patientService, IManagingDoctorService managingDoctorService, IHubContext<ScheduleHub> hubContext)
         {
             _logger = logger;
             this.doctorService = doctorService;
@@ -51,7 +52,7 @@ namespace AppointmentHospital.Controllers
 
             var stats = new
             {
-                PendingCount =  allAppointments.Count(a => a.Status == AppointmentStatus.Pending),
+                PendingCount = allAppointments.Count(a => a.Status == AppointmentStatus.Pending),
                 ConfirmedCount = allAppointments.Count(a => a.Status == AppointmentStatus.Confirmed),
                 CompletedCount = allAppointments.Count(a => a.Status == AppointmentStatus.Completed),
                 CanceledCount = allAppointments.Count(a => a.Status == AppointmentStatus.Canceled)
@@ -63,7 +64,7 @@ namespace AppointmentHospital.Controllers
 
             ViewBag.Stats = stats;
             ViewBag.DoctorName = doctor.FullName ?? "Unknown Doctor";
-            ViewBag.SelectedStatus = status; 
+            ViewBag.SelectedStatus = status;
 
             return View(filteredAppointments);
         }
@@ -74,10 +75,13 @@ namespace AppointmentHospital.Controllers
         {
             var appointment = _appointmentDateService.GetAppointmentsById(id);
             var patient = await _patientService.GetPatientById(appointment.PatientId);
-            if((AppointmentStatus)status == AppointmentStatus.Canceled){
+            if ((AppointmentStatus)status == AppointmentStatus.Canceled)
+            {
                 string body = await _emailService.GetCancelledTemplate(appointment.AppointmentTime, appointment.Doctor.FullName, appointment.Patient.FullName);
                 await _emailService.SendMailAsync(patient.EmailAddress, $"Medical Appointment Of ({appointment.Patient.FullName})", body);
-            } else if((AppointmentStatus)status == AppointmentStatus.Confirmed){
+            }
+            else if ((AppointmentStatus)status == AppointmentStatus.Confirmed)
+            {
                 string body = await _emailService.GetConfirmedTemplate(appointment.AppointmentTime, appointment.Doctor.FullName, appointment.Patient.FullName);
                 await _emailService.SendMailAsync(patient.EmailAddress, $"Medical Appointment Of ({appointment.Patient.FullName})", body);
             }
@@ -87,14 +91,16 @@ namespace AppointmentHospital.Controllers
             return RedirectToAction("Index");
         }
 
-        public async Task<IActionResult> Calendar(int page = 1)
+        public async Task<IActionResult> Calendar(DateTime? filterDate, int page = 1, string sortBy = "Days", string sortOrder = "asc")
         {
             var doctorId = _contextAccessor.HttpContext?.Session.GetString("DoctorId");
             var doctor = doctorService.getDoctorById(Guid.Parse(doctorId));
             ViewBag.DoctorName = doctor.FullName ?? "Unknown Doctor";
             ViewBag.Speciality = doctor.Specializaiton.GetDisplayName().ToString() ?? "Unknown Speciality";
-
-            var timeSlot = await _timeSlotService.GetTimeSlotByDoctorId(Guid.Parse(doctorId), page);
+            ViewBag.CurrentSort = sortBy;
+            ViewBag.CurrentSortOrder = sortOrder;
+            ViewBag.FilterDate = filterDate?.ToString("yyyy-MM-dd");    
+            var timeSlot = await _timeSlotService.GetTimeSlotByDoctorId(Guid.Parse(doctorId), page, sortBy, sortOrder, filterDate);
             return View(timeSlot);
         }
 
@@ -143,7 +149,7 @@ namespace AppointmentHospital.Controllers
                             EndTime = day.Date.Add(nextHour),
                             Available = true
                         });
-                        
+
                         currentStartTime = nextHour;
                     }
                 }
@@ -172,27 +178,29 @@ namespace AppointmentHospital.Controllers
         }
 
         public IActionResult PersonalInfo()
-         {
-            if(User.HasClaim(c => c.Type == ClaimTypes.NameIdentifier)){
+        {
+            if (User.HasClaim(c => c.Type == ClaimTypes.NameIdentifier))
+            {
                 var doctorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 var doctor = doctorService.getDoctorById(Guid.Parse(doctorId));
                 ViewBag.Specializaiton = _managingDoctorService.GetSpecialization();
                 ViewBag.DoctorId = doctorId;
                 return View(doctor);
             }
-            
+
             return RedirectToAction("Index");
         }
 
         [HttpPost]
-        public async Task<IActionResult> UpdateProfile(Doctor request, string phoneNumber, Specialization specialization) {
-             var doctor = await  doctorService.updateDoctor(request, phoneNumber);
-             ViewBag.Specializaiton = _managingDoctorService.GetSpecialization();
-             ViewBag.DoctorId = doctor.DoctorId;
+        public async Task<IActionResult> UpdateProfile(Doctor request, string phoneNumber, Specialization specialization)
+        {
+            var doctor = await doctorService.updateDoctor(request, phoneNumber);
+            ViewBag.Specializaiton = _managingDoctorService.GetSpecialization();
+            ViewBag.DoctorId = doctor.DoctorId;
 
-             await _hubContext.Clients.All.SendAsync("UpdateDoctorProfile", doctor);
-             return View("PersonalInfo", doctor);
-        } 
+            await _hubContext.Clients.All.SendAsync("UpdateDoctorProfile", doctor);
+            return View("PersonalInfo", doctor);
+        }
 
         public IActionResult Search(string query)
         {
@@ -210,9 +218,11 @@ namespace AppointmentHospital.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> SubmitDiagnosis(Guid AppointmentId, Guid PatientId, Guid DoctorId, Guid AcquaintanceId, DateTime DateTime, string DiagnosisDetails, string PrescribedMedications, string DoctorNotes){
+        public async Task<IActionResult> SubmitDiagnosis(Guid AppointmentId, Guid PatientId, Guid DoctorId, Guid AcquaintanceId, DateTime DateTime, string DiagnosisDetails, string PrescribedMedications, string DoctorNotes)
+        {
             List<string> prescribedMedicationList = PrescribedMedications?.Split(',').ToList() ?? new List<string>();
-            DiagnosisHistory diagnosisHistory = new DiagnosisHistory{
+            DiagnosisHistory diagnosisHistory = new DiagnosisHistory
+            {
                 AppointmentId = AppointmentId,
                 PatientId = PatientId,
                 DoctorId = DoctorId,
@@ -250,7 +260,8 @@ namespace AppointmentHospital.Controllers
             return RedirectToAction("Index");
         }
 
-        public IActionResult DeleteTimeSlot(Guid id){
+        public IActionResult DeleteTimeSlot(Guid id)
+        {
             var timeSlot = _timeSlotService.GetTimeSlotById(id);
             _timeSlotService.DeleteTimeSlot(id);
             return RedirectToAction("Calendar");
@@ -358,14 +369,16 @@ namespace AppointmentHospital.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> SuggestDay(Guid timeSlotId, DateTime suggestDate){
+        public async Task<IActionResult> SuggestDay(Guid timeSlotId, DateTime suggestDate)
+        {
             var doctorId = _contextAccessor.HttpContext?.Session.GetString("DoctorId");
             var timeSlot = _timeSlotService.GetTimeSlotById(timeSlotId);
 
             var appointment = _appointmentDateService.GetAppointmentsByDoctorIdAndStartTime(Guid.Parse(doctorId), timeSlot.StartTime);
             var patient = await _patientService.GetPatientById(appointment.PatientId);
 
-            if(appointment != null){
+            if (appointment != null)
+            {
                 _appointmentDateService.UpdateStatusAppointment(appointment.AppointmentId, AppointmentStatus.Canceled);
                 _timeSlotService.DeleteTimeSlot(timeSlot.TimeSlotId);
 
