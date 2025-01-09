@@ -49,19 +49,17 @@ namespace AppointmentHospital.Controllers
                 return NotFound("Doctor not found.");
             }
 
-            var allAppointments = await _appointmentDateService.GetAppointmentsByDoctorId(Guid.Parse(doctorId), page);
-
             var stats = new
             {
-                PendingCount = allAppointments.Count(a => a.Status == AppointmentStatus.Pending),
-                ConfirmedCount = allAppointments.Count(a => a.Status == AppointmentStatus.Confirmed),
-                CompletedCount = allAppointments.Count(a => a.Status == AppointmentStatus.Completed),
-                CanceledCount = allAppointments.Count(a => a.Status == AppointmentStatus.Canceled)
+                PendingCount = _appointmentDateService.CountAppointmentDoctorIdStatus(Guid.Parse(doctorId), AppointmentStatus.Pending),
+                ConfirmedCount = _appointmentDateService.CountAppointmentDoctorIdStatus(Guid.Parse(doctorId), AppointmentStatus.Confirmed),
+                CompletedCount = _appointmentDateService.CountAppointmentDoctorIdStatus(Guid.Parse(doctorId), AppointmentStatus.Completed),
+                CanceledCount = _appointmentDateService.CountAppointmentDoctorIdStatus(Guid.Parse(doctorId), AppointmentStatus.Canceled)
             };
 
             var filteredAppointments = status.HasValue
                 ? await _appointmentDateService.GetAppointmentsByDoctorId(Guid.Parse(doctorId), status.Value, page)
-                : allAppointments;
+                : await _appointmentDateService.GetAppointmentsByDoctorId(Guid.Parse(doctorId), page);
 
             ViewBag.Stats = stats;
             ViewBag.DoctorName = doctor.FullName ?? "Unknown Doctor";
@@ -325,45 +323,45 @@ namespace AppointmentHospital.Controllers
 
             var timeSlotIds = JsonConvert.DeserializeObject<List<Guid>>(timeSlotIdsJson);
             var offDate = DateTime.Parse(offDateStr);
-
             var doctorId = Guid.Parse(_contextAccessor.HttpContext?.Session.GetString("DoctorId")!);
+
             var patientEmails = new HashSet<string>();
 
             foreach (var timeSlotId in timeSlotIds)
             {
                 var timeSlot = _timeSlotService.GetTimeSlotById(timeSlotId);
+                if (timeSlot == null) continue;
 
-                if (timeSlot != null)
+                var appointments = _appointmentDateService.GetAppointmentsByDoctorIdAndDate(doctorId, offDate);
+                foreach (var appointment in appointments)
                 {
-                    var appointments = _appointmentDateService.GetAppointmentsByDoctorIdAndDate(doctorId, offDate);
-
-                    foreach (var appointment in appointments)
-                    {
-                        var patient = await _patientService.GetPatientById(appointment.PatientId);
-
-                        if (patient != null && !patientEmails.Contains(patient.EmailAddress))
-                        {
-                            patientEmails.Add(patient.EmailAddress);
-
-                            _appointmentDateService.UpdateStatusAppointment(appointment.AppointmentId, AppointmentStatus.Canceled);
-                            string body = await _emailService.GetCancelAndSuggestTemplate(
-                                appointment.AppointmentTime,
-                                appointment.Doctor.FullName,
-                                patient.FullName,
-                                suggestDate
-                            );
-
-                            BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendMailAsync(patient.EmailAddress,$"Medical Appointment Of ({patient.FullName})", body));
-                        }
-                    }
-
-                    _timeSlotService.DeleteTimeSlot(timeSlot.TimeSlotId);
+                    await ProcessAppointmentAsync(appointment, patientEmails, suggestDate);
                 }
+
+                _timeSlotService.DeleteTimeSlot(timeSlot.TimeSlotId);
             }
 
             return RedirectToAction("Calendar");
         }
 
+        private async Task ProcessAppointmentAsync(Appointment appointment, HashSet<string> patientEmails, DateTime suggestDate)
+        {
+            var patient = await _patientService.GetPatientById(appointment.PatientId);
+            if (patient == null || patientEmails.Contains(patient.EmailAddress)) return;
+
+            patientEmails.Add(patient.EmailAddress);
+
+            _appointmentDateService.UpdateStatusAppointment(appointment.AppointmentId, AppointmentStatus.Canceled);
+            string emailBody = await _emailService.GetCancelAndSuggestTemplate(
+                appointment.AppointmentTime,
+                appointment.Doctor.FullName,
+                patient.FullName,
+                suggestDate
+            );
+
+            BackgroundJob.Enqueue<IEmailService>(emailService =>
+                emailService.SendMailAsync(patient.EmailAddress, $"Medical Appointment Of ({patient.FullName})", emailBody));
+        }
 
         [HttpPost]
         public async Task<IActionResult> SuggestDay(Guid timeSlotId, DateTime suggestDate)
