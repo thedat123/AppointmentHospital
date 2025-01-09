@@ -6,6 +6,7 @@ using AppointmentHospital.Helpers;
 using AppointmentHospital.Models;
 using AppointmentHospital.Services;
 using AppointmentHospital.ViewModels;
+using Hangfire;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -78,12 +79,12 @@ namespace AppointmentHospital.Controllers
             if ((AppointmentStatus)status == AppointmentStatus.Canceled)
             {
                 string body = await _emailService.GetCancelledTemplate(appointment.AppointmentTime, appointment.Doctor.FullName, appointment.Patient.FullName);
-                await _emailService.SendMailAsync(patient.EmailAddress, $"Medical Appointment Of ({appointment.Patient.FullName})", body);
+                BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendMailAsync(patient.EmailAddress, $"Medical Appointment Of ({appointment.Patient.FullName})", body ));
             }
             else if ((AppointmentStatus)status == AppointmentStatus.Confirmed)
             {
                 string body = await _emailService.GetConfirmedTemplate(appointment.AppointmentTime, appointment.Doctor.FullName, appointment.Patient.FullName);
-                await _emailService.SendMailAsync(patient.EmailAddress, $"Medical Appointment Of ({appointment.Patient.FullName})", body);
+                BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendMailAsync(patient.EmailAddress, $"Medical Appointment Of ({appointment.Patient.FullName})", body ));
             }
 
             _appointmentDateService.UpdateStatusAppointment(id, (AppointmentStatus)status);
@@ -253,7 +254,7 @@ namespace AppointmentHospital.Controllers
             var patient = await _patientService.GetPatientById(PatientId);
 
             string body = await _emailService.GetCompletedTemplate(patient.FullName, doctorService.getDoctorById(DoctorId).FullName, DiagnosisDetails, PrescribedMedicationsHtml, DoctorNotes);
-            await _emailService.SendMailAsync(patient.EmailAddress, $"Medical Appointment Of ({patient.FullName})", body);
+            BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendMailAsync(patient.EmailAddress,$"Medical Appointment Of ({patient.FullName})", body));
 
             _appointmentDateService.UpdateStatusAppointment(AppointmentId, AppointmentStatus.Completed);
             await _hubContext.Clients.All.SendAsync("UpdateStatus", AppointmentId, AppointmentStatus.Completed);
@@ -352,11 +353,7 @@ namespace AppointmentHospital.Controllers
                                 suggestDate
                             );
 
-                            await _emailService.SendMailAsync(
-                                patient.EmailAddress,
-                                $"Medical Appointment Of ({patient.FullName})",
-                                body
-                            );
+                            BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendMailAsync(patient.EmailAddress,$"Medical Appointment Of ({patient.FullName})", body));
                         }
                     }
 
@@ -383,7 +380,7 @@ namespace AppointmentHospital.Controllers
                 _timeSlotService.DeleteTimeSlot(timeSlot.TimeSlotId);
 
                 string body = await _emailService.GetCancelAndSuggestTemplate(appointment.AppointmentTime, appointment.Doctor.FullName, appointment.Patient.FullName, suggestDate);
-                await _emailService.SendMailAsync(patient.EmailAddress, $"Medical Appointment Of ({patient.FullName})", body);
+                BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendMailAsync(patient.EmailAddress, $"Medical Appointment Of ({patient.FullName})", body));
             }
 
             return RedirectToAction("Calendar");
