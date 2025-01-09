@@ -155,7 +155,12 @@ namespace AppointmentHospital.Controllers
                 _appointmentDateService.AddAppointment(appointment);
                 _timeSlotService.UpdateTimeSlotAvalableStatusByTimeSlotID(TimeSlotId);
                 string body = await _emailService.GetBookingTemplate(appointment.AppointmentTime, doctor.FullName, patient.FullName);
-                await _emailService.SendMailAsync(patient.EmailAddress, $"Medical Appointment Of ({patient.FullName})", body);
+                string bodyRemind = await _emailService.GetRemindedTemplate(appointment.AppointmentTime, doctor.FullName, patient.FullName);
+                BackgroundJob.Enqueue<IEmailService>(emailservice => emailservice.SendMailAsync(patient.EmailAddress, $"Medical Appointment Of ({patient.FullName})", body));
+                var remindTime = appointment.AppointmentTime.Date.AddDays(-1).AddHours(20);
+                if(remindTime >= DateTime.Now) {
+                    BackgroundJob.Schedule<IEmailService>(emailservice => emailservice.SendMailAsync(patient.EmailAddress, $"Remind appointment Of ({patient.FullName})", bodyRemind), remindTime);
+                }
                 TempData["SuccessMessage"] = "Your appointment has been booked successfully!";
 
                 var updatedDate = appointment.AppointmentTime.Date.ToString("yyyy-MM-dd");
@@ -223,8 +228,12 @@ namespace AppointmentHospital.Controllers
                 _appointmentDateService.AddAppointment(appointment);
                 _timeSlotService.UpdateTimeSlotAvalableStatusByTimeSlotID(TimeSlotId);
                 string body = await _emailService.GetBookingTemplate(appointment.AppointmentTime, doctor.FullName, patient.FullName);
-                await _emailService.SendMailAsync(patient.EmailAddress, $"Medical Appointment Of ({patient.FullName})", body);
-
+                string remindBody = await _emailService.GetRemindedTemplate(appointment.AppointmentTime, doctor.FullName, aquaintance.Name);
+                BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendMailAsync(patient.EmailAddress,$"Medical Appointment Of ({patient.FullName})", body));
+                var remindTime = appointment.AppointmentTime.Date.AddDays(-1).AddHours(20);
+                if(remindTime > DateTime.Now){
+                    BackgroundJob.Schedule<IEmailService>(emailService => emailService.SendMailAsync(patient.Address,$"Remind appointment Of ({patient.FullName})", remindBody ), remindTime);
+                }
                 TempData["SuccessMessage"] = "Appointment for acquaintance has been booked successfully!";
 
                 var updatedDate = appointment.AppointmentTime.Date.ToString("yyyy-MM-dd");

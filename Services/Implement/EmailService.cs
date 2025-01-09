@@ -54,8 +54,8 @@ namespace AppointmentHospital.Services.Implement
         {
             string content = await System.IO.File.ReadAllTextAsync(Path.Combine(_webHostEnvironment.WebRootPath, "assets", "template", "mails", "remindedTemplate.html"));
             content = content.Replace("{{fullUserName}}", fullUserName);
-            content = content.Replace("{{appointmentTime}}", appointmentTime.ToString("dd/MM/yyyy HH:mm"));
-            content = content.Replace("{{doctorName}}", doctorName);
+            content = content.Replace("{{AppointmentTime}}", appointmentTime.ToString("dd/MM/yyyy HH:mm"));
+            content = content.Replace("{{DoctorName}}", doctorName);
             return content;
         }
 
