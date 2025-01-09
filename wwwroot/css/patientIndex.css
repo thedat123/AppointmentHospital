@@ -135,3 +135,24 @@
 .text-success {
     font-size: 1.5rem;
 }
+
+.specialization-filter select {
+    height: 45px;
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+    padding: 0 1rem;
+    background-color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.specialization-filter select:focus {
+    border-color: #4e73df;
+    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+}
+
+.doctor-card {
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
