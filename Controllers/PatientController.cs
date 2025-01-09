@@ -53,15 +53,7 @@ namespace AppointmentHospital.Controllers
         {
             List<Doctor> doctors = await _doctorService.getAllDoctors(selectSpec);
             ViewBag.Specialization = _managingDoctorService.GetSpecialization();
-             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest"){
-                var doctorDtos = doctors.Select(d => new {
-                    id = d.DoctorId,
-                    name = d.FullName,
-                    specialization = EnumExtensions.GetDisplayName(d.Specializaiton),
-                    imagePath = "~/images/doctor/doctor1"
-                });
-                return Json(new {success = true, doctors = doctorDtos});
-             }
+            ViewBag.SelectedSpec = selectSpec;
             return View(doctors);
         }
 
