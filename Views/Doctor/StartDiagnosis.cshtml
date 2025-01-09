@@ -255,36 +255,36 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    const DOM = {
+        medicationContainer: document.getElementById('prescribedMedicationsContainer'),
+        addButton: document.getElementById('addMedication'),
+        hiddenInput: document.getElementById('PrescribedMedications'),
+        submitButton: document.getElementById('buttonSubmit'),
+        submitForm: document.getElementById('submitForm')
+    };
+
+    function initializeSignalR() {
         const connection = new signalR.HubConnectionBuilder()
             .withUrl('/scheduleHub')
             .build();
 
         connection.start()
-            .then(() => {
-                console.log("Connected to SignalR Hub");
-            })
+            .then(() => console.log("Connected to SignalR Hub"))
             .catch(err => console.error("SignalR connection error:", err));
 
-        connection.on("UpdatePatientProfile", (patient) => {
-            console.log(`Information is updated`);
-
+        connection.on("UpdatePatientProfile", () => {
             const scrollPosition = window.scrollY;
             window.location.reload();
             window.scrollTo(0, scrollPosition);
         });
-    });
+    }
 
-    document.addEventListener('DOMContentLoaded', function () {
-        const container = document.getElementById('prescribedMedicationsContainer');
-        const addButton = document.getElementById('addMedication');
-        const hiddenInput = document.getElementById('PrescribedMedications');
-        const buttonSubmit = document.getElementById('buttonSubmit');
-        const submitForm = document.getElementById('submitForm');
-        if (buttonSubmit && submitForm) {
-            buttonSubmit.addEventListener('click', function (e) {
-                 e.preventDefault();
-                buttonSubmit.disabled = true;
+    function setupFormSubmission() {
+        if (DOM.submitButton && DOM.submitForm) {
+            DOM.submitButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                DOM.submitButton.disabled = true;
+
                 Swal.fire({
                     title: 'Confirm Diagnosis',
                     text: 'Are you sure to confirm this diagnosis?',
@@ -294,35 +294,31 @@
                     cancelButtonText: 'Cancel'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        submitForm.submit();
+                        DOM.submitForm.submit();
                     }
+                    DOM.submitButton.disabled = false;
                 });
-                buttonSubmit.disabled = false;
             });
         }
+    }
 
-        function updateHiddenInput() {
-            const rows = container.querySelectorAll('.medication-row');
-            const prescriptions = [];
-
-            rows.forEach(row => {
+    function updateHiddenInput() {
+        const rows = DOM.medicationContainer.querySelectorAll('.medication-row');
+        const prescriptions = Array.from(rows)
+            .map(row => {
                 const drugName = row.querySelector('.drug-input').value.trim();
                 const quantity = row.querySelector('.quantity-input').value.trim();
+                return drugName && quantity ? `${drugName}-${quantity}` : null;
+            })
+            .filter(Boolean);
 
-                if (drugName && quantity) {
-                    prescriptions.push(`${drugName}-${quantity}`);
-                }
-            });
+        DOM.hiddenInput.value = prescriptions.join(',');
+    }
 
-            hiddenInput.value = prescriptions.join(',');
-        }
-
-
-        addButton.addEventListener('click', function () {
-            const newRow = document.createElement('div');
-            newRow.classList.add('d-flex', 'mb-2', 'medication-row');
-
-            newRow.innerHTML = `
+    function createMedicationRow() {
+        const row = document.createElement('div');
+        row.classList.add('d-flex', 'mb-2', 'medication-row');
+        row.innerHTML = `
             <div class="position-relative flex-grow-1 me-2">
                 <input 
                     type="text" 
@@ -341,110 +337,130 @@
             </div>
             <button type="button" class="btn btn-danger remove-row">Remove</button>
         `;
+        return row;
+    }
 
-            container.appendChild(newRow);
+    async function handleDrugInput(drugInput) {
+        const suggestions = drugInput.nextElementSibling;
+        const query = drugInput.value.trim();
+
+        if (!query) {
+            suggestions.style.display = 'none';
+            return;
+        }
+
+        try {
+            const response = await fetch(`/Doctor/Search?query=${encodeURIComponent(query)}`);
+            const data = await response.json();
+            console.log(data);
+
+            suggestions.innerHTML = '';
+
+            if (data.length === 0) {
+                suggestions.style.display = 'none';
+                return;
+            }
+
+            data.forEach(drug => {
+                const listItem = document.createElement('li');
+                listItem.textContent = drug;
+                listItem.classList.add('dropdown-item');
+                listItem.style.cursor = 'pointer';
+
+                listItem.addEventListener('click', () => {
+                    drugInput.value = drug;
+                    suggestions.style.display = 'none';
+                    updateHiddenInput();
+                });
+
+                suggestions.appendChild(listItem);
+            });
+
+            suggestions.style.display = 'block';
+        } catch (error) {
+            console.error('Error fetching drug suggestions:', error);
+            suggestions.style.display = 'none';
+        }
+    }
+
+    function handleKeyboardNavigation(event, drugInput) {
+        const suggestions = drugInput.nextElementSibling;
+        if (suggestions.style.display !== 'block') return;
+
+        const items = suggestions.querySelectorAll('li');
+        let selectedIndex = Array.from(items).findIndex(item => item.classList.contains('active'));
+
+        switch (event.key) {
+            case 'ArrowDown':
+                event.preventDefault();
+                if (selectedIndex < items.length - 1) {
+                    if (selectedIndex >= 0) items[selectedIndex].classList.remove('active');
+                    selectedIndex++;
+                    items[selectedIndex].classList.add('active');
+                    items[selectedIndex].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                }
+                break;
+
+            case 'ArrowUp':
+                event.preventDefault();
+                if (selectedIndex > 0) {
+                    items[selectedIndex].classList.remove('active');
+                    selectedIndex--;
+                    items[selectedIndex].classList.add('active');
+                    items[selectedIndex].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                }
+                break;
+
+            case 'Enter':
+                event.preventDefault();
+                if (selectedIndex >= 0) {
+                    drugInput.value = items[selectedIndex].textContent;
+                    suggestions.style.display = 'none';
+                    updateHiddenInput();
+                }
+                break;
+        }
+    }
+
+    function setupEventListeners() {
+        DOM.addButton.addEventListener('click', () => {
+            const newRow = createMedicationRow();
+            DOM.medicationContainer.appendChild(newRow);
             updateHiddenInput();
         });
 
-        container.addEventListener('click', function (e) {
+        DOM.medicationContainer.addEventListener('click', (e) => {
             if (e.target.classList.contains('remove-row')) {
                 const row = e.target.closest('.medication-row');
-                container.removeChild(row);
+                DOM.medicationContainer.removeChild(row);
                 updateHiddenInput();
             }
         });
 
-        container.addEventListener('input', async function (e) {
+        DOM.medicationContainer.addEventListener('input', (e) => {
             if (e.target.classList.contains('drug-input')) {
-                const drugInput = e.target;
-                const suggestions = drugInput.nextElementSibling;
-                const query = drugInput.value.trim();
-
-                if (query) {
-                    try {
-                        const response = await fetch(`/Doctor/Search?query=${encodeURIComponent(query)}`);
-                        const data = await response.json();
-                        const drugs = data.$values;
-                        suggestions.innerHTML = '';
-
-                        if (drugs.length === 0) {
-                            suggestions.style.display = 'none';
-                            return;
-                        }
-                        drugs.forEach(drug => {
-                            const listItem = document.createElement('li');
-                            listItem.textContent = drug;
-                            listItem.classList.add('dropdown-item');
-                            listItem.style.cursor = 'pointer';
-                            suggestions.appendChild(listItem);
-
-                            listItem.addEventListener('click', () => {
-                                drugInput.value = drug;
-                                suggestions.style.display = 'none';
-                            });
-                        });
-
-                        suggestions.style.display = 'block';
-                    } catch (error) {
-                        console.error('Error fetching drug suggestions:', error);
-                        suggestions.style.display = 'none';
-                    }
-                } else {
-                    suggestions.style.display = 'none';
-                }
+                handleDrugInput(e.target);
             }
-        });
-
-        container.addEventListener('input', function () {
             updateHiddenInput();
         });
 
-        container.addEventListener('keydown', function (e) {
+        DOM.medicationContainer.addEventListener('keydown', (e) => {
             if (e.target.classList.contains('drug-input')) {
-                const drugInput = e.target;
-                const suggestions = drugInput.nextElementSibling; // UL element
-
-                if (suggestions.style.display === 'block') {
-                    const items = suggestions.querySelectorAll('li');
-                    let selectedIndex = Array.from(items).findIndex(item => item.classList.contains('active'));
-
-                    if (e.key === 'ArrowDown') {
-                        e.preventDefault();
-                        if (selectedIndex < items.length - 1) {
-                            if (selectedIndex >= 0) items[selectedIndex].classList.remove('active');
-                            selectedIndex++;
-                            items[selectedIndex].classList.add('active');
-                            items[selectedIndex].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-                        } else if (selectedIndex === -1 && items.length > 0) {
-                            selectedIndex = 0;
-                            items[selectedIndex].classList.add('active');
-                            items[selectedIndex].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-                        }
-                    } else if (e.key === 'ArrowUp') {
-                        e.preventDefault();
-                        if (selectedIndex > 0) {
-                            items[selectedIndex].classList.remove('active');
-                            selectedIndex--;
-                            items[selectedIndex].classList.add('active');
-                            items[selectedIndex].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-                        }
-                    } else if (e.key === 'Enter') {
-                        e.preventDefault();
-                        if (selectedIndex >= 0) {
-                            drugInput.value = items[selectedIndex].textContent;
-                            suggestions.style.display = 'none';
-                        }
-                    }
-                }
+                handleKeyboardNavigation(e, e.target);
             }
         });
 
-    document.addEventListener('click', function (e) {
-        const isInsideContainer = container.contains(e.target);
-        if (!isInsideContainer) {
-            const allSuggestions = container.querySelectorAll('.drug-suggestions');
-            allSuggestions.forEach(suggestions => suggestions.style.display = 'none');
-        }
-    });
+        document.addEventListener('click', (e) => {
+            if (!DOM.medicationContainer.contains(e.target)) {
+                const suggestions = DOM.medicationContainer.querySelectorAll('.drug-suggestions');
+                suggestions.forEach(s => s.style.display = 'none');
+            }
+        });
+    }
 
+    document.addEventListener('DOMContentLoaded', () => {
+        initializeSignalR();
+        setupFormSubmission();
+        setupEventListeners();
+    });
 </script>
