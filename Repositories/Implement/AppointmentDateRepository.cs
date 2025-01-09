@@ -98,5 +98,9 @@ namespace AppointmentHospital.Repositories.Implement
         public List<Appointment> GetAppointmentsByDoctorIdAndDate(Guid doctorId, DateTime date){
             return _context.Appointments.Where(a => a.DoctorId == doctorId && a.AppointmentTime.Date == date.Date).ToList();    
         }
+
+        public int CountAppointmentDoctorIdStatus(Guid doctorId, AppointmentStatus status){
+            return _context.Appointments.Where(a => a.DoctorId == doctorId && a.Status == status).Count();
+        }
     }
 }

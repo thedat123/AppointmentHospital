@@ -62,4 +62,8 @@ public class AppointmentDateService : IAppointmentDateService
     public List<Appointment> GetAppointmentsByDoctorIdAndDate(Guid doctorId, DateTime date){
         return appointmentRepository.GetAppointmentsByDoctorIdAndDate(doctorId, date);
     }
+
+    public int CountAppointmentDoctorIdStatus(Guid doctorId, AppointmentStatus status){
+        return appointmentRepository.CountAppointmentDoctorIdStatus(doctorId, status);
+    }
 }
