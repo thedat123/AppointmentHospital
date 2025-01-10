@@ -325,8 +325,6 @@ namespace AppointmentHospital.Controllers
             var offDate = DateTime.Parse(offDateStr);
             var doctorId = Guid.Parse(_contextAccessor.HttpContext?.Session.GetString("DoctorId")!);
 
-            var patientEmails = new HashSet<string>();
-
             foreach (var timeSlotId in timeSlotIds)
             {
                 var timeSlot = _timeSlotService.GetTimeSlotById(timeSlotId);
@@ -335,7 +333,7 @@ namespace AppointmentHospital.Controllers
                 var appointments = _appointmentDateService.GetAppointmentsByDoctorIdAndDate(doctorId, offDate);
                 foreach (var appointment in appointments)
                 {
-                    await ProcessAppointmentAsync(appointment, patientEmails, suggestDate);
+                    await ProcessAppointmentAsync(appointment, suggestDate);
                 }
 
                 _timeSlotService.DeleteTimeSlot(timeSlot.TimeSlotId);
@@ -344,14 +342,18 @@ namespace AppointmentHospital.Controllers
             return RedirectToAction("Calendar");
         }
 
-        private async Task ProcessAppointmentAsync(Appointment appointment, HashSet<string> patientEmails, DateTime suggestDate)
+        private async Task ProcessAppointmentAsync(Appointment appointment, DateTime suggestDate)
         {
             var patient = await _patientService.GetPatientById(appointment.PatientId);
-            if (patient == null || patientEmails.Contains(patient.EmailAddress)) return;
+            if (patient == null) return;
 
-            patientEmails.Add(patient.EmailAddress);
+            if(appointment.Status == AppointmentStatus.Completed || appointment.Status == AppointmentStatus.Canceled)
+            {
+                return;
+            }
 
             _appointmentDateService.UpdateStatusAppointment(appointment.AppointmentId, AppointmentStatus.Canceled);
+
             string emailBody = await _emailService.GetCancelAndSuggestTemplate(
                 appointment.AppointmentTime,
                 appointment.Doctor.FullName,
@@ -360,8 +362,13 @@ namespace AppointmentHospital.Controllers
             );
 
             BackgroundJob.Enqueue<IEmailService>(emailService =>
-                emailService.SendMailAsync(patient.EmailAddress, $"Medical Appointment Of ({patient.FullName})", emailBody));
+                emailService.SendMailAsync(
+                    patient.EmailAddress,
+                    $"Hủy và đề xuất lịch hẹn mới cho {patient.FullName}",
+                    emailBody
+                ));
         }
+
 
         [HttpPost]
         public async Task<IActionResult> SuggestDay(Guid timeSlotId, DateTime suggestDate)
