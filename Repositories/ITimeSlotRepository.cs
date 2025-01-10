@@ -11,11 +11,12 @@ public interface ITimeSlotRepository
     public void AddTimeSlot(TimeSlot timeSlot);
 
     public List<DateTime> GetRemainingDaysInMonth(DateTime startDate, DateTime endOfMonth, List<DaySchedule> schedules);
-    public void UpdateTimeSlotAvalableStatusByTimeSlotID(Guid timeSlotID);
+    public void UpdateTimeSlotAvalableStatusByTimeSlotID(Guid timeSlotID, bool status);
     public List<TimeSlot> GetTimeSlotsByDoctorAndDate(Guid id, DateTime date);
     public void DeleteTimeSlot(Guid timeSlotId);
     public TimeSlot GetTimeSlotById(Guid timeSlotId);
     public List<TimeSlot> GetAllTimeSlotByParticularDate(DateTime date);
     public void UpdateNoteInTimeSlot(Guid timeSlotId, string note);
     public Task DeleteOldTimeSlotAsync();
+    public Guid GetTimeSlotIdByAppointmentime(DateTime appointmentTime);
 }

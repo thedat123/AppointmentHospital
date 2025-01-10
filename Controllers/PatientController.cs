@@ -48,7 +48,6 @@ namespace AppointmentHospital.Controllers
             _managingDoctorService = managingDoctorService;
         }
 
-        [AllowAnonymous]
         public async Task<IActionResult> Index(string? selectSpec)
         {
             List<Doctor> doctors = await _doctorService.getAllDoctors(selectSpec);
@@ -145,7 +144,7 @@ namespace AppointmentHospital.Controllers
             try
             {
                 _appointmentDateService.AddAppointment(appointment);
-                _timeSlotService.UpdateTimeSlotAvalableStatusByTimeSlotID(TimeSlotId);
+                _timeSlotService.UpdateTimeSlotAvalableStatusByTimeSlotID(TimeSlotId, false);
                 string body = await _emailService.GetBookingTemplate(appointment.AppointmentTime, doctor.FullName, patient.FullName);
                 string bodyRemind = await _emailService.GetRemindedTemplate(appointment.AppointmentTime, doctor.FullName, patient.FullName);
                 BackgroundJob.Enqueue<IEmailService>(emailservice => emailservice.SendMailAsync(patient.EmailAddress, $"Medical Appointment Of ({patient.FullName})", body));
@@ -218,7 +217,7 @@ namespace AppointmentHospital.Controllers
             try
             {
                 _appointmentDateService.AddAppointment(appointment);
-                _timeSlotService.UpdateTimeSlotAvalableStatusByTimeSlotID(TimeSlotId);
+                _timeSlotService.UpdateTimeSlotAvalableStatusByTimeSlotID(TimeSlotId, false);
                 string body = await _emailService.GetBookingTemplate(appointment.AppointmentTime, doctor.FullName, patient.FullName);
                 string remindBody = await _emailService.GetRemindedTemplate(appointment.AppointmentTime, doctor.FullName, aquaintance.Name);
                 BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendMailAsync(patient.EmailAddress,$"Medical Appointment Of ({patient.FullName})", body));
@@ -282,13 +281,13 @@ namespace AppointmentHospital.Controllers
                 return NotFound("Appointment not found or not in pending status.");
             }
 
-            if ((appointment.AppointmentTime - DateTime.Now).TotalHours > 24)
-            {
-                return BadRequest("Cannot cancel appointments more than 24 hours in advance.");
-            }
-
             _appointmentDateService.UpdateStatusAppointment(id, AppointmentStatus.Canceled);
+            var timeSlotId = _timeSlotService.GetTimeSlotIdByAppointmentime(appointment.AppointmentTime);
+            _timeSlotService.UpdateTimeSlotAvalableStatusByTimeSlotID(timeSlotId, true);
             await _hubContext.Clients.All.SendAsync("UpdateStatus", appointment.AppointmentId, AppointmentStatus.Canceled);
+
+            var updatedDate = appointment.AppointmentTime.Date.ToString("yyyy-MM-dd");
+            await _hubContext.Clients.All.SendAsync("ScheduleUpdated", appointment.DoctorId, updatedDate);
 
             TempData["SuccessMessage"] = "Appointment cancelled successfully.";
             return RedirectToAction("MySchedule");

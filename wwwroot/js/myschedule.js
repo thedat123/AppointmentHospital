@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function () {
             case 'Pending':
                 console.log('Pending start');
                 var hoursDiff = getHoursDifference(appointmentTime);
-                if (hoursDiff < 24 && hoursDiff > 0) {
+                if (hoursDiff >= 24) {
                     const form = document.createElement('form');
                     form.method = 'post';
                     form.action = `/Patient/CancelAppointment/${actionCell.dataset.appointmentId}`;
