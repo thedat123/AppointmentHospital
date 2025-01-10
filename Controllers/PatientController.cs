@@ -289,6 +289,11 @@ namespace AppointmentHospital.Controllers
             var updatedDate = appointment.AppointmentTime.Date.ToString("yyyy-MM-dd");
             await _hubContext.Clients.All.SendAsync("ScheduleUpdated", appointment.DoctorId, updatedDate);
 
+            var patient = await _patientService.GetPatientById(appointment.PatientId);
+
+            string body = await _emailService.GetCancelledTemplate(appointment.AppointmentTime, appointment.Doctor.FullName, appointment.Patient.FullName);
+            BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendMailAsync(patient.EmailAddress, $"Medical Appointment Of ({appointment.Patient.FullName})", body ));
+
             TempData["SuccessMessage"] = "Appointment cancelled successfully.";
             return RedirectToAction("MySchedule");
         }
