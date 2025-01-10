@@ -170,7 +170,6 @@
 
         window.updateTimeSlots = function () {
             const selectedDate = dateSelector.value;
-            // Store the selected date in localStorage
             localStorage.setItem('selectedDate', selectedDate);
 
             timeSlotGroups.forEach(group => {
@@ -183,11 +182,10 @@
             resetSelection();
         };
 
-        // Check for stored selected date and apply it on page load
         const savedSelectedDate = localStorage.getItem('selectedDate');
         if (savedSelectedDate) {
             dateSelector.value = savedSelectedDate;
-            updateTimeSlots();  // Call updateTimeSlots to show the correct time slots for the saved date
+            updateTimeSlots();
         }
 
         function createDateContainer(date) {

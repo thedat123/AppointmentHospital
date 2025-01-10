@@ -51,10 +51,10 @@ public class TimeSlotRepository : ITimeSlotRepository
             .ToList();
     }
 
-    public void UpdateTimeSlotAvalableStatusByTimeSlotID(Guid timeSlotID){
+    public void UpdateTimeSlotAvalableStatusByTimeSlotID(Guid timeSlotID, bool status){
         var timeSlot = _context.TimeSlots.Find(timeSlotID);
         if(timeSlot != null){
-            timeSlot.Available = false;
+            timeSlot.Available = status;
         }
         _context.SaveChanges();
     }
@@ -101,5 +101,9 @@ public class TimeSlotRepository : ITimeSlotRepository
 
         await _context.Database.ExecuteSqlRawAsync(
             "DELETE FROM TimeSlots WHERE EndTime <= {0}", yesterday);
+    }
+
+    public Guid GetTimeSlotIdByAppointmentime(DateTime appointmentTime){
+        return _context.TimeSlots.Where(x => x.StartTime == appointmentTime).Select(x => x.TimeSlotId).FirstOrDefault();
     }
 }

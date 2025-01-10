@@ -28,8 +28,8 @@ public class TimeSlotService : ITimeSlotService
         return timeSlotRepository.GetRemainingDaysInMonth(startDate, endOfMonth, schedules);
     }
 
-    public void UpdateTimeSlotAvalableStatusByTimeSlotID(Guid timeSlotID){
-        timeSlotRepository.UpdateTimeSlotAvalableStatusByTimeSlotID(timeSlotID);
+    public void UpdateTimeSlotAvalableStatusByTimeSlotID(Guid timeSlotID, bool status){
+        timeSlotRepository.UpdateTimeSlotAvalableStatusByTimeSlotID(timeSlotID, status);
     }
     public List<TimeSlot> GetTimeSlotsByDoctorAndDate(Guid id, DateTime date){
         return timeSlotRepository.GetTimeSlotsByDoctorAndDate(id, date);
@@ -48,5 +48,9 @@ public class TimeSlotService : ITimeSlotService
     }
     public void UpdateNoteInTimeSlot(Guid timeSlotId, string note){
         timeSlotRepository.UpdateNoteInTimeSlot(timeSlotId, note);
+    }
+
+    public Guid GetTimeSlotIdByAppointmentime(DateTime appointmentTime){
+        return timeSlotRepository.GetTimeSlotIdByAppointmentime(appointmentTime);
     }
 }
