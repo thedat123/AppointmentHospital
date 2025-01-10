@@ -111,11 +111,6 @@ async function updateChart(dateFilter) {
     } else if (dateFilter.filterType === 'month') {
         url = `${url}month=${encodeURIComponent(dateFilter.dateFilter)}&&year=${yearSelect}`;
     } else if (dateFilter.filterType === 'custom') {
-        // const parts = dateFilter.dateFilter.split("|");
-        // console.log('Parts', parts);
-        // const startDate = parts[0];
-        // const endDate = parts[1];
-        // const customDate = `${startDate}%7C${endDate}`
         url = `${url}dateRange=${encodeURIComponent(dateFilter.dateFilter)}`
     }
     try {
@@ -124,6 +119,17 @@ async function updateChart(dateFilter) {
             throw new Error(`Http error! Status ${response.status}`)
         }
         var data = await response.json();
+
+        // Hàm lọc bỏ key $id trong dữ liệu
+        const removeIdKey = (obj) => {
+            return Object.entries(obj)
+                .filter(([key]) => key !== '$id')  // Loại bỏ key $id
+                .reduce((acc, [key, value]) => {
+                    acc[key] = value;
+                    return acc;
+                }, {});
+        }
+
         if (dateFilter.filterType == 'day') {
             const dateObj = new Date(dateFilter.dateFilter);
             const month = String(dateObj.getMonth() + 1).padStart(2, '0');
@@ -131,40 +137,67 @@ async function updateChart(dateFilter) {
             dateFilter.dateFilter = `${month}/${day}`;
             console.log(`DateFilter ${dateFilter.dateFilter}`);
         }
+
         if (data.amountAppointment && amountAppointmentChart) {
-            amountAppointmentChart.data.datasets[0].data = [data.amountAppointment[dateFilter.dateFilter]]
+            const amountData = removeIdKey(data.amountAppointment);  // Loại bỏ $id
+            amountAppointmentChart.data.datasets[0].data = [amountData[dateFilter.dateFilter]];
             amountAppointmentChart.update();
         }
+
         if (data.oldAndNewUser && oldAndNewUserChart) {
-            oldAndNewUserChart.data.datasets[0].data = [data.oldAndNewUser[dateFilter.dateFilter][1]];
-            oldAndNewUserChart.data.datasets[1].data = [data.oldAndNewUser[dateFilter.dateFilter][0]];
-            oldAndNewUserChart.update();
+            const oldAndNewUserData = removeIdKey(data.oldAndNewUser);  // Loại bỏ $id
+
+            // Lấy giá trị từ mảng $values trong dữ liệu
+            const values = oldAndNewUserData[dateFilter.dateFilter]?.$values;
+
+            // Kiểm tra nếu values tồn tại và cập nhật chart
+            if (values) {
+                oldAndNewUserChart.data.datasets[0].data = [values[1]];  // Người dùng mới
+                oldAndNewUserChart.data.datasets[1].data = [values[0]];  // Người dùng cũ
+                oldAndNewUserChart.update();
+            } else {
+                console.error("Không tìm thấy dữ liệu cho ngày này.");
+            }
         }
+
         if (data.topDoctorAppointment && topDoctorAmountAppointment) {
-            const doctorData = data.topDoctorAppointment[dateFilter.dateFilter];
-            topDoctorAmountAppointment.data.labels = doctorData.map(doctor => doctor.specialization);
-            topDoctorAmountAppointment.data.datasets[0].data = doctorData.map(doctor => doctor.appointmentAmount);
+            const doctorData = removeIdKey(data.topDoctorAppointment[dateFilter.dateFilter]);
+            console.log("DoctorData", doctorData)
+            const doctorAppointments = doctorData.$values.map(doctor => ({
+                doctorName: doctor.doctorName,
+                specialization: doctor.specialization,
+                appointmentAmount: doctor.appointmentAmount
+            }));
+            topDoctorAmountAppointment.data.labels = doctorAppointments.map(doctor => doctor.specialization);
+            topDoctorAmountAppointment.data.datasets[0].data = doctorAppointments.map(doctor => doctor.appointmentAmount);
             topDoctorAmountAppointment.update();
         }
+
         if (data.compareAmountAppointment && compareAmountAppointment) {
-            compareAmountAppointment.data.labels = Object.keys(data.compareAmountAppointment);
-            compareAmountAppointment.data.datasets[0].data = Object.values(data.compareAmountAppointment);
+            const compareAmountData = removeIdKey(data.compareAmountAppointment);  // Loại bỏ $id
+            compareAmountAppointment.data.labels = Object.keys(compareAmountData);
+            compareAmountAppointment.data.datasets[0].data = Object.values(compareAmountData);
             compareAmountAppointment.update();
         }
+
         if (data.compareAmountOldAndNewUser && compareOldAndNewUser) {
-            const compareData = data.compareAmountOldAndNewUser;
-            compareOldAndNewUser.data.datasets[0].data = Object.values(compareData).map(d => d[0]);
-            compareOldAndNewUser.data.datasets[1].data = Object.values(compareData).map(d => d[1]);
-            compareOldAndNewUser.update();
+            // Loại bỏ $id và lấy dữ liệu từ mảng $values
+            const compareAmountOldAndNewUserData = removeIdKey(data.compareAmountOldAndNewUser);  // Loại bỏ $id
+
+            // Chuyển đổi dữ liệu thành mảng để lấy giá trị người dùng mới và người dùng cũ
+            const oldUserData = Object.values(compareAmountOldAndNewUserData).map(d => d.$values[0]);  // Người dùng cũ
+            const newUserData = Object.values(compareAmountOldAndNewUserData).map(d => d.$values[1]);  // Người dùng mới
+
+            // Cập nhật dữ liệu cho biểu đồ
+            compareOldAndNewUser.data.datasets[0].data = oldUserData;  // Dữ liệu người dùng cũ
+            compareOldAndNewUser.data.datasets[1].data = newUserData;  // Dữ liệu người dùng mới
+            compareOldAndNewUser.update();  // Cập nhật biểu đồ
         }
 
-    }
-    catch (error) {
+    } catch (error) {
         console.error('Error: ', error)
     }
-
 }
-
 
 radioButton.forEach(radio => {
     radio.addEventListener('change', function () {
@@ -250,7 +283,7 @@ async function submitStatistic() {
         url = `${url}dateRange=${customRange}`;
         const periodComparison = document.getElementById('periodComparison');
         const userTrends = document.getElementById('userTrends');
-  
+
         periodComparison.style.display = 'none';
         userTrends.style.display = 'none';
         document.getElementById('amountAppointment').parentElement.classList.add('center-chart');
@@ -283,14 +316,17 @@ async function submitStatistic() {
         console.log(data);
         const amountAppointmentData = data.amountAppointment[dateFilter];
         console.log('Value amount appointment', amountAppointmentData);
-        const oldAndNewUserData = data.oldAndNewUser[dateFilter];
+        const oldAndNewUserData = data.oldAndNewUser[dateFilter].$values || [];
         console.log('Value amount old and new user', oldAndNewUserData);
-        var topDoctorAmountAppointmentData = data.topDoctorAppointment[dateFilter];
+        const topDoctorAmountAppointmentData = data.topDoctorAppointment[dateFilter]?.$values || [];
         console.log('Value amount of top doctor amount appointment', topDoctorAmountAppointmentData);
         var compareAmountAppointmentData = data.compareAmountAppointment;
         console.log('Value compare amount appointment', compareAmountAppointmentData);
-        var compareOldAndNewUserData = data.compareAmountOldAndNewUser;
-        console.log('Value compare new and old user', compareOldAndNewUserData);
+        const compareOldAndNewUserData = data.compareAmountOldAndNewUser;
+        console.log('Value compare new and old user:', compareOldAndNewUserData);
+
+        // Tạo mảng để lưu trữ dữ liệu cho từng người dùng (New User và Old User)
+
         if (oldAndNewUserChart || amountAppointmentChart || topDoctorAmountAppointment || compareAmountAppointment || compareOldAndNewUser) {
             oldAndNewUserChart.destroy();
             amountAppointmentChart.destroy();
@@ -299,12 +335,34 @@ async function submitStatistic() {
             compareOldAndNewUser.destroy();
         }
 
-        var doctorName = topDoctorAmountAppointmentData.map(doctor => doctor.doctorName);
-        console.log("Doctor Name", doctorName);
-        var specialization = topDoctorAmountAppointmentData.map(doctor => doctor.specialization);
-        console.log("Specialization", specialization);
-        var appointmentAmount = topDoctorAmountAppointmentData.map(doctor => doctor.appointmentAmount);
-        console.log("AppointmentAmount", appointmentAmount);
+
+
+        const compareDataEntries = Object.entries(compareOldAndNewUserData).filter(([key, value]) => key !== '$id');
+
+        // Sắp xếp các khóa nếu cần thiết (ví dụ: theo thứ tự tăng dần)
+        compareDataEntries.sort(([keyA], [keyB]) => Number(keyA) - Number(keyB));
+
+        // Tạo các mảng labels, newUserData và oldUserData
+        const labels = compareDataEntries.map(([key]) => `Month ${key}`); // Bạn có thể thay đổi định dạng nhãn theo nhu cầu
+        const newUserData = compareDataEntries.map(([_, value]) => value.$values[0] || 0);
+        const oldUserData = compareDataEntries.map(([_, value]) => value.$values[1] || 0);
+
+        console.log('Labels:', labels);
+        console.log('New User Data:', newUserData);
+        console.log('Old User Data:', oldUserData);
+
+        if (Array.isArray(topDoctorAmountAppointmentData)) {
+            var doctorName = topDoctorAmountAppointmentData.map(doctor => doctor.doctorName || 'N/A');
+            console.log("Doctor Name", doctorName);
+
+            var specialization = topDoctorAmountAppointmentData.map(doctor => doctor.specialization || 'N/A');
+            console.log("Specialization", specialization);
+
+            var appointmentAmount = topDoctorAmountAppointmentData.map(doctor => doctor.appointmentAmount || 0);
+            console.log("AppointmentAmount", appointmentAmount);
+        } else {
+            console.error('topDoctorAmountAppointmentData is not a valid array.');
+        }
         topDoctorAmountAppointment = new Chart(document.getElementById("topDoctorAmountAppointment"), {
             type: 'bar',
             data: {
@@ -382,7 +440,7 @@ async function submitStatistic() {
                 scales: {
                     y: {
                         beginAtZero: true,
-                        max: 100,
+                        max: 150,
                         title: {
                             display: true,
                             text: 'Number of Appointments'
@@ -391,16 +449,27 @@ async function submitStatistic() {
                 }
             }
         });
+
+        const filteredCompareAmountAppointmentData = Object.entries(compareAmountAppointmentData)
+            .filter(([key]) => key !== '$id') 
+            .reduce((acc, [key, value]) => {
+                acc[key] = value; 
+                return acc;
+            }, {});
+
+        
         compareAmountAppointment = new Chart(document.getElementById("compareAmountAppointment"), {
             type: 'line',
             data: {
-                labels: Object.keys(compareAmountAppointmentData),
+                labels: Object.keys(filteredCompareAmountAppointmentData), 
                 datasets: [{
                     label: 'Appointments',
-                    data: Object.values(compareAmountAppointmentData),
-                    backgroundColor: 'rgba(255, 99, 132, 0.6)',
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    borderWidth: 1
+                    data: Object.values(filteredCompareAmountAppointmentData), 
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2,
+                    tension: 0.4, 
+                    fill: true 
                 }]
             },
             options: {
@@ -410,7 +479,7 @@ async function submitStatistic() {
                     title: {
                         display: true,
                         text: 'Appointments Comparison',
-                        font: { size: 16 }
+                        font: { size: 16, weight: 'bold' }
                     },
                     legend: {
                         position: 'bottom'
@@ -418,16 +487,29 @@ async function submitStatistic() {
                 },
                 scales: {
                     y: {
+                        max: 150,
                         beginAtZero: true,
-                        max: 50,
                         title: {
                             display: true,
                             text: 'Number of Appointments'
                         }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Month'
+                        }
+                    }
+                },
+                animations: {
+                    tension: {
+                        duration: 1000,
+                        easing: 'easeOutQuad'
                     }
                 }
             }
         });
+
         oldAndNewUserChart = new Chart(document.getElementById("oldAndNewUser"), {
             type: 'bar',
             data: {
@@ -483,17 +565,17 @@ async function submitStatistic() {
         compareOldAndNewUser = new Chart(document.getElementById("compareOldAndNewUser"), {
             type: 'line',
             data: {
-                labels: Object.keys(compareOldAndNewUserData),
+                labels: labels,
                 datasets: [{
                     label: "New User ",
-                    data: Object.values(compareOldAndNewUserData).map(item => item[0]),
+                    data: newUserData,
                     borderColor: 'rgba(75, 192, 192, 1)',
                     backgroundColor: 'rgba(75, 192, 192, 0.2)',
                     tension: 0.4,
                     fill: true
                 }, {
                     label: 'Old User',
-                    data: Object.values(compareOldAndNewUserData).map(item => item[1]),
+                    data: oldUserData,
                     borderColor: 'rgba(255, 99, 132, 1)',
                     backgroundColor: 'rgba(255, 99, 132, 0.2)',
                     tension: 0.4,

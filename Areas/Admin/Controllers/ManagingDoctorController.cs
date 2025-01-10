@@ -57,6 +57,10 @@ namespace AppointmentHospital.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> EditDoctor(Guid id, ManagingDoctorRequest request)
         {
+            if (!ModelState.IsValid)
+            {
+                return View(request);
+            }
             await _managingDoctorService.EditDoctorAsync(id, request);
             return RedirectToAction("Index");
         }

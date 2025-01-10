@@ -6,49 +6,68 @@
 <div class="container-fluid py-4">
     <div class="row">
         <div class="col-md-8 mx-auto">
-            <div class="card shadow-sm" style="background-color: #f0f8ff;">
-                <div class="card-header bg-primary bg-opacity-25">
-                    <h3 class="card-title mb-0 text-primary">Personal Profile</h3>
+            <div class="profile-card">
+                <div class="profile-header">
+                    <div class="avatar-wrapper">
+                        <div class="avatar">
+                            <img src="~/images/user-default.png" alt="Profile" class="rounded-circle" />
+                        </div>
+                        <h3 class="profile-name">@response.FullName</h3>
+                        <p class="profile-email">@response.EmailAddress</p>
+                    </div>
                 </div>
-                <div class="card-body">
+
+                <div class="profile-body">
                     <form id="submitForm" asp-action="PersonalProfile" method="post">
-                        <div class="row mb-4">
+                        <input name="patientId" value="@response.PatientId" type="hidden" />
+                        
+                        <div class="section-title">Personal Information</div>
+                        <div class="row g-4 mb-4">
                             <div class="col-md-6">
-                                <input name="patientId" value="@response.PatientId" type="hidden" />
-                                <div class="form-group mb-3">
-                                    <label class="form-label text-primary fw-bold">Full Name</label>
+                                <div class="form-floating">
                                     <input type="text" class="form-control" asp-for="@Model.FullName"
-                                        value="@response.FullName" />
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label class="form-label text-primary fw-bold">Email Address</label>
-                                    <input type="email" class="form-control" asp-for="@Model.EmailAddress"
-                                        value="@response.EmailAddress" />
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label class="form-label text-primary fw-bold">Username</label>
-                                    <input type="text" class="form-control" asp-for="@Model.UserName"
-                                        value="@response.UserName" />
+                                        value="@response.FullName" id="fullName" placeholder="Full Name" />
+                                    <label for="fullName">Full Name</label>
+                                    <span asp-validation-for="@Model.FullName"></span>
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label class="form-label text-primary fw-bold">Date of Birth</label>
-                                    <input type="date" class="form-control" asp-for="@Model.DateOfBirth"
-                                        value="@(response.DateOfBirth?.ToString("yyyy-MM-dd"))" readonly />
+                                <div class="form-floating">
+                                    <input type="email" class="form-control" asp-for="@Model.EmailAddress"
+                                        value="@response.EmailAddress" id="email" placeholder="Email" />
+                                    <label for="email">Email Address</label>
+                                    <span asp-validation-for="@Model.EmailAddress"></span>
                                 </div>
-                                <div class="form-group mb-3">
-                                    <label class="form-label text-primary fw-bold">Address</label>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" asp-for="@Model.UserName"
+                                        value="@response.UserName" id="username" placeholder="Username" />
+                                    <label for="username">Username</label>
+                                    <span asp-validation-for="@Model.UserName"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="date" class="form-control" asp-for="@Model.DateOfBirth"
+                                        value="@(response.DateOfBirth?.ToString("yyyy-MM-dd"))" id="dob" placeholder="Date of Birth" readonly />
+                                    <label for="dob">Date of Birth</label>
+                                    <span asp-validation-for="@Model.DateOfBirth"></span>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-floating">
                                     <input type="text" class="form-control" asp-for="@Model.Address"
-                                        value="@response.Address" />
+                                        value="@response.Address" id="address" placeholder="Address" />
+                                    <label for="address">Address</label>
                                 </div>
                             </div>
                         </div>
 
-                        <h4 class="text-primary mb-3">Acquaintance</h4>
+                        <div class="section-title">Acquaintance Information</div>
                         <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead class="bg-primary bg-opacity-10">
+                            <table class="table table-hover custom-table">
+                                <thead>
                                     <tr>
                                         <th>Name</th>
                                         <th>Date of Birth</th>
@@ -73,7 +92,7 @@
                         </div>
 
                         <div class="text-end mt-4">
-                            <button id="buttonSubmit" type="submit" class="btn btn-primary px-4">
+                            <button id="buttonSubmit" type="submit" class="btn btn-primary btn-lg px-5">
                                 <i class="fas fa-save me-2"></i>Save Changes
                             </button>
                         </div>
@@ -83,6 +102,7 @@
         </div>
     </div>
 </div>
+
 @section Styles {
     <link href="~/css/personal-profile.css" rel="stylesheet" />
 }

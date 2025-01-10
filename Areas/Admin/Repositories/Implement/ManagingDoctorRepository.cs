@@ -126,6 +126,9 @@ namespace AppointmentHospital.Areas.Admin.Repositories.Implement
             doctor.User.PhoneNumber = request.PhoneNumber;
             doctor.ExperienceYear = request.ExperienceYear;
             doctor.Specializaiton = request.Specializaiton;
+            doctor.Gender = request.Gender;
+            doctor.Description = request.Description;
+            doctor.Degree = request.Degree;
             _context.Update(doctor);
             await _context.SaveChangesAsync();
         }

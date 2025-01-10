@@ -18,11 +18,13 @@
     <form id="submitForm" asp-action="UpdateProfile" method="post" class="profile-form">
         <div class="profile-section">
             <h3>Personal Information</h3>
+            <div asp-validation-summary="All"></div>
             <div class="form-grid">
                 <input asp-for="@Model.DoctorId" class="form-control" type="hidden" value="@Model.DoctorId" />
                 <div class="form-group">
                     <label asp-for="@Model.FullName">Full Name</label>
                     <input asp-for="@Model.FullName" class="form-control" required />
+                    <span asp-validation-for="@Model.FullName"></span>
                 </div>
                 <div class="form-group">
                     <label asp-for="@Model.Gender">Gender</label>
@@ -31,10 +33,12 @@
                         <option value="Female">Female</option>
                         <option value="Other">Other</option>
                     </select>
+                    <span asp-validation-for="@Model.Gender"></span>
                 </div>
                 <div class="form-group">
                     <label asp-for="@Model.DateOfBirth">Date of Birth</label>
-                    <input asp-for="@Model.DateOfBirth" type="date" class="form-control" />
+                    <input value="@Model.DateOfBirth" asp-for="@Model.DateOfBirth" type="date" class="form-control" />
+                    <span asp-validation-for="@Model.DateOfBirth"></span>
                 </div>
             </div>
         </div>
@@ -51,14 +55,17 @@
                             <option value="@specialization.Value">@specialization.Text</option>
                         }
                     </select>
+                    <span asp-validation-for="@Model.Specializaiton"></span>
                 </div>
                 <div class="form-group">
                     <label asp-for="@Model.ExperienceYear">Years of Experience</label>
                     <input asp-for="@Model.ExperienceYear" type="number" class="form-control" min="0" />
+                    <span asp-validation-for="@Model.ExperienceYear"></span>
                 </div>
                 <div class="form-group">
                     <label asp-for="@Model.Degree">Degree</label>
                     <input asp-for="@Model.Degree" class="form-control" />
+                    <span asp-validation-for="@Model.Degree"></span>
                 </div>
             </div>
         </div>
@@ -69,10 +76,12 @@
                 <div class="form-group">
                     <label asp-for="@Model.User.Email">Email</label>
                     <input asp-for="@Model.User.Email" type="email" class="form-control" readonly />
+                    <span asp-validation-for="@Model.User.Email"></span>
                 </div>
                 <div class="form-group">
                     <label asp-for="@Model.User.PhoneNumber">Phone Number</label>
                     <input name="phoneNumber" value="@Model.User.PhoneNumber" class="form-control" />
+                    <span asp-validation-for="@Model.User.PhoneNumber"></span>
                 </div>
             </div>
         </div>
@@ -82,6 +91,7 @@
             <div class="form-group">
                 <label asp-for="@Model.Description">About Me</label>
                 <textarea asp-for="@Model.Description" class="form-control" rows="4"></textarea>
+                <span asp-validation-for="@Model.Description"></span>
             </div>
         </div>
 
