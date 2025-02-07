@@ -497,7 +497,6 @@ async function submitStatistic() {
                     x: {
                         title: {
                             display: true,
-                            text: 'Month'
                         }
                     }
                 },
@@ -607,7 +606,6 @@ async function submitStatistic() {
                     x: {
                         title: {
                             display: true,
-                            text: 'Month'
                         }
                     }
                 },

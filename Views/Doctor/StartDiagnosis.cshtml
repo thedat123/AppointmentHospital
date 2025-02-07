@@ -352,7 +352,7 @@
         try {
             const response = await fetch(`/Doctor/Search?query=${encodeURIComponent(query)}`);
             const data = await response.json();
-            console.log(data);
+            console.log(data.$values);
 
             suggestions.innerHTML = '';
 
@@ -361,7 +361,7 @@
                 return;
             }
 
-            data.forEach(drug => {
+            data.$values.forEach(drug => {
                 const listItem = document.createElement('li');
                 listItem.textContent = drug;
                 listItem.classList.add('dropdown-item');
