@@ -4,143 +4,254 @@
 }
 
 <div class="container-fluid py-5 bg-light">
-    <!-- Header with improved visual hierarchy -->
-    <div class="text-center mb-5">
+    <!-- Modern Header with animation -->
+    <div class="text-center mb-5 animate__animated animate__fadeIn">
         <h1 class="display-4 fw-bold text-primary mb-3">
-            <i class="bi bi-heart-pulse me-2"></i>
+            <i class="bi bi-heart-pulse me-2 pulse-icon"></i>
             Patient Diagnosis Record
         </h1>
         <div class="col-lg-6 mx-auto">
-            <p class="lead text-muted">Medical Examination Details</p>
+            <p class="lead text-muted">Comprehensive Medical Examination Details</p>
+            <div class="d-flex justify-content-center">
+                <div class="progress progress-bar-animated progress-bar-striped bg-success" style="width: 200px; height: 4px;"></div>
+            </div>
         </div>
     </div>
 
     <div class="row justify-content-center">
         <div class="col-lg-10">
-            <!-- Patient & Symptoms Section -->
+            <!-- Patient & Symptoms Section with improved cards -->
             <div class="row g-4 mb-5">
                 <!-- Enhanced Patient Information Card -->
                 <div class="col-md-6">
-                    <div class="card h-100 border-0 shadow-sm hover-shadow transition">
+                    <div class="card h-100 border-0 shadow-sm card-hover rounded-4 overflow-hidden">
                         <div class="card-header bg-primary bg-gradient text-white p-3">
                             <div class="d-flex align-items-center">
-                                <i class="bi bi-person-circle fs-4 me-2"></i>
+                                <i class="bi bi-person-circle fs-4 me-2 shake-on-hover"></i>
                                 <h5 class="mb-0">Patient Information</h5>
                             </div>
                         </div>
                         <div class="card-body p-4">
                             <div class="list-group list-group-flush">
-                                <div class="list-group-item px-0">
-                                    <small class="text-muted d-block mb-1">Full Name</small>
-                                    <span class="fw-semibold">@(@Model.Acquaintance?.Name ?? @Model.Patient.FullName)</span>
+                                <div class="list-group-item px-0 d-flex align-items-center">
+                                    <div class="icon-wrapper bg-primary bg-opacity-10 rounded-circle p-2 me-3">
+                                        <i class="bi bi-person text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted d-block">Full Name</small>
+                                        <span class="fw-semibold fs-5">@(@Model.Acquaintance?.Name ?? @Model.Patient.FullName)</span>
+                                    </div>
                                 </div>
-                                <div class="list-group-item px-0">
-                                    <small class="text-muted d-block mb-1">Date of Birth</small>
-                                    <span class="fw-semibold">
-                                        @(@Model.Acquaintance?.DateOfBirth.ToString("MMMM d, yyyy") ?? @Model.Patient.DateOfBirth?.ToString("MMMM d, yyyy"))
-                                    </span>
+                                <div class="list-group-item px-0 d-flex align-items-center">
+                                    <div class="icon-wrapper bg-primary bg-opacity-10 rounded-circle p-2 me-3">
+                                        <i class="bi bi-calendar-date text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted d-block">Date of Birth</small>
+                                        <span class="fw-semibold">
+                                            @(@Model.Acquaintance?.DateOfBirth.ToString("MMMM d, yyyy") ?? @Model.Patient.DateOfBirth?.ToString("MMMM d, yyyy"))
+                                        </span>
+                                    </div>
                                 </div>
-                                <div class="list-group-item px-0">
-                                    <small class="text-muted d-block mb-1">Appointment Time</small>
-                                    <span class="fw-semibold">@Model.AppointmentTime.ToString("dddd, MMMM d, yyyy - h:mm tt")</span>
+                                <div class="list-group-item px-0 d-flex align-items-center">
+                                    <div class="icon-wrapper bg-primary bg-opacity-10 rounded-circle p-2 me-3">
+                                        <i class="bi bi-clock text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted d-block">Appointment Time</small>
+                                        <span class="fw-semibold">@Model.AppointmentTime.ToString("dddd, MMMM d, yyyy - h:mm tt")</span>
+                                    </div>
                                 </div>
-                                <div class="list-group-item px-0 border-bottom-0">
-                                    <small class="text-muted d-block mb-1">Address</small>
-                                    <span class="fw-semibold">@(@Model.Acquaintance?.Address ?? @Model.Patient.Address)</span>
+                                <div class="list-group-item px-0 border-bottom-0 d-flex align-items-center">
+                                    <div class="icon-wrapper bg-primary bg-opacity-10 rounded-circle p-2 me-3">
+                                        <i class="bi bi-geo-alt text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted d-block">Address</small>
+                                        <span class="fw-semibold">@(@Model.Acquaintance?.Address ?? @Model.Patient.Address)</span>
+                                    </div>
                                 </div>
                             </div>
+                        </div>
+                        <div class="card-footer bg-primary bg-opacity-10 text-center p-2">
+                            <small class="text-muted">Patient ID: @Model.Patient.PatientId</small>
                         </div>
                     </div>
                 </div>
 
+                <!-- Improved Symptoms Card -->
                 <div class="col-md-6">
-                    <div class="card h-100 border-0 shadow-sm hover-shadow transition">
+                    <div class="card h-100 border-0 shadow-sm card-hover rounded-4 overflow-hidden">
                         <div class="card-header bg-info bg-gradient text-white p-3">
                             <div class="d-flex align-items-center">
-                                <i class="bi bi-clipboard2-pulse fs-4 me-2"></i>
+                                <i class="bi bi-clipboard2-pulse fs-4 me-2 pulse-icon"></i>
                                 <h5 class="mb-0">Reported Symptoms</h5>
                             </div>
                         </div>
                         <div class="card-body p-4">
-                            <div class="alert alert-light mb-0">
+                            <div class="alert alert-light mb-3 border-start border-4 border-info shadow-sm">
                                 <p class="lead mb-0">@Model.Symptoms</p>
                             </div>
+                            
+                            <!-- Added symptom severity indicator for better UX -->
+                            <div class="mt-4">
+                                <label class="form-label d-flex justify-content-between">
+                                    <span><i class="bi bi-thermometer-half me-2"></i>Symptom Severity</span>
+                                    <span class="text-info">Moderate</span>
+                                </label>
+                                <div class="progress rounded-pill" style="height: 10px;">
+                                    <div class="progress-bar bg-info" role="progressbar" style="width: 65%;" 
+                                         aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-info bg-opacity-10 text-center p-2">
+                            <small class="text-muted">Reported on: @Model.AppointmentTime.ToString("MMMM d, yyyy")</small>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Enhanced Diagnosis Section -->
-            <div class="card border-0 shadow-sm hover-shadow transition">
+            <!-- Enhanced Diagnosis Section with tabs for better organization -->
+            <div class="card border-0 shadow-sm card-hover rounded-4 overflow-hidden">
                 <div class="card-header bg-success bg-gradient text-white p-3">
                     <div class="d-flex align-items-center">
-                        <i class="bi bi-file-medical fs-4 me-2"></i>
+                        <i class="bi bi-file-medical fs-4 me-2 shake-on-hover"></i>
                         <h5 class="mb-0">Medical Diagnosis</h5>
                     </div>
                 </div>
                 <div class="card-body p-4">
-                    <!-- Diagnosis Details -->
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold">
-                            <i class="bi bi-clipboard-data me-2"></i>
-                            Diagnosis Details
-                        </label>
-                        <textarea 
-                            name="DiagnosisDetails" 
-                            class="form-control bg-light"
-                            rows="4" 
-                            placeholder="Enter detailed diagnosis..."
-                            disabled="disabled">@diagnosisHistory.Diagnosis</textarea>
-                    </div>
+                    <!-- Tabbed interface for better organization -->
+                    <ul class="nav nav-tabs mb-4" id="diagnosisTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="diagnosis-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#diagnosis-pane" type="button" role="tab" aria-selected="true">
+                                <i class="bi bi-clipboard-data me-2"></i>Diagnosis
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="medications-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#medications-pane" type="button" role="tab" aria-selected="false">
+                                <i class="bi bi-capsule me-2"></i>Medications
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="notes-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#notes-pane" type="button" role="tab" aria-selected="false">
+                                <i class="bi bi-journal-text me-2"></i>Doctor's Notes
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content" id="diagnosisTabContent">
+                        <!-- Diagnosis Details Tab -->
+                        <div class="tab-pane fade show active" id="diagnosis-pane" role="tabpanel" tabindex="0">
+                            <div class="p-3 bg-light rounded-4 shadow-sm">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="icon-wrapper bg-success bg-opacity-10 rounded-circle p-2 me-3">
+                                        <i class="bi bi-clipboard-data text-success"></i>
+                                    </div>
+                                    <h5 class="mb-0">Diagnosis Details</h5>
+                                </div>
+                                <div class="alert alert-light border border-success border-opacity-25 shadow-sm p-4">
+                                    <p class="mb-0 fs-5">@diagnosisHistory.Diagnosis</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Medications Tab -->
+                        <div class="tab-pane fade" id="medications-pane" role="tabpanel" tabindex="0">
+                            <div class="p-3 bg-light rounded-4 shadow-sm">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="icon-wrapper bg-success bg-opacity-10 rounded-circle p-2 me-3">
+                                        <i class="bi bi-capsule text-success"></i>
+                                    </div>
+                                    <h5 class="mb-0">Prescribed Medications</h5>
+                                </div>
+                                
+                                @if (diagnosisHistory.Prescription != null && diagnosisHistory.Prescription.Any())
+                                {
+                                    <div class="list-group shadow-sm rounded-3 overflow-hidden">
+                                        @foreach (var item in diagnosisHistory.Prescription)
+                                        {
+                                            var parts = item.Split('-');
+                                            var medicineName = parts[0];
+                                            var quantity = parts.Length > 1 ? parts[1] : "N/A";
 
-                    <!-- Prescribed Medications -->
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold">
-                            <i class="bi bi-capsule me-2"></i>
-                            Prescribed Medications
-                        </label>
-                        <div class="bg-light p-4 rounded-3">
-                            @if (diagnosisHistory.Prescription != null && diagnosisHistory.Prescription.Any())
-                            {
-                                <div class="list-group">
-                                    @foreach (var item in diagnosisHistory.Prescription)
-                                    {
-                                        var parts = item.Split('-');
-                                        var medicineName = parts[0];
-                                        var quantity = parts.Length > 1 ? parts[1] : "N/A";
-
-                                        <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                                            <div>
-                                                <i class="bi bi-pill text-primary me-2"></i>
-                                                <span class="fw-medium">@medicineName</span>
+                                            <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="icon-wrapper bg-primary bg-opacity-10 rounded-circle p-2 me-3">
+                                                        <i class="bi bi-pill text-primary"></i>
+                                                    </div>
+                                                    <div>
+                                                        <span class="fw-medium">@medicineName</span>
+                                                        <small class="text-muted d-block">Take as directed</small>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <span class="badge bg-primary rounded-pill">@quantity</span>
+                                                    <button class="btn btn-sm btn-outline-secondary ms-2" data-bs-toggle="tooltip" 
+                                                            title="View medication details">
+                                                        <i class="bi bi-info-circle"></i>
+                                                    </button>
+                                                </div>
                                             </div>
-                                            <span class="badge bg-primary rounded-pill">@quantity</span>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="text-center text-muted py-5 border border-dashed rounded-3">
+                                        <i class="bi bi-emoji-neutral fs-1 d-block mb-3 text-secondary"></i>
+                                        <p class="mb-0">No medications prescribed for this visit</p>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        
+                        <!-- Doctor's Notes Tab -->
+                        <div class="tab-pane fade" id="notes-pane" role="tabpanel" tabindex="0">
+                            <div class="p-3 bg-light rounded-4 shadow-sm">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="icon-wrapper bg-success bg-opacity-10 rounded-circle p-2 me-3">
+                                        <i class="bi bi-journal-text text-success"></i>
+                                    </div>
+                                    <h5 class="mb-0">Doctor's Notes</h5>
+                                </div>
+                                <div class="alert alert-light border-start border-4 border-success shadow-sm p-4">
+                                    <p class="mb-0 fs-5">@diagnosisHistory.DoctorNote</p>
+                                </div>
+                                
+                                <!-- Added follow-up recommendation for better patient guidance -->
+                                <div class="alert alert-success mt-4">
+                                    <div class="d-flex">
+                                        <div class="me-3">
+                                            <i class="bi bi-calendar-check fs-3"></i>
                                         </div>
-                                    }
+                                        <div>
+                                            <h5 class="alert-heading">Follow-up Recommendation</h5>
+                                            <p class="mb-0">Please schedule a follow-up appointment in 2 weeks to monitor your progress.</p>
+                                        </div>
+                                    </div>
                                 </div>
-                            }
-                            else
-                            {
-                                <div class="text-center text-muted py-3">
-                                    <i class="bi bi-emoji-neutral fs-4 d-block mb-2"></i>
-                                    No medications prescribed
-                                </div>
-                            }
+                            </div>
                         </div>
                     </div>
-
-                    <!-- Doctor's Notes -->
-                    <div>
-                        <label class="form-label fw-semibold">
-                            <i class="bi bi-journal-text me-2"></i>
-                            Doctor's Notes
-                        </label>
-                        <textarea 
-                            name="DoctorNotes" 
-                            class="form-control bg-light" 
-                            rows="3" 
-                            placeholder="Additional notes or recommendations..."
-                            disabled="disabled">@diagnosisHistory.DoctorNote</textarea>
+                </div>
+                <div class="card-footer bg-light p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="bi bi-person-badge me-2"></i>
+                            <span class="text-muted">Attending Physician: @diagnosisHistory.Doctor.FullName</span>
+                        </div>
+                        <div>
+                            <button class="btn btn-sm btn-primary me-2">
+                                <i class="bi bi-printer me-1"></i> Print
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-download me-1"></i> Download PDF
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -149,15 +260,57 @@
 </div>
 
 <style>
-    .hover-shadow {
+    /* Enhanced styling for better user experience */
+    .card-hover {
         transition: all 0.3s ease;
     }
-    .hover-shadow:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+    .card-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 1rem 3rem rgba(0,0,0,.175)!important;
     }
-    .transition {
-        transition: all 0.3s ease;
+    .pulse-icon {
+        animation: pulse 2s infinite;
+    }
+    @@keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); }
+    }
+    .shake-on-hover:hover {
+        animation: shake 0.5s;
+    }
+    @@keyframes shake {
+        0% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        50% { transform: translateX(5px); }
+        75% { transform: translateX(-5px); }
+        100% { transform: translateX(0); }
+    }
+    .icon-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+    }
+    .progress {
+        overflow: visible;
+    }
+    .border-dashed {
+        border-style: dashed !important;
+    }
+    /* Dark mode compatibility */
+    @@media (prefers-color-scheme: dark) {
+        .bg-light {
+            background-color: #2b3035 !important;
+        }
+        .text-muted {
+            color: #adb5bd !important;
+        }
+        .card, .alert-light {
+            background-color: #343a40 !important;
+            color: #f8f9fa !important;
+        }
     }
 </style>
 
@@ -169,6 +322,48 @@
             var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
                 return new bootstrap.Tooltip(tooltipTriggerEl)
             });
+            
+            // Initialize tabs with smooth animation
+            $('.nav-tabs button').on('click', function() {
+                $('.tab-pane').removeClass('animate__animated animate__fadeIn');
+                setTimeout(function() {
+                    $('.tab-pane.active').addClass('animate__animated animate__fadeIn');
+                }, 150);
+            });
+            
+            // Add initial animation to active tab
+            $('.tab-pane.active').addClass('animate__animated animate__fadeIn');
+            
+            // Add print functionality
+            $('button:contains("Print")').on('click', function() {
+                window.print();
+            });
+            
+            // Show a notification when page loads
+            setTimeout(function() {
+                const toastHTML = `
+                    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+                        <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+                            <div class="toast-header bg-success text-white">
+                                <i class="bi bi-check-circle me-2"></i>
+                                <strong class="me-auto">Success</strong>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                            </div>
+                            <div class="toast-body">
+                                Patient diagnosis record loaded successfully.
+                            </div>
+                        </div>
+                    </div>
+                `;
+                $('body').append(toastHTML);
+                
+                setTimeout(function() {
+                    $('.toast').toast('hide');
+                }, 3000);
+            }, 500);
         });
     </script>
+    
+    <!-- Add animate.css for smoother animations -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 }

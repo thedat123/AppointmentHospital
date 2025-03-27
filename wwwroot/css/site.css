@@ -52,7 +52,6 @@ html {
 }
 
 body {
-    margin-bottom: 60px;
     color: var(--default-color);
     background-color: var(--background-color);
     font-family: var(--default-font);

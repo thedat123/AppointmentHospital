@@ -125,6 +125,7 @@ namespace AppointmentHospital.Controllers
             DateTime endOfMonth = new DateTime(now.Year, now.Month, DateTime.DaysInMonth(now.Year, now.Month));
 
             var remainingDays = _timeSlotService.GetRemainingDaysInMonth(startDate, endOfMonth, input.Schedules);
+            var parsedDoctorId = Guid.Parse(doctorId);
 
             foreach (var day in remainingDays)
             {
@@ -133,24 +134,20 @@ namespace AppointmentHospital.Controllers
                     s.StartTime.HasValue &&
                     s.EndTime.HasValue);
 
-                if (schedule != null)
+                if (schedule == null) continue;
+
+                for (TimeSpan currentStartTime = schedule.StartTime.Value;
+                    currentStartTime < schedule.EndTime.Value;
+                    currentStartTime = currentStartTime.Add(TimeSpan.FromHours(1)))
                 {
-                    TimeSpan currentStartTime = schedule.StartTime.Value;
-                    while (currentStartTime < schedule.EndTime.Value)
+                    _timeSlotService.AddTimeSlot(new TimeSlot
                     {
-                        TimeSpan nextHour = currentStartTime.Add(TimeSpan.FromHours(1));
-
-                        _timeSlotService.AddTimeSlot(new TimeSlot
-                        {
-                            TimeSlotId = Guid.NewGuid(),
-                            DoctorId = Guid.Parse(doctorId),
-                            StartTime = day.Date.Add(currentStartTime),
-                            EndTime = day.Date.Add(nextHour),
-                            Available = true
-                        });
-
-                        currentStartTime = nextHour;
-                    }
+                        TimeSlotId = Guid.NewGuid(),
+                        DoctorId = parsedDoctorId,
+                        StartTime = day.Date.Add(currentStartTime),
+                        EndTime = day.Date.Add(currentStartTime.Add(TimeSpan.FromHours(1))),
+                        Available = true
+                    });
                 }
             }
 

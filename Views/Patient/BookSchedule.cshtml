@@ -1,110 +1,173 @@
-﻿<link rel="stylesheet" href="~/css/book-schedule.css" asp-append-version="true" />
-@model dynamic
-<div class="modal-content">
-    <div class="modal-header">
-        <h5 class="modal-title">BOOK APPOINTMENT</h5>
-    </div>
-    <div class="modal-body">
-        <div class="doctor-info mb-3">
-            <p class="mb-1">Doctor: @Model.DoctorName</p>
-            <p class="mb-3">Appointment Time: @Model.AppointmentDateTime.ToString("f")</p>
+﻿@model dynamic
+@{
+    ViewData["Title"] = "Book Appointment";
+}
 
-            <div class="booking-type mb-3">
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="bookingType" id="forSelf" value="self" checked onchange="togglePatientInfo()">
-                    <label class="form-check-label" for="forSelf">For Myself</label>
+<link rel="stylesheet" href="~/css/book-schedule.css" asp-append-version="true" />
+
+<div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+        <h5 class="m-0 font-weight-bold">Book Appointment</h5>
+    </div>
+    <div class="card-body">
+        <div class="doctor-info mb-4">
+            <div class="d-flex align-items-center mb-3">
+                <div class="doctor-avatar me-3">
+                    <img src="@Url.Content("~/images/doctor-placeholder.jpg")" alt="Doctor" class="rounded-circle" width="60" height="60" />
                 </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="bookingType" id="forOther" value="other" onchange="togglePatientInfo()">
-                    <label class="form-check-label" for="forOther">For Someone Else</label>
+                <div>
+                    <h6 class="mb-1 text-primary">Dr. @Model.DoctorName</h6>
+                    <p class="text-muted mb-0"><i class="bi bi-calendar-check me-2"></i>@Model.AppointmentDateTime.ToString("dddd, MMMM d, yyyy")</p>
+                    <p class="text-muted mb-0"><i class="bi bi-clock me-2"></i>@Model.AppointmentDateTime.ToString("h:mm tt")</p>
+                </div>
+            </div>
+
+            <div class="booking-type mb-4">
+                <label class="form-label fw-bold">Who is this appointment for?</label>
+                <div class="d-flex">
+                    <div class="form-check me-4">
+                        <input class="form-check-input" type="radio" name="bookingType" id="forSelf" value="self" checked onchange="togglePatientInfo()">
+                        <label class="form-check-label" for="forSelf">For Myself</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="bookingType" id="forOther" value="other" onchange="togglePatientInfo()">
+                        <label class="form-check-label" for="forOther">For Someone Else</label>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <form id="bookingForm" method="post">
+        <form id="bookingForm" method="post" class="needs-validation" novalidate>
             <input type="hidden" id="doctorId" name="DoctorId" value="@Model.DoctorId" />
             <input type="hidden" id="appointmentDateTime" name="AppointmentDateTime" value="@Model.AppointmentDateTime" />
             <input type="hidden" id="timeSlotId" name="TimeSlotId" value="@Model.TimeSlotId" />
 
             <div id="self-section" class="patient-section">
-                <h6 class="text-info">Symptoms</h6>
-                <div class="mb-3">
-                    <textarea class="form-control" rows="4" name="symptoms" placeholder="Reason for Appointment"></textarea>
+                <div class="mb-4">
+                    <label for="selfSymptoms" class="form-label fw-bold">Reason for Appointment <span class="text-danger">*</span></label>
+                    <textarea class="form-control" id="selfSymptoms" rows="4" name="symptoms" placeholder="Please describe your symptoms or reason for the visit" required></textarea>
+                    <div class="invalid-feedback">
+                        Please provide a reason for your appointment.
+                    </div>
                 </div>
             </div>
 
             <div id="other-section" class="patient-section" style="display: none;">
-                <h6 class="text-info">Patient's Information</h6>
+                <h6 class="border-bottom pb-2 mb-3">Patient's Information</h6>
+                
                 <div class="mb-3">
-                    <input type="text" class="form-control" name="acquaintanceName" placeholder="Full Name (required)">
+                    <label for="acquaintanceName" class="form-label">Full Name <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="acquaintanceName" name="acquaintanceName" required>
+                    <div class="invalid-feedback">
+                        Please provide the patient's full name.
+                    </div>
                 </div>
 
-                <div class="gender-selection mb-3">
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="gender" id="male" value="Male">
-                        <label class="form-check-label" for="male">Male</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="gender" id="female" value="Female">
-                        <label class="form-check-label" for="female">Female</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="gender" id="other" value="Other">
-                        <label class="form-check-label" for="other">Other</label>
+                <div class="mb-3">
+                    <label class="form-label">Gender</label>
+                    <div class="d-flex">
+                        <div class="form-check me-3">
+                            <input class="form-check-input" type="radio" name="gender" id="male" value="Male">
+                            <label class="form-check-label" for="male">Male</label>
+                        </div>
+                        <div class="form-check me-3">
+                            <input class="form-check-input" type="radio" name="gender" id="female" value="Female">
+                            <label class="form-check-label" for="female">Female</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="gender" id="otherGender" value="Other">
+                            <label class="form-check-label" for="otherGender">Other</label>
+                        </div>
                     </div>
                 </div>
 
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <input type="tel" class="form-control" name="phoneNumber" placeholder="Patient's Phone Number">
+                        <label for="phoneNumber" class="form-label">Phone Number</label>
+                        <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber">
                     </div>
                     <div class="col-md-6">
-                        <input id="scheduleDate" type="date" class="form-control" name="birthDate" 
-                            min="@DateTime.Now.ToString("yyyy-MM-dd")">
+                        <label for="birthDate" class="form-label">Date of Birth</label>
+                        <input id="birthDate" type="date" class="form-control" name="birthDate">
                     </div>
                 </div>
 
                 <div class="mb-3">
-                    <input type="number" class="form-control" name="identificationNumber" placeholder="Identification Number">
+                    <label for="identificationNumber" class="form-label">Identification Number</label>
+                    <input type="text" class="form-control" id="identificationNumber" name="identificationNumber">
                 </div>
 
                 <div class="mb-3">
-                    <input type="text" class="form-control" name="address" placeholder="Address">
+                    <label for="address" class="form-label">Address</label>
+                    <input type="text" class="form-control" id="address" name="address">
                 </div>
 
                 <div class="mb-3">
-                    <textarea class="form-control" rows="4" name="symptom" placeholder="Reason for Appointment" required></textarea>
+                    <label for="otherSymptoms" class="form-label">Reason for Appointment <span class="text-danger">*</span></label>
+                    <textarea class="form-control" id="otherSymptoms" rows="4" name="symptom" placeholder="Please describe the patient's symptoms or reason for the visit" required></textarea>
+                    <div class="invalid-feedback">
+                        Please provide a reason for the appointment.
+                    </div>
                 </div>
+            </div>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                <button type="button" class="btn btn-outline-secondary me-md-2" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="submitBookingForm()">
+                    <i class="bi bi-check-circle me-2"></i>Confirm Appointment
+                </button>
             </div>
         </form>
     </div>
-    <div class="modal-footer">
-        <button type="button" class="btn btn-primary" onclick="submitBookingForm()">Confirm Appointment</button>
-    </div>
 </div>
 
-<script>
-    function togglePatientInfo() {
-        const forSelf = document.getElementById('forSelf').checked;
-        document.getElementById('self-section').style.display = forSelf ? 'block' : 'none';
-        document.getElementById('other-section').style.display = forSelf ? 'none' : 'block';
-    }
+@section Scripts {
+    <script>
+        // Form validation
+        (function () {
+            'use strict'
+            var forms = document.querySelectorAll('.needs-validation')
+            Array.from(forms).forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+        })();
 
-    function submitBookingForm() {
-        const form = document.getElementById('bookingForm');
-        const forSelf = document.getElementById('forSelf').checked;
-        Swal.fire({
-            title: 'Confirm Booking',
-            text: 'Are you sure you want to book this appointment?',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: 'Accept',
-            cancelButtonText: 'Cancel'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                form.action = forSelf ? '/Patient/BookForSelf' : '/Patient/BookForOther';
-                form.submit();
-            }});
+        function togglePatientInfo() {
+            const forSelf = document.getElementById('forSelf').checked;
+            document.getElementById('self-section').style.display = forSelf ? 'block' : 'none';
+            document.getElementById('other-section').style.display = forSelf ? 'none' : 'block';
+        }
 
-    }
-</script>
+        function submitBookingForm() {
+            const form = document.getElementById('bookingForm');
+            const forSelf = document.getElementById('forSelf').checked;
+            
+            // Add validation before showing confirmation
+            if (!form.checkValidity()) {
+                form.classList.add('was-validated');
+                return;
+            }
+            
+            Swal.fire({
+                title: 'Confirm Booking',
+                text: 'Are you sure you want to book this appointment?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Confirm',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#007bff'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.action = forSelf ? '/Patient/BookForSelf' : '/Patient/BookForOther';
+                    form.submit();
+                }
+            });
+        }
+    </script>
+}

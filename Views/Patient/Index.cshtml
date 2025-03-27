@@ -21,23 +21,158 @@
         </h2>
 
         <div class="row justify-content-center">
-            <div class="col-md-10 col-lg-8">
-                <form action="/Patient/Predict" method="post">
-                    <div class="input-group search-bar mb-4 shadow-lg">
-                        <input type="text" class="form-control form-control-lg" id="searchInput"
-                            placeholder="Search Symptoms" name="symptoms"
-                            style="border-radius: 50px 0 0 50px; padding: 20px;" />
-                        <button class="btn btn-primary px-4" type="submit"
-                            style="border-radius: 0 50px 50px 0; font-size: 1.2rem;">
-                            <i class="fas fa-search me-2"></i> Search
-                        </button>
+            <div class="col-md-10 col-lg-9">
+                <!-- Enhanced Chatbot Widget -->
+                <div class="chatbot-widget shadow">
+                    <!-- Chatbot Header -->
+                    <div class="chatbot-header text-white d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <div class="chatbot-avatar me-3">
+                                <i class="fas fa-heartbeat fa-lg"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0 fw-bold">Medical Assistant</h5>
+                                <div class="small d-flex align-items-center">
+                                    <span class="badge bg-success me-2 px-2 py-1">Online</span>
+                                    <span>Available 24/7</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chat-controls">
+                            <button id="newChatBtn" class="btn btn-light d-flex align-items-center">
+                                <i class="fas fa-plus me-2"></i> New Chat
+                            </button>
+                        </div>
                     </div>
+                    
+                    <!-- New Layout with Sidebar for Conversation History -->
+                    <div class="chatbot-container d-flex">
+                        <!-- Conversation History Sidebar -->
+                        <div class="chat-history-sidebar p-3" style="width: 30%; height: 380px; overflow-y: auto;">
+                            <div class="d-flex justify-content-between align-items-center mb-3 px-1">
+                                <h6 class="mb-0 fw-bold text-primary">Recent Conversations</h6>
+                                <button class="btn btn-sm btn-link text-muted p-0" title="Clear All">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                            <div id="conversationList">
+                                <!-- Conversation History Items -->
+                                <div class="chat-history-item active d-flex flex-column">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="chat-title text-truncate fw-medium" style="max-width: 80%;">
+                                            <i class="fas fa-comment-medical me-2 text-primary"></i>
+                                            <span>Headache symptoms</span>
+                                        </div>
+                                        <small class="badge bg-light text-dark">Today</small>
+                                    </div>
+                                    <small class="text-muted mt-1 text-truncate">Last message: Recommended treatment...</small>
+                                </div>
+                                <div class="chat-history-item d-flex flex-column">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="chat-title text-truncate fw-medium" style="max-width: 80%;">
+                                            <i class="fas fa-comment-medical me-2 text-primary"></i>
+                                            <span>Fever and cough</span>
+                                        </div>
+                                        <small class="badge bg-light text-dark">Yesterday</small>
+                                    </div>
+                                    <small class="text-muted mt-1 text-truncate">Last message: Follow up in 3 days...</small>
+                                </div>
+                                <div class="chat-history-item d-flex flex-column">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="chat-title text-truncate fw-medium" style="max-width: 80%;">
+                                            <i class="fas fa-comment-medical me-2 text-primary"></i>
+                                            <span>Stomach pain advice</span>
+                                        </div>
+                                        <small class="badge bg-light text-dark">Mar 20</small>
+                                    </div>
+                                    <small class="text-muted mt-1 text-truncate">Last message: Diet recommendations...</small>
+                                </div>
+                            </div>
+                        </div>
 
-                    <div class="d-flex justify-content-center gap-3">
-                        <input type="file" id="imageInput" class="form-control" accept="image/*"
-                            style="display: none;" />
+                        <!-- Chat Content Area -->
+                        <div class="chat-content" style="width: 70%;">
+                            <!-- Chat Messages Area -->
+                            <div id="chatMessages" class="chat-messages">
+                                <div class="message bot-message mb-4">
+                                    <div class="d-flex align-items-start">
+                                        <div class="avatar-small me-2 bg-primary text-white rounded-circle d-flex align-items-center justify-content-center">
+                                            <i class="fas fa-robot"></i>
+                                        </div>
+                                        <div class="message-content text-white">
+                                            <p class="mb-0">Hi there! I'm your medical assistant. How can I help you with your health concerns today?</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="message bot-message mb-4">
+                                    <div class="d-flex align-items-start">
+                                        <div class="avatar-small me-2 bg-primary text-white rounded-circle d-flex align-items-center justify-content-center">
+                                            <i class="fas fa-robot"></i>
+                                        </div>
+                                        <div class="message-content text-white">
+                                            <p class="mb-0">Feel free to describe your symptoms or ask any health-related questions. I'm here to assist you!</p>
+                                            <div class="suggested-queries mt-3">
+                                                <p class="mb-2 small">Common topics:</p>
+                                                <div class="d-flex flex-wrap gap-2">
+                                                    <button class="query-suggestion">Headache and fever</button>
+                                                    <button class="query-suggestion">Stomach pain</button>
+                                                    <button class="query-suggestion">Cough and sore throat</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Example of thinking animation
+                                <div class="message bot-message mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <div class="avatar-small me-2 bg-primary text-white rounded-circle d-flex align-items-center justify-content-center">
+                                            <i class="fas fa-robot"></i>
+                                        </div>
+                                        <div class="thinking-dots">
+                                            <span class="dot"></span>
+                                            <span class="dot"></span>
+                                            <span class="dot"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                -->
+                            </div>
+                            
+                            <!-- Chat Input Area with Tools -->
+                            <div class="chat-footer">
+                                <form id="chatForm" action="/Patient/Predict" method="post" class="chat-input">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="userInput" name="symptoms" 
+                                               placeholder="Describe your symptoms or ask a health question..." 
+                                               style="border-radius: 50px 0 0 50px;" />
+                                        <button class="btn btn-primary" type="submit" 
+                                                style="border-radius: 0 50px 50px 0;">
+                                            <i class="fas fa-paper-plane"></i>
+                                        </button>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mt-3">
+                                        <div class="chat-tools">
+                                            <button type="button" class="btn btn-sm text-primary" title="Upload Image">
+                                                <i class="fas fa-image"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-sm text-primary" title="Voice Input">
+                                                <i class="fas fa-microphone"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-sm text-primary" title="Attach Files">
+                                                <i class="fas fa-paperclip"></i>
+                                            </button>
+                                        </div>
+                                        <div class="text-muted small d-flex align-items-center">
+                                            <i class="fas fa-shield-alt me-1"></i> 
+                                            Your information is secure & confidential
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
 
@@ -84,13 +219,6 @@
                             <p class="card-text text-center">
                                 <i class="fas fa-paragraph text-primary me-2"></i>@TempData["Description"]
                             </p>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 d-flex flex-column align-items-center border-end">
-                            <div class="text-center mb-3">
-
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -149,7 +277,6 @@
         }
     </div>
 </div>
-
 
 <div class="container my-5">
     <section class="services-section">
@@ -229,5 +356,374 @@
 </div>
 @section Styles {
     <link rel="stylesheet" href="~/css/patientIndex.css" asp-append-version="true" />
+    <style>
+        body {
+            background-color: #f0f2f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .chatbot-widget {
+            border-radius: 16px;
+            overflow: hidden;
+            margin-top: 30px;
+            margin-bottom: 30px;
+            background-color: #fff;
+            transition: all 0.3s ease;
+        }
+        
+        .chatbot-header {
+            background: linear-gradient(135deg, #3a8ffe 0%, #0d6efd 100%);
+            border-radius: 16px 16px 0 0;
+            padding: 18px 20px !important;
+        }
+        
+        .chatbot-avatar {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #newChatBtn {
+            border-radius: 50px;
+            padding: 6px 14px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .chat-history-sidebar {
+            border-right: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+            background-color: #f8f9fa;
+        }
+        
+        .chat-history-item {
+            cursor: pointer;
+            padding: 12px 15px !important;
+            border-radius: 10px;
+            margin-bottom: 8px !important;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+        
+        .chat-history-item:hover {
+            background-color: rgba(13, 110, 253, 0.08);
+        }
+        
+        .chat-history-item.active {
+            background-color: rgba(13, 110, 253, 0.12);
+            border-left: 3px solid #0d6efd;
+        }
+        
+        .chat-title {
+            font-size: 0.95rem;
+            color: #495057;
+        }
+        
+        .chat-messages {
+            background-color: #f8f9fa;
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23e1e6f0' fill-opacity='0.3' fill-rule='evenodd'/%3E%3C/svg%3E");
+            padding: 20px !important;
+            height: 380px !important;
+        }
+        
+        .message {
+            margin-bottom: 16px !important;
+        }
+        
+        .avatar-small {
+            width: 38px !important;
+            height: 38px !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .user-message .message-content {
+            background-color: #e9ecef;
+            border-radius: 18px 18px 0 18px !important;
+            color: #212529;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        
+        .bot-message .message-content {
+            background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+            border-radius: 18px 18px 18px 0 !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 14px 18px !important;
+        }
+        
+        .chat-footer {
+            background-color: #fff;
+            border-top: 1px solid #e9ecef;
+            padding: 16px 20px !important;
+            border-radius: 0 0 16px 16px;
+        }
+        
+        .chat-input .form-control {
+            border: 1px solid #dee2e6;
+            padding: 14px 20px !important;
+            font-size: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            transition: all 0.2s ease;
+        }
+        
+        .chat-input .form-control:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+        }
+        
+        .chat-input .btn-primary {
+            padding: 12px 22px !important;
+            box-shadow: 0 2px 4px rgba(13, 110, 253, 0.3);
+        }
+        
+        .chat-tools button {
+            margin-right: 8px;
+            color: #6c757d;
+            transition: all 0.2s ease;
+        }
+        
+        .chat-tools button:hover {
+            color: #0d6efd;
+        }
+        
+        .suggested-queries {
+            margin-top: 8px;
+        }
+        
+        .query-suggestion {
+            background-color: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50px;
+            margin-right: 6px;
+            margin-bottom: 6px;
+            color: white;
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+        
+        .query-suggestion:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.4);
+            color: white;
+        }
+        
+        /* Thinking Animation */
+        .thinking-dots {
+            padding: 10px 16px;
+            border-radius: 18px;
+            display: inline-block;
+            background-color: rgba(13, 110, 253, 0.7);
+        }
+        
+        .thinking-dots .dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #fff;
+            margin: 0 3px;
+            opacity: 0;
+            animation: thinking 1.4s infinite;
+        }
+        
+        .thinking-dots .dot:nth-child(1) { animation-delay: 0s; }
+        .thinking-dots .dot:nth-child(2) { animation-delay: 0.2s; }
+        .thinking-dots .dot:nth-child(3) { animation-delay: 0.4s; }
+        
+        @@keyframes thinking {
+            0% { opacity: 0; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
+            100% { opacity: 0; transform: scale(0.8); }
+        }
+        
+        /* Responsive adjustments */
+        @@media (max-width: 767px) {
+            .chatbot-container {
+                flex-direction: column;
+            }
+            
+            .chat-history-sidebar, .chat-content {
+                width: 100% !important;
+            }
+            
+            .chat-history-sidebar {
+                height: 120px !important;
+                border-right: none;
+                border-bottom: 1px solid #dee2e6;
+            }
+            
+            .chat-messages {
+                height: 300px !important;
+            }
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Handle clicking on conversation history items
+            $('.chat-history-item').click(function() {
+                $('.chat-history-item').removeClass('active');
+                $(this).addClass('active');
+                
+                // In a real implementation, you would load the selected conversation
+                // For demo purposes, we'll just show a message
+                const chatTitle = $(this).find('.chat-title span').text();
+                $('#chatMessages').append(`
+                    <div class="message system-message text-center mb-3">
+                        <div class="message-content p-2 rounded-3 bg-light text-muted small">
+                            <p class="mb-0">Loaded conversation: "${chatTitle}"</p>
+                        </div>
+                    </div>
+                `);
+                
+                // Scroll to bottom of chat
+                scrollToBottom();
+            });
+            
+            // Handle new chat button
+            $('#newChatBtn').click(function() {
+                // Clear chat messages except the welcome message
+                $('#chatMessages').html(`
+                    <div class="message bot-message mb-3">
+                        <div class="d-flex align-items-start">
+                            <div class="avatar-small me-2 bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="message-content p-3 rounded-3 bg-primary text-white">
+                                <p class="mb-0">Hello! I'm your medical assistant. How can I help you today?</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="message bot-message mb-3">
+                        <div class="d-flex align-items-start">
+                            <div class="avatar-small me-2 bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="message-content p-3 rounded-3 bg-primary text-white">
+                                <div class="suggested-queries mb-2">
+                                    <p class="mb-1">Try asking about:</p>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <button class="btn btn-sm btn-light query-suggestion">Headache and fever</button>
+                                        <button class="btn btn-sm btn-light query-suggestion">Stomach pain</button>
+                                        <button class="btn btn-sm btn-light query-suggestion">Cough and sore throat</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `);
+                
+                // Create new chat in history
+                const currentDate = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                $('#conversationList').prepend(`
+                    <div class="chat-history-item active p-2 rounded mb-1">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="chat-title text-truncate" style="max-width: 80%;">
+                                <i class="fas fa-comment-medical me-1 text-primary"></i>
+                                <span>New conversation</span>
+                            </div>
+                            <small class="text-muted">${currentDate}</small>
+                        </div>
+                    </div>
+                `);
+                
+                // Remove active class from other items
+                $('#conversationList .chat-history-item:not(:first-child)').removeClass('active');
+            });
+            
+            // Handle query suggestions
+            $('.query-suggestion').click(function() {
+                const suggestionText = $(this).text();
+                $('#userInput').val(suggestionText);
+                
+                // Add user message to chat
+                $('#chatMessages').append(`
+                    <div class="message user-message mb-3">
+                        <div class="d-flex align-items-start justify-content-end">
+                            <div class="message-content p-3 rounded-3 bg-light">
+                                <p class="mb-0">${suggestionText}</p>
+                            </div>
+                            <div class="avatar-small ms-2 bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
+                                <i class="fas fa-user"></i>
+                            </div>
+                        </div>
+                    </div>
+                `);
+                
+                // Scroll to bottom of chat
+                scrollToBottom();
+                
+                // Submit the form
+                $('#chatForm').submit();
+            });
+            
+            // Handle form submission
+            $('#chatForm').submit(function(e) {
+                const userInput = $('#userInput').val().trim();
+                if (userInput) {
+                    // Add user message to chat
+                    $('#chatMessages').append(`
+                        <div class="message user-message mb-3">
+                            <div class="d-flex align-items-start justify-content-end">
+                                <div class="message-content p-3 rounded-3 bg-light">
+                                    <p class="mb-0">${userInput}</p>
+                                </div>
+                                <div class="avatar-small ms-2 bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                            </div>
+                        </div>
+                    `);
+                    
+                    // Add "Thinking..." message (will be replaced by actual response from server)
+                    $('#chatMessages').append(`
+                        <div class="message bot-message thinking mb-3">
+                            <div class="d-flex align-items-start">
+                                <div class="avatar-small me-2 bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
+                                    <i class="fas fa-robot"></i>
+                                </div>
+                                <div class="message-content p-3 rounded-3 bg-primary text-white">
+                                    <p class="mb-0">
+                                        <span class="thinking-dots">
+                                            <span class="dot">.</span>
+                                            <span class="dot">.</span>
+                                            <span class="dot">.</span>
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    `);
+                    
+                    // Update conversation title in history
+                    $('#conversationList .chat-history-item.active .chat-title span').text(userInput);
+                    
+                    // Scroll to bottom of chat
+                    scrollToBottom();
+                    
+                    // Clear input field
+                    $('#userInput').val('');
+                }
+                
+                // Form will be submitted normally to server
+            });
+            
+            // Function to scroll to bottom of chat
+            function scrollToBottom() {
+                const chatMessages = document.getElementById('chatMessages');
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+            
+            // Initial scroll to bottom
+            scrollToBottom();
+        });
+    </script>
 }
 

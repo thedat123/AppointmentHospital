@@ -8,96 +8,67 @@
     <link rel="stylesheet" href="~/css/site.css" />
     <link rel="stylesheet" href="~/css/layout.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     @RenderSection("Styles", required: false)
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom fixed-top">
-            <div class="container">
-                <a class="navbar-brand d-flex align-items-center" asp-action="Index" asp-controller="Patient">
-                    <img src="~/images/MedicalCarelogo.png" alt="BookingCare" height="40">MedicalCare
-                </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarMain">
-                    <ul class="navbar-nav mx-auto">
-                        <li class="nav-item">
-                            <a class="nav-link d-flex flex-column align-items-center" onclick="@(User.Identity.IsAuthenticated ? "return true" : "showLoginAlert(); return false" )"  href="/specialties">
-                                <i class="fas fa-stethoscope mb-1"></i>
-                                <span>Specialties</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link d-flex flex-column align-items-center" onclick="@(User.Identity.IsAuthenticated ? "return true" : "showLoginAlert(); return false" )"  href="/medical-facilities">
-                                <i class="fas fa-hospital mb-1"></i>
-                                <span>Facilities</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link d-flex flex-column align-items-center" onclick="@(User.Identity.IsAuthenticated ? "return true" : "showLoginAlert(); return false" )"  href="/doctors">
-                                <i class="fas fa-user-md mb-1"></i>
-                                <span>Doctors</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link d-flex flex-column align-items-center" onclick="@(User.Identity.IsAuthenticated ? "return true" : "showLoginAlert(); return false" )"  href="/health-packages">
-                                <i class="fas fa-heartbeat mb-1"></i>
-                                <span>Health Packages</span>
-                            </a>
-                        </li>
-                    </ul>
-                    <div class="d-flex align-items-center">
-                        <div class="dropdown me-3">
-                            <select class="form-select form-select-sm border-primary rounded-pill">
-                                <option value="en">EN</option>
-                                <option value="vi">VN</option>
-                            </select>
+    <header class="main-header">
+        <div class="container">
+            <div class="row main-nav">
+                <div class="col-2">
+                    <a href="@Url.Action("Index", "Patient")">
+                        <img src="~/images/MedicalCarelogo.png" alt="MedicalCare Logo" class="logo">
+                    </a>
+                </div>
+                <div class="col-7">
+                    <div class="main-nav-links text-center">
+                        <a href="/health-packages">Giới thiệu</a>
+                        <a href="/specialties">Chuyên khoa</a>
+                        <a href="/medical-facilities">Chuyên gia - bác sĩ</a>
+                        <a href="/doctors">Tầm nhìn và sứ mệnh</a>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="search-and-actions">
+                        <div class="search-container">
+                            <input type="text" placeholder="Tìm kiếm...">
+                            <i class="fas fa-search"></i>
                         </div>
-                        @if (User.Identity.IsAuthenticated)
-                        {
-                            <div class="dropdown user-dropdown">
-                                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" 
-                                   data-bs-toggle="dropdown" aria-expanded="false">
-                                    <img src="~/images/user-default.png" class="rounded-circle me-2" width="32" height="32" alt="User">
-                                    <span class="text-primary">Hi, @User.Identity.Name</span>
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                                    <li>
-                                        <a class="dropdown-item" asp-action="PersonalProfile" asp-controller="Patient">
-                                            <i class="fas fa-user-circle me-2"></i> Profile
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" asp-action="MySchedule" asp-controller="Patient">
-                                            <i class="fas fa-calendar-alt me-2"></i> My Schedule
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="/settings">
-                                            <i class="fas fa-cog me-2"></i> Settings
-                                        </a>
-                                    </li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li>
-                                        <form asp-action="Logout" asp-controller="Account" method="post" class="m-0">
-                                            <button class="dropdown-item text-danger">
-                                                <i class="fas fa-sign-out-alt me-2"></i> Logout
-                                            </button>
-                                        </form>
-                                    </li>
-                                </ul>
-                            </div>
-                        }
-                        else
-                        {
-                            <a asp-action="Login" asp-controller="Account" class="btn btn-outline-primary rounded-pill me-2">Sign In</a>
-                            <a asp-action="Register" asp-controller="Account" class="btn btn-primary rounded-pill">Register</a>
-                        }
+                        <div class="user-actions">
+                            <a href="#" class="calendar-icon">
+                                <i class="far fa-calendar" style="margin-right: 15px;"></i>
+                            </a>
+                            @if (User.Identity.IsAuthenticated)
+                            {
+                                <div class="dropdown">
+                                    <a href="#" class="dropdown-toggle" id="userDropdown" data-bs-toggle="dropdown">
+                                        <img src="~/images/user-default.png" class="rounded-circle" width="32" height="32" alt="Người dùng">
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li><a class="dropdown-item" href="/Patient/PersonalProfile">Hồ sơ cá nhân</a></li>
+                                        <li><a class="dropdown-item" href="/Patient/MySchedule">Lịch khám của tôi</a></li>
+                                        <li><a class="dropdown-item" href="/settings">Cài đặt</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <form method="post" action="/account/logout">
+                                                <button type="submit" class="dropdown-item text-danger">Đăng xuất</button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </div>
+                            }
+                            else
+                            {
+                                <div>
+                                    <a href="/account/login" class="btn-login">Đăng nhập</a>
+                                    <a href="/account/register" class="btn-register">Đăng ký</a>
+                                </div>
+                            }
+                        </div>
                     </div>
                 </div>
             </div>
-        </nav>
+        </div>
     </header>
 
     <main role="main" class="main-content">
