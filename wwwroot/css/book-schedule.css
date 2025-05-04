@@ -1,47 +1,157 @@
-.modal-content {
-    max-width: 800px;
-    margin: auto;
-    padding: 20px;
+:root {
+    --primary: #2c7be5;
+    --primary-hover: #1a68d1;
+    --secondary: #edf2f9;
+    --secondary-hover: #d9e2ef;
+    --text-dark: #12263f;
+    --text-muted: #95aac9;
+    --danger: #e63757;
 }
 
-.modal-header {
-    background-color: #00b5d8;
-    color: white;
-    padding: 10px 20px;
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f9fbfd;
+    color: var(--text-dark);
 }
 
-.close {
-    color: white;
+.card {
+    border: none;
+    border-radius: 0.75rem;
+    box-shadow: 0 0.75rem 1.5rem rgba(18, 38, 63, 0.08);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
 }
 
-.text-info {
-    color: #00b5d8 !important;
-    margin-bottom: 15px;
+.card-header {
+    background-color: var(--primary);
+    padding: 1.25rem 1.5rem;
+    border-bottom: none;
 }
 
-.form-control {
-    border-radius: 4px;
-    padding: 8px 12px;
+.card-header h5 {
+    font-weight: 600;
+    letter-spacing: 0.03em;
 }
 
-.fee-info {
-    margin-top: 20px;
-    padding: 10px;
-    background-color: #f8f9fa;
-    border-radius: 4px;
+.card-body {
+    padding: 1.75rem;
 }
 
-.modal-footer {
-    display: flex;
-    justify-content: flex-end;
+.doctor-info {
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--secondary);
+}
+
+.doctor-avatar img {
+    border: 2px solid white;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12);
+}
+
+.form-label {
+    color: var(--text-dark);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.form-control, .form-select {
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e3ebf6;
+    transition: all 0.2s ease;
+    font-size: 0.95rem;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.2rem rgba(44, 123, 229, 0.15);
+}
+
+.form-check-input:checked {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
 }
 
 .btn-primary {
-    background-color: #00b5d8;
-    border-color: #00b5d8;
+    background-color: var(--primary);
+    border-color: var(--primary);
 }
 
 .btn-primary:hover {
-    background-color: #008ab3;
-    border-color: #008ab3;
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(44, 123, 229, 0.25);
+}
+
+.btn-outline-secondary {
+    color: var(--text-dark);
+    border-color: #d9e2ef;
+    background-color: transparent;
+}
+
+.btn-outline-secondary:hover {
+    background-color: var(--secondary);
+    border-color: var(--secondary-hover);
+    color: var(--text-dark);
+}
+
+.text-primary {
+    color: var(--primary) !important;
+}
+
+.invalid-feedback {
+    font-size: 0.85rem;
+    margin-top: 0.35rem;
+}
+
+.patient-section {
+    padding: 1.25rem;
+    background-color: #f9fbfd;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.text-danger {
+    color: var(--danger) !important;
+}
+
+.booking-type {
+    padding: 1rem;
+    background-color: var(--secondary);
+    border-radius: 0.5rem;
+}
+
+/* Modal specific styles */
+.modal-content {
+    border: none;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    box-shadow: 0 0.75rem 1.5rem rgba(18, 38, 63, 0.12);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1.25rem;
+    }
+    
+    .d-flex {
+        flex-direction: column;
+    }
+    
+    .doctor-avatar {
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+    
+    .form-check-input {
+        margin-top: 0.25rem;
+    }
 }

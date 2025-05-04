@@ -17,4 +17,5 @@ public interface ITimeSlotService
     public List<TimeSlot> GetAllTimeSlotByParticularDate(DateTime date);
     public void UpdateNoteInTimeSlot(Guid timeSlotId, string note);
     public Guid GetTimeSlotIdByAppointmentime(DateTime appointmentTime);
+    public void UpdateTimeSlot(Guid timeSlotId, DateTime date);
 }

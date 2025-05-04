@@ -9,7 +9,6 @@ public interface ITimeSlotRepository
 {
     public Task<Pagination<TimeSlot>> GetTimeSlotByDoctorId(Guid doctorId, int page,string sortBy, string sortOrder, DateTime? filterDate);
     public void AddTimeSlot(TimeSlot timeSlot);
-
     public List<DateTime> GetRemainingDaysInMonth(DateTime startDate, DateTime endOfMonth, List<DaySchedule> schedules);
     public void UpdateTimeSlotAvalableStatusByTimeSlotID(Guid timeSlotID, bool status);
     public List<TimeSlot> GetTimeSlotsByDoctorAndDate(Guid id, DateTime date);
@@ -19,4 +18,5 @@ public interface ITimeSlotRepository
     public void UpdateNoteInTimeSlot(Guid timeSlotId, string note);
     public Task DeleteOldTimeSlotAsync();
     public Guid GetTimeSlotIdByAppointmentime(DateTime appointmentTime);
+    public void UpdateTimeSlot(Guid timeSlotId, DateTime date);
 }

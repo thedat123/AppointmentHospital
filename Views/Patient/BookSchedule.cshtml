@@ -7,31 +7,31 @@
 
 <div class="card shadow-sm">
     <div class="card-header bg-primary text-white">
-        <h5 class="m-0 font-weight-bold">Book Appointment</h5>
+        <h5 class="m-0 font-weight-bold">Đặt Lịch Khám</h5>
     </div>
     <div class="card-body">
         <div class="doctor-info mb-4">
             <div class="d-flex align-items-center mb-3">
                 <div class="doctor-avatar me-3">
-                    <img src="@Url.Content("~/images/doctor-placeholder.jpg")" alt="Doctor" class="rounded-circle" width="60" height="60" />
+                    <img src="@Url.Content("~/images/user-default.png")" alt="Bác sĩ" class="rounded-circle" width="60" height="60" />
                 </div>
                 <div>
-                    <h6 class="mb-1 text-primary">Dr. @Model.DoctorName</h6>
+                    <h6 class="mb-1 text-primary">BS. @Model.DoctorName</h6>
                     <p class="text-muted mb-0"><i class="bi bi-calendar-check me-2"></i>@Model.AppointmentDateTime.ToString("dddd, MMMM d, yyyy")</p>
                     <p class="text-muted mb-0"><i class="bi bi-clock me-2"></i>@Model.AppointmentDateTime.ToString("h:mm tt")</p>
                 </div>
             </div>
 
             <div class="booking-type mb-4">
-                <label class="form-label fw-bold">Who is this appointment for?</label>
+                <label class="form-label fw-bold">Đặt lịch cho ai?</label>
                 <div class="d-flex">
                     <div class="form-check me-4">
                         <input class="form-check-input" type="radio" name="bookingType" id="forSelf" value="self" checked onchange="togglePatientInfo()">
-                        <label class="form-check-label" for="forSelf">For Myself</label>
+                        <label class="form-check-label" for="forSelf">Cho bản thân</label>
                     </div>
                     <div class="form-check">
                         <input class="form-check-input" type="radio" name="bookingType" id="forOther" value="other" onchange="togglePatientInfo()">
-                        <label class="form-check-label" for="forOther">For Someone Else</label>
+                        <label class="form-check-label" for="forOther">Cho người khác</label>
                     </div>
                 </div>
             </div>
@@ -44,115 +44,137 @@
 
             <div id="self-section" class="patient-section">
                 <div class="mb-4">
-                    <label for="selfSymptoms" class="form-label fw-bold">Reason for Appointment <span class="text-danger">*</span></label>
-                    <textarea class="form-control" id="selfSymptoms" rows="4" name="symptoms" placeholder="Please describe your symptoms or reason for the visit" required></textarea>
+                    <label for="selfSymptoms" class="form-label fw-bold">Lý do khám <span class="text-danger">*</span></label>
+                    <textarea class="form-control" id="selfSymptoms" rows="4" name="symptoms" placeholder="Vui lòng mô tả triệu chứng hoặc lý do khám" required></textarea>
                     <div class="invalid-feedback">
-                        Please provide a reason for your appointment.
+                        Vui lòng cung cấp lý do khám.
                     </div>
                 </div>
             </div>
 
             <div id="other-section" class="patient-section" style="display: none;">
-                <h6 class="border-bottom pb-2 mb-3">Patient's Information</h6>
+                <h6 class="border-bottom pb-2 mb-3">Thông tin bệnh nhân</h6>
                 
                 <div class="mb-3">
-                    <label for="acquaintanceName" class="form-label">Full Name <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="acquaintanceName" name="acquaintanceName" required>
+                    <label for="acquaintanceName" class="form-label">Họ và tên <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="acquaintanceName" name="acquaintanceName">
                     <div class="invalid-feedback">
-                        Please provide the patient's full name.
+                        Vui lòng cung cấp tên đầy đủ của bệnh nhân.
                     </div>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Gender</label>
+                    <label class="form-label">Giới tính</label>
                     <div class="d-flex">
                         <div class="form-check me-3">
                             <input class="form-check-input" type="radio" name="gender" id="male" value="Male">
-                            <label class="form-check-label" for="male">Male</label>
+                            <label class="form-check-label" for="male">Nam</label>
                         </div>
                         <div class="form-check me-3">
                             <input class="form-check-input" type="radio" name="gender" id="female" value="Female">
-                            <label class="form-check-label" for="female">Female</label>
+                            <label class="form-check-label" for="female">Nữ</label>
                         </div>
                         <div class="form-check">
                             <input class="form-check-input" type="radio" name="gender" id="otherGender" value="Other">
-                            <label class="form-check-label" for="otherGender">Other</label>
+                            <label class="form-check-label" for="otherGender">Khác</label>
                         </div>
                     </div>
                 </div>
 
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <label for="phoneNumber" class="form-label">Phone Number</label>
+                        <label for="phoneNumber" class="form-label">Số điện thoại</label>
                         <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber">
                     </div>
                     <div class="col-md-6">
-                        <label for="birthDate" class="form-label">Date of Birth</label>
+                        <label for="birthDate" class="form-label">Ngày sinh</label>
                         <input id="birthDate" type="date" class="form-control" name="birthDate">
                     </div>
                 </div>
 
                 <div class="mb-3">
-                    <label for="identificationNumber" class="form-label">Identification Number</label>
+                    <label for="identificationNumber" class="form-label">Số chứng minh nhân dân</label>
                     <input type="text" class="form-control" id="identificationNumber" name="identificationNumber">
                 </div>
 
                 <div class="mb-3">
-                    <label for="address" class="form-label">Address</label>
+                    <label for="address" class="form-label">Địa chỉ</label>
                     <input type="text" class="form-control" id="address" name="address">
                 </div>
 
                 <div class="mb-3">
-                    <label for="otherSymptoms" class="form-label">Reason for Appointment <span class="text-danger">*</span></label>
-                    <textarea class="form-control" id="otherSymptoms" rows="4" name="symptom" placeholder="Please describe the patient's symptoms or reason for the visit" required></textarea>
+                    <label for="otherSymptoms" class="form-label">Lý do khám <span class="text-danger">*</span></label>
+                    <textarea class="form-control" id="otherSymptoms" rows="4" name="symptom" placeholder="Vui lòng mô tả triệu chứng hoặc lý do khám của bệnh nhân"></textarea>
                     <div class="invalid-feedback">
-                        Please provide a reason for the appointment.
+                        Vui lòng cung cấp lý do khám.
                     </div>
                 </div>
             </div>
 
             <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-                <button type="button" class="btn btn-outline-secondary me-md-2" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-outline-secondary me-md-2" data-bs-dismiss="modal">Hủy</button>
                 <button type="button" class="btn btn-primary" onclick="submitBookingForm()">
-                    <i class="bi bi-check-circle me-2"></i>Confirm Appointment
+                    <i class="bi bi-check-circle me-2"></i>Xác nhận đặt lịch
                 </button>
             </div>
         </form>
     </div>
 </div>
 
+
 @section Scripts {
     <script>
-        // Form validation
-        (function () {
-            'use strict'
-            var forms = document.querySelectorAll('.needs-validation')
-            Array.from(forms).forEach(function (form) {
-                form.addEventListener('submit', function (event) {
-                    if (!form.checkValidity()) {
-                        event.preventDefault()
-                        event.stopPropagation()
-                    }
-                    form.classList.add('was-validated')
-                }, false)
-            })
-        })();
+        // Initialize form on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            togglePatientInfo();
+        });
 
         function togglePatientInfo() {
             const forSelf = document.getElementById('forSelf').checked;
-            document.getElementById('self-section').style.display = forSelf ? 'block' : 'none';
-            document.getElementById('other-section').style.display = forSelf ? 'none' : 'block';
+            const selfSection = document.getElementById('self-section');
+            const otherSection = document.getElementById('other-section');
+            
+            // Toggle visibility of sections
+            selfSection.style.display = forSelf ? 'block' : 'none';
+            otherSection.style.display = forSelf ? 'none' : 'block';
+            
+            // Toggle required attributes based on which section is active
+            toggleRequiredFields(forSelf);
+        }
+        
+        function toggleRequiredFields(forSelf) {
+            // Self section fields
+            document.getElementById('selfSymptoms').required = forSelf;
+            
+            // Other section fields
+            const otherRequiredFields = [
+                document.getElementById('acquaintanceName'),
+                document.getElementById('otherSymptoms')
+            ];
+            
+            otherRequiredFields.forEach(field => {
+                if (field) field.required = !forSelf;
+            });
+            
+            // Reset validation when switching sections
+            document.getElementById('bookingForm').classList.remove('was-validated');
         }
 
         function submitBookingForm() {
             const form = document.getElementById('bookingForm');
             const forSelf = document.getElementById('forSelf').checked;
             
+            // Make sure required fields are properly set before validation
+            toggleRequiredFields(forSelf);
+            
             // Add validation before showing confirmation
             if (!form.checkValidity()) {
+                console.log("Form is invalid, showing validation messages...");
                 form.classList.add('was-validated');
                 return;
             }
+
+            console.log("Form is valid, proceeding to confirmation...");
             
             Swal.fire({
                 title: 'Confirm Booking',

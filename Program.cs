@@ -15,8 +15,14 @@ using AppointmentHospital.Configuration.EmailConfiguaration;
 using Hangfire;
 using AppointmentHospital.Configuration.BaseUrl;
 using DotNetEnv;
+using FinalProject.Repositories;
+using FinalProject.Repositories.Implement;
+using FinalProject.Services;
+using FinalProject.Services.Implement;
 
-
+using System;
+using System.Net;
+using System.Net.Mail;
 
 namespace AppointmentHospital
 {
@@ -24,7 +30,6 @@ namespace AppointmentHospital
     {
         public static async Task Main(string[] args)
         {
-
             var builder = WebApplication.CreateBuilder(args);
             Env.Load();
             builder.Services.AddControllersWithViews();
@@ -76,6 +81,10 @@ namespace AppointmentHospital
 
             builder.Services.AddScoped<IDiseasePredictionService, DiseasePredictionService>();
             builder.Services.AddScoped<ICronTimeSlotService, CronTimeSlotService>();
+            
+            builder.Services.AddScoped<ISpecialitiesRepository, SpecialitiesRepository>();
+            builder.Services.AddScoped<ISpecialitiesService, SpecialitiesService>();
+            builder.Services.AddScoped<IChatbotService, ChatbotService>();
 
             builder.Services.AddAuthentication().AddGoogle(option =>
             {

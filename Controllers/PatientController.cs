@@ -14,6 +14,7 @@ using AppointmentHospital.EnumStatus;
 using Hangfire;
 using AppointmentHospital.Services.Implement;
 using AppointmentHospital.Areas.Admin.Services;
+using FinalProject.Services;
 
 namespace AppointmentHospital.Controllers
 {
@@ -30,10 +31,12 @@ namespace AppointmentHospital.Controllers
         private readonly ITimeSlotService _timeSlotService;
         private readonly IHubContext<ScheduleHub> _hubContext;
         private readonly IDiseasePredictionService _predictionService;
-
+        private readonly ISpecialitiesService _specialitiesService;
         private readonly IManagingDoctorService _managingDoctorService;
 
-        public PatientController(AppDbContext appDbContext,IPatientService patientService ,IDoctorService doctorService, ILogger<PatientController> logger, IHttpContextAccessor contextAccessor, IAppointmentDateService appointmentDateService, IEmailService emailService, ITimeSlotService timeSlotService, IHubContext<ScheduleHub> hubContext, IDiseasePredictionService diseasePredictionService, IManagingDoctorService managingDoctorService)
+        private readonly ChatbotService _chatbotService = new ChatbotService();
+
+        public PatientController(AppDbContext appDbContext,IPatientService patientService ,IDoctorService doctorService, ILogger<PatientController> logger, IHttpContextAccessor contextAccessor, IAppointmentDateService appointmentDateService, IEmailService emailService, ITimeSlotService timeSlotService, IHubContext<ScheduleHub> hubContext, IDiseasePredictionService diseasePredictionService, IManagingDoctorService managingDoctorService, ISpecialitiesService specialitiesService)
         {
             _appDbContext = appDbContext;
             _patientService = patientService;
@@ -46,9 +49,18 @@ namespace AppointmentHospital.Controllers
             _hubContext = hubContext;
             _predictionService = diseasePredictionService;
             _managingDoctorService = managingDoctorService;
+            _specialitiesService = specialitiesService;
         }
 
         public async Task<IActionResult> Index(string? selectSpec)
+        {
+            List<Doctor> doctors = await _doctorService.getAllDoctors(selectSpec);
+            ViewBag.Specialization = _managingDoctorService.GetSpecialization();
+            ViewBag.SelectedSpec = selectSpec;
+            return View(doctors);
+        }
+
+        public async Task<IActionResult> ListDoctor(string? selectSpec)
         {
             List<Doctor> doctors = await _doctorService.getAllDoctors(selectSpec);
             ViewBag.Specialization = _managingDoctorService.GetSpecialization();
@@ -351,6 +363,48 @@ namespace AppointmentHospital.Controllers
 
             ViewData["DiagnosisHistory"] = diagnosisHistory;
             return View(appointment);
+        }
+
+        public IActionResult Specialities(){
+            var specialities = _specialitiesService.GetAllSpecialities();
+            return View(specialities);
+        }
+
+        public IActionResult DetailSpecialities(){
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> Chatbot(string userMessage)
+        {
+            try
+            {
+                Console.WriteLine("User message received: " + userMessage); // Kiểm tra xem có nhận được chưa
+
+                var chatRequest = new ChatRequest
+                {
+                    Query = userMessage,
+                    IncludeContext = false,
+                    MaxResults = 0
+                };
+
+                var chatResponse = await _chatbotService.SendMessageAsync(chatRequest);
+                ViewBag.UserMessage = userMessage;
+                ViewBag.BotReply = chatResponse.Response;
+            }
+            catch (Exception ex)
+            {
+                ViewBag.BotReply = "Lỗi khi gọi API chatbot: " + ex.Message;
+            }
+
+            return View();
+        }
+
+
+        [HttpGet]
+        public ActionResult Chatbot()
+        {
+            return View();
         }
 
     }

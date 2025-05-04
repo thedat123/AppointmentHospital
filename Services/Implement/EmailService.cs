@@ -103,8 +103,10 @@ namespace AppointmentHospital.Services.Implement
                 SmtpClient smtpClient = new SmtpClient();
                 smtpClient.Port = port;
                 smtpClient.Host = host;
-                smtpClient.Credentials = new NetworkCredential(username, password);
                 smtpClient.EnableSsl = enableSSL;
+                smtpClient.UseDefaultCredentials = false;
+                smtpClient.DeliveryMethod = SmtpDeliveryMethod.Network;
+                smtpClient.Credentials = new NetworkCredential(username, password);  
                 await smtpClient.SendMailAsync(message);
             }
             catch(Exception ex)

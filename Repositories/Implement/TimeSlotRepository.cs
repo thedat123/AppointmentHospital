@@ -106,4 +106,13 @@ public class TimeSlotRepository : ITimeSlotRepository
     public Guid GetTimeSlotIdByAppointmentime(DateTime appointmentTime){
         return _context.TimeSlots.Where(x => x.StartTime == appointmentTime).Select(x => x.TimeSlotId).FirstOrDefault();
     }
+
+    public void UpdateTimeSlot(Guid timeSlotId, DateTime appointmentTime){
+        var timeSlot = _context.TimeSlots.Find(timeSlotId);
+        if(timeSlot != null){
+            timeSlot.StartTime = appointmentTime.Date + timeSlot.StartTime.TimeOfDay;
+            timeSlot.EndTime = appointmentTime.Date + timeSlot.EndTime.TimeOfDay;
+            _context.SaveChanges();
+        }
+    }
 }

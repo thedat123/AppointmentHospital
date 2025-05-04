@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" />
     <link rel="stylesheet" href="~/css/layout.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     @RenderSection("Styles", required: false)
@@ -15,24 +16,24 @@
     <header class="main-header">
         <div class="container">
             <div class="row main-nav">
-                <div class="col-2">
+                <div class="col-1">
                     <a href="@Url.Action("Index", "Patient")">
                         <img src="~/images/MedicalCarelogo.png" alt="MedicalCare Logo" class="logo">
                     </a>
                 </div>
-                <div class="col-7">
+                <div class="col-8">
                     <div class="main-nav-links text-center">
-                        <a href="/health-packages">Giới thiệu</a>
-                        <a href="/specialties">Chuyên khoa</a>
-                        <a href="/medical-facilities">Chuyên gia - bác sĩ</a>
-                        <a href="/doctors">Tầm nhìn và sứ mệnh</a>
+                        <a href="@Url.Action("Index", "Patient")">Giới thiệu</a>
+                        <a href="@Url.Action("Specialities", "Patient")">Chuyên khoa</a>
+                        <a href="@Url.Action("ListDoctor", "Patient")">Chuyên gia - Bác sĩ</a>
+                        <a href="@Url.Action("Index", "Patient")">Tầm nhìn & Sứ mệnh</a>
+                        <a href="@Url.Action("Chatbot", "Patient")">Hỗ trợ Chatbot</a>
                     </div>
                 </div>
                 <div class="col-3">
                     <div class="search-and-actions">
-                        <div class="search-container">
-                            <input type="text" placeholder="Tìm kiếm...">
-                            <i class="fas fa-search"></i>
+                        <div class="booking-container">
+                            <button type="submit">Đặt lịch khám bệnh</button>
                         </div>
                         <div class="user-actions">
                             <a href="#" class="calendar-icon">

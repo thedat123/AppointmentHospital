@@ -1,5 +1,6 @@
 ﻿using AppointmentHospital.Entity;
 using AppointmentHospital.EnumStatus;
+using FinalProject.Entity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +18,7 @@ namespace AppointmentHospital.Models
         public DbSet<Acquaintance> Acquaintances { get; set;}
         public DbSet<Drug> Drugs { get; set; }
         public DbSet<DiagnosisHistory> DiagnosisHistory { get; set; }
+        public DbSet<Specialities> Specialities { get; set; }
 
         public DbSet<Feedback> Feedbacks { get; set; }
 

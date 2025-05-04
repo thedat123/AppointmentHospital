@@ -14,27 +14,26 @@
                         <div class="icon-circle bg-white bg-opacity-25">
                             <i class="fas fa-stethoscope text-white fa-lg"></i>
                         </div>
-                        <h1 class="h3 text-white mb-0">Appointments</h1>
+                        <h1 class="h3 text-white mb-0">Danh sách lịch hẹn</h1>
                     </div>
                     <div class="bg-white status-badge">
                         <i class="fas fa-user-md text-primary me-2"></i>
-                        <span class="fw-semibold text-primary">Dr. @ViewBag.DoctorName</span>
+                        <span class="fw-semibold text-primary">Bác sĩ @ViewBag.DoctorName</span>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Stats Cards -->
+    <!-- Thống kê -->
     <div class="row g-4 mb-5">
         @{
-            var statCards = new[]
-            {
-        (AppointmentStatus.Pending, (int)ViewBag.Stats.PendingCount, "fa-clock", "#FFA500", "#FFF5E6"),
-        (AppointmentStatus.Confirmed, (int)ViewBag.Stats.ConfirmedCount, "fa-check-circle", "#10B981", "#ECFDF5"),
-        (AppointmentStatus.Completed, (int)ViewBag.Stats.CompletedCount, "fa-check-double", "#3B82F6", "#EFF6FF"),
-        (AppointmentStatus.Canceled, (int)ViewBag.Stats.CanceledCount, "fa-times-circle", "#6B7280", "#F3F4F6")
-        };
+            var statCards = new[] {
+                (AppointmentStatus.Pending, (int)ViewBag.Stats.PendingCount, "fa-clock", "#FFA500", "#FFF5E6"),
+                (AppointmentStatus.Confirmed, (int)ViewBag.Stats.ConfirmedCount, "fa-check-circle", "#10B981", "#ECFDF5"),
+                (AppointmentStatus.Completed, (int)ViewBag.Stats.CompletedCount, "fa-check-double", "#3B82F6", "#EFF6FF"),
+                (AppointmentStatus.Canceled, (int)ViewBag.Stats.CanceledCount, "fa-times-circle", "#6B7280", "#F3F4F6")
+            };
         }
         @foreach (var (status, count, icon, color, bgColor) in statCards)
         {
@@ -61,22 +60,19 @@
                     <div class="search-box">
                         <i class="fas fa-search"></i>
                         <input type="text" class="form-control form-control-lg border-0 bg-light" id="searchInput"
-                            placeholder="Search patients or symptoms...">
+                            placeholder="Tìm kiếm bệnh nhân hoặc triệu chứng...">
                     </div>
                 </div>
                 <div class="col-md-6 text-md-end">
                     @foreach (var (status, icon) in new[]
                     {
-                    (AppointmentStatus.Pending, "fa-clock"),
-                    (AppointmentStatus.Confirmed, "fa-check-circle"),
-                    (AppointmentStatus.Completed, "fa-check-double"),
-                    (AppointmentStatus.Canceled, "fa-times-circle")
+                        (AppointmentStatus.Pending, "fa-clock"),
+                        (AppointmentStatus.Confirmed, "fa-check-circle"),
+                        (AppointmentStatus.Completed, "fa-check-double"),
+                        (AppointmentStatus.Canceled, "fa-times-circle")
                     })
                     {
-                        <a asp-action="Index" asp-route-status="@status" class="btn @(ViewBag.SelectedStatus == status 
-                                      ? "btn-primary" 
-                                      : "btn-outline-primary") 
-                                  btn-rounded me-2 mb-2">
+                        <a asp-action="Index" asp-route-status="@status" class="btn @(ViewBag.SelectedStatus == status ? "btn-primary" : "btn-outline-primary") btn-rounded me-2 mb-2">
                             <i class="fas @icon me-1"></i> @status
                         </a>
                     }
@@ -91,10 +87,10 @@
                 <thead class="bg-light">
                     <tr>
                         <th class="border-0 ps-4">#</th>
-                        <th class="border-0">Schedule</th>
-                        <th class="border-0">Patient</th>
-                        <th class="border-0">Symptoms</th>
-                        <th class="border-0 text-center">Actions</th>
+                        <th class="border-0">Thời gian</th>
+                        <th class="border-0">Bệnh nhân</th>
+                        <th class="border-0">Triệu chứng</th>
+                        <th class="border-0 text-center">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -106,8 +102,8 @@
                             <tr>
                                 <td class="ps-4">@(i + 1)</td>
                                 <td>
-                                    <div class="fw-semibold">@appointment.AppointmentTime.ToString("dddd, MMMM d, yyyy")</div>
-                                    <div class="small text-muted">@appointment.AppointmentTime.ToString("h:mm tt")</div>
+                                    <div class="fw-semibold">@appointment.AppointmentTime.ToString("dddd, dd/MM/yyyy")</div>
+                                    <div class="small text-muted">@appointment.AppointmentTime.ToString("HH:mm")</div>
                                 </td>
                                 <td>
                                     <div class="fw-semibold">
@@ -115,29 +111,25 @@
                                             appointment.Acquaintance?.Name != null
                                             ? appointment.Acquaintance.Name
                                             : appointment.Patient.FullName
-                                            )
+                                        )
                                     </div>
                                     <div class="small text-muted">
                                         @(
                                             appointment.Acquaintance?.DateOfBirth != null
-                                            ? appointment.Acquaintance.DateOfBirth
-                                            : appointment.Patient.DateOfBirth
-                                            )
+                                            ? appointment.Acquaintance.DateOfBirth.ToString("dd/MM/yyyy")
+                                            : appointment.Patient.DateOfBirth?.ToString("dd/MM/yyyy")
+                                        )
                                         |
                                         @(
                                             !string.IsNullOrEmpty(appointment.Acquaintance?.Address)
                                             ? appointment.Acquaintance.Address
                                             : appointment.Patient.Address
-                                            )
+                                        )
                                     </div>
                                 </td>
                                 <td>
                                     <div class="text-truncate" style="max-width: 200px;" title="@appointment.Symptoms">
-                                        @(
-                                            !string.IsNullOrEmpty(appointment.Symptoms)
-                                            ? appointment.Symptoms
-                                            : "No Symptoms Provided"
-                                            )
+                                        @(!string.IsNullOrEmpty(appointment.Symptoms) ? appointment.Symptoms : "Không có triệu chứng")
                                     </div>
                                 </td>
                                 <td class="text-center">
@@ -145,20 +137,18 @@
                                     {
                                         <form action="/Doctor/UpdateStatus" method="post" class="d-inline-flex gap-2">
                                             <input type="hidden" name="id" value="@appointment.AppointmentId" />
-                                            <button type="submit" name="status" value="1"
-                                                class="btn btn-success btn-sm btn-rounded">
-                                                <i class="fas fa-check me-1"></i> Confirm
+                                            <button type="submit" name="status" value="1" class="btn btn-success btn-sm btn-rounded">
+                                                <i class="fas fa-check me-1"></i> Xác nhận
                                             </button>
                                             <button type="submit" name="status" value="3" class="btn btn-danger btn-sm btn-rounded">
-                                                <i class="fas fa-times me-1"></i> Cancel
+                                                <i class="fas fa-times me-1"></i> Hủy
                                             </button>
                                         </form>
                                     }
                                     else if (appointment.Status == AppointmentHospital.EnumStatus.AppointmentStatus.Confirmed)
                                     {
-                                        <a asp-controller="Doctor" asp-action="StartDiagnosis"
-                                            asp-route-id="@appointment.AppointmentId" class="btn btn-primary btn-sm btn-rounded">
-                                            <i class="fas fa-stethoscope me-1"></i> Start diagnosis
+                                        <a asp-controller="Doctor" asp-action="StartDiagnosis" asp-route-id="@appointment.AppointmentId" class="btn btn-primary btn-sm btn-rounded">
+                                            <i class="fas fa-stethoscope me-1"></i> Bắt đầu khám
                                         </a>
                                     }
                                     else if (appointment.Status == AppointmentHospital.EnumStatus.AppointmentStatus.Completed)
@@ -166,16 +156,12 @@
                                         if (appointment.FeedbackId.HasValue)
                                         {
                                             <div id="Feedback">
-                                                <button onclick="ViewFeedback()" id="viewFeedback" type="button"
-                                                    class="btn btn-primary btn-sm btn-rounded"
-                                                    data-appointment-id="@appointment.AppointmentId">
-                                                    View Feedback
+                                                <button onclick="ViewFeedback()" id="viewFeedback" type="button" class="btn btn-primary btn-sm btn-rounded" data-appointment-id="@appointment.AppointmentId">
+                                                    Xem đánh giá
                                                 </button>
                                             </div>
                                         }
-
                                     }
-
                                 </td>
                             </tr>
                         }
@@ -186,7 +172,7 @@
                             <td colspan="5" class="text-center py-5">
                                 <div class="text-muted">
                                     <i class="fas fa-calendar-times fa-3x mb-3"></i>
-                                    <p class="mb-0">No appointments available</p>
+                                    <p class="mb-0">Không có lịch hẹn nào</p>
                                 </div>
                             </td>
                         </tr>
@@ -199,8 +185,7 @@
                         @if (Model.HasPreviousPage)
                         {
                             <li class="page-item">
-                                <a class="page-link" href="javascript:void(0)"
-                                    onclick="changePage(@(Model.CurrentPage - 1))" aria-label="Previous">
+                                <a class="page-link" href="javascript:void(0)" onclick="changePage(@(Model.CurrentPage - 1))" aria-label="Trước">
                                     <span aria-hidden="true">&laquo;</span>
                                 </a>
                             </li>
@@ -216,8 +201,7 @@
                         @if (Model.HasNextPage)
                         {
                             <li class="page-item">
-                                <a class="page-link" href="javascript:void(0)"
-                                    onclick="changePage(@(Model.CurrentPage + 1))" aria-label="Next">
+                                <a class="page-link" href="javascript:void(0)" onclick="changePage(@(Model.CurrentPage + 1))" aria-label="Sau">
                                     <span aria-hidden="true">&raquo;</span>
                                 </a>
                             </li>
@@ -228,6 +212,7 @@
         </div>
     </div>
 </div>
+
 
 <!-- View Feedback Modal -->
 <div class="modal fade" id="viewFeedbackModal" tabindex="-1" aria-labelledby="viewFeedbackModalLabel" role="dialog">

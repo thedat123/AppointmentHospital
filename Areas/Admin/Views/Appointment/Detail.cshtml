@@ -7,10 +7,22 @@
             <div class="header-content">
                 <h2 class="text-white">
                     <i class="bi bi-calendar2-check"></i>
-                    Appointment Details
+                    Chi tiết lịch hẹn
                 </h2>
                 <div class="appointment-status @Model.Status.ToString().ToLower()">
-                    <span class="status-badge">@Model.Status.ToString()</span>
+                    <span class="status-badge">
+                        @{
+                            var status = Model.Status.ToString();
+                            string statusText = status switch
+                            {
+                                "Pending" => "Chờ xác nhận",
+                                "Confirmed" => "Đã xác nhận",
+                                "Cancelled" => "Đã hủy",
+                                _ => "Không xác định"
+                            };
+                        }
+                        @statusText
+                    </span>
                 </div>
             </div>
         </div>
@@ -20,22 +32,22 @@
                 <div class="info-card patient-info">
                     <div class="info-header">
                         <i class="bi bi-person-circle"></i>
-                        <h3>Patient Information</h3>
+                        <h3>Thông tin bệnh nhân</h3>
                     </div>
                     <div class="info-body">
-                        <p><strong>Name:</strong> @Model.PatientName</p>
-                        <p><strong>ID:</strong> @Model.PatientId</p>
+                        <p><strong>Họ tên:</strong> @Model.PatientName</p>
+                        <p><strong>Mã bệnh nhân:</strong> @Model.PatientId</p>
                     </div>
                 </div>
 
                 <div class="info-card doctor-info">
                     <div class="info-header">
                         <i class="bi bi-person-badge"></i>
-                        <h3>Doctor Information</h3>
+                        <h3>Thông tin bác sĩ</h3>
                     </div>
                     <div class="info-body">
-                        <p><strong>Name:</strong> @Model.DoctorName</p>
-                        <p><strong>Specialization:</strong> @Model.Specialization</p>
+                        <p><strong>Họ tên:</strong> @Model.DoctorName</p>
+                        <p><strong>Chuyên khoa:</strong> @Model.Specialization</p>
                     </div>
                 </div>
             </div>
@@ -44,11 +56,11 @@
                 <div class="info-card appointment-time">
                     <div class="info-header">
                         <i class="bi bi-clock-history"></i>
-                        <h3>Appointment Schedule</h3>
+                        <h3>Thời gian khám</h3>
                     </div>
                     <div class="info-body">
                         <div class="time-details">
-                            <p><i class="bi bi-calendar-event"></i> @Model.AppointmentTime.ToString("dddd, MMMM dd, yyyy")</p>
+                            <p><i class="bi bi-calendar-event"></i> @Model.AppointmentTime.ToString("dddd, dd MMMM yyyy", new System.Globalization.CultureInfo("vi-VN"))</p>
                             <p><i class="bi bi-clock"></i> @Model.AppointmentTime.ToString("hh:mm tt")</p>
                         </div>
                     </div>
@@ -61,7 +73,7 @@
                     <div class="info-card notes">
                         <div class="info-header">
                             <i class="bi bi-journal-text"></i>
-                            <h3>Additional Notes</h3>
+                            <h3>Ghi chú thêm</h3>
                         </div>
                         <div class="info-body">
                             <p>@Model.Notes</p>
@@ -76,7 +88,7 @@
                     <div class="info-card cancellation">
                         <div class="info-header warning">
                             <i class="bi bi-exclamation-triangle"></i>
-                            <h3>Cancellation Reason</h3>
+                            <h3>Lý do hủy</h3>
                         </div>
                         <div class="info-body">
                             <p>@Model.CancellationReason</p>
@@ -88,14 +100,14 @@
             <div class="created-info">
                 <small>
                     <i class="bi bi-clock-history"></i>
-                    Created on @Model.CreatedAt.ToString("MMMM dd, yyyy") at @Model.CreatedAt.ToString("hh:mm tt")
+                    Tạo vào ngày @Model.CreatedAt.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("vi-VN")) lúc @Model.CreatedAt.ToString("hh:mm tt")
                 </small>
             </div>
         </div>
 
         <div class="card-actions">
             <a href="@Url.Action("Index")" class="btn-back">
-                <i class="bi bi-arrow-left"></i> Back to List
+                <i class="bi bi-arrow-left"></i> Quay lại danh sách
             </a>
         </div>
     </div>
