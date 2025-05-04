@@ -144,3 +144,24 @@ body {
   border-radius: 20px;
   padding: 8px 15px;
 }
+
+.booking-container {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.booking-container button {
+  padding: 10px 20px;
+  margin-right: 20px;
+  background-color: #0077d9;
+  color: white;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.booking-container button:hover {
+  background-color: #0077d9;
+}

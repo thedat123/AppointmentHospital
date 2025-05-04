@@ -1,0 +1,231 @@
+/* departments.css */
+:root {
+    --primary: #0d6efd;
+    --primary-dark: #0b5ed7;
+    --primary-light: #e7f1ff;
+    --transition: all 0.3s ease;
+}
+
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    opacity: 0.1;
+}
+
+/* Search Container */
+.search-container {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.search-container .form-control {
+    border: none;
+    padding: 15px 25px;
+    font-size: 1.1rem;
+    border-radius: 10px 0 0 10px;
+}
+
+.search-container .btn {
+    padding: 15px 30px;
+    font-size: 1.1rem;
+    border-radius: 0 10px 10px 0;
+    transition: var(--transition);
+}
+
+/* Filter Section */
+.filter-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn-filter {
+    padding: 12px 24px;
+    border-radius: 10px;
+    background: var(--primary-light);
+    color: var(--primary);
+    border: none;
+    transition: var(--transition);
+    font-weight: 500;
+}
+
+.btn-filter:hover, .btn-filter.active {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-filter .badge {
+    transition: var(--transition);
+}
+
+.btn-filter:hover .badge, .btn-filter.active .badge {
+    background: var(--primary-light);
+    color: var(--primary);
+}
+
+/* Department Cards */
+.department-card {
+    border-radius: 15px;
+    transition: var(--transition);
+    overflow: hidden;
+}
+
+.department-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+}
+
+.icon-wrapper {
+    width: 80px;
+    height: 80px;
+    background: var(--primary-light);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: var(--primary);
+    transition: var(--transition);
+    overflow: hidden;
+}
+
+.icon-wrapper img {
+    max-width: 60%;
+    height: auto;
+}
+
+.department-card:hover .icon-wrapper {
+    background: var(--primary);
+    color: white;
+    transform: scale(1.1);
+}
+
+.btn-hover-fill {
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.btn-hover-fill::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 100%;
+    background: var(--primary);
+    transition: var(--transition);
+    z-index: -1;
+}
+
+.btn-hover-fill:hover {
+    color: white;
+}
+
+.btn-hover-fill:hover::before {
+    width: 100%;
+}
+
+/* Animations */
+.animate-element {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s ease forwards paused;
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Empty State */
+.empty-state {
+    padding: 60px 20px;
+}
+
+/* Scroll To Top Button */
+.scroll-to-top {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: var(--transition);
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.scroll-to-top.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.scroll-to-top:hover {
+    transform: translateY(-3px);
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .hero-section h1 {
+        font-size: 2.5rem;
+    }
+    
+    .search-container {
+        padding: 15px;
+    }
+    
+    .search-container .form-control,
+    .search-container .btn {
+        padding: 12px 20px;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-section {
+        text-align: center;
+    }
+
+    .search-container {
+        margin-top: 30px;
+    }
+
+    .filter-buttons {
+        justify-content: center;
+    }
+
+    .btn-filter {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .scroll-to-top {
+        bottom: 15px;
+        right: 15px;
+        width: 40px;
+        height: 40px;
+    }
+}

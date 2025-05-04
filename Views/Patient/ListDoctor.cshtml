@@ -1,0 +1,1146 @@
+@model IEnumerable<AppointmentHospital.Models.Doctor>
+@using AppointmentHospital.EnumStatus
+@inject IUrlHelper Url
+
+<div class="doctors-page">
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-7 hero-content">
+                    <h1 class="hero-title">Đội ngũ Bác sĩ chuyên môn</h1>
+                    <p class="hero-subtitle">Khám phá đội ngũ bác sĩ giàu kinh nghiệm và tận tâm của chúng tôi</p>
+                    <div class="search-container">
+                        <div class="search-box">
+                            <i class="bi bi-search search-icon"></i>
+                            <input type="text" id="doctorSearch" class="form-control" placeholder="Tìm kiếm theo tên bác sĩ hoặc chuyên khoa...">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-5 d-none d-md-block hero-image-container">
+                    <img src="~/images/doctors-hero.svg" alt="Medical Team" class="hero-image">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="container">
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <div class="section-header">
+                    <h2 class="section-title">Danh sách Bác sĩ</h2>
+                    <div class="controls-wrapper">
+                        <div class="filter-wrapper">
+                            <div class="filter-pills" id="specialtyFilters">
+                                <button class="filter-pill active" data-specialty="all">
+                                    <i class="bi bi-grid-fill"></i>
+                                    Tất cả
+                                </button>
+                                
+                            </div>
+                        </div>
+                        <div class="view-options">
+                            <button class="btn btn-view active" data-view="grid" title="Xem dạng lưới">
+                                <i class="bi bi-grid"></i>
+                            </button>
+                            <button class="btn btn-view" data-view="list" title="Xem dạng danh sách">
+                                <i class="bi bi-list"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Doctors Grid -->
+            <div class="doctors-wrapper">
+                <div class="doctors-grid" id="doctorsContainer">
+                    @foreach (var doctor in Model)
+                    {
+                        <div class="doctor-card" data-specialty="@doctor.Specializaiton.ToString().ToLower()">
+                            <div class="doctor-image">
+                                <img src="@Url.Content(string.IsNullOrEmpty(doctor.ImagePath) 
+                                    ? "~/images/user-default.png" 
+                                    : $"~/images/{doctor.ImagePath}")" 
+                                    alt="@doctor.FullName"
+                                    loading="lazy">
+                                <div class="doctor-specialty">
+                                    @doctor.Specializaiton.GetDisplayName()
+                                </div>
+                            </div>
+                            <div class="doctor-info">
+                                <h3 class="doctor-name">@doctor.FullName</h3>
+                                <div class="doctor-meta">
+                                    <div class="rating">
+                                        <i class="bi bi-star-fill"></i>
+                                        <span>4.8</span>
+                                        <small>(56 đánh giá)</small>
+                                    </div>
+                                    <div class="experience">
+                                        <i class="bi bi-calendar-check"></i>
+                                        <span>15+ năm kinh nghiệm</span>
+                                    </div>
+                                </div>
+                                <p class="doctor-description">
+                                    @doctor.Description
+                                </p>
+                                <div class="doctor-actions">
+                                    <a href="@Url.Action("DetailDoctor", "Patient", new { id = doctor.DoctorId })" 
+                                       class="btn btn-primary btn-appointment" style="width: max-content;">
+                                        <i class="bi bi-calendar-plus"></i>
+                                        Đặt lịch khám
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Loading State -->
+                <div class="state-message loading-state d-none">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Đang tải danh sách bác sĩ...</p>
+                </div>
+
+                <!-- Empty State -->
+                <div class="state-message empty-state d-none">
+                    <i class="bi bi-search"></i>
+                    <h3>Không tìm thấy bác sĩ</h3>
+                    <p>Vui lòng thử lại với tiêu chí tìm kiếm khác</p>
+                    <button class="btn btn-primary btn-reset-search">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                        Xóa tìm kiếm
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        :root {
+            /* Base colors */
+            --primary-50: #eff6ff;
+            --primary-100: #dbeafe;
+            --primary-200: #bfdbfe;
+            --primary-300: #93c5fd;
+            --primary-400: #60a5fa;
+            --primary-500: #3b82f6;
+            --primary-600: #2563eb;
+            --primary-700: #1d4ed8;
+            --primary-800: #1e40af;
+            --primary-900: #1e3a8a;
+            
+            /* Supporting colors */
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            
+            /* Neutrals */
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgba(0,0,0,0.05);
+            --shadow: 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px 0 rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+            
+            /* Border radius */
+            --radius-sm: 0.125rem;  /* 2px */
+            --radius: 0.25rem;      /* 4px */
+            --radius-md: 0.375rem;  /* 6px */
+            --radius-lg: 0.5rem;    /* 8px */
+            --radius-xl: 0.75rem;   /* 12px */
+            --radius-2xl: 1rem;     /* 16px */
+            --radius-3xl: 1.5rem;   /* 24px */
+            --radius-full: 9999px;  /* Fully rounded */
+        }
+
+        body {
+            background-color: var(--gray-50);
+            color: var(--gray-800);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.5;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary-600), var(--primary-800));
+            padding: 4rem 0;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 2rem;
+            border-radius: 0 0 var(--radius-3xl) var(--radius-3xl);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l30 30-30 30L0 30z' fill='%23ffffff' fill-opacity='0.05'/%3E%3C/svg%3E");
+            opacity: 0.1;
+        }
+
+        .hero-content {
+            padding: 0 1rem;
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+            letter-spacing: -0.025em;
+        }
+
+        .hero-subtitle {
+            font-size: 1.125rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+            max-width: 80%;
+        }
+
+        .search-container {
+            position: relative;
+            max-width: 500px;
+        }
+
+        .search-box {
+            position: relative;
+            background: white;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+
+        .search-icon {
+            position: absolute;
+            transform: translateY(-50%);
+            color: var(--gray-500);
+            z-index: 10;
+        }
+
+        .search-box input {
+            border: none;
+            padding: 1rem 1.5rem 1rem 3rem;
+            font-size: 1rem;
+            width: 100%;
+            border-radius: var(--radius-xl);
+            transition: all 0.2s ease;
+        }
+
+        .search-box input:focus {
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+            outline: none;
+        }
+
+        .hero-image-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hero-image {
+            max-width: 100%;
+            height: auto;
+            filter: drop-shadow(0 20px 13px rgba(0, 0, 0, 0.08));
+        }
+
+        /* Main Content */
+        .main-content {
+            position: relative;
+            padding-bottom: 4rem;
+        }
+
+        /* Filter Section */
+        .filter-section {
+            margin-bottom: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+            color: var(--gray-900);
+        }
+
+        .controls-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .filter-wrapper {
+            flex: 1;
+        }
+
+        .filter-pills {
+            display: flex;
+            gap: 0.75rem;
+            overflow-x: auto;
+            padding: 0.25rem 0;
+            max-width: 100%;
+            scrollbar-width: thin;
+            scrollbar-color: var(--gray-300) transparent;
+        }
+
+        .filter-pills::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .filter-pills::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .filter-pills::-webkit-scrollbar-thumb {
+            background-color: var(--gray-300);
+            border-radius: var(--radius-full);
+        }
+
+        .filter-pill {
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-full);
+            background: white;
+            color: var(--gray-700);
+            border: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .filter-pill:hover {
+            border-color: var(--primary-300);
+            color: var(--primary-700);
+            background: var(--primary-50);
+        }
+
+        .filter-pill.active {
+            background: var(--primary-600);
+            color: white;
+            border-color: var(--primary-600);
+        }
+
+        .view-options {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-view {
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-md);
+            background: white;
+            color: var(--gray-600);
+            border: 1px solid var(--gray-200);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .btn-view:hover {
+            border-color: var(--primary-300);
+            color: var(--primary-600);
+        }
+
+        .btn-view.active {
+            background: var(--primary-600);
+            color: white;
+            border-color: var(--primary-600);
+        }
+
+        /* Doctors Grid */
+        .doctors-wrapper {
+            position: relative;
+            min-height: 300px;
+        }
+
+        .doctors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .doctors-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .doctors-list .doctor-card {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .doctors-list .doctor-image {
+            width: 120px;
+            min-width: 120px;
+            height: auto;
+            min-height: 100%;
+        }
+
+        .doctors-list .doctor-info {
+            flex: 1;
+        }
+
+        .doctor-card {
+            background: white;
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .doctor-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .doctor-image {
+            position: relative;
+            height: 220px;
+        }
+
+        .doctor-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .doctor-specialty {
+            position: absolute;
+            bottom: 1rem;
+            left: 1rem;
+            background: rgba(37, 99, 235, 0.9);
+            color: white;
+            padding: 0.375rem 0.75rem;
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 500;
+            box-shadow: var(--shadow-md);
+        }
+
+        .doctor-info {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .doctor-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 0.75rem;
+            color: var(--gray-900);
+        }
+
+        .doctor-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .rating, .experience {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            color: var(--gray-700);
+            font-size: 0.875rem;
+        }
+
+        .rating i {
+            color: var(--warning);
+        }
+
+        .rating span {
+            font-weight: 600;
+        }
+
+        .doctor-description {
+            color: var(--gray-600);
+            font-size: 0.875rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            flex: 1;
+        }
+
+        .doctor-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-top: auto;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.375rem;
+            font-weight: 500;
+            font-size: 0.875rem;
+            padding: 0.625rem 1rem;
+            border-radius: var(--radius-lg);
+            transition: all 0.2s ease;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary-600);
+            color: white;
+            border: 1px solid var(--primary-600);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-700);
+            border-color: var(--primary-700);
+        }
+
+        .btn-outline-primary {
+            background: transparent;
+            color: var(--primary-600);
+            border: 1px solid var(--primary-200);
+        }
+
+        .btn-outline-primary:hover {
+            background: var(--primary-50);
+            color: var(--primary-700);
+            border-color: var(--primary-300);
+        }
+
+        /* States */
+        .state-message {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .empty-state i {
+            font-size: 2.5rem;
+            color: var(--gray-400);
+            margin-bottom: 1rem;
+        }
+
+        .empty-state h3 {
+            color: var(--gray-800);
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            color: var(--gray-600);
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-reset-search {
+            margin-top: 0.5rem;
+        }
+
+        /* Responsive Design */
+        @@media (max-width: 992px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1rem;
+                max-width: 100%;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .controls-wrapper {
+                width: 100%;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .view-options {
+                margin-left: auto;
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .hero-section {
+                padding: 3rem 0 2rem;
+                text-align: center;
+                border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+            }
+            
+            .hero-content {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .search-container {
+                width: 100%;
+            }
+            
+            .doctor-actions {
+                grid-template-columns: 1fr;
+            }
+            
+            .doctors-list .doctor-card {
+                flex-direction: column;
+            }
+            
+            .doctors-list .doctor-image {
+                width: 100%;
+                height: 200px;
+            }
+        }
+
+        @@media (max-width: 576px) {
+            .doctors-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+    // Elements
+    const doctorSearch = document.getElementById('doctorSearch');
+    const specialtyFilters = document.getElementById('specialtyFilters');
+    const filterPills = document.querySelectorAll('.filter-pill');
+    const doctorCards = document.querySelectorAll('.doctor-card');
+    const viewButtons = document.querySelectorAll('.btn-view');
+    const doctorsContainer = document.getElementById('doctorsContainer');
+    const loadingState = document.querySelector('.loading-state');
+    const emptyState = document.querySelector('.empty-state');
+    const resetSearchBtn = document.querySelector('.btn-reset-search');
+
+    // Set up specialty filters container with horizontal scrolling
+    function setupSpecialtyFiltersContainer() {
+        // Create a container for horizontal scrolling with fixed width
+        const filtersScrollContainer = document.createElement('div');
+        filtersScrollContainer.className = 'specialty-filters-scroll';
+        
+        // Create an inner container for the filters
+        const filtersInnerContainer = document.createElement('div');
+        filtersInnerContainer.className = 'specialty-filters-inner';
+        
+        // Move existing specialty filters into the inner container
+        if (specialtyFilters.parentNode) {
+            specialtyFilters.parentNode.insertBefore(filtersScrollContainer, specialtyFilters);
+            filtersInnerContainer.appendChild(specialtyFilters);
+            filtersScrollContainer.appendChild(filtersInnerContainer);
+        }
+        
+        // Add styles for horizontal scrolling and fixed width
+        const styleSheet = document.createElement('style');
+        styleSheet.textContent += `
+            .specialty-filters-scroll {
+                width: 90%;
+                max-width: 100vw;
+                overflow-x: auto;
+                position: relative;
+                scrollbar-width: thin;
+                -ms-overflow-style: -ms-autohiding-scrollbar;
+                padding: 10px 0;
+                margin: 0;
+                box-sizing: border-box;
+            }
+            
+            .specialty-filters-scroll::-webkit-scrollbar {
+                height: 4px;
+            }
+            
+            .specialty-filters-scroll::-webkit-scrollbar-thumb {
+                background-color: #ccc;
+                border-radius: 3px;
+            }
+            
+            .specialty-filters-inner {
+                display: inline-block;
+                white-space: nowrap;
+                padding: 0 5px;
+                box-sizing: border-box;
+            }
+            
+            #specialtyFilters {
+                display: inline-flex;
+                flex-wrap: nowrap;
+                gap: 10px;
+                padding: 0;
+                margin: 0;
+            }
+            
+            .filter-pill {
+                flex: 0 0 auto;
+                padding: 8px 16px;
+                border-radius: 50px;
+                border: 1px solid #ddd;
+                background-color: #f8f9fa;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 200px;
+                min-width: 80px;
+                text-align: center;
+            }
+            
+            .filter-pill:hover {
+                background-color: #e9ecef;
+            }
+            
+            .filter-pill.active {
+                background-color: #007bff;
+                color: white;
+                border-color: #007bff;
+            }
+        `;
+        document.head.appendChild(styleSheet);
+    }
+
+    // Create specialty filters dynamically based on available specialties
+    function createSpecialtyFilters() {
+        // Get unique specialties from doctor cards
+        const specialties = new Set();
+        doctorCards.forEach(card => {
+            if (card.dataset.specialty) {
+                specialties.add(card.dataset.specialty);
+            }
+        });
+
+        // Add "All" button if it doesn't exist
+        if (!specialtyFilters.querySelector('[data-specialty="all"]')) {
+            const allButton = document.createElement('button');
+            allButton.className = 'filter-pill active';
+            allButton.dataset.specialty = 'all';
+            allButton.innerHTML = '<i class="bi bi-grid-fill"></i> Tất cả';
+            specialtyFilters.appendChild(allButton);
+            
+            allButton.addEventListener('click', (e) => {
+                handleFilterClick(e);
+            });
+        }
+
+        // Add each specialty as a filter pill
+        specialties.forEach(specialty => {
+            if (specialty && !specialtyFilters.querySelector(`[data-specialty="${specialty}"]`)) {
+                const specialtyButton = document.createElement('button');
+                specialtyButton.className = 'filter-pill';
+                specialtyButton.dataset.specialty = specialty;
+
+                // Get display name if possible, otherwise capitalize first letter
+                const displayName = getDisplayNameForSpecialty(specialty);
+                specialtyButton.innerHTML = `<i class="bi bi-tag"></i> ${displayName}`;
+                
+                specialtyFilters.appendChild(specialtyButton);
+                
+                specialtyButton.addEventListener('click', (e) => {
+                    handleFilterClick(e);
+                });
+            }
+        });
+    }
+
+    // Helper function to get display name for specialty
+    function getDisplayNameForSpecialty(specialty) {
+        // Find a doctor with this specialty to get the display name
+        const doctorWithSpecialty = Array.from(doctorCards).find(card => 
+            card.dataset.specialty === specialty
+        );
+        
+        if (doctorWithSpecialty) {
+            const specialtyElement = doctorWithSpecialty.querySelector('.doctor-specialty');
+            if (specialtyElement) {
+                return specialtyElement.textContent.trim();
+            }
+        }
+        
+        // Default to capitalized specialty name
+        return specialty.charAt(0).toUpperCase() + specialty.slice(1);
+    }
+
+    // Handle filter pill click with toggle functionality
+    function handleFilterClick(e) {
+        const pill = e.currentTarget;
+        const clickedSpecialty = pill.dataset.specialty;
+        
+        // If clicked on "All" button
+        if (clickedSpecialty === 'all') {
+            // Deactivate all other pills
+            filterPills.forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+            // Activate only "All" button
+            pill.classList.add('active');
+        } else {
+            // Always deactivate "All" button when a specific specialty is clicked
+            document.querySelector('.filter-pill[data-specialty="all"]').classList.remove('active');
+            
+            // Toggle the clicked pill
+            pill.classList.toggle('active');
+            
+            // If no specific specialty pills are active, re-activate "All"
+            const activeSpecialtyPills = document.querySelectorAll('.filter-pill.active:not([data-specialty="all"])');
+            if (activeSpecialtyPills.length === 0) {
+                document.querySelector('.filter-pill[data-specialty="all"]').classList.add('active');
+            }
+        }
+        
+        filterDoctors();
+    }
+
+    // Search functionality with debounce
+    function debounce(func, wait) {
+        let timeout;
+        return function(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    // Improved filter function that handles accented Vietnamese characters
+    function normalizeVietnamese(str) {
+        return str.normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase();
+    }
+
+    function filterDoctors() {
+        const searchTerm = doctorSearch.value.trim();
+        const normalizedSearchTerm = normalizeVietnamese(searchTerm.toLowerCase());
+        const activePills = document.querySelectorAll('.filter-pill.active');
+        const isAllActive = document.querySelector('.filter-pill[data-specialty="all"].active') !== null;
+        
+        // Get all active specialties
+        const activeSpecialties = new Set();
+        activePills.forEach(pill => {
+            const specialty = pill.dataset.specialty;
+            if (specialty !== 'all') {
+                activeSpecialties.add(specialty);
+            }
+        });
+        
+        let visibleCount = 0;
+
+        // Show loading state briefly for better UX
+        if (searchTerm.length > 0) {
+            loadingState.classList.remove('d-none');
+            doctorsContainer.classList.add('d-none');
+            emptyState.classList.add('d-none');
+            
+            // Simulate loading delay for better UX
+            setTimeout(() => {
+                performFilter();
+            }, 300);
+        } else {
+            performFilter();
+        }
+
+        function performFilter() {
+            doctorCards.forEach(card => {
+                const doctorName = normalizeVietnamese(card.querySelector('.doctor-name').textContent);
+                const doctorSpecialty = card.dataset.specialty;
+                const doctorDesc = normalizeVietnamese(card.querySelector('.doctor-description').textContent);
+                
+                // Get specialty display name for searching
+                const specialtyElement = card.querySelector('.doctor-specialty');
+                const specialtyDisplayName = specialtyElement ? 
+                    normalizeVietnamese(specialtyElement.textContent) : '';
+                
+                // Check for matches in multiple fields
+                const matchesSearch = normalizedSearchTerm === '' || 
+                                     doctorName.includes(normalizedSearchTerm) || 
+                                     doctorDesc.includes(normalizedSearchTerm) ||
+                                     specialtyDisplayName.includes(normalizedSearchTerm);
+                                     
+                // A doctor matches if either "All" is active or its specialty is in the active specialties
+                const matchesSpecialty = isAllActive || activeSpecialties.has(doctorSpecialty);
+
+                if (matchesSearch && matchesSpecialty) {
+                    card.style.display = '';
+                    // Apply a staggered animation
+                    card.style.animationDelay = `${visibleCount * 0.05}s`;
+                    visibleCount++;
+                    
+                    // Highlight matching text if search term exists
+                    if (normalizedSearchTerm) {
+                        highlightMatches(card, searchTerm);
+                    } else {
+                        // Remove highlights if no search term
+                        removeHighlights(card);
+                    }
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            // Toggle states
+            loadingState.classList.add('d-none');
+            
+            if (visibleCount === 0) {
+                emptyState.classList.remove('d-none');
+                doctorsContainer.classList.add('d-none');
+            } else {
+                emptyState.classList.add('d-none');
+                doctorsContainer.classList.remove('d-none');
+            }
+        }
+    }
+
+    // Highlight matching text in doctor cards
+    function highlightMatches(card, searchTerm) {
+        // First remove any existing highlights
+        removeHighlights(card);
+
+        if (!searchTerm) return;
+
+        const elements = [
+            card.querySelector('.doctor-name'),
+            card.querySelector('.doctor-description')
+        ];
+
+        elements.forEach(element => {
+            if (!element) return;
+            
+            const text = element.textContent;
+            const regex = new RegExp(escapeRegExp(searchTerm), 'gi');
+            
+            if (regex.test(text)) {
+                element.innerHTML = text.replace(regex, match => 
+                    `<span class="highlight">${match}</span>`
+                );
+            }
+        });
+    }
+
+    // Remove highlights
+    function removeHighlights(card) {
+        const highlightedElements = card.querySelectorAll('.highlight');
+        highlightedElements.forEach(el => {
+            const parent = el.parentNode;
+            if (parent) {
+                parent.textContent = parent.textContent;
+            }
+        });
+    }
+
+    // Helper to escape regex special characters
+    function escapeRegExp(string) {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    // Reset search
+    function resetSearch() {
+        doctorSearch.value = '';
+        // Clear all active pills and set 'all' to active
+        document.querySelectorAll('.filter-pill').forEach(pill => {
+            pill.classList.remove('active');
+        });
+        document.querySelector('.filter-pill[data-specialty="all"]').classList.add('active');
+        removeAllHighlights();
+        filterDoctors();
+    }
+
+    function removeAllHighlights() {
+        doctorCards.forEach(card => removeHighlights(card));
+    }
+
+    // Event listeners
+    doctorSearch.addEventListener('input', debounce(filterDoctors, 300));
+    
+    // Add keydown event to handle Enter key on search input
+    doctorSearch.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            filterDoctors();
+        }
+    });
+    
+    // Add search icon click handler if present
+    const searchIcon = document.querySelector('.search-icon');
+    if (searchIcon) {
+        searchIcon.addEventListener('click', function() {
+            filterDoctors();
+        });
+    }
+    
+    if (resetSearchBtn) {
+        resetSearchBtn.addEventListener('click', resetSearch);
+    }
+
+    // Initialize filter pills event listeners
+    filterPills.forEach(pill => {
+        pill.addEventListener('click', (e) => {
+            handleFilterClick(e);
+        });
+    });
+
+    // View toggle
+    viewButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            viewButtons.forEach(b => b.classList.remove('active'));
+            button.classList.add('active');
+            
+            const viewType = button.dataset.view;
+            if (viewType === 'grid') {
+                doctorsContainer.className = 'doctors-grid';
+            } else {
+                doctorsContainer.className = 'doctors-list';
+            }
+        });
+    });
+
+    // Lazy loading images with Intersection Observer
+    if ('IntersectionObserver' in window) {
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    const src = img.getAttribute('src');
+                    if (src && src.includes('user-default.png')) {
+                        // Already loaded with default image
+                        observer.unobserve(img);
+                        return;
+                    }
+                    
+                    if (img.dataset.src) {
+                        img.src = img.dataset.src;
+                        img.removeAttribute('data-src');
+                    }
+                    observer.unobserve(img);
+                }
+            });
+        }, {
+            rootMargin: '50px 0px',
+            threshold: 0.1
+        });
+
+        document.querySelectorAll('.doctor-image img').forEach(img => {
+            imageObserver.observe(img);
+        });
+    }
+
+    // Animate doctor cards when they come into view
+    if ('IntersectionObserver' in window) {
+        const animateObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-in');
+                    animateObserver.unobserve(entry.target);
+                }
+            });
+        }, {
+            rootMargin: '0px',
+            threshold: 0.1
+        });
+
+        doctorCards.forEach(card => {
+            animateObserver.observe(card);
+        });
+    }
+
+    // Add animation and highlight styles dynamically
+    const styleSheet = document.createElement('style');
+    styleSheet.textContent = `
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .doctor-card {
+            opacity: 0;
+        }
+        
+        .doctor-card.animate-in {
+            animation: fadeInUp 0.5s ease forwards;
+        }
+        
+        .highlight {
+            background-color: #ffeb3b;
+            padding: 0 2px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+    `;
+    document.head.appendChild(styleSheet);
+
+    // Make sure specialty filters container takes full width
+    function ensureFullWidth() {
+        const containerWidth = document.querySelector('.specialty-filters-scroll').offsetWidth;
+        document.documentElement.style.setProperty('--filter-container-width', containerWidth + 'px');
+    }
+
+    // Run on load and window resize
+    window.addEventListener('resize', ensureFullWidth);
+    
+    // Initialize fixed-width specialty filters container
+    setupSpecialtyFiltersContainer();
+    
+    // Initialize specialty filters
+    createSpecialtyFilters();
+    
+    // Ensure proper width calculation after DOM is fully loaded
+    setTimeout(ensureFullWidth, 0);
+});
+    </script>
+}

@@ -43,6 +43,11 @@ namespace AppointmentHospital.Controllers
         {
             var doctorId = _contextAccessor.HttpContext?.Session.GetString("DoctorId");
 
+            if (string.IsNullOrEmpty(doctorId))
+            {
+                return BadRequest("Doctor ID is missing.");
+            }
+
             var doctor = doctorService.getDoctorById(Guid.Parse(doctorId));
             if (doctor == null)
             {
@@ -267,7 +272,6 @@ namespace AppointmentHospital.Controllers
         public IActionResult RegisterOffDay(DateTime offDate, string Note)
         {
             var timeList = _timeSlotService.GetAllTimeSlotByParticularDate(offDate);
-
             if (timeList.Count != 0)
             {
                 bool hasAvailable = true;
@@ -333,7 +337,7 @@ namespace AppointmentHospital.Controllers
                     await ProcessAppointmentAsync(appointment, suggestDate);
                 }
 
-                _timeSlotService.DeleteTimeSlot(timeSlot.TimeSlotId);
+                _timeSlotService.UpdateTimeSlot(timeSlotId, suggestDate);
             }
 
             return RedirectToAction("Calendar");

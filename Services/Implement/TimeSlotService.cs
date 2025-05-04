@@ -53,4 +53,7 @@ public class TimeSlotService : ITimeSlotService
     public Guid GetTimeSlotIdByAppointmentime(DateTime appointmentTime){
         return timeSlotRepository.GetTimeSlotIdByAppointmentime(appointmentTime);
     }
+    public void UpdateTimeSlot(Guid timeSlotId, DateTime date){
+        timeSlotRepository.UpdateTimeSlot(timeSlotId, date);
+    }
 }

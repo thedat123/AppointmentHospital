@@ -3,8 +3,7 @@
 @model Pagination<TimeSlot>
 
 <div class="container py-4">
-    <h1 class="text-primary mb-4">Doctor Schedule Registration</h1>
-
+    <h1 class="text-primary mb-4">Đăng ký Lịch Khám Bệnh</h1>
     <div class="card shadow-sm mb-4">
         @if (TempData["SuccessMessage"] != null)
         {
@@ -22,21 +21,21 @@
             </div>
         }
         <div class="card-header bg-white">
-            <h3 class="card-title mb-0">Doctor Information</h3>
+            <h3 class="card-title mb-0">Thông tin bác sĩ</h3>
         </div>
         <div class="card-body">
             <form method="post" asp-action="UpdateDoctorInfo">
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <label for="DoctorName" class="form-label">Full Name</label>
+                            <label for="DoctorName" class="form-label">Họ và tên</label>
                             <input type="text" class="form-control" id="DoctorName" name="DoctorName"
                                 value="@ViewBag.DoctorName" disabled required />
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <label for="Specialty" class="form-label">Specialty</label>
+                            <label for="Specialty" class="form-label">Chuyên khoa</label>
                             <input type="text" class="form-control" id="DoctorName" name="DoctorName"
                                 value="@ViewBag.Speciality" disabled required />
                         </div>
@@ -44,11 +43,12 @@
                 </div>
             </form>
         </div>
+
     </div>
 
     <div class="card shadow-sm mb-4">
         <div class="card-header bg-white">
-            <h3 class="card-title mb-0">Regular Working Schedule</h3>
+            <h3 class="card-title mb-0">Lịch Làm Việc</h3>
         </div>
         <div class="card-body">
             <form method="post" id="updateRegularScheduleForm" asp-action="UpdateRegularSchedule">
@@ -61,20 +61,33 @@
                                     name="@($"Schedules[{(int)day}].Enabled")" value="true" />
                                 <input type="hidden" name="@($"Schedules[{(int)day}].DayOfWeek")" value="@((int)day)" />
                                 <label class="form-check-label fw-bold" for="@($"Enable{day}")">
-                                    @day.ToString()
+                                    @{
+                                        var vietnameseDay = day switch
+                                        {
+                                            DayOfWeek.Monday => "Thứ Hai",
+                                            DayOfWeek.Tuesday => "Thứ Ba",
+                                            DayOfWeek.Wednesday => "Thứ Tư",
+                                            DayOfWeek.Thursday => "Thứ Năm",
+                                            DayOfWeek.Friday => "Thứ Sáu",
+                                            DayOfWeek.Saturday => "Thứ Bảy",
+                                            DayOfWeek.Sunday => "Chủ Nhật",
+                                            _ => day.ToString()
+                                        };
+                                    }
+                                    @vietnameseDay
                                 </label>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="input-group">
-                                <span class="input-group-text">From</span>
+                                <span class="input-group-text">Từ</span>
                                 <input type="time" class="form-control" id="@($"StartTime{day}")"
                                     name="@($"Schedules[{(int)day}].StartTime")" />
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="input-group">
-                                <span class="input-group-text">To</span>
+                                <span class="input-group-text">Đến</span>
                                 <input type="time" class="form-control" id="@($"EndTime{day}")"
                                     name="@($"Schedules[{(int)day}].EndTime")" />
                             </div>
@@ -82,46 +95,42 @@
                     </div>
                 }
 
-                <button type="submit" id="saveRegularScheduleButton" class="btn btn-primary mt-3">Save Regular
-                    Schedule</button>
+                <button type="submit" id="saveRegularScheduleButton" class="btn btn-primary mt-3">Lưu Lịch Làm Việc</button>
             </form>
         </div>
     </div>
 
-    <div class="container py-4">
-        <div class="card shadow-sm">
-            <div class="card-header bg-white">
-                <h3 class="card-title mb-0">Register Off Day</h3>
-            </div>
-            <div class="card-body">
-                <form method="post" asp-controller="Doctor" asp-action="RegisterOffDay">
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="offDate" class="form-label">Off Date</label>
-                            <input type="date" class="form-control" id="offDate" name="offDate" required>
-                        </div>
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white">
+            <h3 class="card-title mb-0">Đăng Ký Ngày Nghỉ</h3>
+        </div>
+        <div class="card-body">
+            <form method="post" asp-controller="Doctor" asp-action="RegisterOffDay">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="offDate" class="form-label">Ngày Nghỉ</label>
+                        <input type="date" class="form-control" id="offDate" name="offDate" min="@DateTime.Now.ToString("yyyy-MM-dd")" required>
                     </div>
-                    <div class="mb-3">
-                        <label for="Note" class="form-label">Reason for Off Day</label>
-                        <textarea class="form-control" id="Note" name="Note" rows="3"
-                            placeholder="Please provide a reason for the off day request..."></textarea>
-                    </div>
-
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <button type="submit" class="btn btn-primary px-4">
-                            Register Off Day
-                        </button>
-                    </div>
-                </form>
-            </div>
+                </div>
+                <div class="mb-3">
+                    <label for="Note" class="form-label">Lý Do Nghỉ</label>
+                    <textarea class="form-control" id="Note" name="Note" rows="3"
+                            placeholder="Vui lòng nhập lý do xin nghỉ..."></textarea>
+                </div>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button type="submit" class="btn btn-primary px-4">
+                        Đăng Ký Ngày Nghỉ
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
-    <div class="card shadow-sm">
+    <div class="card shadow-sm mb-4">
         <div class="card-header bg-white">
-            <h3 class="card-title mb-0">Registered Schedules</h3>
+            <h3 class="card-title mb-0">Lịch làm việc đã đăng ký</h3>
             <div class="d-flex justify-content-center align-items-center w-100">
-                <form asp-action="Calendar"  method="get" class="d-flex justify-content-center align-items-center filter-form">
+                <form asp-action="Calendar" method="get" class="d-flex justify-content-center align-items-center filter-form">
                     <input type="hidden" name="sortBy" value="@ViewBag.CurrentSort" />
                     <input type="hidden" name="sortOrder" value="@ViewBag.CurrentSortOrder" />
 
@@ -130,7 +139,7 @@
                             <input type="date" id="filterDate" name="filterDate" class="form-control date-input"
                                 value="@ViewBag.FilterDate" />
                             <label for="filterDate">
-                                <i class="bi bi-calendar3 me-2"></i>Select Date
+                                <i class="bi bi-calendar3 me-2"></i>Chọn ngày
                             </label>
                         </div>
                     </div>
@@ -138,7 +147,7 @@
                     <div class="button-group">
                         <button type="submit" class="btn btn-primary btn-animate">
                             <i class="bi bi-funnel-fill me-2"></i>
-                            <span>Filter</span>
+                            <span>Lọc</span>
                         </button>
                     </div>
                 </form>
@@ -152,7 +161,7 @@
                         <tr>
                             <th class="sortable"
                                 onclick="location.href='@Url.Action("Calendar", new { sortBy = "Days", sortOrder = ViewBag.CurrentSort == "Days" && ViewBag.CurrentSortOrder == "asc" ? "desc" : "asc", page = 1 })'">
-                                Days
+                                Ngày
                                 @if (ViewBag.CurrentSort == "Days")
                                 {
                                     @if (ViewBag.CurrentSortOrder == "asc")
@@ -171,7 +180,7 @@
                             </th>
                             <th class="sortable"
                                 onclick="location.href='@Url.Action("Calendar", new { sortBy = "StartTime", sortOrder = ViewBag.CurrentSort == "StartTime" && ViewBag.CurrentSortOrder == "asc" ? "desc" : "asc", page = 1 })'">
-                                Start Time
+                                Bắt đầu
                                 @if (ViewBag.CurrentSort == "StartTime")
                                 {
                                     @if (ViewBag.CurrentSortOrder == "asc")
@@ -190,7 +199,7 @@
                             </th>
                             <th class="sortable"
                                 onclick="location.href='@Url.Action("Calendar", new { sortBy = "EndTime",  sortOrder = ViewBag.CurrentSort == "EndTime" && ViewBag.CurrentSortOrder == "asc" ? "desc" : "asc", page = 1 })'">
-                                End Time
+                                Kết thúc
                                 @if (ViewBag.CurrentSort == "EndTime")
                                 {
                                     @if (ViewBag.CurrentSortOrder == "asc")
@@ -207,7 +216,7 @@
                                     <i class="bi bi-arrow-down-up ms-1"></i>
                                 }
                             </th>
-                            <th class="text-center">Actions</th>
+                            <th class="text-center">Hành động</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -221,7 +230,7 @@
                                     <button type="button" id="deleteButton" class="btn btn-danger btn-sm delete-btn"
                                         data-id="@schedule.TimeSlotId" data-available="@schedule.Available"
                                         data-starttime="@schedule.StartTime" data-endtime="@schedule.EndTime">
-                                        <i class="bi bi-trash"></i> Delete
+                                        <i class="bi bi-trash"></i> Xóa
                                     </button>
                                 </td>
                             </tr>
@@ -235,7 +244,7 @@
                             {
                                 <li class="page-item">
                                     <a class="page-link" href="javascript:void(0)"
-                                        onclick="changeSchedulePage(@(Model.CurrentPage - 1))" aria-label="Previous">
+                                        onclick="changeSchedulePage(@(Model.CurrentPage - 1))" aria-label="Trang trước">
                                         <span aria-hidden="true">&laquo;</span>
                                     </a>
                                 </li>
@@ -252,7 +261,7 @@
                             {
                                 <li class="page-item">
                                     <a class="page-link" href="javascript:void(0)"
-                                        onclick="changeSchedulePage(@(Model.CurrentPage + 1))" aria-label="Next">
+                                        onclick="changeSchedulePage(@(Model.CurrentPage + 1))" aria-label="Trang sau">
                                         <span aria-hidden="true">&raquo;</span>
                                     </a>
                                 </li>
@@ -268,17 +277,17 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="suggestModalLabel">Suggest New Date</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title" id="suggestModalLabel">Đề xuất ngày khám mới</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
                 </div>
                 <div class="modal-body">
                     <form id="suggestForm" asp-controller="Doctor" asp-action="SuggestDay">
                         <input type="hidden" id="timeSlotId" name="timeSlotId" />
                         <div class="mb-3">
-                            <label for="suggestDate" class="form-label">New Date</label>
+                            <label for="suggestDate" class="form-label">Ngày mới</label>
                             <input type="date" id="suggestDate" name="suggestDate" class="form-control" required />
                         </div>
-                        <button type="submit" class="btn btn-primary">Submit Suggestion</button>
+                        <button type="submit" class="btn btn-primary">Gửi đề xuất</button>
                     </form>
                 </div>
             </div>
@@ -289,17 +298,16 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="suggestModalLabel">Suggest New Date</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title" id="suggestModalLabel">Đề xuất ngày khám mới</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="suggestForm" asp-controller="Doctor" asp-action="SuggestDayForMultiplePatients"
-                        method="get">
+                    <form id="suggestForm" asp-controller="Doctor" asp-action="SuggestDayForMultiplePatients" method="get">
                         <div class="mb-3">
-                            <label for="suggestDate" class="form-label">New Date</label>
+                            <label for="suggestDate" class="form-label">Ngày mới</label>
                             <input type="date" id="suggestDate" name="suggestDate" class="form-control" required />
                         </div>
-                        <button type="submit" class="btn btn-primary">Submit Suggestion</button>
+                        <button type="submit" class="btn btn-primary">Gửi đề xuất</button>
                     </form>
                 </div>
             </div>

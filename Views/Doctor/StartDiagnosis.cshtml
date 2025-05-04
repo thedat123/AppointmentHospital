@@ -10,22 +10,23 @@
             <div class="header-icon">
                 <i class="fas fa-stethoscope"></i>
             </div>
-            <h1 class="mb-0">Patient Diagnosis</h1>
+            <h1 class="mb-0">Chẩn đoán bệnh</h1>
         </div>
     </div>
+
     <div class="patient-card mb-4">
         <div class="card shadow-sm">
             <div class="card-header bg-primary text-white">
                 <h5 class="mb-0">
                     <i class="fas fa-user-circle me-2"></i>
-                    Patient Information
+                    Thông tin bệnh nhân
                 </h5>
             </div>
             <div class="card-body">
                 <div class="row g-4">
                     <div class="col-md-6">
                         <div class="info-group">
-                            <label>Full Name</label>
+                            <label>Họ và tên</label>
                             <p class="info-value">@(
                                 @Model.Acquaintance?.Name != null
                                 ? @Model.Acquaintance.Name
@@ -35,25 +36,25 @@
                     </div>
                     <div class="col-md-6">
                         <div class="info-group">
-                            <label>Date of Birth</label>
+                            <label>Ngày sinh</label>
                             <p class="info-value">
                                 @(
                                     @Model.Acquaintance?.DateOfBirth != null
-                                    ? @Model.Acquaintance.DateOfBirth.ToString("MMMM d, yyyy")
-                                    : @Model.Patient.DateOfBirth?.ToString("MMMM d, yyyy")
+                                    ? @Model.Acquaintance.DateOfBirth.ToString("dd/MM/yyyy")
+                                    : @Model.Patient.DateOfBirth?.ToString("dd/MM/yyyy")
                                     )
                             </p>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="info-group">
-                            <label>Appointment Time</label>
-                            <p class="info-value">@Model.AppointmentTime.ToString("dddd, MMMM d, yyyy - h:mm tt")</p>
+                            <label>Thời gian khám</label>
+                            <p class="info-value">@Model.AppointmentTime.ToString("dddd, dd/MM/yyyy - HH:mm")</p>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="info-group">
-                            <label>Address</label>
+                            <label>Địa chỉ</label>
                             <p class="info-value">@(
                                 @Model.Acquaintance?.Address != null
                                 ? @Model.Acquaintance.Address
@@ -72,7 +73,7 @@
                 <div class="card-header bg-info text-white">
                     <h5 class="mb-0">
                         <i class="fas fa-notes-medical me-2"></i>
-                        Symptoms
+                        Triệu chứng
                     </h5>
                 </div>
                 <div class="card-body">
@@ -86,12 +87,12 @@
                 <div class="card-header bg-success text-white">
                     <h5 class="mb-0">
                         <i class="fas fa-diagnoses me-2"></i>
-                        Diagnosis Details
+                        Chi tiết chẩn đoán
                     </h5>
                 </div>
                 <div class="card-body">
                     <form asp-controller="Doctor" id="submitForm" asp-action="SubmitDiagnosis" method="post"
-                        enctype="multipart/form-data">
+                          enctype="multipart/form-data">
                         <input type="hidden" name="AppointmentId" value="@Model.AppointmentId" />
                         <input type="hidden" name="PatientId" value="@Model.PatientId" />
                         <input type="hidden" name="DoctorId" value="@Model.DoctorId" />
@@ -100,44 +101,43 @@
 
                         <div class="mb-3">
                             <textarea name="DiagnosisDetails" class="form-control diagnosis-textarea" rows="6"
-                                placeholder="Enter your detailed diagnosis here..." required></textarea>
+                                      placeholder="Nhập nội dung chẩn đoán chi tiết..." required></textarea>
                         </div>
 
                         <div class="mb-3">
-                            <label for="PrescribedMedications" class="form-label">Prescribed Medications</label>
+                            <label class="form-label">Thuốc kê đơn</label>
                             <div id="prescribedMedicationsContainer" name="PrescribedMedications">
                                 <div class="d-flex mb-2 medication-row">
                                     <div class="position-relative flex-grow-1 me-2">
                                         <input type="text" class="form-control drug-input"
-                                            placeholder="Enter drug name..." required />
+                                               placeholder="Tên thuốc..." required />
                                         <ul class="drug-suggestions dropdown-menu"
                                             style="display: none; max-height: 200px; overflow-y: auto; z-index: 1000;">
                                         </ul>
                                     </div>
 
                                     <div class="flex-shrink-0 me-2" style="width: 100px;">
-                                        <input type="number" class="form-control quantity-input" placeholder="Qty"
-                                            min="1" required />
+                                        <input type="number" class="form-control quantity-input" placeholder="Số lượng"
+                                               min="1" required />
                                     </div>
 
-                                    <button type="button" class="btn btn-danger remove-row">Remove</button>
+                                    <button type="button" class="btn btn-danger remove-row">Xóa</button>
                                 </div>
                             </div>
-                            <button type="button" class="btn btn-primary mt-2" id="addMedication">Add
-                                Medication</button>
+                            <button type="button" class="btn btn-primary mt-2" id="addMedication">Thêm thuốc</button>
                             <input type="hidden" id="PrescribedMedications" name="PrescribedMedications" />
                         </div>
 
                         <div class="mb-3">
-                            <label for="DoctorNotes" class="form-label">Doctor's Notes</label>
+                            <label class="form-label">Ghi chú của bác sĩ</label>
                             <textarea name="DoctorNotes" class="form-control" rows="3"
-                                placeholder="Enter any additional notes or reminders for the patient..."></textarea>
+                                      placeholder="Ghi chú thêm hoặc lời nhắc cho bệnh nhân..."></textarea>
                         </div>
 
                         <div class="text-end">
                             <button type="submit" id="buttonSubmit" class="btn btn-success btn-lg">
                                 <i class="fas fa-save me-2"></i>
-                                Save Diagnosis
+                                Lưu chẩn đoán
                             </button>
                         </div>
                     </form>
@@ -147,111 +147,109 @@
     </div>
 
     <div class="card shadow-sm">
-    <div class="card-header bg-secondary text-white d-flex align-items-center">
-        <h5 class="mb-0">
-            <i class="fas fa-history me-2"></i>
-            Medical History
-        </h5>
-    </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead>
-                            <tr class="table-light">
-                                <th class="py-3">Patient</th>
-                                <th class="py-3">Diagnosis</th>
-                                <th class="py-3">Notes</th>
-                                <th class="py-3">Prescription</th>
-                                <th class="py-3">Visit Date</th>
-                                <th class="py-3">Doctor</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if (diagnosisHistory != null && diagnosisHistory.Any())
-                            {
-                                @foreach (var history in diagnosisHistory)
-                                {
-                                    <tr>
-                                        <td>
-                                            <div class="fw-medium">
-                                                @(Model.Acquaintance?.Name ?? Model.Patient.FullName)
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-primary diagnosis-badge px-3 py-2">
-                                                @history.Diagnosis
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <div class="note-cell text-truncate" 
-                                                 data-bs-toggle="tooltip" 
-                                                 data-bs-placement="top" 
-                                                 title="@history.DoctorNote">
-                                                @history.DoctorNote
-                                            </div>
-                                        </td>
-                                        <td>
-                                            @if (history.Prescription != null && history.Prescription.Any())
-                                            {
-                                                <div class="prescription-list">
-                                                    @foreach (var medication in history.Prescription)
-                                                    {
-                                                        var parts = medication.Split('-');
-                                                        var name = parts[0];
-                                                        var quantity = parts.Length > 1 ? parts[1] : "N/A";
-                                                        <div class="prescription-item">
-                                                            <i class="fas fa-pills text-primary me-2"></i>
-                                                            <span class="fw-medium">@name</span>
-                                                            <span class="text-muted ms-1">- Qty: @quantity</span>
-                                                        </div>
-                                                    }
-                                                </div>
-                                            }
-                                            else
-                                            {
-                                                <div class="text-muted fst-italic">
-                                                    <i class="fas fa-info-circle me-1"></i>
-                                                    No Prescription
-                                                </div>
-                                            }
-                                        </td>
-                                        <td>
-                                            <span class="badge date-badge px-3 py-2">
-                                                @history.DateTime.ToString("dd/MM/yyyy")
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <div class="doctor-info">
-                                                <div class="doctor-avatar">
-                                                    <i class="fas fa-user-md text-primary"></i>
-                                                </div>
-                                                <div class="fw-medium">
-                                                    Dr. @history.Doctor.FullName
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                }
-                            }
-                            else
+        <div class="card-header bg-secondary text-white d-flex align-items-center">
+            <h5 class="mb-0">
+                <i class="fas fa-history me-2"></i>
+                Lịch sử khám bệnh
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr class="table-light">
+                            <th class="py-3">Bệnh nhân</th>
+                            <th class="py-3">Chẩn đoán</th>
+                            <th class="py-3">Ghi chú</th>
+                            <th class="py-3">Thuốc</th>
+                            <th class="py-3">Ngày khám</th>
+                            <th class="py-3">Bác sĩ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (diagnosisHistory != null && diagnosisHistory.Any())
+                        {
+                            @foreach (var history in diagnosisHistory)
                             {
                                 <tr>
-                                    <td colspan="6" class="text-center py-4">
-                                        <div class="text-muted">
-                                            <i class="fas fa-folder-open me-2"></i>
-                                            No Medical History Available
+                                    <td>
+                                        <div class="fw-medium">
+                                            @(Model.Acquaintance?.Name ?? Model.Patient.FullName)
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary diagnosis-badge px-3 py-2">
+                                            @history.Diagnosis
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="note-cell text-truncate"
+                                             data-bs-toggle="tooltip"
+                                             data-bs-placement="top"
+                                             title="@history.DoctorNote">
+                                            @history.DoctorNote
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (history.Prescription != null && history.Prescription.Any())
+                                        {
+                                            <div class="prescription-list">
+                                                @foreach (var medication in history.Prescription)
+                                                {
+                                                    var parts = medication.Split('-');
+                                                    var name = parts[0];
+                                                    var quantity = parts.Length > 1 ? parts[1] : "N/A";
+                                                    <div class="prescription-item">
+                                                        <i class="fas fa-pills text-primary me-2"></i>
+                                                        <span class="fw-medium">@name</span>
+                                                        <span class="text-muted ms-1">- SL: @quantity</span>
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="text-muted fst-italic">
+                                                <i class="fas fa-info-circle me-1"></i>
+                                                Không có thuốc kê đơn
+                                            </div>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="badge date-badge px-3 py-2">
+                                            @history.DateTime.ToString("dd/MM/yyyy")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="doctor-info">
+                                            <div class="doctor-avatar">
+                                                <i class="fas fa-user-md text-primary"></i>
+                                            </div>
+                                            <div class="fw-medium">
+                                                Bác sĩ @history.Doctor.FullName
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>
                             }
-                        </tbody>
-                    </table>
-                </div>
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center py-4">
+                                    <div class="text-muted">
+                                        <i class="fas fa-folder-open me-2"></i>
+                                        Chưa có lịch sử khám bệnh
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 </div>
-
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
 <script>

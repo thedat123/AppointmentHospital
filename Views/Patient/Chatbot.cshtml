@@ -1,0 +1,1109 @@
+<div class="app-container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-container">
+                <div class="logo-hospital">
+                    <i class="fas fa-hospital"></i>
+                </div>
+                <div class="logo-text">Chatbot Bệnh Viện</div>
+            </div>
+            <button class="toggle-btn" id="toggle-sidebar">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+        </div>
+        
+        <button class="new-chat-btn" id="new-chat-btn">
+            <i class="fas fa-plus new-chat-icon"></i>
+            <span class="new-chat-text">Cuộc trò chuyện mới</span>
+        </button>
+        
+        <div class="chat-history" id="chat-history">
+            <!-- Chat history items will be added here dynamically -->
+        </div>
+        
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-name">Bệnh nhân</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="chat-header">
+            <div class="chat-title-header" id="current-chat-title">Cuộc trò chuyện mới</div>
+            <div class="header-actions">
+                <button id="rename-chat" title="Đổi tên cuộc trò chuyện">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button id="clear-chat" title="Xóa cuộc trò chuyện">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="chat-container" id="chat-container">
+            <!-- Bot initial greeting message -->
+            @if (!string.IsNullOrEmpty(ViewBag.BotReply))
+            {
+                <div class="message-row user-message-row">
+                    <div class="avatar user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="message user-message">
+                        @Html.Raw(ViewBag.UserMessage)
+                    </div>
+                </div>
+
+                <div class="message-row">
+                    <div class="avatar bot-avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="message bot-message">
+                        <div class="markdown-content" id="bot-markdown-content">
+                            @Html.Raw(ViewBag.BotReply)
+                        </div>
+                    </div>
+                </div>
+                
+                <script>
+                    // Chuyển đổi nội dung Markdown sang HTML
+                    document.addEventListener('DOMContentLoaded', function() {
+                        var botMarkdownContent = document.getElementById('bot-markdown-content');
+                        if (botMarkdownContent) {
+                            var markdownText = botMarkdownContent.textContent.trim();
+                            
+                            // Cấu hình Marked để chuyển đổi markdown sang HTML an toàn
+                            marked.setOptions({
+                                breaks: true,
+                                gfm: true,
+                                headerIds: true,
+                                sanitize: false,
+                                smartLists: true,
+                                smartypants: true,
+                                xhtml: true
+                            });
+                            
+                            // Chuyển đổi markdown sang HTML
+                            var htmlContent = marked.parse(markdownText);
+                            
+                            // Gán HTML đã chuyển đổi vào phần tử
+                            botMarkdownContent.innerHTML = htmlContent;
+                        }
+                    });
+                </script>
+            } else {
+                <!-- Welcome screen shown on new chat -->
+                <div class="welcome-container" id="welcome-screen">
+                    <div class="welcome-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h1 class="welcome-title">Xin chào! Tôi là trợ lý ảo của Bệnh viện</h1>
+                    <p class="welcome-subtitle">Tôi có thể giúp bạn tìm hiểu thông tin, đặt lịch khám, và giải đáp các thắc mắc về sức khỏe</p>
+                    
+                    <div class="suggestion-grid">
+                        <div class="suggestion-card" data-query="Giờ làm việc của bệnh viện là khi nào?">
+                            <div class="suggestion-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="suggestion-title">Giờ làm việc</div>
+                            <div class="suggestion-text">Thời gian làm việc và lịch trực của bệnh viện</div>
+                        </div>
+                        
+                        <div class="suggestion-card" data-query="Bệnh viện có những dịch vụ nào?">
+                            <div class="suggestion-icon">
+                                <i class="fas fa-stethoscope"></i>
+                            </div>
+                            <div class="suggestion-title">Dịch vụ y tế</div>
+                            <div class="suggestion-text">Các dịch vụ khám và chữa bệnh tại bệnh viện</div>
+                        </div>
+                        
+                        <div class="suggestion-card" data-query="Làm thế nào để đặt lịch khám bệnh?">
+                            <div class="suggestion-icon">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <div class="suggestion-title">Đặt lịch khám</div>
+                            <div class="suggestion-text">Hướng dẫn đăng ký và đặt lịch khám bệnh</div>
+                        </div>
+                        
+                        <div class="suggestion-card" data-query="Tôi cần liên hệ với bác sĩ">
+                            <div class="suggestion-icon">
+                                <i class="fas fa-user-md"></i>
+                            </div>
+                            <div class="suggestion-title">Liên hệ bác sĩ</div>
+                            <div class="suggestion-text">Thông tin liên hệ và tư vấn từ bác sĩ</div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        
+        <div class="typing-indicator" id="typing-indicator">
+            <div class="message-row">
+                <div class="avatar bot-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="typing-bubble">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+        
+        <form action="/Patient/Chatbot" method="post" class="input-container" id="chat-form">
+            <div class="input-wrapper">
+                <textarea class="input-textarea" id="user-input" name="userMessage" placeholder="Nhập câu hỏi của bạn..." rows="1"></textarea>
+                <div class="input-buttons">
+                    <button class="input-button" id="attach-button" type="button">
+                        <i class="fas fa-paperclip"></i>
+                        <span class="button-tooltip">Đính kèm file</span>
+                    </button>
+                    <button class="input-button" id="mic-button" type="button">
+                        <i class="fas fa-microphone"></i>
+                        <span class="button-tooltip">Ghi âm</span>
+                    </button>
+                    <button type="submit" class="input-button send-button" id="send-button">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="input-hint">Nhấn Enter để gửi, Shift+Enter để xuống dòng</div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+<style>
+    /* Font import */    
+    body {
+        background-color: #f8f9fa;
+        font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        height: 100vh;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        color: #333;
+    }
+
+    /* Container Styles */
+    .app-container {
+        display: flex;
+        flex: 1;
+        height: 100vh;
+        overflow: hidden;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Sidebar Styles - Improved colors and spacing */
+    .sidebar {
+        width: 280px;
+        background: linear-gradient(180deg, #0a4275 0%, #0d5394 100%);
+        color: white;
+        display: flex;
+        flex-direction: column;
+        transition: all 0.3s ease;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .sidebar-collapsed {
+        width: 70px;
+    }
+
+    .sidebar-header {
+        padding: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .logo-container {
+        display: flex;
+        align-items: center;
+    }
+
+    .logo-hospital {
+        width: 36px;
+        height: 36px;
+        background-color: white;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #0a4275;
+        margin-right: 12px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        font-size: 18px;
+    }
+
+    .logo-text {
+        font-weight: 600;
+        font-size: 18px;
+        white-space: nowrap;
+        opacity: 1;
+        transition: opacity 0.3s;
+        letter-spacing: 0.5px;
+    }
+
+    .sidebar-collapsed .logo-text {
+        opacity: 0;
+        width: 0;
+        overflow: hidden;
+    }
+
+    .toggle-btn {
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        padding: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: background-color 0.2s;
+    }
+
+    .toggle-btn:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* New Chat Button - More attractive with hover effects */
+    .new-chat-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(90deg, #1976d2 0%, #2196f3 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 14px 18px;
+        margin: 18px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .new-chat-btn:hover {
+        background: linear-gradient(90deg, #1565c0 0%, #1976d2 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .new-chat-btn:active {
+        transform: translateY(0);
+    }
+
+    .new-chat-icon {
+        margin-right: 10px;
+        font-size: 16px;
+    }
+
+    .sidebar-collapsed .new-chat-text {
+        display: none;
+    }
+
+    /* Chat History - Better spacing and hover effects */
+    .chat-history {
+        flex: 1;
+        overflow-y: auto;
+        padding: 10px;
+    }
+
+    .chat-item {
+        display: flex;
+        align-items: center;
+        padding: 12px 14px;
+        border-radius: 10px;
+        cursor: pointer;
+        margin-bottom: 6px;
+        transition: all 0.2s ease;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .chat-item:hover {
+        background-color: rgba(255, 255, 255, 0.12);
+        transform: translateX(3px);
+    }
+
+    .chat-item.active {
+        background-color: rgba(255, 255, 255, 0.2);
+        border-left: 3px solid #64b5f6;
+    }
+
+    .chat-icon {
+        margin-right: 12px;
+        font-size: 15px;
+    }
+
+    .chat-title {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        transition: opacity 0.3s;
+        font-weight: 400;
+    }
+
+    .sidebar-collapsed .chat-title {
+        opacity: 0;
+        width: 0;
+    }
+
+    /* User Info Footer - Improved styling */
+    .sidebar-footer {
+        padding: 16px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+    }
+
+    .user-avatar {
+        width: 36px;
+        height: 36px;
+        background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .user-name {
+        font-weight: 500;
+        font-size: 15px;
+        transition: opacity 0.3s;
+    }
+
+    .sidebar-collapsed .user-name {
+        opacity: 0;
+        width: 0;
+        overflow: hidden;
+    }
+
+    /* Main Content - Better backgrounds and spacing */
+    .main-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background-color: #f8f9fa;
+    }
+
+    /* Chat Header - Improved styling */
+    .chat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 24px;
+        background-color: white;
+        border-bottom: 1px solid #e0e0e0;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .chat-title-header {
+        font-weight: 600;
+        font-size: 18px;
+        color: #333;
+    }
+
+    .header-actions button {
+        background: none;
+        border: none;
+        color: #666;
+        font-size: 16px;
+        margin-left: 12px;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+
+    .header-actions button:hover {
+        background-color: #f0f0f0;
+        color: #1976d2;
+    }
+
+    /* Chat Container */
+    .chat-container {
+        flex: 1;
+        overflow-y: auto;
+        padding: 24px;
+        padding-bottom: 100px; /* Extra padding at bottom to prevent messages being hidden behind input */
+        display: flex;
+        flex-direction: column;
+        scroll-behavior: smooth;
+        background-color: #f8f9fa;
+    }
+
+    /* Welcome Container - More attractive design */
+    .welcome-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding: 24px;
+    }
+
+    .welcome-icon {
+        font-size: 54px;
+        color: #1976d2;
+        margin-bottom: 24px;
+        padding: 20px;
+        background-color: rgba(25, 118, 210, 0.1);
+        border-radius: 50%;
+        width: 100px;
+        height: 100px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .welcome-title {
+        font-size: 30px;
+        font-weight: 700;
+        margin-bottom: 16px;
+        color: #333;
+        background: linear-gradient(90deg, #0a4275 0%, #1976d2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .welcome-subtitle {
+        font-size: 17px;
+        color: #666;
+        max-width: 600px;
+        margin-bottom: 40px;
+        line-height: 1.6;
+    }
+
+    /* Suggestion Cards - Improved layout and hover effects */
+    .suggestion-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        max-width: 900px;
+        width: 100%;
+    }
+
+    .suggestion-card {
+        background-color: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        cursor: pointer;
+        border: 1px solid #e0e0e0;
+        transition: all 0.3s ease;
+        text-align: left;
+    }
+
+    .suggestion-card:hover {
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        border-color: #bbdefb;
+        transform: translateY(-4px);
+    }
+
+    .suggestion-icon {
+        color: #1976d2;
+        margin-bottom: 14px;
+        font-size: 24px;
+        background-color: rgba(25, 118, 210, 0.1);
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .suggestion-title {
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: #333;
+        font-size: 16px;
+    }
+
+    .suggestion-text {
+        color: #666;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    /* Message Styles - Improved bubble design */
+    .message-row {
+        display: flex;
+        margin-bottom: 24px;
+        animation: fadeIn 0.3s;
+        justify-content: flex-end;
+    }
+
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 16px;
+        flex-shrink: 0;
+    }
+
+    .user-avatar-chat {
+        background: linear-gradient(135deg, #bbdefb 0%, #64b5f6 100%);
+        color: #0d47a1;
+    }
+
+    .bot-avatar {
+        background: linear-gradient(135deg, #0a4275 0%, #1976d2 100%);
+        color: white;
+    }
+
+    .message-content {
+        flex: 1;
+    }
+
+    .message-bubble {
+        padding: 14px 18px;
+        border-radius: 16px;
+        max-width: 90%;
+        line-height: 1.6;
+        font-size: 15px;
+    }
+
+    .user-message {
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        color: #333;
+        border-bottom-right-radius: 4px;
+        align-self: flex-end;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        padding: 10px;
+        border-radius: 20px;
+    }
+
+    .bot-message {
+        background-color: white;
+        color: #333;
+        border-bottom-left-radius: 4px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e0e0e0;
+        padding: 10px;
+        border-radius: 20px;
+    }
+
+    .message-time {
+        font-size: 12px;
+        color: #999;
+        margin-top: 8px;
+    }
+
+    /* Quick Replies - More attractive design */
+    .quick-replies {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 14px;
+    }
+
+    .quick-reply {
+        background-color: #f5f5f5;
+        border: 1px solid #e0e0e0;
+        color: #333;
+        border-radius: 20px;
+        padding: 8px 16px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-weight: 500;
+    }
+
+    .quick-reply:hover {
+        background-color: #e3f2fd;
+        border-color: #bbdefb;
+        color: #1976d2;
+        transform: translateY(-2px);
+    }
+
+    /* Typing Indicator - Improved animation */
+    .typing-indicator {
+        display: none;
+        padding: 12px 16px;
+        margin-bottom: 24px;
+        animation: fadeIn 0.3s;
+    }
+
+    .typing-bubble {
+        background-color: white;
+        padding: 16px;
+        border-radius: 16px;
+        border-bottom-left-radius: 4px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e0e0e0;
+        display: inline-block;
+    }
+
+    .typing-bubble span {
+        height: 8px;
+        width: 8px;
+        float: left;
+        margin: 0 1px;
+        background-color: #1976d2;
+        display: block;
+        border-radius: 50%;
+        opacity: 0.4;
+        animation: typing 1s infinite ease-in-out;
+    }
+
+    .typing-bubble span:nth-child(1) { animation-delay: 0s; }
+    .typing-bubble span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-bubble span:nth-child(3) { animation-delay: 0.4s; }
+
+    @@keyframes typing {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-5px); }
+        100% { transform: translateY(0px); }
+    }
+
+    /* Input Container - Improved styling and focus effects */
+    .input-container {
+        padding: 18px 24px;
+        background-color: white;
+        border-top: 1px solid #e0e0e0;
+        position: sticky;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .input-wrapper {
+        display: flex;
+        align-items: flex-end;
+        background-color: #f8f9fa;
+        border: 1px solid #e0e0e0;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        position: relative;
+        padding: 10px 15px;
+    }
+
+    .input-wrapper:focus-within {
+        border-color: #1976d2;
+        box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.15);
+        background-color: white;
+    }
+
+    .input-textarea {
+        flex: 1;
+        border: none;
+        background: transparent;
+        resize: none;
+        max-height: 150px;
+        font-size: 15px;
+        outline: none;
+        line-height: 1.5;
+        padding: 8px 0;
+        color: #333;
+        font-family: 'Roboto', sans-serif;
+    }
+
+    .input-textarea::placeholder {
+        color: #999;
+    }
+
+    .input-hint {
+        font-size: 12px;
+        color: #999;
+        margin-top: 6px;
+        text-align: right;
+    }
+
+    .input-buttons {
+        display: flex;
+        align-items: center;
+    }
+
+    .input-button {
+        background: none;
+        border: none;
+        color: #666;
+        font-size: 16px;
+        padding: 8px;
+        cursor: pointer;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        margin-left: 6px;
+        position: relative;
+    }
+
+    .input-button:hover {
+        background-color: #e3f2fd;
+        color: #1976d2;
+    }
+
+    .input-button:disabled {
+        color: #ccc;
+        cursor: not-allowed;
+    }
+
+    .input-button:disabled:hover {
+        background: none;
+    }
+
+    .send-button {
+        background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+        color: white;
+        border-radius: 50%;
+        width: 38px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .send-button:hover:not(:disabled) {
+        background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
+        color: white;
+        transform: scale(1.05);
+    }
+
+    .send-button:disabled {
+        background: #e0e0e0;
+    }
+
+    .button-tooltip {
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 6px 10px;
+        border-radius: 6px;
+        font-size: 12px;
+        white-space: nowrap;
+        visibility: hidden;
+        opacity: 0;
+        transition: all 0.2s ease;
+        pointer-events: none;
+    }
+
+    .input-button:hover .button-tooltip {
+        visibility: visible;
+        opacity: 1;
+        bottom: calc(100% + 10px);
+    }
+
+    /* Responsive Design - Improved mobile experience */
+    @@media (max-width: 768px) {
+        .app-container {
+            flex-direction: column;
+        }
+
+        .sidebar {
+            width: 100%;
+            height: auto;
+            max-height: 60px;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .sidebar-expanded {
+            max-height: 100vh;
+            z-index: 999;
+        }
+
+        .main-content {
+            height: calc(100vh - 60px);
+        }
+
+        .sidebar-header {
+            padding: 12px 16px;
+        }
+
+        .logo-text {
+            font-size: 16px;
+        }
+
+        .new-chat-btn {
+            margin: 12px 16px;
+            padding: 10px;
+        }
+
+        .suggestion-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .welcome-title {
+            font-size: 24px;
+        }
+        
+        .welcome-subtitle {
+            font-size: 15px;
+        }
+        
+        .input-container {
+            padding: 12px 16px;
+        }
+    }
+
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #aaa;
+    }
+    
+    /* Accessibility improvements */
+    .input-button:focus, .new-chat-btn:focus, .suggestion-card:focus {
+        outline: 2px solid #1976d2;
+        outline-offset: 2px;
+    }
+    
+    button, .suggestion-card {
+        cursor: pointer;
+    }
+
+    .markdown-content {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+    }
+    
+    .markdown-content h1 {
+        color: #2c3e50;
+        font-size: 1.8em;
+        margin-top: 1em;
+        margin-bottom: 0.5em;
+        padding-bottom: 0.3em;
+        border-bottom: 1px solid #eaecef;
+    }
+    
+    .markdown-content h2 {
+        color: #2c3e50;
+        font-size: 1.5em;
+        margin-top: 1em;
+        margin-bottom: 0.5em;
+        padding-bottom: 0.3em;
+        border-bottom: 1px solid #eaecef;
+    }
+    
+    .markdown-content h3 {
+        color: #2c3e50;
+        font-size: 1.3em;
+        margin-top: 1em;
+        margin-bottom: 0.5em;
+    }
+    
+    .markdown-content p {
+        margin-top: 0.5em;
+        margin-bottom: 0.5em;
+    }
+    
+    .markdown-content ul, .markdown-content ol {
+        padding-left: 1.5em;
+        margin-top: 0.5em;
+        margin-bottom: 0.5em;
+    }
+    
+    .markdown-content ul li, .markdown-content ol li {
+        margin-bottom: 0.3em;
+    }
+    
+    .markdown-content blockquote {
+        padding: 0.5em 1em;
+        color: #6a737d;
+        border-left: 0.25em solid #dfe2e5;
+        margin: 0.8em 0;
+        background-color: #f6f8fa;
+    }
+    
+    .markdown-content blockquote p {
+        margin: 0;
+    }
+    
+    .markdown-content code {
+        padding: 0.2em 0.4em;
+        margin: 0;
+        font-size: 85%;
+        background-color: rgba(27, 31, 35, 0.05);
+        border-radius: 3px;
+        font-family: monospace;
+    }
+    
+    .markdown-content pre {
+        background-color: #f6f8fa;
+        border-radius: 3px;
+        padding: 1em;
+        overflow: auto;
+    }
+    
+    .markdown-content pre code {
+        background-color: transparent;
+        padding: 0;
+    }
+    
+    .markdown-content hr {
+        height: 0.25em;
+        padding: 0;
+        margin: 1.5em 0;
+        background-color: #e1e4e8;
+        border: 0;
+    }
+    
+    .markdown-content table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-bottom: 1em;
+    }
+    
+    .markdown-content table th, .markdown-content table td {
+        padding: 0.5em 1em;
+        border: 1px solid #dfe2e5;
+    }
+    
+    .markdown-content table th {
+        background-color: #f6f8fa;
+    }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const chatContainer = document.getElementById('chat-container');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+        const typingIndicator = document.querySelector('.typing-indicator');
+        const resetButton = document.getElementById('reset-chat');
+        const textarea = document.getElementById('user-input');
+        const form = textarea.closest('form');
+        
+        // Thêm sự kiện cho nút gửi - FIX: Sử dụng form.submit() thay vì sendMessage
+        sendButton.addEventListener('click', function(e) {
+            e.preventDefault(); // Ngăn hành vi mặc định của button
+            if (userInput.value.trim()) {
+                form.submit(); // Gửi form đến controller
+            }
+        });
+        
+        // Thêm sự kiện khi nhấn Enter
+        userInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault(); // chặn xuống dòng
+                if (userInput.value.trim()) {
+                    form.submit(); // gửi form
+                }
+            }
+        });
+
+        // Thêm sự kiện cho các nút trả lời nhanh
+        document.querySelectorAll('.quick-reply').forEach(button => {
+            button.addEventListener('click', function() {
+                userInput.value = this.textContent;
+                form.submit(); // Sử dụng form.submit() thay vì sendMessage
+            });
+        });
+        
+        // Nút reset chat
+        resetButton?.addEventListener('click', function() {
+            // Xóa tất cả tin nhắn trừ tin nhắn chào hỏi đầu tiên
+            while (chatContainer.children.length > 1) {
+                chatContainer.removeChild(chatContainer.lastChild);
+            }
+            
+            // Thêm lại tin nhắn chào hỏi ban đầu nếu bị xóa
+            if (chatContainer.children.length === 0) {
+                const welcomeMessage = createBotMessage("Xin chào! Tôi là trợ lý ảo của Bệnh viện Sức khỏe Cộng đồng. Tôi có thể giúp gì cho bạn hôm nay?");
+                chatContainer.appendChild(welcomeMessage);
+                
+                // Thêm các nút trả lời nhanh
+                addQuickReplies(["Giờ làm việc", "Dịch vụ", "Đặt lịch khám", "Liên hệ bác sĩ"]);
+            }
+        });
+        
+        // Thêm sự kiện cho các suggestion cards trong welcome screen
+        document.querySelectorAll('.suggestion-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const query = this.getAttribute('data-query');
+                if (query) {
+                    userInput.value = query;
+                    form.submit(); // Sử dụng form.submit() thay vì sendMessage
+                }
+            });
+        });
+        
+        function createBotMessage(text) {
+            const botMessageContainer = document.createElement('div');
+            botMessageContainer.className = 'message-with-icon';
+            
+            const botIcon = document.createElement('div');
+            botIcon.className = 'bot-icon';
+            botIcon.innerHTML = '<i class="fas fa-robot"></i>';
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            
+            const message = document.createElement('div');
+            message.className = 'message bot-message';
+            message.textContent = text;
+            
+            messageContent.appendChild(message);
+            
+            botMessageContainer.appendChild(botIcon);
+            botMessageContainer.appendChild(messageContent);
+            
+            return botMessageContainer;
+        }
+        
+        function addQuickReplies(replies) {
+            const quickRepliesContainer = document.createElement('div');
+            quickRepliesContainer.className = 'quick-replies';
+            
+            replies.forEach(reply => {
+                const button = document.createElement('div');
+                button.className = 'quick-reply';
+                button.textContent = reply;
+                button.addEventListener('click', function() {
+                    userInput.value = this.textContent;
+                    form.submit(); // Sử dụng form.submit() thay vì sendMessage
+                });
+                quickRepliesContainer.appendChild(button);
+            });
+            
+            // Thêm vào message-content của tin nhắn bot cuối cùng
+            const lastBotMessage = chatContainer.querySelector('.message-with-icon:last-child .message-content');
+            if (lastBotMessage) {
+                lastBotMessage.appendChild(quickRepliesContainer);
+            }
+        }
+    });
+</script>
