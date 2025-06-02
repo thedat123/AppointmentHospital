@@ -1,10 +1,10 @@
 using System;
-using AppointmentHospital.Entity;
 using AppointmentHospital.EnumStatus;
 using AppointmentHospital.Models;
 using AppointmentHospital.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using AppointmentHospital.Helpers;
 
 namespace AppointmentHospital.Repositories.Implement;
 
@@ -15,15 +15,20 @@ public class DoctorRepository : IDoctorRepository
         _context = context; 
     }
 
-    public async Task<List<Doctor>> getAllDoctors(string selectSpec){
+    public async Task<List<Doctor>> getAllDoctors(string selectSpec, int page)
+    {
         var query = _context.Doctors.AsQueryable();
-        if(!selectSpec.IsNullOrEmpty()){
-            int.TryParse(selectSpec, out int selectSpecInt);
-            Specialization spec = (Specialization)Enum.ToObject(typeof(Specialization), selectSpecInt);
-            query = query.Where(d => d.Specializaiton == spec);
+        int selectSpecInt = 0;
+
+        if (!string.IsNullOrEmpty(selectSpec))
+        {
+            int.TryParse(selectSpec, out selectSpecInt);
+            query = query.Where(d => d.SpecialityId == selectSpecInt);
         }
-        return await query.ToListAsync();
+
+        return await Pagination<Doctor>.PaginatedList(query, page);
     }
+
 
     public Doctor getDoctorById(Guid doctorId){
         return _context.Doctors
@@ -32,13 +37,9 @@ public class DoctorRepository : IDoctorRepository
     }
     public async Task<Doctor> updateDoctor(Doctor request, string phoneNumber) {
         var doctor = _context.Doctors.Where(d => d.DoctorId == request.DoctorId).FirstOrDefault();
-        doctor.DateOfBirth = request.DateOfBirth;
-        doctor.Description = request.Description;
         doctor.FullName = request.FullName;
-        doctor.ExperienceYear = request.ExperienceYear;
-        doctor.Gender = request.Gender;
         doctor.Degree = request.Degree;
-        doctor.Specializaiton = request.Specializaiton;
+        doctor.SpecialityId = request.SpecialityId;
         doctor.User.PhoneNumber = phoneNumber;
         _context.Update(doctor);
         await _context.SaveChangesAsync();

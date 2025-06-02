@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using AppointmentHospital.Entity;
 using AppointmentHospital.EnumStatus;
 using AppointmentHospital.Helpers;
 using AppointmentHospital.Models;
@@ -101,6 +100,12 @@ namespace AppointmentHospital.Repositories.Implement
 
         public int CountAppointmentDoctorIdStatus(Guid doctorId, AppointmentStatus status){
             return _context.Appointments.Where(a => a.DoctorId == doctorId && a.Status == status).Count();
+        }
+
+        public async Task<Pagination<Appointment>> GetAllPendingAppointments(int page){
+            var appointments = _context.Appointments.Where(a => a.Status == AppointmentStatus.Pending);
+            var paginatedAppointments = await Pagination<Appointment>.PaginatedList(appointments, page);
+            return paginatedAppointments;
         }
     }
 }

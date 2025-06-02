@@ -66,7 +66,6 @@
                 <div class="col-md-6 text-md-end">
                     @foreach (var (status, icon) in new[]
                     {
-                        (AppointmentStatus.Pending, "fa-clock"),
                         (AppointmentStatus.Confirmed, "fa-check-circle"),
                         (AppointmentStatus.Completed, "fa-check-double"),
                         (AppointmentStatus.Canceled, "fa-times-circle")
@@ -133,19 +132,7 @@
                                     </div>
                                 </td>
                                 <td class="text-center">
-                                    @if (appointment.Status == AppointmentHospital.EnumStatus.AppointmentStatus.Pending)
-                                    {
-                                        <form action="/Doctor/UpdateStatus" method="post" class="d-inline-flex gap-2">
-                                            <input type="hidden" name="id" value="@appointment.AppointmentId" />
-                                            <button type="submit" name="status" value="1" class="btn btn-success btn-sm btn-rounded">
-                                                <i class="fas fa-check me-1"></i> Xác nhận
-                                            </button>
-                                            <button type="submit" name="status" value="3" class="btn btn-danger btn-sm btn-rounded">
-                                                <i class="fas fa-times me-1"></i> Hủy
-                                            </button>
-                                        </form>
-                                    }
-                                    else if (appointment.Status == AppointmentHospital.EnumStatus.AppointmentStatus.Confirmed)
+                                    @if (appointment.Status == AppointmentHospital.EnumStatus.AppointmentStatus.Confirmed)
                                     {
                                         <a asp-controller="Doctor" asp-action="StartDiagnosis" asp-route-id="@appointment.AppointmentId" class="btn btn-primary btn-sm btn-rounded">
                                             <i class="fas fa-stethoscope me-1"></i> Bắt đầu khám

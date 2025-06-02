@@ -16,7 +16,7 @@ namespace AppointmentHospital.Models
         public Guid DoctorId { get; set; }
 
         public Guid? AcquaintanceId { get; set; }
-
+        public Guid? CollaboratorId { get; set; }
         public Guid? FeedbackId { get; set; }
 
         [Required]
@@ -53,5 +53,7 @@ namespace AppointmentHospital.Models
         [ForeignKey("FeedbackId")]
         public virtual Feedback Feedback { get; set; }
 
+        [ForeignKey("CollaboratorId")]
+        public virtual Collaborator Collaborator { get; set; }
     }
 }

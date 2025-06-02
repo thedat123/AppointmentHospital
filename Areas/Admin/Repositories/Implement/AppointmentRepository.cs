@@ -16,24 +16,19 @@ namespace AppointmentHospital.Areas.Admin.Repositories.Implement
        {
            _context = context;
        }
-       public async Task<Pagination<AppointmentResponse>> GetAllAppointmentAsync(int page, string? searchTerm, Specialization? specialization)
+       public async Task<Pagination<AppointmentResponse>> GetAllAppointmentAsync(int page, string? searchTerm, int SpecialityId)
        {
            var query = _context.Appointments.AsQueryable();
-           if (searchTerm != null && specialization == null)
+           if (searchTerm != null)
            {
                query = query.Where(a => a.Doctor.FullName.ToLower().Contains(searchTerm.ToLower()) || a.Patient.FullName.ToLower().Contains(searchTerm.ToLower()));
            }
-           if (searchTerm == null && specialization != null)
-           {         
-               query = query.Where(a => a.Doctor.Specializaiton == specialization);
-           }
-           if (searchTerm != null && specialization != null)
+           if (searchTerm != null)
            {
-               query = query.Where(a => (a.Patient.FullName.ToLower().Contains(searchTerm.ToLower()) || a.Doctor.FullName.ToLower().Contains(searchTerm.ToLower())) && a.Doctor.Specializaiton == specialization);
+               query = query.Where(a => (a.Patient.FullName.ToLower().Contains(searchTerm.ToLower()) || a.Doctor.FullName.ToLower().Contains(searchTerm.ToLower())) && a.Doctor.SpecialityId == SpecialityId);
            }
            var paginatedList = await Pagination<Appointment>.PaginatedList(query, page);
            var appointmentList = paginatedList.Select(a => new AppointmentResponse {
-                
                 AppointmentId = a.AppointmentId,
                 AppointmentTime = a.AppointmentTime,
                 DoctorId = a.DoctorId,
@@ -42,7 +37,7 @@ namespace AppointmentHospital.Areas.Admin.Repositories.Implement
                 PatientId = a.AcquaintanceId.HasValue ? _context.Acquaintances.Where(ac => ac.Id == a.AcquaintanceId).FirstOrDefault().Id : a.PatientId,
                 PatientName = a.AcquaintanceId.HasValue ? _context.Acquaintances.Where(ac => ac.Id == a.AcquaintanceId).FirstOrDefault().Name : a.Patient.FullName,
                 CreatedAt = a.CreatedAt,
-                Specialization = EnumExtensions.GetDisplayName(a.Doctor.Specializaiton)
+                SpecialityId = a.Doctor.SpecialityId ?? 0,
            }).ToList();
            return new Pagination<AppointmentResponse>(appointmentList, page, paginatedList.TotalItems);
        }
@@ -59,19 +54,13 @@ namespace AppointmentHospital.Areas.Admin.Repositories.Implement
 
        public List<SelectListItem> GetSpecialization()
        {
-           var specializationList = Enum.GetValues(typeof(Specialization)).Cast<Specialization>().Select(s => new SelectListItem
+           var specializationList = _context.Specialities.Select(s => new SelectListItem
            {
-               Text = GetDisplayNameSpecializatiton(s),
-               Value = ((int)s).ToString()
+               Text = s.SpecialityName,
+               Value = s.Id.ToString()
            }).ToList();
            return specializationList;
        }
-       public static string GetDisplayNameSpecializatiton(Enum value)
-       {
-           var displayName = value.GetType().GetField(value.ToString())?.GetCustomAttribute<DisplayAttribute>()?.Name ?? value.ToString();
-           return displayName;
-       }
-
        public async Task<AppointmentResponse> GetAppointmentAsync(Guid id)
        {
            var appointment = await _context.Appointments.Include(a => a.Patient).Include(a => a.Doctor).Include(a => a.Acquaintance).Select(a => new AppointmentResponse
@@ -79,7 +68,8 @@ namespace AppointmentHospital.Areas.Admin.Repositories.Implement
                PatientId = a.AcquaintanceId.HasValue ? a.Acquaintance.Id : a.Patient.PatientId,
                PatientName = a.AcquaintanceId.HasValue ? a.Acquaintance.Name : a.Patient.FullName,
                DoctorId = a.DoctorId,
-               Specialization = EnumExtensions.GetDisplayName(a.Doctor.Specializaiton),
+               SpecialityId = a.Doctor.SpecialityId,
+               SpecialityName = a.Doctor.Specialities.SpecialityName,
                AppointmentId = a.AppointmentId,
                DoctorName = a.Doctor.FullName,
                Status = a.Status,

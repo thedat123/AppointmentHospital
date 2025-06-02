@@ -5,8 +5,7 @@
 
 <div class="statistics-container">
     <div class="filter-section">
-        <h2 class="filter-title">Statistics Filter</h2>
-
+        <h2 class="filter-title">Bộ lọc thống kê</h2>
 
         <div id="yearInput">
             <select id="yearSelect" class="form-input">
@@ -25,32 +24,32 @@
                     }
                 }
             </select>
-            <label for="yearSelect">Select Year</label>
+            <label for="yearSelect">Chọn năm</label>
         </div>
 
         <div class="radio-group">
             <label class="radio-label">
                 <input type="radio" name="statisticType" value="day" checked>
-                <span class="radio-text">Daily</span>
+                <span class="radio-text">Theo ngày</span>
             </label>
             <label class="radio-label">
                 <input type="radio" name="statisticType" value="week">
-                <span class="radio-text">Weekly</span>
+                <span class="radio-text">Theo tuần</span>
             </label>
             <label class="radio-label">
                 <input type="radio" name="statisticType" value="month">
-                <span class="radio-text">Monthly</span>
+                <span class="radio-text">Theo tháng</span>
             </label>
             <label class="radio-label">
                 <input type="radio" name="statisticType" value="range">
-                <span class="radio-text">Custom</span>
+                <span class="radio-text">Tùy chỉnh</span>
             </label>
         </div>
 
         <div class="filter-controls">
             <div id="dayInput" class="floating-input">
                 <input type="date" id="singleDate" name="singleDate" class="form-input" required>
-                <label for="singleDate">Select Date</label>
+                <label for="singleDate">Chọn ngày</label>
             </div>
 
             <div id="weekInput" class="floating-input" style="display: none;">
@@ -58,10 +57,10 @@
                     <option value="" disabled selected></option>
                     @foreach (var week in weeks)
                     {
-                        <option value="@(week.Value)">@week.Text</option>
+                        <option value="@week.Value">@week.Text</option>
                     }
                 </select>
-                <label for="weekSelect">Select Week</label>
+                <label for="weekSelect">Chọn tuần</label>
             </div>
 
             <div id="monthInput" class="floating-input" style="display: none;">
@@ -72,68 +71,71 @@
                         <option value="@month.Value">@month.Text</option>
                     }
                 </select>
-                <label for="monthSelect">Select Month</label>
+                <label for="monthSelect">Chọn tháng</label>
             </div>
 
             <div id="rangeInput" class="floating-input date-range" style="display: none;">
                 <div class="range-container">
                     <div class="range-input">
                         <input type="date" id="startDate" name="startDate" class="form-input" required>
-                        <label for="startDate">Start Date</label>
+                        <label for="startDate">Từ ngày</label>
                     </div>
                     <div class="range-input">
                         <input type="date" id="endDate" name="endDate" class="form-input" required>
-                        <label for="endDate">End Date</label>
+                        <label for="endDate">Đến ngày</label>
                     </div>
                 </div>
             </div>
 
             <button class="btn-submit" onclick="submitStatistic()">
                 <i class="fas fa-chart-line"></i>
-                <span>Generate Report</span>
+                <span>Thống kê</span>
             </button>
         </div>
     </div>
+
     <div id="statistic-table">
         <div class="stats-section">
-            <h2 class="section-title">Appointment Statistics</h2>
-            <div  id="appointmentChartsContainer" class="charts-grid">
+            <h2 class="section-title">Thống kê lịch hẹn</h2>
+            <div id="appointmentChartsContainer" class="charts-grid">
                 <div class="chart-card">
-                    <h3 class="chart-title">Current Period</h3>
+                    <h3 class="chart-title">Giai đoạn hiện tại</h3>
                     <div class="chart-container">
                         <canvas id="amountAppointment"></canvas>
                     </div>
                 </div>
                 <div id="periodComparison" class="chart-card">
-                    <h3 class="chart-title">Period Comparison</h3>
+                    <h3 class="chart-title">So sánh giai đoạn</h3>
                     <div class="chart-container">
                         <canvas id="compareAmountAppointment"></canvas>
                     </div>
                 </div>
             </div>
         </div>
+
         <div class="stats-section">
-            <h2 class="section-title">User Statistics</h2>
+            <h2 class="section-title">Thống kê người dùng</h2>
             <div id="userChartsContainer" class="charts-grid">
                 <div class="chart-card">
-                    <h3 class="chart-title">Current Users</h3>
+                    <h3 class="chart-title">Người dùng hiện tại</h3>
                     <div class="chart-container">
                         <canvas id="oldAndNewUser"></canvas>
                     </div>
                 </div>
-                <div  id="userTrends" class="chart-card">
-                    <h3 class="chart-title">User Trends</h3>
+                <div id="userTrends" class="chart-card">
+                    <h3 class="chart-title">Xu hướng người dùng</h3>
                     <div class="chart-container">
                         <canvas id="compareOldAndNewUser"></canvas>
                     </div>
                 </div>
             </div>
         </div>
+
         <div class="stats-section">
-            <h2 class="section-title">Doctor Performance</h2>
+            <h2 class="section-title">Hiệu suất bác sĩ</h2>
             <div class="charts-grid single-chart">
                 <div class="chart-card">
-                    <h3 class="chart-title">Top Doctors by Appointments</h3>
+                    <h3 class="chart-title">Bác sĩ có nhiều lịch hẹn nhất</h3>
                     <div class="chart-container">
                         <canvas id="topDoctorAmountAppointment"></canvas>
                     </div>

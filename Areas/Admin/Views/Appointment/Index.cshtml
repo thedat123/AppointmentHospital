@@ -2,12 +2,22 @@
 @using AppointmentHospital.Helpers;
 @using AppointmentHospital.EnumStatus;
 @model Pagination<AppointmentResponse>;
+
 @{
     var specializationList = ViewData["SpecializationList"] as List<SelectListItem>;
     var statusList = ViewData["StatusList"] as List<SelectListItem>;
     var searchTerm = ViewData["SearchTerm"] as string;
-    var specializationViewData = ViewData["Specialization"] as Specialization?;
-    
+    var specializationViewData = ViewData["SpecialityId"] as int?;
+
+    // Map Status enum to Vietnamese
+    Func<string, string> GetVietnameseStatus = status => status switch
+    {
+        "Pending" => "Chờ xác nhận",
+        "Confirmed" => "Đã xác nhận",
+        "Canceled" => "Đã hủy",
+        "Completed" => "Hoàn thành",
+        _ => "Không rõ"
+    };
 }
 
 <div class="card shadow-sm mb-4">
@@ -22,27 +32,27 @@
                     </span>
                     <input name="searchTerm"
                            class="form-control"
-                           placeholder="Enter patient name or doctor name"
+                           placeholder="Nhập tên bệnh nhân hoặc bác sĩ"
                            value="@searchTerm">
                 </div>
             </div>
-                <div class="col-md-3">
-                    <label class="form-label">Specialization</label>
-                    <select name="specialization" class="form-select">
-                        @if (!specializationViewData.HasValue)
-                        {
-                            <option value="" disabled selected>Choose specialization</option>
-                        }
-                        else
-                        {
-                        <option value="" disabled>Choose specialization</option>
-                        }
+            <div class="col-md-3">
+                <label class="form-label">Chuyên khoa</label>
+                <select name="SpecialityId" class="form-select">
+                    @if (!specializationViewData.HasValue)
+                    {
+                        <option value="" disabled selected>Chọn chuyên khoa</option>
+                    }
+                    else
+                    {
+                        <option value="" disabled>Chọn chuyên khoa</option>
+                    }
 
-                        @foreach (var specialization in specializationList)
+                    @foreach (var specialization in specializationList)
+                    {
+                        if (specializationViewData.HasValue)
                         {
-                        if(specializationViewData.HasValue)
-                        {
-                            @if (specialization.Value == ((int)specializationViewData).ToString())
+                            if (specialization.Value == ((int)specializationViewData).ToString())
                             {
                                 <option value="@specialization.Value" selected>@specialization.Text</option>
                             }
@@ -51,17 +61,16 @@
                                 <option value="@specialization.Value">@specialization.Text</option>
                             }
                         }
-                        else 
+                        else
                         {
                             <option value="@specialization.Value">@specialization.Text</option>
                         }
-
                     }
-                    </select>
-                </div>
+                </select>
+            </div>
             <div class="col-md-1">
                 <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-search me-2"></i>Search
+                    <i class="bi bi-search me-2"></i>Tìm
                 </button>
             </div>
         </form>
@@ -72,7 +81,7 @@
     <div class="card-header bg-white py-3">
         <div class="row align-items-center">
             <div class="col">
-                <h5 class="mb-0">Dashboard Doctor</h5>
+                <h5 class="mb-0">Danh sách lịch hẹn</h5>
             </div>
         </div>
     </div>
@@ -82,17 +91,25 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th class="text-dark text-decoration-none">Patient</th>
-                        <th class="text-dark text-decoration-none">Doctor</th>
-                        <th class="text-dark text-decoration-none">Appointment Time</th>
-                        <th class="text-dark text-decoration-none">Specialization</th>
-                        <th class="text-dark text-decoration-none">Status</th>
-                        <th class="text-end">Actions</th>
+                        <th class="text-dark text-decoration-none">Bệnh nhân</th>
+                        <th class="text-dark text-decoration-none">Bác sĩ</th>
+                        <th class="text-dark text-decoration-none">Thời gian hẹn</th>
+                        <th class="text-dark text-decoration-none">Chuyên khoa</th>
+                        <th class="text-dark text-decoration-none">Trạng thái</th>
+                        <th class="text-end">Hành động</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var response in Model)
                     {
+                        var colorBadge = response.Status.ToString() switch
+                        {
+                            "Pending" => "secondary",
+                            "Confimed" => "info",
+                            "Canceled" => "danger",
+                            "Completed" => "success",
+                            _ => "dark"
+                        };
                         <tr>
                             <td>
                                 <div class="d-flex align-items-center">
@@ -111,26 +128,18 @@
                                 </div>
                             </td>
                             <td>
-                                @response.AppointmentTime.ToString("yyyy-MM-dd HH:mm:ss")
+                                @response.AppointmentTime.ToString("dd/MM/yyyy HH:mm")
                             </td>
                             <td>
-                                @response.Specialization
-                            </td>
-                            @{
-                                var colorBadge = response.Status.ToString() switch
-                                {
-                                    "Pending" => "secondary",
-                                    "Confimed" => "info",
-                                    "Canceled" => "danger", 
-                                    "Completed" => "success",
-                                    _ => "dark" // Default case for unexpected values
-                                };
-                            }
-                            <td>
-                                <span class="badge bg-@colorBadge ">@response.Status</span>
+                                @response.SpecialityName <!-- nếu có tên, dùng tên thay vì ID -->
                             </td>
                             <td>
-                                <a asp-action="Detail" asp-route-id ="@response.AppointmentId">View Detail</a>
+                                <span class="badge bg-@colorBadge">@GetVietnameseStatus(response.Status.ToString())</span>
+                            </td>
+                            <td class="text-end">
+                                <a class="btn btn-sm btn-outline-primary" asp-action="Detail" asp-route-id="@response.AppointmentId">
+                                    Xem chi tiết
+                                </a>
                             </td>
                         </tr>
                     }
@@ -139,27 +148,27 @@
         </div>
     </div>
 
-    <nav class="mt-2 d-flex justify-content-center" aria-label="...">
-        @{
-            <ul class="pagination">
-                <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "") ">
-                    <a class="page-link" asp-action="Index" asp-route-page="@(Model.CurrentPage-1)" asp-route-specialization="@(specializationViewData)" asp-route-searchTerm="@(searchTerm)" >Previous</a>
+    <nav class="mt-2 d-flex justify-content-center" aria-label="Phân trang">
+        <ul class="pagination">
+            <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
+                <a class="page-link" asp-action="Index" asp-route-page="@(Model.CurrentPage-1)" asp-route-SpecialityId="@(specializationViewData)" asp-route-searchTerm="@(searchTerm)">Trước</a>
+            </li>
+            @for (int i = 1; i <= Model.TotalPage; i++)
+            {
+                <li class="page-item @(Model.CurrentPage == i ? "active" : "")">
+                    <a class="page-link" asp-action="Index"
+                       asp-route-page="@i"
+                       asp-route-SpecialityId="@(specializationViewData)"
+                       asp-route-searchTerm="@(searchTerm)">
+                        @i
+                    </a>
                 </li>
-                @for (int i = 1; i <= Model.TotalPage; i++)
-                {
-                    <li class="page-item @(Model.CurrentPage == @i ? "active": "" )">
-                        <a class="page-link" asp-action="Index" 
-                                            asp-route-page="@i" 
-                                            asp-route-specialization="@(specializationViewData)" asp-route-searchTerm="@(searchTerm)">@i</a>
-                    </li>
-                }
-                <li class="page-item  @(!Model.HasNextPage? "disabled": "")">
-                    <a class="page-link" asp-action="Index" asp-route-page="@(Model.CurrentPage+1)" asp-route-specialization="@(specializationViewData)" asp-route-searchTerm="@(searchTerm)">Next</a>
-                </li>
-            </ul>
-        }
+            }
+            <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
+                <a class="page-link" asp-action="Index" asp-route-page="@(Model.CurrentPage+1)" asp-route-SpecialityId="@(specializationViewData)" asp-route-searchTerm="@(searchTerm)">Tiếp</a>
+            </li>
+        </ul>
     </nav>
-
 </div>
 
 @section Styles {

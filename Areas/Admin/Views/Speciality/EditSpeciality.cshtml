@@ -1,0 +1,175 @@
+﻿@using AppointmentHospital.Models;
+@using AppointmentHospital.Helpers;
+@model Specialities;
+@{
+    var searchTerm = ViewBag.SearchTerm as string;
+    var isEdit = Model?.Id > 0;
+}
+<div class="container-fluid py-4">
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+            <div class="row">
+                <div class="col-12 col-lg-10 mx-auto">
+                    <form asp-action="EditSpeciality" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        <input type="hidden" name="Id" value="@Model.Id"/>
+                        <input type="hidden" asp-for="SpecialityImage" value="@Model.SpecialityImage" />
+
+                        <div class="text-center mb-4">
+                            <h3 class="text-primary fw-bold">Edit Speciality Information</h3>
+                            <p class="text-muted">Update speciality details below</p>
+                        </div>
+
+                        <!-- Basic Information Section -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0 text-primary">
+                                    <i class="fas fa-hospital me-2"></i>Basic Information
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-4">
+                                    <div class="col-12">
+                                        <div class="form-floating">
+                                            <input asp-for="@Model.SpecialityName" class="form-control" placeholder="Speciality Name" required />
+                                            <label asp-for="@Model.SpecialityName">Speciality Name</label>
+                                            <span asp-validation-for="@Model.SpecialityName" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label class="form-label fw-bold">Speciality Image</label>
+                                        <input type="file" class="form-control" name="ImageFile" accept="image/*">
+                                        @if (!string.IsNullOrEmpty(Model.SpecialityImage))
+                                        {
+                                            <div class="mt-2">
+                                                <img src="@Model.SpecialityImage" alt="Current Image" class="img-thumbnail" style="max-height: 100px;">
+                                                <small class="text-muted d-block">Current image</small>
+                                            </div>
+                                        }
+                                    </div>
+
+                                    <div class="col-12">
+                                        <div class="form-floating">
+                                            <textarea asp-for="@Model.Introduction" class="form-control" style="height: 150px" placeholder="Speciality Introduction"></textarea>
+                                            <label asp-for="@Model.Introduction">Introduction</label>
+                                            <span asp-validation-for="@Model.Introduction" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <div class="form-floating">
+                                            <textarea asp-for="@Model.Mission" class="form-control" style="height: 120px" placeholder="Mission Statement"></textarea>
+                                            <label asp-for="@Model.Mission">Mission</label>
+                                            <span asp-validation-for="@Model.Mission" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Services & Expertise Section -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0 text-primary">
+                                    <i class="fas fa-stethoscope me-2"></i>Services & Expertise
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-4">
+                                    <div class="col-12">
+                                        <div class="form-floating">
+                                            <textarea asp-for="@Model.Service" class="form-control" style="height: 150px" placeholder="Services Offered"></textarea>
+                                            <label asp-for="@Model.Service">Services</label>
+                                            <span asp-validation-for="@Model.Service" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <div class="form-floating">
+                                            <textarea asp-for="@Model.Expertise" class="form-control" style="height: 120px" placeholder="Areas of Expertise"></textarea>
+                                            <label asp-for="@Model.Expertise">Expertise</label>
+                                            <span asp-validation-for="@Model.Expertise" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <div class="form-floating">
+                                            <textarea asp-for="@Model.Treatment" class="form-control" style="height: 150px" placeholder="Treatment Methods"></textarea>
+                                            <label asp-for="@Model.Treatment">Treatment</label>
+                                            <span asp-validation-for="@Model.Treatment" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Facilities & Achievements Section -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0 text-primary">
+                                    <i class="fas fa-trophy me-2"></i>Facilities & Achievements
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-4">
+                                    <div class="col-12">
+                                        <div class="form-floating">
+                                            <textarea asp-for="@Model.Aminities" class="form-control" style="height: 120px" placeholder="Amenities Available"></textarea>
+                                            <label asp-for="@Model.Aminities">Amenities</label>
+                                            <span asp-validation-for="@Model.Aminities" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <div class="form-floating">
+                                            <textarea asp-for="@Model.Equipment" class="form-control" style="height: 120px" placeholder="Medical Equipment"></textarea>
+                                            <label asp-for="@Model.Equipment">Equipment</label>
+                                            <span asp-validation-for="@Model.Equipment" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <div class="form-floating">
+                                            <textarea asp-for="@Model.Archivement" class="form-control" style="height: 120px" placeholder="Achievements and Recognition"></textarea>
+                                            <label asp-for="@Model.Archivement">Achievements</label>
+                                            <span asp-validation-for="@Model.Archivement" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="col-12 text-center mt-4">
+                            <button type="submit" class="btn btn-primary px-5 py-2 me-2">
+                                <i class="fas fa-save me-2"></i>Save Changes
+                            </button>
+                            <a asp-action="SpecialityIndex" class="btn btn-outline-secondary px-4 py-2">
+                                <i class="fas fa-arrow-left me-2"></i>Back to List
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/create.css" />
+    <style>
+        .card-header {
+            border-bottom: 2px solid #dee2e6;
+        }
+        .form-text small {
+            font-size: 0.8rem;
+            line-height: 1.4;
+        }
+        .form-floating textarea {
+            min-height: 120px;
+        }
+        .img-thumbnail {
+            border: 2px solid #dee2e6;
+        }
+    </style>
+}

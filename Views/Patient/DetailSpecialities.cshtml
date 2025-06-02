@@ -1,203 +1,1138 @@
-<!-- Hero Section -->
-<div class="hero-section">
-    <div class="container">
-        <h1 class="hero-title">TRUNG TÂM TIM MẠCH</h1>
-    </div>
-</div>
-
-<!-- Contact Options -->
-<div class="container-fluid contact-bar">
-    <div class="row g-0">
-        <div class="col-4">
-            <a href="tel:+84xxxxxxxxx" class="contact-option contact-option-1">
-                <span><i class="bi bi-telephone"></i> Gọi tổng đài</span>
-            </a>
-        </div>
-        <div class="col-4">
-            <a href="#appointment" class="contact-option contact-option-2">
-                <span><i class="bi bi-calendar-check"></i> Đặt lịch hẹn</span>
-            </a>
-        </div>
-        <div class="col-4">
-            <a href="#doctors" class="contact-option contact-option-3">
-                <span><i class="bi bi-person"></i> Tìm bác sĩ</span>
-            </a>
-        </div>
-    </div>
-</div>
-
-<!-- Main Content -->
-<div class="container">
-    <h2 class="service-heading">Khám và điều trị theo tiêu chuẩn cao nhất</h2>
-    <!-- Tab Buttons -->
-    <div class="row tab-buttons">
-        <div class="col-md-3 mb-3">
-            <button class="tab-btn active">Tổng quan</button>
-        </div>
-        <div class="col-md-3 mb-3">
-            <button class="tab-btn">Dịch vụ</button>
-        </div>
-        <div class="col-md-3 mb-3">
-            <button class="tab-btn">Kỹ thuật - Công nghệ</button>
-        </div>
-        <div class="col-md-3 mb-3">
-            <button class="tab-btn">Đội ngũ bác sĩ</button>
-        </div>
-    </div>
+@model AppointmentHospital.Models.Specialities
+@{
+    ViewBag.Title = Model.SpecialityName;
     
-    <!-- Tab Content would go here -->
-    <div class="tab-content mt-4">
-        <div class="tab-pane active">
-            - THEO TỔ CHỨC Y TẾ THẾ GIỚI (WHO),BỆNH TIM MẠCHĐANG LÀ NGUYÊN NHÂN TỬ VONG HÀNG ĐẦU TRÊN TOÀN THẾ GIỚI. MỖI NĂM, SỐ NGƯỜI CHẾT DO BỆNH TIM VÀ ĐỘT QUỴ NHIỀU HƠN CẢ UNG THƯ, LAO, SỐT RÉT VÀ HIV CỘNG LẠI. THEO THỐNG KÊ CỦA HỘI TIM MẠCH NĂM 2015, TẠI VIỆT NAM, CỨ 3 NGƯỜI TRƯỞNG THÀNH CÓ 1 NGƯỜI CÓ NGUY CƠ MẮC BỆNH TIM MẠCH, CHỦ YẾU LÀBỆNH MẠCH VÀNH. MỖI NĂM, CÁC BỆNH LÝ VỀ TIM MẠCH CƯỚP ĐI KHOẢNG 200.000 NGƯỜI, CHIẾM 1/4 TỔNG SỐ TRƯỜNG HỢP TỬ VONG TẠI VIỆT NAM.
-            - MẶC DÙ CÁC BỆNH LÝ TIM MẠCH LÀ MỐI ĐE DỌA SỨC KHỎE HÀNG ĐẦU ĐỐI VỚI BẤT CỨ AI, NHƯNG BỆNH HOÀN TOÀN CÓ THỂ PHÒNG NGỪA ĐƯỢC. BẰNG CÁCH TUÂN THỦ LỐI SỐNG LÀNH MẠNH, CHẾ ĐỘ ĂN UỐNG KHOA HỌC VÀ TẦM SOÁT ĐỊNH KỲ, BẠN SẼ TẬN HƯỞNG CUỘC SỐNG CHẤT LƯỢNG VỚI MỘT TRÁI TIM KHỎE MẠNH.
-            - VỚI MỤC TIÊU PHÁT HIỆN SỚM – CHẨN ĐOÁN CHÍNH XÁC – ĐIỀU TRỊ KỊP THỜI CÁC BỆNH LÝ TIM MẠCH, TRUNG TÂM TIM MẠCHBVĐK MEDICALCAREĐƯỢC THÀNH LẬP, QUY TỤ ĐỘI NGŨ CHUYÊN GIA GIÀU KINH NGHIỆM, TỪNG LÀM VIỆC Ở BỆNH VIỆN TIM TÂM ĐỨC, BỆNH VIỆN VINMEC, BỆNH VIỆN FV… CÙNG HỆ THỐNG MÁY MÓC HIỆN ĐẠI, TIÊN TIẾN HỖ TRỢ BÁC SĨ CHẨN ĐOÁN VÀ ĐƯA RA PHÁC ĐỒ ĐIỀU TRỊ TỐT NHẤT CHO BỆNH NHÂN.
-            - TRUNG TÂM TIM MẠCH BVĐK MEDICALCARE TP.HCM GỒM 7 KHOA:
-            - KHOANỘI TIM MẠCH
-            - KHÁM BỆNH NGOẠI TRÚ
-            - KHOA PHẪU THUẬT TIM – LỒNG NGỰC, MẠCH MÁU
-            - KHOA THÔNG TIM CAN THIỆP
-            - KHOA ĐIỆN SINH LÝ VÀ LOẠN NHỊP TIM
-            - KHOA HỒI SỨC NỘI TIM MẠCH
-            - KHOA HỒI SỨC NGOẠI TIM MẠCH
-            - KHOA TIM BẨM SINH
+    // Define available tabs with display names and icons
+    var tabData = new[] {
+        new { Field = "Introduction", DisplayName = "Thông Tin Giới Thiệu", Icon = "fa-info-circle", Content = Model.Introduction },
+        new { Field = "Service", DisplayName = "Dịch vụ", Icon = "fa-handshake", Content = Model.Service },
+        new { Field = "Equipment", DisplayName = "Kỹ thuật - Công nghệ", Icon = "fa-microscope", Content = Model.Equipment },
+        new { Field = "Expertise", DisplayName = "Chuyên môn chính", Icon = "fa-user-md", Content = Model.Expertise },
+        new { Field = "Aminities", DisplayName = "Tiện ích", Icon = "fa-star", Content = Model.Aminities },
+        new { Field = "Archivement", DisplayName = "Thành tựu", Icon = "fa-trophy", Content = Model.Archivement },
+        new { Field = "Mission", DisplayName = "Sứ mệnh", Icon = "fa-flag", Content = Model.Mission },
+        new { Field = "Treatment", DisplayName = "Điều trị", Icon = "fa-procedures", Content = Model.Treatment },
+        new { Field = "Doctors", DisplayName = "Danh sách bác sĩ", Icon = "fa-user-md", Content = (Model.Doctor != null && Model.Doctor.Any()) ? "HasDoctor" : null }
+    };
+
+    // Filter tabs that have content
+    var availableTabs = tabData.Where(t => !string.IsNullOrWhiteSpace(t.Content)).ToList();
+}
+
+<div class="speciality-container">
+    <!-- Header with animation -->
+    <div class="speciality-header">
+        <div class="container">
+            <h1 class="speciality-title animated fadeInDown">@Model.SpecialityName</h1>
+            <p class="speciality-subtitle animated fadeInUp">Khám và điều trị theo tiêu chuẩn quốc tế</p>
+        </div>
+    </div>
+
+    <div class="container main-content">
+        @if (availableTabs.Any())
+        {
+            <!-- Enhanced Tab Navigation -->
+            <div class="tab-navigation animated fadeIn">
+                <ul class="nav nav-pills" id="specialityTabs" role="tablist">
+                    @for (int i = 0; i < availableTabs.Count; i++)
+                    {
+                        var tab = availableTabs[i];
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link @(i == 0 ? "active" : "")" 
+                                    id="@(tab.Field)-tab" 
+                                    data-bs-toggle="pill" 
+                                    data-bs-target="#@(tab.Field)" 
+                                    type="button" 
+                                    role="tab" 
+                                    aria-selected="@(i == 0 ? "true" : "false")">
+                                <span class="tab-icon"><i class="fas @tab.Icon"></i></span>
+                                <span class="tab-text">@tab.DisplayName</span>
+                            </button>
+                        </li>
+                    }
+                </ul>
+            </div>
+            
+            <!-- Tab Content with improved rendering -->
+            <div class="tab-content" id="specialityTabContent">
+                @for (int i = 0; i < availableTabs.Count; i++)
+                {
+                    var tab = availableTabs[i];
+                    <div class="tab-pane fade @(i == 0 ? "show active" : "")" 
+                        id="@(tab.Field)" 
+                        role="tabpanel" 
+                        aria-labelledby="@(tab.Field)-tab">
+
+                        <div class="content-card">
+                            <div class="card-header">
+                                <i class="fas @tab.Icon icon-header"></i>
+                                <h2 class="card-title">@tab.DisplayName</h2>
+                            </div>
+
+                            <div class="card-body">
+                                @if (tab.Field == "Doctors")
+                                {
+                                    <div class="row">
+                                        <div class="doctors-grid" id="doctorsContainer">
+                                            @foreach (var doctor in Model.Doctor)
+                                            {
+                                                <div class="doctor-card" data-specialty="@doctor.Specialities.SpecialityName.ToLower()">
+                                                    <div class="doctor-image">
+                                                        <img src="@Url.Content(string.IsNullOrEmpty(doctor.ImagePath) 
+                                                            ? "~/images/user-default.png" 
+                                                            : $"~/images/{doctor.ImagePath}")" 
+                                                            alt="@doctor.FullName"
+                                                            loading="lazy">
+                                                        <div class="doctor-specialty">
+                                                            @doctor.Specialities.SpecialityName
+                                                        </div>
+                                                    </div>
+                                                    <div class="doctor-info">
+                                                        <h3 class="doctor-name">@doctor.FullName</h3>
+                                                        <div class="doctor-meta">
+                                                            @if (!string.IsNullOrEmpty(doctor.Introduction))
+                                                            {
+                                                                <div class="doctor-introduction">
+                                                                    <i class="bi bi-person-circle"></i>
+                                                                    <span class="introduction-text">@doctor.Introduction</span>
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                        <div class="doctor-actions">
+                                                            <a href="@Url.Action("DetailDoctor", "Patient", new { id = doctor.DoctorId })" 
+                                                            class="btn btn-primary btn-appointment require-auth">
+                                                                <i class="bi bi-calendar-plus"></i>
+                                                                Đặt lịch khám
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    var content = FormatContent(tab.Content);
+                                    @Html.Raw(content)
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i> Không có thông tin chi tiết về chuyên khoa này.
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Call-to-Action with gradient animation -->
+<div class="appointment-cta">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <div class="cta-text">
+                    <h3><i class="fas fa-calendar-check me-2"></i>Đặt lịch khám với bác sĩ chuyên khoa</h3>
+                    <p>Đội ngũ y bác sĩ giàu kinh nghiệm, trang thiết bị hiện đại</p>
+                </div>
+            </div>
+            <div class="col-lg-4 text-end">
+                <a href="/Appointment/Create" class="btn btn-appointment">
+                    <span>Đặt lịch ngay</span>
+                    <i class="fas fa-arrow-right ms-2"></i>
+                </a>
+            </div>
         </div>
     </div>
 </div>
+
+<!-- Improved Floating Buttons -->
+<div class="floating-buttons">
+    <a href="tel:19001234" class="call-button" title="Gọi ngay để được tư vấn">
+        <i class="fas fa-phone"></i>
+        <span class="button-tooltip">Gọi ngay</span>
+    </a>
+    <button id="backToTop" class="back-to-top" title="Lên đầu trang">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+</div>
+
+@functions {
+    public string FormatContent(string content)
+    {
+        if (string.IsNullOrWhiteSpace(content))
+            return string.Empty;
+            
+        // Parse and format content with improved styling
+        var lines = content.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+        var result = new System.Text.StringBuilder();
+        var inList = false;
+        var listIndex = 0;
+        
+        foreach (var line in lines)
+        {
+            var trimmedLine = line.Trim();
+            
+            // Check if the line is a bullet point
+            if (trimmedLine.StartsWith("-"))
+            {
+                if (!inList)
+                {
+                    result.Append("<ul class=\"medical-list\">");
+                    inList = true;
+                    listIndex = 0;
+                }
+                
+                // Extract the text after the bullet point
+                var itemText = trimmedLine.Substring(1).Trim();
+                result.AppendFormat("<li class=\"list-item\" data-index=\"{0}\">{1}</li>", listIndex++, itemText);
+            }
+            else
+            {
+                // Close the list if we were in one
+                if (inList)
+                {
+                    result.Append("</ul>");
+                    inList = false;
+                }
+                
+                // Handle headings (if line has a colon and less than 70 chars, treat as heading)
+                if (trimmedLine.Contains(":") && trimmedLine.Length < 70 && !trimmedLine.Contains("<") && !trimmedLine.Contains(">"))
+                {
+                    var parts = trimmedLine.Split(new[] { ':' }, 2);
+                    result.AppendFormat("<div class=\"content-heading\"><strong>{0}:</strong>{1}</div>", 
+                        parts[0], 
+                        parts.Length > 1 ? parts[1] : "");
+                }
+                else
+                {
+                    result.AppendFormat("<p>{0}</p>", trimmedLine);
+                }
+            }
+        }
+        
+        // Close any open list
+        if (inList)
+        {
+            result.Append("</ul>");
+        }
+        
+        return result.ToString();
+    }
+}
 
 <style>
-    body {
-        font-family: 'Segoe UI', Arial, sans-serif;
+    /* Import Google fonts with display=swap for better loading performance */
+@@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@500;600;700&display=swap');
+
+:root {
+    /* Updated color palette with softer, more accessible colors */
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --primary-light: #60a5fa;
+    --secondary: #0ea5e9;
+    --light-bg: #f8fafc;
+    --text-color: #334155;
+    --muted-text: #64748b;
+    --border-color: #e2e8f0;
+    --call-color: #10b981;
+    --header-gradient: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+    --transition: all 0.3s ease;
+
+    /* Base colors - adjusted for increased accessibility */
+    --primary-50: #eff6ff;
+    --primary-100: #dbeafe;
+    --primary-200: #bfdbfe;
+    --primary-300: #93c5fd;
+    --primary-400: #60a5fa;
+    --primary-500: #3b82f6;
+    --primary-600: #2563eb;
+    --primary-700: #1d4ed8;
+    --primary-800: #1e40af;
+    --primary-900: #1e3a8a;
+        
+    /* Supporting colors */
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    
+    /* Neutrals */
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+    
+    /* Shadows - refined for better depth perception */
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+    --shadow: 0 2px 4px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.08);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -2px rgba(0,0,0,0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.04);
+    
+    /* Border radius */
+    --radius-sm: 0.25rem;  /* 4px */
+    --radius: 0.375rem;    /* 6px */
+    --radius-md: 0.5rem;   /* 8px */
+    --radius-lg: 0.75rem;  /* 12px */
+    --radius-xl: 1rem;     /* 16px */
+    --radius-2xl: 1.25rem; /* 20px */
+    --radius-3xl: 1.5rem;  /* 24px */
+    --radius-full: 9999px; /* Fully rounded */
+}
+
+/* Improved smooth scrolling for better UX */
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 80px; /* Accounts for fixed headers if present */
+}
+
+/* Refined animations with reduced motion preference support */
+@@media (prefers-reduced-motion: no-preference) {
+    .animated {
+        animation-duration: 0.6s;
+        animation-fill-mode: both;
     }
     
-    .hero-section {
-        height: 300px;
-        background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/images/doctor-hands.jpg');
-        background-size: cover;
-        background-position: center;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        color: white;
-        position: relative;
+    @@keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
     }
     
-    .hero-title {
-        font-size: 2.5rem;
-        font-weight: bold;
-        text-align: center;
-        text-transform: uppercase;
+    @@keyframes fadeInDown {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
     }
     
-    .contact-bar {
-        background: linear-gradient(to right, #0275d8, #f0ad4e, #5cb85c);
-        padding: 0;
+    @@keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
     }
     
-    .contact-option {
-        height: 50px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        color: white;
-        text-decoration: none;
-        border: none;
+    .fadeIn { animation-name: fadeIn; }
+    .fadeInDown { animation-name: fadeInDown; }
+    .fadeInUp { animation-name: fadeInUp; animation-delay: 0.1s; }
+}
+
+/* Removed animation for those who prefer reduced motion */
+@@media (prefers-reduced-motion: reduce) {
+    .animated {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/* Enhanced Speciality Header */
+.speciality-header {
+    background: var(--header-gradient);
+    padding: 50px 0;
+    color: white;
+    text-align: center;
+    margin-bottom: 30px;
+    border-radius: 0 0 30px 30px;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Simplified pseudo-elements for better performance */
+.speciality-header::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background: radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.15) 0%, transparent 40%);
+}
+
+.speciality-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    position: relative;
+    text-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+}
+
+.speciality-subtitle {
+    font-size: 1.2rem;
+    font-weight: 400;
+    margin-bottom: 0;
+    opacity: 0.95;
+    position: relative;
+}
+
+/* Improved Tab Navigation */
+.tab-navigation {
+    margin-bottom: 30px;
+    padding: 6px;
+    background-color: white;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-md);
+}
+
+.nav-pills {
+    gap: 10px;
+    padding: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.nav-pills .nav-link {
+    border-radius: var(--radius-lg);
+    color: var(--gray-700);
+    padding: 14px 16px;
+    font-weight: 500;
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background-color: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    min-width: 120px;
+}
+
+.nav-pills .nav-link.active {
+    background: var(--header-gradient);
+    color: white;
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+    border-color: transparent;
+}
+
+.tab-icon {
+    font-size: 1.6rem;
+    margin-bottom: 6px;
+    transition: var(--transition);
+}
+
+.tab-text {
+    font-size: 0.9rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* Enhanced Tab Content */
+.tab-content {
+    min-height: 400px;
+}
+
+.content-card {
+    background-color: white;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 30px;
+    border: 1px solid var(--gray-100);
+    transition: var(--transition);
+}
+
+.card-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--gray-100);
+    display: flex;
+    align-items: center;
+    background: linear-gradient(to right, rgba(37, 99, 235, 0.04), transparent);
+}
+
+.icon-header {
+    color: var(--primary);
+    font-size: 1.4rem;
+    margin-right: 15px;
+}
+
+.card-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--gray-800);
+}
+
+.card-body {
+    padding: 24px;
+    line-height: 1.8;
+}
+
+.card-body p {
+    margin-bottom: 18px;
+    color: var(--gray-700);
+}
+
+/* Improved Content Formatting */
+.content-heading {
+    margin-bottom: 18px;
+    padding: 14px 20px;
+    background-color: var(--primary-50);
+    border-radius: var(--radius-md);
+    border-left: 4px solid var(--primary);
+}
+
+.content-heading strong {
+    color: var(--primary-700);
+    font-weight: 600;
+    margin-right: 5px;
+}
+
+/* Enhanced List Styling */
+.medical-list {
+    list-style: none;
+    padding-left: 0;
+    margin: 22px 0;
+}
+
+.list-item {
+    position: relative;
+    padding: 16px 20px 16px 45px;
+    margin-bottom: 14px;
+    background-color: var(--gray-50);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+    font-size: 1.2rem;
+}
+
+.list-item::before {
+    content: '';
+    position: absolute;
+    left: 18px;
+    top: 22px;
+    width: 8px;
+    height: 8px;
+    background-color: var(--primary);
+    border-radius: 50%;
+}
+
+/* Subtle indicator icon */
+.list-item::after {
+    content: '\f105'; /* Font Awesome arrow icon */
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--primary);
+    opacity: 0;
+    transition: var(--transition);
+}
+
+/* Improved Call-to-Action */
+.appointment-cta {
+    background: var(--header-gradient);
+    color: white;
+    padding: 40px 0;
+    margin-top: 50px;
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+/* Refined background pattern */
+.appointment-cta::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at right bottom, rgba(255,255,255,0.15) 0%, transparent 60%);
+}
+
+.cta-text {
+    position: relative;
+}
+
+.appointment-cta h3 {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    margin-bottom: 10px;
+    font-size: 1.6rem;
+}
+
+.appointment-cta p {
+    opacity: 0.9;
+    margin-bottom: 0;
+    font-size: 1.1rem;
+}
+
+.btn-appointment {
+    background-color: white;
+    color: var(--primary-700);
+    font-weight: 600;
+    padding: 14px 28px;
+    border-radius: 50px;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    box-shadow: var(--shadow-lg);
+    font-size: 1rem;
+}
+
+.btn-appointment i {
+    transition: var(--transition);
+    margin-left: 5px;
+}
+
+/* Enhanced Floating Buttons */
+.floating-buttons {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    z-index: 1000;
+}
+
+/* Improved call button with accessibility */
+.call-button {
+    background: linear-gradient(135deg, var(--call-color) 0%, #059669 100%);
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 1.5rem;
+    box-shadow: 0 6px 15px rgba(16, 185, 129, 0.35);
+    transition: var(--transition);
+    text-decoration: none;
+    position: relative;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Improved tooltip */
+.button-tooltip {
+    position: absolute;
+    right: 70px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 6px 12px;
+    border-radius: var(--radius);
+    font-size: 0.85rem;
+    opacity: 0;
+    visibility: hidden;
+    transition: var(--transition);
+    white-space: nowrap;
+    box-shadow: var(--shadow-md);
+}
+
+.back-to-top {
+    background-color: white;
+    border: none;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--primary);
+    font-size: 1.2rem;
+    box-shadow: var(--shadow-md);
+    transition: var(--transition);
+    cursor: pointer;
+    display: none;
+    border: 1px solid var(--gray-200);
+}
+
+/* Focus styles for better accessibility */
+button:focus, a:focus {
+    outline: 2px solid var(--primary-400);
+    outline-offset: 2px;
+}
+
+/* Improved Doctor Cards */
+.doctors-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+}
+
+.doctors-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.doctors-list .doctor-card {
+    display: flex;
+    flex-direction: row;
+    height: auto;
+}
+
+.doctors-list .doctor-image {
+    width: 130px;
+    min-width: 130px;
+    height: auto;
+    min-height: 100%;
+    border-radius: var(--radius-md) 0 0 var(--radius-md);
+}
+
+.doctors-list .doctor-info {
+    flex: 1;
+}
+
+.doctor-card {
+    background: white;
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border: 1px solid var(--gray-100);
+}
+
+.doctor-image {
+    position: relative;
+    height: 220px;
+}
+
+.doctor-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.doctor-specialty {
+    position: absolute;
+    bottom: 1rem;
+    left: 1rem;
+    background: rgba(37, 99, 235, 0.9);
+    color: white;
+    padding: 0.375rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 500;
+    box-shadow: var(--shadow-md);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.doctor-info {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.doctor-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+    color: var(--gray-900);
+}
+
+.doctor-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.doctor-introduction {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    color: var(--gray-700);
+    font-size: 0.875rem;
+    background-color: var(--gray-50);
+    padding: 0.75rem;
+    border-radius: var(--radius-md);
+    border-left: 3px solid var(--primary-500);
+    flex: 1;
+}
+
+.doctor-introduction i {
+    color: var(--primary-600);
+    margin-top: 0.125rem;
+    flex-shrink: 0;
+}
+
+.introduction-text {
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.rating, .experience {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    color: var(--gray-700);
+    font-size: 0.875rem;
+}
+
+.rating i {
+    color: var(--warning);
+}
+
+.rating span {
+    font-weight: 600;
+}
+
+.doctor-actions {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: auto;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+    padding: 0.625rem 1.25rem;
+    border-radius: var(--radius-lg);
+    transition: all 0.2s ease;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    color: white;
+    border: 1px solid transparent;
+}
+
+.btn-outline-primary {
+    background: transparent;
+    color: var(--primary-600);
+    border: 1px solid var(--primary-200);
+}
+
+/* Responsive improvements */
+@@media (max-width: 992px) {
+    .speciality-title {
+        font-size: 2.2rem;
     }
     
-    .contact-option:hover {
-        opacity: 0.9;
+    .appointment-cta .text-end {
+        text-align: center !important;
+        margin-top: 20px;
     }
     
-    .contact-option-1 {
-        background-color: #0275d8;
+    .doctors-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    }
+}
+
+@@media (max-width: 768px) {
+    .speciality-header {
+        padding: 40px 0;
+        border-radius: 0 0 25px 25px;
     }
     
-    .contact-option-2 {
-        background-color: #f0ad4e;
+    .speciality-title {
+        font-size: 1.8rem;
     }
     
-    .contact-option-3 {
-        background-color: #5cb85c;
+    .speciality-subtitle {
+        font-size: 1rem;
     }
     
-    .breadcrumb {
-        padding: 15px 0;
-        margin-bottom: 0;
+    .nav-pills {
+        gap: 8px;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding: 10px;
+        scrollbar-width: thin;
+        justify-content: flex-start;
     }
     
-    .breadcrumb-item a {
-        color: #0275d8;
-        text-decoration: none;
+    .nav-pills::-webkit-scrollbar {
+        height: 4px;
     }
     
-    .service-heading {
-        color: #a94442;
-        text-align: center;
-        margin: 30px 0;
-        padding-bottom: 10px;
-        position: relative;
+    .nav-pills::-webkit-scrollbar-thumb {
+        background-color: var(--gray-300);
+        border-radius: var(--radius-full);
     }
     
-    .service-heading::after {
-        content: "";
-        position: absolute;
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 80px;
-        height: 3px;
-        background-color: #a94442;
+    .nav-pills .nav-link {
+        min-width: 110px;
+        padding: 12px;
+        flex-shrink: 0;
     }
     
-    .tab-buttons {
-        margin-bottom: 30px;
+    .tab-icon {
+        font-size: 1.4rem;
     }
     
-    .tab-btn {
-        background-color: #f8f9fa;
-        border: 1px solid #ddd;
-        border-radius: 0;
-        padding: 15px;
-        color: #333;
+    .tab-text {
+        font-size: 0.8rem;
+    }
+    
+    .card-header {
+        padding: 15px 20px;
+    }
+    
+    .card-title {
+        font-size: 1.3rem;
+    }
+    
+    .card-body {
+        padding: 20px;
+    }
+    
+    .list-item {
+        padding: 12px 15px 12px 35px;
+    }
+    
+    .doctors-list .doctor-card {
+        flex-direction: column;
+    }
+    
+    .doctors-list .doctor-image {
         width: 100%;
+        min-width: 100%;
+        height: 180px;
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+}
+
+@@media (max-width: 576px) {
+    .speciality-header {
+        padding: 30px 0;
+        border-radius: 0 0 20px 20px;
+    }
+    
+    .speciality-title {
+        font-size: 1.6rem;
+    }
+    
+    .card-body {
+        padding: 16px;
+    }
+    
+    .appointment-cta {
+        padding: 30px 0;
         text-align: center;
-        transition: all 0.3s;
     }
     
-    .tab-btn.active {
-        background-color: #a94442;
-        color: white;
+    .appointment-cta h3 {
+        font-size: 1.4rem;
     }
     
-    .back-to-top {
-        position: fixed;
+    .floating-buttons {
         bottom: 20px;
         right: 20px;
-        background-color: white;
-        border: 1px solid #ddd;
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     }
     
     .call-button {
-        position: fixed;
-        bottom: 80px;
-        right: 20px;
-        background-color: #5cb85c;
-        border-radius: 50%;
         width: 50px;
         height: 50px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        color: white;
-        font-size: 24px;
+        font-size: 1.3rem;
     }
+    
+    .doctors-grid {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+    }
+    
+    .doctor-image {
+        height: 180px;
+    }
+}
+
+/* Accessibility Improvements */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+/* Skip to content link for screen readers */
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: var(--primary);
+    color: white;
+    padding: 8px;
+    z-index: 100;
+    transition: top 0.3s;
+}
+
+.skip-link:focus {
+    top: 0;
+}
+
+/* Print styles - for better printable version */
+@@media print {
+    .speciality-header {
+        background: none !important;
+        color: black;
+        padding: 20px 0;
+    }
+    
+    .nav-pills, .floating-buttons, .appointment-cta, .back-to-top {
+        display: none !important;
+    }
+    
+    .content-card {
+        break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+    
+    .tab-pane {
+        display: block !important;
+        opacity: 1 !important;
+        break-inside: avoid;
+    }
+}
+
+/* Dark mode support for users with dark mode preference */
+@@media (prefers-color-scheme: dark) {
+    .dark-mode-enabled {
+        --light-bg: #111827;
+        --text-color: #e5e7eb;
+        --muted-text: #9ca3af;
+        --border-color: #374151;
+        --gray-50: #1f2937;
+        --gray-100: #1f2937;
+        --gray-200: #374151;
+        --gray-800: #e5e7eb;
+        --gray-900: #f3f4f6;
+        --gray-700: #d1d5db;
+        
+        background-color: var(--light-bg);
+    }
+    
+    .dark-mode-enabled .content-card,
+    .dark-mode-enabled .doctor-card,
+    .dark-mode-enabled .tab-navigation {
+        background-color: #1f2937;
+        border-color: #374151;
+    }
+    
+    .dark-mode-enabled .list-item {
+        background-color: #111827;
+    }
+    
+    .dark-mode-enabled .nav-pills .nav-link {
+        background-color: #111827;
+        color: #e5e7eb;
+    }
+    
+    .dark-mode-enabled .back-to-top {
+        background-color: #374151;
+        color: #e5e7eb;
+    }
+}
 </style>
+
+@section Scripts {
+    <script>
+        function showLoginAlert() {
+            Swal.fire({
+                title: 'Yêu cầu đăng nhập',
+                text: 'Vui lòng đăng nhập để sử dụng tính năng này',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Đăng nhập',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '/Account/Login';
+                }
+            });
+        }
+
+        // Nếu người dùng chưa đăng nhập => gắn sự kiện cho các liên kết cần bảo vệ
+        @if (!User.Identity.IsAuthenticated)
+        {
+            <text>
+                document.addEventListener('DOMContentLoaded', function () {
+                    document.querySelectorAll('.require-auth').forEach(function (el) {
+                        el.addEventListener('click', function (e) {
+                            e.preventDefault();
+                            showLoginAlert();
+                        });
+                    });
+                });
+            </text>
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Back to top button
+            const backToTop = document.getElementById('backToTop');
+            
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 300) {
+                    backToTop.style.display = 'flex';
+                    backToTop.classList.add('animated');
+                    backToTop.classList.add('fadeIn');
+                } else {
+                    backToTop.style.display = 'none';
+                    backToTop.classList.remove('animated');
+                    backToTop.classList.remove('fadeIn');
+                }
+            });
+            
+            backToTop.addEventListener('click', function() {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+            
+            // Animation for list items
+            const animateListItems = () => {
+                document.querySelectorAll('.list-item').forEach(function(item, index) {
+                    setTimeout(function() {
+                        item.style.opacity = '0';
+                        item.style.transform = 'translateX(-20px)';
+                        
+                        setTimeout(function() {
+                            item.style.transition = 'all 0.5s ease';
+                            item.style.opacity = '1';
+                            item.style.transform = 'translateX(0)';
+                        }, 50);
+                    }, index * 150);
+                });
+            };
+            
+            // Initial animation
+            setTimeout(animateListItems, 300);
+            
+            // Re-trigger animations when switching tabs
+            document.querySelectorAll('[data-bs-toggle="pill"]').forEach(function(tabEl) {
+                tabEl.addEventListener('shown.bs.tab', function (event) {
+                    setTimeout(animateListItems, 100);
+                });
+            });
+        });
+    </script>
+}

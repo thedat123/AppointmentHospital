@@ -10,6 +10,131 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <style>
+        /* Chatbot styles */
+        .chatbot-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 400px;
+            height: 450px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            display: none;
+        }
+        
+        .chatbot-header {
+            background-color: #3498db;
+            color: white;
+            padding: 15px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .chatbot-close {
+            cursor: pointer;
+            font-size: 18px;
+        }
+        
+        .chatbot-messages {
+            flex-grow: 1;
+            padding: 15px;
+            overflow-y: auto;
+        }
+        
+        .message {
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            border-radius: 18px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        
+        .bot-message {
+            background-color: #f1f0f0;
+            color: #333;
+            align-self: flex-start;
+            margin-right: auto;
+        }
+        
+        .user-message {
+            background-color: #3498db;
+            color: white;
+            align-self: flex-end;
+            margin-left: auto;
+            text-align: right;
+        }
+        
+        .chatbot-input {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .chatbot-input input {
+            flex-grow: 1;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            margin-right: 10px;
+        }
+        
+        .chatbot-input button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 15px;
+            cursor: pointer;
+        }
+        
+        .doctor-suggestion {
+            background-color: #e8f4fd;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .doctor-suggestion:hover {
+            background-color: #d0e8fb;
+        }
+        
+        .doctor-img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .symptom-option {
+            display: inline-block;
+            margin: 5px;
+            padding: 8px 12px;
+            background-color: #f1f0f0;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .symptom-option:hover {
+            background-color: #e0e0e0;
+        }
+        
+        .symptom-selected {
+            background-color: #3498db;
+            color: white;
+        }
+    </style>
     @RenderSection("Styles", required: false)
 </head>
 <body>
@@ -21,19 +146,18 @@
                         <img src="~/images/MedicalCarelogo.png" alt="MedicalCare Logo" class="logo">
                     </a>
                 </div>
-                <div class="col-8">
+                <div class="col-6">
                     <div class="main-nav-links text-center">
                         <a href="@Url.Action("Index", "Patient")">Giới thiệu</a>
                         <a href="@Url.Action("Specialities", "Patient")">Chuyên khoa</a>
                         <a href="@Url.Action("ListDoctor", "Patient")">Chuyên gia - Bác sĩ</a>
-                        <a href="@Url.Action("Index", "Patient")">Tầm nhìn & Sứ mệnh</a>
-                        <a href="@Url.Action("Chatbot", "Patient")">Hỗ trợ Chatbot</a>
+                        <a href="@Url.Action("Chatbot", "Patient")" class="require-auth">Hỗ trợ Chatbot</a>
                     </div>
                 </div>
-                <div class="col-3">
+                <div class="col-5">
                     <div class="search-and-actions">
                         <div class="booking-container">
-                            <button type="submit">Đặt lịch khám bệnh</button>
+                            <button type="button" id="bookingButton">Đặt lịch khám bệnh</button>
                         </div>
                         <div class="user-actions">
                             <a href="#" class="calendar-icon">
@@ -60,9 +184,13 @@
                             }
                             else
                             {
-                                <div>
-                                    <a href="/account/login" class="btn-login">Đăng nhập</a>
-                                    <a href="/account/register" class="btn-register">Đăng ký</a>
+                                <div class="auth-buttons">
+                                    <a href="/account/login" class="btn btn-outline-primary btn-login me-2">
+                                        <i class="fas fa-sign-in-alt me-1"></i>Đăng nhập
+                                    </a>
+                                    <a href="/account/register" class="btn btn-primary btn-register">
+                                        <i class="fas fa-user-plus me-1"></i>Đăng ký
+                                    </a>
                                 </div>
                             }
                         </div>
@@ -76,25 +204,539 @@
         @RenderBody()
     </main>
 
+    <!-- Chatbot Container -->
+    <div class="chatbot-container" id="bookingChatbot">
+        <div class="chatbot-header">
+            <span>Tư vấn đặt lịch khám</span>
+            <span class="chatbot-close" id="closeChatbot">&times;</span>
+        </div>
+        <div class="chatbot-messages" id="chatbotMessages">
+            <!-- Messages will be added here dynamically -->
+        </div>
+        <div class="chatbot-input">
+            <input type="text" id="userInput" placeholder="Nhập triệu chứng của bạn...">
+            <button id="sendMessage">Gửi</button>
+        </div>
+    </div>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-          function showLoginAlert() {
+        // Authentication check function
+        function showLoginAlert() {
             Swal.fire({
-                title: 'Authentication Required',
-                text: 'Please sign in to access this feature',
+                title: 'Yêu cầu đăng nhập',
+                text: 'Vui lòng đăng nhập để sử dụng tính năng này',
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: 'Sign In',
-                cancelButtonText: 'Cancel'
+                confirmButtonText: 'Đăng nhập',
+                cancelButtonText: 'Hủy'
             }).then((result) => {
                 if (result.isConfirmed) {
                     window.location.href = '/Account/Login';
                 }
             });
         }
+
+        // Nếu người dùng chưa đăng nhập => gắn sự kiện cho các liên kết cần bảo vệ
+        @if (!User.Identity.IsAuthenticated)
+        {
+            <text>
+                document.addEventListener('DOMContentLoaded', function () {
+                    document.querySelectorAll('.require-auth').forEach(function (el) {
+                        el.addEventListener('click', function (e) {
+                            e.preventDefault();
+                            showLoginAlert();
+                        });
+                    });
+                });
+            </text>
+        }
+
+        // Chatbot functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const bookingButton = document.getElementById('bookingButton');
+            const chatbotContainer = document.getElementById('bookingChatbot');
+            const closeChatbot = document.getElementById('closeChatbot');
+            const chatbotMessages = document.getElementById('chatbotMessages');
+            const userInput = document.getElementById('userInput');
+            const sendButton = document.getElementById('sendMessage');
+            
+            let userSymptoms = [];
+            let selectedSymptoms = []; // Track selected symptoms
+            let conversationState = 'greeting';
+            let sessionId = null;
+            
+            // Show chatbot when booking button is clicked
+            bookingButton.addEventListener('click', function() {
+                // Check if user is authenticated
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <text>
+                    chatbotContainer.style.display = 'flex';
+                    if (chatbotMessages.children.length === 0) {
+                        // Generate new session ID
+                        sessionId = generateSessionId();
+                        // First time opening the chatbot
+                        addBotMessage("🏥 Xin chào! Tôi là trợ lý ảo hỗ trợ đặt lịch khám. Để giúp bạn tìm bác sĩ phù hợp, vui lòng cho tôi biết về các triệu chứng bạn đang gặp phải.");
+                        setTimeout(() => {
+                            showSymptomOptions();
+                        }, 500);
+                    }
+                    </text>
+                }
+                else
+                {
+                    <text>
+                    showLoginAlert();
+                    </text>
+                }
+            });
+            
+            // Generate session ID
+            function generateSessionId() {
+                return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                    return v.toString(16);
+                });
+            }
+            
+            // Close chatbot
+            closeChatbot.addEventListener('click', function() {
+                chatbotContainer.style.display = 'none';
+            });
+            
+            // Send message when clicking send button
+            sendButton.addEventListener('click', sendUserMessage);
+            
+            // Send message when pressing Enter
+            userInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendUserMessage();
+                }
+            });
+            
+            // Function to add a bot message to the chat
+            function addBotMessage(message) {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message', 'bot-message');
+                messageElement.innerHTML = message;
+                chatbotMessages.appendChild(messageElement);
+                chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+            }
+            
+            // Function to add a user message to the chat
+            function addUserMessage(message) {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message', 'user-message');
+                messageElement.textContent = message;
+                chatbotMessages.appendChild(messageElement);
+                chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+            }
+            
+            // Function to send user message
+            function sendUserMessage() {
+                const message = userInput.value.trim();
+                if (message === '') return;
+                
+                addUserMessage(message);
+                userInput.value = '';
+                
+                // Show typing indicator
+                showTypingIndicator();
+                
+                // Process the message based on the current conversation state
+                processUserInput(message);
+            }
+            
+            // Show typing indicator
+            function showTypingIndicator() {
+                const typingElement = document.createElement('div');
+                typingElement.classList.add('message', 'bot-message', 'typing-indicator');
+                typingElement.innerHTML = `
+                    <div class="typing-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                `;
+                chatbotMessages.appendChild(typingElement);
+                chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+            }
+            
+            // Remove typing indicator
+            function removeTypingIndicator() {
+                const typingIndicator = document.querySelector('.typing-indicator');
+                if (typingIndicator) {
+                    typingIndicator.remove();
+                }
+            }
+            
+            // Process user input based on conversation state
+            async function processUserInput(message) {
+                if (conversationState === 'greeting') {
+                    // Add symptoms and call API
+                    await callChatbotAPI(message);
+                    conversationState = 'diagnosis_complete';
+                } 
+                else if (conversationState === 'collecting_symptoms') {
+                    // Call API with additional symptoms
+                    await callChatbotAPI(message);
+                    conversationState = 'diagnosis_complete';
+                }
+                else if (conversationState === 'diagnosis_complete') {
+                    // Handle follow-up questions or booking
+                    await callChatbotAPI(message);
+                }
+            }
+            
+            // Call chatbot API
+            async function callChatbotAPI(userMessage) {
+                try {
+                    const response = await fetch('/Patient/ChatbotMessage', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: new URLSearchParams({
+                            'userMessage': userMessage,
+                            'sessionId': sessionId || ''
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    // Remove typing indicator
+                    removeTypingIndicator();
+                    
+                    if (data.botReply) {
+                        // Parse and format the bot reply
+                        formatAndDisplayBotReply(data.botReply);
+                    } else {
+                        addBotMessage("❌ Xin lỗi, tôi không thể xử lý yêu cầu của bạn lúc này. Vui lòng thử lại sau.");
+                    }
+                    
+                } catch (error) {
+                    console.error('Error calling chatbot API:', error);
+                    removeTypingIndicator();
+                    addBotMessage("❌ Có lỗi xảy ra khi kết nối với hệ thống. Vui lòng thử lại sau.");
+                }
+            }
+            
+            // Format and display bot reply
+            function formatAndDisplayBotReply(reply) {
+                // Check if reply contains diagnosis information
+                if (reply.includes('🎯') && reply.includes('DỰ ĐOÁN BỆNH LÝ')) {
+                    formatDiagnosisReply(reply);
+                } else {
+                    // Regular reply
+                    addBotMessage(reply);
+                }
+            }
+            
+            // Format diagnosis reply
+            function formatDiagnosisReply(reply) {
+                // Split reply into sections
+                const sections = reply.split(/(?=🎯|🔄|🏥|👨‍⚕️)/);
+                
+                sections.forEach((section, index) => {
+                    if (section.trim()) {
+                        setTimeout(() => {
+                            if (section.includes('🎯')) {
+                                // Main diagnosis
+                                formatMainDiagnosis(section);
+                            } else if (section.includes('🔄')) {
+                                // Alternative diagnoses
+                                formatAlternativeDiagnoses(section);
+                            } else if (section.includes('🏥')) {
+                                // Department recommendations
+                                formatDepartmentRecommendations(section);
+                            } else if (section.includes('👨‍⚕️')) {
+                                // Doctor recommendations
+                                formatDoctorRecommendations(section);
+                            }
+                        }, index * 1000);
+                    }
+                });
+                
+                // Add follow-up options
+                setTimeout(() => {
+                    addFollowUpOptions();
+                }, sections.length * 1000 + 500);
+            }
+            
+            // Format main diagnosis
+            function formatMainDiagnosis(section) {
+                const lines = section.split('\n').filter(line => line.trim());
+                let formattedHTML = '';
+                
+                lines.forEach(line => {
+                    if (line.includes('🎯')) {
+                        formattedHTML += `<div class="diagnosis-header">${line}</div>`;
+                    } else if (line.includes('✅')) {
+                        formattedHTML += `<div class="diagnosis-symptoms">${line}</div>`;
+                    } else if (line.includes('📋')) {
+                        formattedHTML += `<div class="diagnosis-info">${line}</div>`;
+                    } else if (line.trim()) {
+                        formattedHTML += `<div class="diagnosis-detail">${line}</div>`;
+                    }
+                });
+                
+                addBotMessage(`<div class="diagnosis-card main-diagnosis">${formattedHTML}</div>`);
+            }
+            
+            // Format alternative diagnoses
+            function formatAlternativeDiagnoses(section) {
+                const lines = section.split('\n').filter(line => line.trim());
+                let formattedHTML = '<div class="alternative-diagnoses">';
+                
+                lines.forEach(line => {
+                    if (line.includes('🔄')) {
+                        formattedHTML += `<div class="section-header">${line}</div>`;
+                    } else if (line.trim() && line.match(/^\d+\./)) {
+                        formattedHTML += `<div class="alternative-item">${line}</div>`;
+                    }
+                });
+                
+                formattedHTML += '</div>';
+                addBotMessage(formattedHTML);
+            }
+            
+            // Format department recommendations
+            function formatDepartmentRecommendations(section) {
+                const lines = section.split('\n').filter(line => line.trim());
+                let formattedHTML = '<div class="department-recommendations">';
+                
+                lines.forEach(line => {
+                    if (line.includes('🏥')) {
+                        formattedHTML += `<div class="section-header">${line}</div>`;
+                    } else if (line.includes('🔹')) {
+                        formattedHTML += `<div class="department-item">${line}</div>`;
+                    } else if (line.includes('📌')) {
+                        formattedHTML += `<div class="department-specialty">${line}</div>`;
+                    } else if (line.includes('🔗')) {
+                        formattedHTML += `<div class="department-link">${line}</div>`;
+                    }
+                });
+                
+                formattedHTML += '</div>';
+                addBotMessage(formattedHTML);
+            }
+            
+            // Format doctor recommendations
+            function formatDoctorRecommendations(section) {
+                const lines = section.split('\n').filter(line => line.trim());
+                let formattedHTML = '<div class="doctor-recommendations">';
+                
+                lines.forEach(line => {
+                    if (line.includes('👨‍⚕️')) {
+                        formattedHTML += `<div class="section-header">${line}</div>`;
+                    } else if (line.includes('⭐')) {
+                        formattedHTML += `<div class="doctor-title">${line}</div>`;
+                    } else if (line.includes('THS') || line.includes('BS')) {
+                        const doctorName = line.replace(/^\*\*•\s*/, '').replace(/\*\*/g, '');
+                        formattedHTML += `<div class="doctor-name" onclick="selectDoctor('${doctorName}')">${doctorName}</div>`;
+                    } else if (line.includes('💼')) {
+                        formattedHTML += `<div class="doctor-experience">${line}</div>`;
+                    } else if (line.includes('🎯')) {
+                        formattedHTML += `<div class="doctor-specialty">${line}</div>`;
+                    } else if (line.includes('📞')) {
+                        formattedHTML += `<div class="doctor-contact">${line}</div>`;
+                    } else if (line.includes('🚀')) {
+                        formattedHTML += `<div class="booking-cta"><button class="btn-book-now" onclick="bookAppointment()">Đặt lịch ngay</button></div>`;
+                    }
+                });
+                
+                formattedHTML += '</div>';
+                addBotMessage(formattedHTML);
+            }
+            
+            // Add follow-up options
+            function addFollowUpOptions() {
+                const optionsHTML = `
+                    <div class="follow-up-options">
+                        <div class="option-title">📋 Bạn muốn làm gì tiếp theo?</div>
+                        <div class="option-buttons">
+                            <button class="option-btn" onclick="bookAppointment()">🚀 Đặt lịch khám</button>
+                            <button class="option-btn" onclick="addMoreSymptoms()">➕ Thêm triệu chứng</button>
+                            <button class="option-btn" onclick="askMoreInfo()">❓ Hỏi thêm thông tin</button>
+                            <button class="option-btn" onclick="restartConsultation()">🔄 Tư vấn lại</button>
+                        </div>
+                    </div>
+                `;
+                
+                addBotMessage(optionsHTML);
+            }
+            
+            // Show symptom options with multi-selection capability
+            function showSymptomOptions() {
+                const commonSymptoms = [
+                    "Đau đầu", "Sốt", "Ho", "Khó thở", 
+                    "Đau bụng", "Mệt mỏi", "Chóng mặt", "Buồn nôn",
+                    "Đau họng", "Đau lưng", "Đau răng", "Sưng tấy"
+                ];
+                
+                let optionsHTML = "<div class='symptom-selection'>";
+                optionsHTML += "<div class='symptom-title'>💊 Bạn có thể chọn một hoặc nhiều triệu chứng từ danh sách dưới đây:</div>";
+                optionsHTML += "<div class='symptom-grid'>";
+                
+                commonSymptoms.forEach((symptom, index) => {
+                    optionsHTML += `<span class="symptom-option" data-symptom="${symptom}" onclick="toggleSymptom('${symptom}', this)">${symptom}</span>`;
+                });
+                
+                optionsHTML += "</div>";
+                optionsHTML += "<div class='selected-symptoms'>";
+                optionsHTML += "<div class='selected-title' style='display: none;'>✅ Triệu chứng đã chọn:</div>";
+                optionsHTML += "<div class='selected-list'></div>";
+                optionsHTML += "</div>";
+                optionsHTML += "<div class='symptom-actions'>";
+                optionsHTML += "<button class='btn-submit-symptoms' onclick='submitSelectedSymptoms()' style='display: none;'>Gửi triệu chứng đã chọn</button>";
+                optionsHTML += "</div>";
+                optionsHTML += "<div class='or-text'>Hoặc bạn có thể nhập triệu chứng khác vào ô chat bên dưới</div>";
+                optionsHTML += "</div>";
+                
+                addBotMessage(optionsHTML);
+            }
+            
+            // Toggle symptom selection
+            window.toggleSymptom = function(symptom, element) {
+                const index = selectedSymptoms.indexOf(symptom);
+                
+                if (index === -1) {
+                    // Add symptom
+                    selectedSymptoms.push(symptom);
+                    element.classList.add('symptom-selected');
+                } else {
+                    // Remove symptom
+                    selectedSymptoms.splice(index, 1);
+                    element.classList.remove('symptom-selected');
+                }
+                
+                updateSelectedSymptomsDisplay();
+            }
+            
+            // Update display of selected symptoms
+            function updateSelectedSymptomsDisplay() {
+                const selectedTitle = document.querySelector('.selected-title');
+                const selectedList = document.querySelector('.selected-list');
+                const submitButton = document.querySelector('.btn-submit-symptoms');
+                
+                if (selectedSymptoms.length > 0) {
+                    selectedTitle.style.display = 'block';
+                    submitButton.style.display = 'inline-block';
+                    
+                    selectedList.innerHTML = selectedSymptoms.map(symptom => 
+                        `<span class="selected-symptom-tag">${symptom} <span class="remove-symptom" onclick="removeSelectedSymptom('${symptom}')">×</span></span>`
+                    ).join('');
+                } else {
+                    selectedTitle.style.display = 'none';
+                    submitButton.style.display = 'none';
+                    selectedList.innerHTML = '';
+                }
+            }
+            
+            // Remove a selected symptom
+            window.removeSelectedSymptom = function(symptom) {
+                const index = selectedSymptoms.indexOf(symptom);
+                if (index !== -1) {
+                    selectedSymptoms.splice(index, 1);
+                    
+                    // Update the visual state of the symptom option
+                    const symptomOption = document.querySelector(`[data-symptom="${symptom}"]`);
+                    if (symptomOption) {
+                        symptomOption.classList.remove('symptom-selected');
+                    }
+                    
+                    updateSelectedSymptomsDisplay();
+                }
+            }
+            
+            // Submit selected symptoms
+            window.submitSelectedSymptoms = async function() {
+                if (selectedSymptoms.length === 0) {
+                    return;
+                }
+                
+                const symptomsText = selectedSymptoms.join(', ');
+                userSymptoms = [...selectedSymptoms];
+                
+                addUserMessage(`tôi đang bị: ${symptomsText} thì khả năng cao bị bệnh gì?`);
+                
+                // Hide symptom selection interface
+                const symptomSelection = document.querySelector('.symptom-selection');
+                if (symptomSelection) {
+                    symptomSelection.style.opacity = '0.5';
+                    symptomSelection.style.pointerEvents = 'none';
+                }
+                
+                // Show typing indicator and call API
+                showTypingIndicator();
+                await callChatbotAPI(symptomsText);
+                conversationState = 'diagnosis_complete';
+            }
+            
+            // Legacy function for single symptom selection (keep for backward compatibility)
+            window.selectSymptom = async function(symptom) {
+                selectedSymptoms = [symptom];
+                await submitSelectedSymptoms();
+            }
+            
+            // Book appointment
+            window.bookAppointment = function() {
+                addBotMessage(`
+                    <div class="booking-process">
+                        <div class="booking-title">🏥 Đang chuyển hướng đến trang đặt lịch...</div>
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                `);
+                
+                setTimeout(() => {
+                    window.location.href = '/Patient/BookAppointment';
+                }, 1500);
+            }
+            
+            // Add more symptoms
+            window.addMoreSymptoms = function() {
+                addBotMessage("💊 Vui lòng cho tôi biết thêm triệu chứng khác bạn đang gặp phải:");
+                setTimeout(() => {
+                    showSymptomOptions();
+                }, 500);
+                conversationState = 'collecting_symptoms';
+            }
+            
+            // Ask for more information
+            window.askMoreInfo = function() {
+                addBotMessage("❓ Bạn muốn biết thêm thông tin gì về chẩn đoán hoặc phương pháp điều trị? Hãy đặt câu hỏi cho tôi.");
+                conversationState = 'diagnosis_complete';
+            }
+            
+            // Restart consultation
+            window.restartConsultation = function() {
+                userSymptoms = [];
+                selectedSymptoms = [];
+                conversationState = 'greeting';
+                sessionId = generateSessionId();
+                
+                addBotMessage("🔄 Tôi sẽ bắt đầu tư vấn lại từ đầu. Vui lòng cho tôi biết về các triệu chứng bạn đang gặp phải:");
+                setTimeout(() => {
+                    showSymptomOptions();
+                }, 500);
+            }
+            
+            // Select doctor
+            window.selectDoctor = function(doctorName) {
+                addUserMessage(`Tôi muốn đặt lịch với ${doctorName}`);
+                addBotMessage(`✅ Bạn đã chọn đặt lịch với ${doctorName}. Tôi sẽ chuyển bạn đến trang đặt lịch để hoàn tất thủ tục.`);
+                
+                setTimeout(() => {
+                    bookAppointment();
+                }, 1000);
+            }
+        });
     </script>
     @RenderSection("Scripts", required: false)
 </body>

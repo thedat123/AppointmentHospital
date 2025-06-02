@@ -13,4 +13,10 @@ public class ChatRequest
 
     [JsonProperty("max_results")]
     public int MaxResults { get; set; }
+
+    [JsonProperty("patient_id")]
+    public Guid PatientId { get; set; }
+
+    [JsonProperty("session_id")]
+    public Guid SessionId { get; set; }
 }

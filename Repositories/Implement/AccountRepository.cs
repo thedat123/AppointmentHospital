@@ -64,6 +64,7 @@ namespace AppointmentHospital.Repositories.Implement
                     FullName = request.FullName,
                     Address = request.Address,
                     DateOfBirth = request.DateOfBirth,
+                    PhoneNumber = request.PhoneNumber,
                     User = user
                 };
                 await _appDbContext.Patients.AddAsync(patient);

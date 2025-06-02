@@ -1,6 +1,5 @@
 using System;
 using AppointmentHospital.Controllers;
-using AppointmentHospital.Entity;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -30,6 +29,9 @@ namespace AppointmentHospital.Models
 
         [Required]
         public Guid PatientId { get; set; }
+
+        [MaxLength(20)]
+        public string PhoneNumber { get; set; }
 
         [ForeignKey("PatientId")]
         public virtual Patient Patient { get; set; } 

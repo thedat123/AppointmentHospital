@@ -29,9 +29,9 @@ namespace AppointmentHospital.Areas.Admin.Services.Implement
             await _managingDoctorRepository.EditDoctorAsync(id, request);
         }
 
-        public async Task<Pagination<ManagingDoctorResponse> > GetAllDoctor(int page, string searchTerm, Specialization? specialization)
+        public async Task<Pagination<ManagingDoctorResponse> > GetAllDoctor(int page, string searchTerm, int specialityId)
         {
-            return  await _managingDoctorRepository.GetAllDoctor(page, searchTerm, specialization);
+            return  await _managingDoctorRepository.GetAllDoctor(page, searchTerm, specialityId);
         }
 
         public async Task<ManagingDoctorResponse> GetDoctorAsync(Guid id)

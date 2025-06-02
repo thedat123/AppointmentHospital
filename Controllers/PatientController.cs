@@ -1,5 +1,4 @@
 ﻿using AppointmentHospital.DTOs.Patient;
-using AppointmentHospital.Entity;
 using AppointmentHospital.Models;
 using AppointmentHospital.Services;
 using AppointmentHospital.Helpers;
@@ -14,7 +13,7 @@ using AppointmentHospital.EnumStatus;
 using Hangfire;
 using AppointmentHospital.Services.Implement;
 using AppointmentHospital.Areas.Admin.Services;
-using FinalProject.Services;
+using AppointmentHospital.Services;
 
 namespace AppointmentHospital.Controllers
 {
@@ -24,7 +23,7 @@ namespace AppointmentHospital.Controllers
         private readonly IDoctorService _doctorService;
         private readonly IPatientService _patientService;
         private readonly IHttpContextAccessor _contextAccessor;
-        private readonly AppDbContext _appDbContext;
+        private readonly AppDbContext _context;
         private readonly IAppointmentDateService _appointmentDateService;
         private readonly ILogger<PatientController> _logger;
         private readonly IEmailService _emailService;
@@ -38,7 +37,7 @@ namespace AppointmentHospital.Controllers
 
         public PatientController(AppDbContext appDbContext,IPatientService patientService ,IDoctorService doctorService, ILogger<PatientController> logger, IHttpContextAccessor contextAccessor, IAppointmentDateService appointmentDateService, IEmailService emailService, ITimeSlotService timeSlotService, IHubContext<ScheduleHub> hubContext, IDiseasePredictionService diseasePredictionService, IManagingDoctorService managingDoctorService, ISpecialitiesService specialitiesService)
         {
-            _appDbContext = appDbContext;
+            _context = appDbContext;
             _patientService = patientService;
             _doctorService = doctorService;
             _logger = logger;
@@ -52,18 +51,19 @@ namespace AppointmentHospital.Controllers
             _specialitiesService = specialitiesService;
         }
 
-        public async Task<IActionResult> Index(string? selectSpec)
+        [AllowAnonymous]
+        public async Task<IActionResult> Index(string? selectSpec, int page = 1)
         {
-            List<Doctor> doctors = await _doctorService.getAllDoctors(selectSpec);
+            List<Doctor> doctors = await _doctorService.getAllDoctors(selectSpec, page);
             ViewBag.Specialization = _managingDoctorService.GetSpecialization();
             ViewBag.SelectedSpec = selectSpec;
             return View(doctors);
         }
 
-        public async Task<IActionResult> ListDoctor(string? selectSpec)
+        [AllowAnonymous]
+        public async Task<IActionResult> ListDoctor(string? selectSpec, int page = 1)
         {
-            List<Doctor> doctors = await _doctorService.getAllDoctors(selectSpec);
-            ViewBag.Specialization = _managingDoctorService.GetSpecialization();
+            List<Doctor> doctors = await _doctorService.getAllDoctors(selectSpec, page);
             ViewBag.SelectedSpec = selectSpec;
             return View(doctors);
         }
@@ -169,12 +169,12 @@ namespace AppointmentHospital.Controllers
                 var updatedDate = appointment.AppointmentTime.Date.ToString("yyyy-MM-dd");
                 await _hubContext.Clients.All.SendAsync("ScheduleUpdated", DoctorId, updatedDate);
                 await _hubContext.Clients.All.SendAsync("UpdateStatistics");
-                return RedirectToAction("Index", "Patient");
+                return RedirectToAction("MySchedule", "Patient");
             }
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = $"An error occurred while booking the appointment: {ex.Message}";
-                return RedirectToAction("Index", "Patient");
+                return RedirectToAction("DetailDoctor", "Patient");
             }
         }
 
@@ -241,12 +241,12 @@ namespace AppointmentHospital.Controllers
 
                 var updatedDate = appointment.AppointmentTime.Date.ToString("yyyy-MM-dd");
                 await _hubContext.Clients.All.SendAsync("ScheduleUpdated", DoctorId, updatedDate);
-                return RedirectToAction("Index", "Patient");
+                return RedirectToAction("MySchedule", "Patient");
             }
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = $"An error occurred while booking the appointment: {ex.Message}";
-                return RedirectToAction("Index", "Patient");
+                return RedirectToAction("DetailDoctor", "Patient");
             }
         }
 
@@ -365,47 +365,339 @@ namespace AppointmentHospital.Controllers
             return View(appointment);
         }
 
-        public IActionResult Specialities(){
-            var specialities = _specialitiesService.GetAllSpecialities();
+        [AllowAnonymous]
+        public async Task<IActionResult> Specialities(int page = 1){
+            var specialities = await _specialitiesService.GetAllSpecialitiesAsync(page);
             return View(specialities);
         }
 
-        public IActionResult DetailSpecialities(){
-            return View();
+        [AllowAnonymous]
+        public IActionResult DetailSpecialities(int id){
+            var specialities = _specialitiesService.GetSpecialityById(id);
+            return View(specialities);
         }
 
         [HttpPost]
-        public async Task<ActionResult> Chatbot(string userMessage)
+        [Route("Patient/ChatbotMessage")]
+        public async Task<IActionResult> ChatbotMessage(string userMessage, string sessionId)
         {
             try
             {
-                Console.WriteLine("User message received: " + userMessage); // Kiểm tra xem có nhận được chưa
-
+                Console.WriteLine("User message received: " + userMessage);
+                Console.WriteLine("Session ID: " + sessionId);
+                
+                var patientId = _contextAccessor.HttpContext?.Session.GetString("PatientId");
+                
+                Guid sessionGuid;
+                
+                // Nếu sessionId không được cung cấp hoặc không hợp lệ, tạo mới
+                if (string.IsNullOrEmpty(sessionId) || !Guid.TryParse(sessionId, out sessionGuid))
+                {
+                    sessionGuid = Guid.NewGuid();
+                }
+                
                 var chatRequest = new ChatRequest
                 {
                     Query = userMessage,
                     IncludeContext = false,
-                    MaxResults = 0
+                    MaxResults = 0,
+                    PatientId = patientId != null ? Guid.Parse(patientId) : Guid.Empty,
+                    SessionId = sessionGuid
                 };
-
+                
                 var chatResponse = await _chatbotService.SendMessageAsync(chatRequest);
-                ViewBag.UserMessage = userMessage;
-                ViewBag.BotReply = chatResponse.Response;
+                
+                // Return JSON instead of View
+                return Json(new { botReply = chatResponse.Response });
             }
             catch (Exception ex)
             {
-                ViewBag.BotReply = "Lỗi khi gọi API chatbot: " + ex.Message;
+                // Return error as JSON
+                return Json(new { botReply = "Lỗi khi gọi API chatbot: " + ex.Message });
+            }
+        }
+
+        [HttpGet]
+        [Route("Patient/Chatbot")]
+        public async Task<IActionResult> Chatbot()
+        {
+            var patientId = _contextAccessor.HttpContext?.Session.GetString("PatientId");
+
+            if (patientId != null)
+            {
+                var patient = await _patientService.GetPatientById(Guid.Parse(patientId));
+                ViewBag.PatientName = patient.FullName;
+                ViewBag.PatientId = patientId;
+            }
+            else
+            {
+                ViewBag.PatientName = "Guest";
+                ViewBag.PatientId = null;
             }
 
             return View();
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetChatSessions()
+        {
+            try
+            {
+                var patientId = _contextAccessor.HttpContext?.Session.GetString("PatientId");
+                
+                if (string.IsNullOrEmpty(patientId))
+                {
+                    return BadRequest(new { error = "Patient not authenticated" });
+                }
+
+                Console.WriteLine("Fetching chat sessions for patient ID: " + patientId);
+
+                // Lấy danh sách sessions với tin nhắn đầu tiên của user
+                var sessionsWithFirstMessage = await (from session in _context.ChatSessions
+                    where session.PatientId == Guid.Parse(patientId) && session.IsActive
+                    select new
+                    {
+                        Session = session,
+                        FirstMessage = _context.ChatMessages
+                            .Where(msg => msg.SessionId == session.SessionId && msg.IsFromPatient == true)
+                            .OrderBy(msg => msg.CreatedAt)
+                            .FirstOrDefault()
+                    })
+                    .Select(x => new
+                    {
+                        sessionId = x.Session.SessionId.ToString(),
+                        sessionName = x.FirstMessage != null ?
+                            (x.FirstMessage.MessageText.Length > 50 ?
+                                x.FirstMessage.MessageText.Substring(0, 50) + "..." :
+                                x.FirstMessage.MessageText) :
+                            "Cuộc trò chuyện mới",
+                        createdAt = x.Session.CreatedAt,
+                        updatedAt = x.Session.UpdatedAt,
+                        firstMessageDate = x.FirstMessage != null ? x.FirstMessage.CreatedAt : x.Session.CreatedAt
+                    })
+                    .OrderByDescending(x => x.updatedAt)
+                    .ToListAsync();
+
+                Console.WriteLine("Retrieved chat sessions: " + sessionsWithFirstMessage.Count);
+
+                return Json(sessionsWithFirstMessage);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error fetching chat sessions: " + ex.Message);
+                return BadRequest(new { error = "An error occurred while fetching chat sessions" });
+            }
+        }
 
         [HttpGet]
-        public ActionResult Chatbot()
+        public async Task<IActionResult> GetChatMessages(string sessionId)
         {
-            return View();
+            try
+            {
+                var patientId = _contextAccessor.HttpContext?.Session.GetString("PatientId");
+                
+                if (string.IsNullOrEmpty(patientId))
+                {
+                    return BadRequest(new { error = "Patient not authenticated" });
+                }
+
+                // Kiểm tra session có thuộc về patient này không
+                var sessionExists = await _context.ChatSessions
+                    .AnyAsync(s => s.SessionId == Guid.Parse(sessionId) && 
+                                s.PatientId == Guid.Parse(patientId) && 
+                                s.IsActive);
+                                
+                if (!sessionExists)
+                {
+                    return BadRequest(new { error = "Session not found or access denied" });
+                }
+
+                // Lấy tin nhắn từ database theo sessionId
+                var messages = await _context.ChatMessages
+                    .Where(m => m.SessionId == Guid.Parse(sessionId))
+                    .OrderBy(m => m.CreatedAt)
+                    .Select(m => new
+                    {
+                        MessageText = m.MessageText,
+                        IsFromPatient = m.IsFromPatient,
+                        CreatedAt = m.CreatedAt
+                    })
+                    .ToListAsync();
+                    
+                return Json(messages);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateChatSession([FromBody] CreateChatSessionRequest request)
+        {
+            try
+            {
+                var patientId = _contextAccessor.HttpContext?.Session.GetString("PatientId");
+                
+                if (string.IsNullOrEmpty(patientId))
+                {
+                    return BadRequest(new { error = "Patient not authenticated" });
+                }
+                
+                var session = new ChatSessions
+                {
+                    SessionId = Guid.Parse(request.SessionId),
+                    PatientId = Guid.Parse(patientId),
+                    SessionName = request.SessionName,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now,
+                    IsActive = true
+                };
+                
+                _context.ChatSessions.Add(session);
+                await _context.SaveChangesAsync();
+                
+                return Json(new
+                {
+                    sessionId = session.SessionId.ToString(),
+                    sessionName = session.SessionName,
+                    createdAt = session.CreatedAt
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateChatSessionName([FromBody] UpdateSessionNameRequest request)
+        {
+            try
+            {
+                var patientId = _contextAccessor.HttpContext?.Session.GetString("PatientId");
+                
+                if (string.IsNullOrEmpty(patientId))
+                {
+                    return BadRequest(new { error = "Patient not authenticated" });
+                }
+
+                var session = await _context.ChatSessions
+                    .FirstOrDefaultAsync(s => s.SessionId == Guid.Parse(request.SessionId) && 
+                                            s.PatientId == Guid.Parse(patientId) && 
+                                            s.IsActive);
+                    
+                if (session != null)
+                {
+                    session.SessionName = request.SessionName;
+                    session.UpdatedAt = DateTime.Now;
+                    await _context.SaveChangesAsync();
+                }
+                else
+                {
+                    return BadRequest(new { error = "Session not found or access denied" });
+                }
+                
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteChatSession([FromBody] DeleteSessionRequest request)
+        {
+            try
+            {
+                var patientId = _contextAccessor.HttpContext?.Session.GetString("PatientId");
+
+                Console.WriteLine("Deleting session with ID: " + patientId);
+                
+                if (string.IsNullOrEmpty(patientId))
+                {
+                    return BadRequest(new { error = "Patient not authenticated" });
+                }
+
+                var session = await _context.ChatSessions
+                    .FirstOrDefaultAsync(s => s.SessionId == request.SessionId && 
+                                            s.PatientId == Guid.Parse(patientId) && 
+                                            s.IsActive);
+                
+                Console.WriteLine($"Deleting session: {session?.SessionId} for patient: {patientId}");
+                    
+                if (session != null)
+                {
+                    _context.ChatMessages.RemoveRange(
+                        _context.ChatMessages.Where(m => m.SessionId == session.SessionId));
+                    _context.ChatSessions.Remove(session);
+                    await _context.SaveChangesAsync();
+                }
+                else
+                {
+                    return BadRequest(new { error = "Session not found or access denied" });
+                }
+                
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SaveChatMessage([FromBody] SaveMessageRequest request)
+        {
+            try
+            {
+                var patientId = _contextAccessor.HttpContext?.Session.GetString("PatientId");
+                
+                if (string.IsNullOrEmpty(patientId))
+                {
+                    return BadRequest(new { error = "Patient not authenticated" });
+                }
+
+                // Kiểm tra session có thuộc về patient này không
+                var sessionExists = await _context.ChatSessions
+                    .AnyAsync(s => s.SessionId == Guid.Parse(request.SessionId) && 
+                                s.PatientId == Guid.Parse(patientId) && 
+                                s.IsActive);
+                                
+                if (!sessionExists)
+                {
+                    return BadRequest(new { error = "Session not found or access denied" });
+                }
+
+                var message = new ChatMessages
+                {
+                    SessionId = Guid.Parse(request.SessionId),
+                    MessageText = request.MessageText,
+                    IsFromPatient = request.IsFromPatient,
+                    CreatedAt = DateTime.Now
+                };
+                
+                _context.ChatMessages.Add(message);
+                await _context.SaveChangesAsync();
+                
+                // Cập nhật UpdatedAt của session để sắp xếp đúng thứ tự
+                var session = await _context.ChatSessions
+                    .FirstOrDefaultAsync(s => s.SessionId == Guid.Parse(request.SessionId));
+                if (session != null)
+                {
+                    session.UpdatedAt = DateTime.Now;
+                    await _context.SaveChangesAsync();
+                }
+                
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
 
     }
 

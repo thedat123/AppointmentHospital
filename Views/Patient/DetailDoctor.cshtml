@@ -2,7 +2,8 @@
 @using AppointmentHospital.EnumStatus
 
 <link rel="stylesheet" href="~/css/doctor-detail.css" asp-append-version="true" />
-
+<!-- Add Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <div class="container doctor-details">
     <div class="row g-4">
         <div class="col-md-4">
@@ -14,7 +15,7 @@
                     </div>
                     <h2 class="doctor-name mt-3">@Model.Doctor.FullName</h2>
                     <p class="doctor-specialization">
-                        <i class="fas fa-user-md me-2"></i>@Model.Doctor.Specializaiton.GetDisplayName()
+                        <i class="fas fa-user-md me-2"></i>@Model.Doctor.Specialities.SpecialityName
                     </p>
                 </div>
             </div>
@@ -42,6 +43,23 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- Hospital Location Map Card -->
+            <div class="card mt-4 hospital-location">
+                <div class="card-header">
+                    <h4><i class="fas fa-map-marker-alt me-2"></i>Vị Trí Bệnh Viện</h4>
+                </div>
+                <div class="card-body">
+                    <div id="map" style="height: 300px; width: 100%; border-radius: 10px;"></div>
+                    <div class="mt-3">
+                        <h6 class="fw-bold"><i class="fas fa-hospital me-2"></i>Bệnh viện Đa khoa MedicalCare Đà Nẵng</h6>
+                        <p class="text-muted mb-2">
+                            <i class="fas fa-map-marker-alt me-1"></i>
+                            123 Trưng Nữ Vương, Hải Châu, Đà Nẵng
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="col-md-8">
@@ -55,31 +73,204 @@
                             <h5 class="section-title"><i class="fas fa-info-circle me-2 text-primary"></i>Thông Tin Cá Nhân</h5>
                             <table class="table info-table">
                                 <tr>
-                                    <th>Giới Tính:</th>
-                                    <td>@(Model.Doctor.Gender)</td>
-                                </tr>
-                                <tr>
-                                    <th>Ngày Sinh:</th>
-                                    <td>@Model.Doctor.DateOfBirth.ToString("dd/MM/yyyy")</td>
+                                    <th>Họ Tên:</th>
+                                    <td>@Model.Doctor.FullName</td>
                                 </tr>
                             </table>
                         </div>
                         <div class="col-md-6">
                             <h5 class="section-title"><i class="fas fa-graduation-cap me-2 text-success"></i>Thông Tin Nghề Nghiệp</h5>
                             <table class="table info-table">
-                                <tr>
-                                    <th>Bằng Cấp:</th>
-                                    <td>@Model.Doctor.Degree</td>
-                                </tr>
-                                <tr>
-                                    <th>Kinh Nghiệm:</th>
-                                    <td>@Model.Doctor.ExperienceYear năm</td>
-                                </tr>
+                                @if (!string.IsNullOrEmpty(Model.Doctor.Degree))
+                                {
+                                    <tr>
+                                        <th>Học hàm - Học vị:</th>
+                                        <td>@Model.Doctor.Degree</td>
+                                    </tr>
+                                }
                             </table>
                         </div>
                     </div>
-                    <h5 class="section-title mt-4"><i class="fas fa-file-alt me-2 text-info"></i>Giới Thiệu</h5>
-                    <p class="summary-text">@Model.Doctor.Description</p>
+
+                    <!-- Tab Navigation -->
+                    <div class="mt-4">
+                        <nav class="doctor-profile-nav">
+                            <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                                @if (!string.IsNullOrEmpty(Model.Doctor.Introduction))
+                                {
+                                    <button class="nav-link active" id="intro-tab" data-bs-toggle="tab" data-bs-target="#intro" type="button" role="tab">
+                                        <i class="fas fa-file-alt me-2"></i>Giới Thiệu
+                                    </button>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.Doctor.Expertise))
+                                {
+                                    <button class="nav-link" id="expertise-tab" data-bs-toggle="tab" data-bs-target="#expertise" type="button" role="tab">
+                                        <i class="fas fa-star me-2"></i>Chuyên Môn
+                                    </button>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.Doctor.Awards))
+                                {
+                                    <button class="nav-link" id="awards-tab" data-bs-toggle="tab" data-bs-target="#awards" type="button" role="tab">
+                                        <i class="fas fa-trophy me-2"></i>Giải Thưởng
+                                    </button>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.Doctor.WorkExperience))
+                                {
+                                    <button class="nav-link" id="experience-tab" data-bs-toggle="tab" data-bs-target="#experience" type="button" role="tab">
+                                        <i class="fas fa-briefcase me-2"></i>Kinh Nghiệm
+                                    </button>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.Doctor.TrainingProcess))
+                                {
+                                    <button class="nav-link" id="training-tab" data-bs-toggle="tab" data-bs-target="#training" type="button" role="tab">
+                                        <i class="fas fa-graduation-cap me-2"></i>Đào Tạo
+                                    </button>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.Doctor.ResearchProject))
+                                {
+                                    <button class="nav-link" id="research-tab" data-bs-toggle="tab" data-bs-target="#research" type="button" role="tab">
+                                        <i class="fas fa-microscope me-2"></i>Nghiên Cứu
+                                    </button>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.Doctor.OrganizationMember))
+                                {
+                                    <button class="nav-link" id="organization-tab" data-bs-toggle="tab" data-bs-target="#organization" type="button" role="tab">
+                                        <i class="fas fa-users me-2"></i>Tổ Chức
+                                    </button>
+                                }
+                            </div>
+                        </nav>
+
+                        <!-- Tab Content -->
+                        <div class="tab-content" id="nav-tabContent">
+                            @if (!string.IsNullOrEmpty(Model.Doctor.Introduction))
+                            {
+                                <div class="tab-pane fade show active" id="intro" role="tabpanel">
+                                    <div class="tab-content-wrapper mt-3">
+                                        <h5 class="section-title"><i class="fas fa-file-alt me-2 text-info"></i>Giới Thiệu</h5>
+                                        <div class="content-container" data-full-height="false">
+                                            <div class="summary-text collapsed-text">
+                                                @Html.Raw(Model.Doctor.Introduction.Replace("\n", "<br />"))
+                                            </div>
+                                            <div class="text-center mt-3">
+                                                <button class="btn btn-link p-0 text-decoration-none toggle-content" onclick="toggleContent(this)">
+                                                    <i class="fas fa-chevron-down me-1"></i>Xem thêm
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.Doctor.Expertise))
+                            {
+                                <div class="tab-pane fade" id="expertise" role="tabpanel">
+                                    <div class="tab-content-wrapper mt-3">
+                                        <h5 class="section-title"><i class="fas fa-star me-2 text-warning"></i>Chuyên Môn</h5>
+                                        <div class="content-container" data-full-height="false">
+                                            <div class="summary-text collapsed-text">
+                                                @Html.Raw(Model.Doctor.Expertise.Replace("\n", "<br />"))
+                                            </div>
+                                            <div class="text-center mt-3">
+                                                <button class="btn btn-link p-0 text-decoration-none toggle-content" onclick="toggleContent(this)">
+                                                    <i class="fas fa-chevron-down me-1"></i>Xem thêm
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.Doctor.Awards))
+                            {
+                                <div class="tab-pane fade" id="awards" role="tabpanel">
+                                    <div class="tab-content-wrapper mt-3">
+                                        <h5 class="section-title"><i class="fas fa-trophy me-2 text-warning"></i>Giải Thưởng</h5>
+                                        <div class="content-container" data-full-height="false">
+                                            <div class="summary-text collapsed-text">
+                                                @Html.Raw(Model.Doctor.Awards.Replace("\n", "<br />"))
+                                            </div>
+                                            <div class="text-center mt-3">
+                                                <button class="btn btn-link p-0 text-decoration-none toggle-content" onclick="toggleContent(this)">
+                                                    <i class="fas fa-chevron-down me-1"></i>Xem thêm
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.Doctor.WorkExperience))
+                            {
+                                <div class="tab-pane fade" id="experience" role="tabpanel">
+                                    <div class="tab-content-wrapper mt-3">
+                                        <h5 class="section-title"><i class="fas fa-briefcase me-2 text-secondary"></i>Kinh Nghiệm Làm Việc</h5>
+                                        <div class="content-container" data-full-height="false">
+                                            <div class="summary-text collapsed-text">
+                                                @Html.Raw(Model.Doctor.WorkExperience.Replace("\n", "<br />"))
+                                            </div>
+                                            <div class="text-center mt-3">
+                                                <button class="btn btn-link p-0 text-decoration-none toggle-content" onclick="toggleContent(this)">
+                                                    <i class="fas fa-chevron-down me-1"></i>Xem thêm
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.Doctor.TrainingProcess))
+                            {
+                                <div class="tab-pane fade" id="training" role="tabpanel">
+                                    <div class="tab-content-wrapper mt-3">
+                                        <h5 class="section-title"><i class="fas fa-graduation-cap me-2 text-success"></i>Quá Trình Đào Tạo</h5>
+                                        <div class="content-container" data-full-height="false">
+                                            <div class="summary-text collapsed-text">
+                                                @Html.Raw(Model.Doctor.TrainingProcess.Replace("\n", "<br />"))
+                                            </div>
+                                            <div class="text-center mt-3">
+                                                <button class="btn btn-link p-0 text-decoration-none toggle-content" onclick="toggleContent(this)">
+                                                    <i class="fas fa-chevron-down me-1"></i>Xem thêm
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.Doctor.ResearchProject))
+                            {
+                                <div class="tab-pane fade" id="research" role="tabpanel">
+                                    <div class="tab-content-wrapper mt-3">
+                                        <h5 class="section-title"><i class="fas fa-microscope me-2 text-primary"></i>Dự Án Nghiên Cứu</h5>
+                                        <div class="content-container" data-full-height="false">
+                                            <div class="summary-text collapsed-text">
+                                                @Html.Raw(Model.Doctor.ResearchProject.Replace("\n", "<br />"))
+                                            </div>
+                                            <div class="text-center mt-3">
+                                                <button class="btn btn-link p-0 text-decoration-none toggle-content" onclick="toggleContent(this)">
+                                                    <i class="fas fa-chevron-down me-1"></i>Xem thêm
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.Doctor.OrganizationMember))
+                            {
+                                <div class="tab-pane fade" id="organization" role="tabpanel">
+                                    <div class="tab-content-wrapper mt-3">
+                                        <h5 class="section-title"><i class="fas fa-users me-2 text-info"></i>Thành Viên Tổ Chức</h5>
+                                        <div class="content-container" data-full-height="false">
+                                            <div class="summary-text collapsed-text">
+                                                @Html.Raw(Model.Doctor.OrganizationMember.Replace("\n", "<br />"))
+                                            </div>
+                                            <div class="text-center mt-3">
+                                                <button class="btn btn-link p-0 text-decoration-none toggle-content" onclick="toggleContent(this)">
+                                                    <i class="fas fa-chevron-down me-1"></i>Xem thêm
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -153,151 +344,1113 @@
         </div>
     </div>
 
+    <!-- Leaflet JavaScript -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.min.js"></script>
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
-    document.addEventListener('DOMContentLoaded', function () {
-    const connection = new signalR.HubConnectionBuilder()
-        .withUrl('/scheduleHub')
-        .build();
+        let map;
+        let userLocationMarker;
+        let routeControl;
+        let watchId;
+        let isRouting = false;
+        let routingRetryCount = 0;
+        const MAX_ROUTING_RETRIES = 3;
 
-    const timeSlotGroups = document.querySelectorAll('.time-slots-for-date');
-    const bookButton = document.getElementById('bookAppointmentButton');
-    const formSelectedDate = document.getElementById('selectedDate');
-    const formSelectedTime = document.getElementById('selectedTime');
-    const timeSlotIdFunc = document.getElementById('timeSlotId');
-    
-    // Collect all available dates from the time slot groups
-    const validDates = [];
-    timeSlotGroups.forEach(group => {
-        validDates.push(group.getAttribute('data-date'));
-    });
+        // Initialize Leaflet Map with enhanced features
+        function initMap() {
+            // Hospital location coordinates
+            const hospitalLocation = [16.0572013, 108.217826];
 
-    // Initialize flatpickr
-    const dateSelector = flatpickr("#appointmentDate", {
-        dateFormat: "Y-m-d",
-        minDate: "today",
-        enable: validDates,
-        onChange: function (selectedDates, dateStr) {
-            if (dateStr) {
-                localStorage.setItem('selectedDate', dateStr);
+            // Create map with smooth zoom options
+            map = L.map('map', {
+                zoomControl: false,
+                attributionControl: false,
+                fadeAnimation: true,
+                zoomAnimation: true,
+                markerZoomAnimation: true,
+                preferCanvas: true
+            }).setView(hospitalLocation, 15);
+
+            // Add custom zoom control
+            L.control.zoom({
+                position: 'bottomright'
+            }).addTo(map);
+
+            // Add attribution control
+            L.control.attribution({
+                position: 'bottomleft',
+                prefix: false
+            }).addTo(map);
+
+            // Add multiple tile layer options for better performance
+            const osmLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap contributors'
+            });
+
+            const cartoLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                maxZoom: 19,
+                attribution: '© CARTO'
+            });
+
+            // Use Carto layer for smoother experience
+            cartoLayer.addTo(map);
+
+            // Custom hospital icon with animation
+            const hospitalIcon = L.divIcon({
+                html: `
+                    <div class="hospital-marker">
+                        <div class="hospital-icon">
+                            <i class="fas fa-hospital"></i>
+                        </div>
+                        <div class="hospital-pulse"></div>
+                    </div>
+                `,
+                iconSize: [40, 40],
+                iconAnchor: [20, 20],
+                className: 'custom-hospital-icon'
+            });
+
+            // Add hospital marker with bounce animation
+            const hospitalMarker = L.marker(hospitalLocation, { 
+                icon: hospitalIcon,
+                riseOnHover: true
+            }).addTo(map);
+
+            // Enhanced popup content
+            hospitalMarker.bindPopup(`
+                <div class="hospital-popup">
+                    <div class="popup-header">
+                        <h6><i class="fas fa-hospital me-2"></i>Bệnh viện Đa khoa MedicalCare</h6>
+                    </div>
+                    <div class="popup-body">
+                        <p><i class="fas fa-map-marker-alt me-2"></i>123 Trưng Nữ Vương, Hải Châu, Đà Nẵng</p>
+                        <p><i class="fas fa-phone me-2"></i>(0236) 123-4567</p>
+                        <p><i class="fas fa-clock me-2"></i>24/7 - Cấp cứu</p>
+                    </div>
+                    <div class="popup-actions">
+                        <button onclick="getDirections()" class="btn-primary">
+                            <i class="fas fa-route"></i> Chỉ đường
+                        </button>
+                        <button onclick="getCurrentLocation()" class="btn-secondary">
+                            <i class="fas fa-crosshairs"></i> Vị trí tôi
+                        </button>
+                    </div>
+                </div>
+            `, {
+                maxWidth: 300,
+                className: 'custom-popup'
+            }).openPopup();
+
+            // Add CSS styles for animations
+            addCustomStyles();
+
+            // Initialize location tracking
+            initLocationTracking();
+        }
+
+        // Add custom CSS styles
+        function addCustomStyles() {
+            const style = document.createElement('style');
+            style.textContent = `
+                .custom-hospital-icon {
+                    background: none !important;
+                    border: none !important;
+                }
+                
+                .hospital-marker {
+                    position: relative;
+                    width: 40px;
+                    height: 40px;
+                }
+                
+                .hospital-icon {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: #DC434C;
+                    color: white;
+                    width: 35px;
+                    height: 35px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 16px;
+                    box-shadow: 0 2px 10px rgba(220, 67, 76, 0.3);
+                    z-index: 2;
+                    animation: hospitalBounce 2s ease-in-out infinite;
+                }
+                
+                .hospital-pulse {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    width: 40px;
+                    height: 40px;
+                    background: rgba(220, 67, 76, 0.3);
+                    border-radius: 50%;
+                    animation: hospitalPulse 2s ease-in-out infinite;
+                }
+                
+                @@keyframes hospitalBounce {
+                    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+                    50% { transform: translate(-50%, -60%) scale(1.1); }
+                }
+                
+                @@keyframes hospitalPulse {
+                    0% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
+                    100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
+                }
+                
+                .user-marker {
+                    position: relative;
+                    width: 30px;
+                    height: 30px;
+                }
+                
+                .user-icon {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: #007bff;
+                    color: white;
+                    width: 25px;
+                    height: 25px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 12px;
+                    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+                    border: 3px solid white;
+                    z-index: 2;
+                }
+                
+                .user-pulse {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    width: 30px;
+                    height: 30px;
+                    background: rgba(0, 123, 255, 0.2);
+                    border-radius: 50%;
+                    animation: userPulse 1.5s ease-in-out infinite;
+                }
+                
+                @@keyframes userPulse {
+                    0% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+                    100% { transform: translate(-50%, -50%) scale(1.8); opacity: 0; }
+                }
+                
+                .hospital-popup {
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                }
+                
+                .popup-header h6 {
+                    margin: 0 0 8px 0;
+                    color: #DC434C;
+                    font-weight: 600;
+                    font-size: 16px;
+                }
+                
+                .hospital-rating {
+                    display: flex;
+                    align-items: center;
+                    gap: 5px;
+                    margin-bottom: 10px;
+                }
+                
+                .stars {
+                    color: #ffc107;
+                    font-size: 14px;
+                }
+                
+                .popup-body p {
+                    margin: 0 0 8px 0;
+                    font-size: 13px;
+                    color: #666;
+                    display: flex;
+                    align-items: center;
+                }
+                
+                .popup-body i {
+                    color: #999;
+                    width: 16px;
+                }
+                
+                .popup-actions {
+                    display: flex;
+                    gap: 8px;
+                    margin-top: 12px;
+                }
+                
+                .popup-actions button {
+                    flex: 1;
+                    padding: 8px 12px;
+                    border: none;
+                    border-radius: 6px;
+                    font-size: 12px;
+                    font-weight: 500;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 4px;
+                }
+                
+                .btn-primary {
+                    background: #007bff;
+                    color: white;
+                }
+                
+                .btn-primary:hover {
+                    background: #0056b3;
+                    transform: translateY(-1px);
+                }
+                
+                .btn-secondary {
+                    background: #6c757d;
+                    color: white;
+                }
+                
+                .btn-secondary:hover {
+                    background: #545b62;
+                    transform: translateY(-1px);
+                }
+                
+                .loading-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.5);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 10000;
+                }
+                
+                .loading-content {
+                    background: white;
+                    padding: 20px;
+                    border-radius: 10px;
+                    text-align: center;
+                    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+                }
+                
+                .loading-spinner {
+                    width: 40px;
+                    height: 40px;
+                    border: 4px solid #f3f3f3;
+                    border-top: 4px solid #007bff;
+                    border-radius: 50%;
+                    animation: spin 1s linear infinite;
+                    margin: 0 auto 10px;
+                }
+                
+                @@keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+                
+                .notification {
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    max-width: 350px;
+                    z-index: 9999;
+                    animation: slideInRight 0.3s ease-out;
+                }
+                
+                @@keyframes slideInRight {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                
+                .custom-popup .leaflet-popup-content-wrapper {
+                    border-radius: 10px;
+                    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+                }
+                
+                .route-control-container {
+                    background: white;
+                    border-radius: 10px;
+                    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                    overflow: hidden;
+                }
+                
+                .leaflet-routing-container {
+                    background: white;
+                    border-radius: 10px;
+                    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+                }
+                
+                .route-summary {
+                    background: linear-gradient(135deg, #007bff, #0056b3);
+                    color: white;
+                    padding: 15px;
+                    margin: 0;
+                    border-radius: 10px 10px 0 0;
+                }
+                
+                .route-summary h6 {
+                    margin: 0 0 8px 0;
+                    font-size: 16px;
+                    font-weight: 600;
+                }
+                
+                .route-summary p {
+                    margin: 0 0 5px 0;
+                    font-size: 14px;
+                    opacity: 0.9;
+                }
+                
+                @@keyframes fadeOut {
+                    from { opacity: 1; }
+                    to { opacity: 0; }
+                }
+                
+                @@keyframes slideOutRight {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(100%); opacity: 0; }
+                }
+                
+                .route-line {
+                    animation: drawRoute 2s ease-in-out;
+                }
+                
+                @@keyframes drawRoute {
+                    from { stroke-dasharray: 1000; stroke-dashoffset: 1000; }
+                    to { stroke-dasharray: 1000; stroke-dashoffset: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Initialize location tracking with high accuracy
+        function initLocationTracking() {
+            if (navigator.geolocation) {
+                // Get initial position
+                getCurrentLocation();
+                
+                // Watch position for real-time updates
+                watchId = navigator.geolocation.watchPosition(
+                    updateUserLocation,
+                    handleLocationError,
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 30000
+                    }
+                );
+            } else {
+                showNotification("Trình duyệt của bạn không hỗ trợ định vị địa lý.", 'warning');
+            }
+        }
+
+        // Get user's current location with loading state
+        function getCurrentLocation() {
+            showLoadingOverlay("Đang xác định vị trí của bạn...");
+            
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        hideLoadingOverlay();
+                        updateUserLocation(position);
+                        showNotification("Đã xác định được vị trí của bạn!", 'success');
+                    },
+                    function(error) {
+                        hideLoadingOverlay();
+                        handleLocationError(error);
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 60000
+                    }
+                );
+            } else {
+                hideLoadingOverlay();
+                showNotification("Trình duyệt của bạn không hỗ trợ định vị địa lý.", 'warning');
+            }
+        }
+
+        // Update user location with smooth animation
+        function updateUserLocation(position) {
+            const userLat = position.coords.latitude;
+            const userLng = position.coords.longitude;
+            const accuracy = position.coords.accuracy;
+            
+            // Remove existing user location marker
+            if (userLocationMarker) {
+                map.removeLayer(userLocationMarker);
+            }
+            
+            // Custom user location icon with animation
+            const userIcon = L.divIcon({
+                html: `
+                    <div class="user-marker">
+                        <div class="user-icon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="user-pulse"></div>
+                    </div>
+                `,
+                iconSize: [30, 30],
+                iconAnchor: [15, 15],
+                className: 'custom-user-icon'
+            });
+            
+            // Add user location marker with smooth animation
+            userLocationMarker = L.marker([userLat, userLng], { 
+                icon: userIcon,
+                riseOnHover: true
+            }).addTo(map);
+            
+            // Enhanced popup for user location
+            userLocationMarker.bindPopup(`
+                <div class="user-popup">
+                    <h6><i class="fas fa-user-circle me-2"></i>Vị trí của bạn</h6>
+                    <p><i class="fas fa-map-marker-alt me-2"></i>Lat: ${userLat.toFixed(6)}</p>
+                    <p><i class="fas fa-map-marker-alt me-2"></i>Lng: ${userLng.toFixed(6)}</p>
+                    <p><i class="fas fa-bullseye me-2"></i>Độ chính xác: ${Math.round(accuracy)}m</p>
+                </div>
+            `, {
+                className: 'custom-popup'
+            });
+            
+            // Add accuracy circle
+            if (accuracy < 1000) {
+                L.circle([userLat, userLng], {
+                    radius: accuracy,
+                    color: '#007bff',
+                    fillColor: '#007bff',
+                    fillOpacity: 0.1,
+                    weight: 1
+                }).addTo(map);
+            }
+            
+            // Smooth pan to show both locations
+            const hospitalLocation = [16.0572013, 108.217826];
+            const bounds = L.latLngBounds([
+                [userLat, userLng],
+                hospitalLocation
+            ]);
+            
+            map.fitBounds(bounds, {
+                padding: [50, 50],
+                animate: true,
+                duration: 1
+            });
+            
+            console.log("User location updated:", userLat, userLng, "Accuracy:", accuracy);
+        }
+
+        // Handle location errors with user-friendly messages
+        function handleLocationError(error) {
+            let message = "";
+            let type = 'warning';
+            
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    message = "Bạn đã từ chối chia sẻ vị trí. Vui lòng bật định vị để sử dụng tính năng chỉ đường.";
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    message = "Không thể xác định vị trí của bạn. Vui lòng kiểm tra kết nối internet.";
+                    break;
+                case error.TIMEOUT:
+                    message = "Yêu cầu định vị đã hết thời gian chờ. Đang thử lại...";
+                    type = 'info';
+                    // Retry after timeout
+                    setTimeout(() => getCurrentLocation(), 2000);
+                    break;
+                default:
+                    message = "Đã xảy ra lỗi không xác định khi xác định vị trí.";
+                    type = 'error';
+                    break;
+            }
+            
+            showNotification(message, type);
+            console.error("Geolocation error:", error);
+        }
+
+        // Get directions with enhanced routing
+        function getDirections() {
+            if (isRouting) {
+                showNotification("Đang tính toán đường đi...", 'info');
+                return;
+            }
+            
+            if (!userLocationMarker) {
+                showNotification("Đang xác định vị trí của bạn trước khi chỉ đường...", 'info');
+                getCurrentLocation();
+                
+                setTimeout(() => {
+                    if (userLocationMarker) {
+                        calculateAndShowRoute();
+                    } else {
+                        showNotification("Không thể xác định vị trí của bạn. Vui lòng bật định vị.", 'warning');
+                    }
+                }, 3000);
+                return;
+            }
+            
+            calculateAndShowRoute();
+        }
+
+        // Multiple routing services for fallback
+        const routingServices = [
+            {
+                name: 'OSRM',
+                url: 'https://router.project-osrm.org/route/v1',
+                timeout: 8000
+            },
+            {
+                name: 'GraphHopper',
+                url: 'https://graphhopper.com/api/1/route',
+                timeout: 10000
+            }
+        ];
+
+        // Fast route calculation with fallback services
+        async function calculateRouteWithFallback(userLocation, hospitalLocation) {
+            for (let i = 0; i < routingServices.length; i++) {
+                try {
+                    const service = routingServices[i];
+                    console.log(`Trying routing service: ${service.name}`);
+                    
+                    const route = await calculateRouteWithService(userLocation, hospitalLocation, service);
+                    if (route) {
+                        return route;
+                    }
+                } catch (error) {
+                    console.warn(`Routing service ${routingServices[i].name} failed:`, error);
+                }
+            }
+            
+            // If all services fail, create a simple straight line route
+            return createSimpleRoute(userLocation, hospitalLocation);
+        }
+
+        // Calculate route with specific service
+        function calculateRouteWithService(userLocation, hospitalLocation, service) {
+            return new Promise((resolve, reject) => {
+                const timeout = setTimeout(() => {
+                    reject(new Error('Timeout'));
+                }, service.timeout);
+
+                // Try to use Leaflet Routing Machine with the service
+                const tempRouting = L.Routing.control({
+                    waypoints: [
+                        L.latLng(userLocation.lat, userLocation.lng),
+                        L.latLng(hospitalLocation[0], hospitalLocation[1])
+                    ],
+                    routeWhileDragging: false,
+                    addWaypoints: false,
+                    createMarker: function() { return null; },
+                    router: L.Routing.osrmv1({
+                        serviceUrl: service.url,
+                        timeout: service.timeout - 1000
+                    }),
+                    show: false
+                });
+
+                tempRouting.on('routesfound', function(e) {
+                    clearTimeout(timeout);
+                    resolve(e.routes[0]);
+                });
+
+                tempRouting.on('routingerror', function(e) {
+                    clearTimeout(timeout);
+                    reject(e);
+                });
+
+                // Don't add to map, just calculate
+                tempRouting.route();
+            });
+        }
+
+        // Create simple straight line route as fallback
+        function createSimpleRoute(userLocation, hospitalLocation) {
+            const distance = map.distance([userLocation.lat, userLocation.lng], hospitalLocation);
+            const estimatedTime = (distance / 1000) * 3; // Rough estimate: 3 minutes per km in city
+            
+            return {
+                coordinates: [
+                    [userLocation.lat, userLocation.lng],
+                    hospitalLocation
+                ],
+                summary: {
+                    totalDistance: distance,
+                    totalTime: estimatedTime * 60
+                },
+                instructions: [
+                    { text: "Khởi hành từ vị trí hiện tại" },
+                    { text: `Di chuyển theo đường thẳng đến bệnh viện (khoảng ${(distance/1000).toFixed(1)} km)` },
+                    { text: "Đã đến đích - Bệnh viện Đa khoa MedicalCare" }
+                ]
+            };
+        }
+
+        // Calculate and show route with optimized performance
+        async function calculateAndShowRoute() {
+            if (!userLocationMarker || isRouting) return;
+            
+            isRouting = true;
+            routingRetryCount = 0;
+            showLoadingOverlay("Đang tính toán đường đi nhanh nhất...");
+            
+            const hospitalLocation = [16.0572013, 108.217826];
+            const userLocation = userLocationMarker.getLatLng();
+            
+            // Remove existing route
+            if (routeControl) {
+                map.removeControl(routeControl);
+            }
+
+            try {
+                // Try fast route calculation with fallback
+                const route = await calculateRouteWithFallback(userLocation, hospitalLocation);
+                
+                if (route) {
+                    displayRoute(route, userLocation, hospitalLocation);
+                } else {
+                    throw new Error('All routing services failed');
+                }
+            } catch (error) {
+                console.error('Route calculation failed:', error);
+                
+                if (routingRetryCount < MAX_ROUTING_RETRIES) {
+                    routingRetryCount++;
+                    showNotification(`Đang thử lại... (lần ${routingRetryCount}/${MAX_ROUTING_RETRIES})`, 'info');
+                    setTimeout(() => {
+                        isRouting = false;
+                        calculateAndShowRoute();
+                    }, 1000);
+                } else {
+                    hideLoadingOverlay();
+                    isRouting = false;
+                    showNotification('Không thể tính toán đường đi. Hiển thị đường đi ước tính.', 'warning');
+                    
+                    // Show simple route as last resort
+                    const simpleRoute = createSimpleRoute(userLocation, hospitalLocation);
+                    displayRoute(simpleRoute, userLocation, hospitalLocation);
+                }
+            }
+        }
+
+        // Display route on map
+        function displayRoute(route, userLocation, hospitalLocation) {
+            hideLoadingOverlay();
+            isRouting = false;
+            
+            // Create route line
+            const routeLine = L.polyline(route.coordinates, {
+                color: '#007bff',
+                weight: 6,
+                opacity: 0.8,
+                className: 'route-line'
+            }).addTo(map);
+            
+            // Calculate route info
+            const distance = (route.summary.totalDistance / 1000).toFixed(1) + ' km';
+            const time = Math.round(route.summary.totalTime / 60) + ' phút';
+            
+            // Create custom route control panel
+            const routeInfo = L.control({ position: 'topleft' });
+            routeInfo.onAdd = function() {
+                const div = L.DomUtil.create('div', 'route-control-container');
+                div.innerHTML = `
+                    <div class="route-summary">
+                        <h6><i class="fas fa-route me-2"></i>Thông tin đường đi</h6>
+                        <p><i class="fas fa-road me-2"></i>Khoảng cách: ${distance}</p>
+                        <p><i class="fas fa-clock me-2"></i>Thời gian: ${time}</p>
+                    </div>
+                    <div style="padding: 10px; background: white;">
+                        <button onclick="clearRoute()" class="btn-secondary" style="width: 48%; margin-right: 4%;">
+                            <i class="fas fa-times"></i> Xóa
+                        </button>
+                        <button onclick="recalculateRoute()" class="btn-primary" style="width: 48%;">
+                            <i class="fas fa-sync-alt"></i> Tính lại
+                        </button>
+                    </div>
+                `;
+                return div;
+            };
+            
+            routeInfo.addTo(map);
+            
+            // Store route control for cleanup
+            routeControl = {
+                routeLine: routeLine,
+                routeInfo: routeInfo
+            };
+            
+            // Fit map to show entire route
+            const bounds = L.latLngBounds(route.coordinates);
+            map.fitBounds(bounds, {
+                padding: [30, 30],
+                animate: true,
+                duration: 1.5
+            });
+            
+            showNotification(`🚗 Đường đi đã sẵn sàng: ${distance}, ${time}`, 'success');
+            console.log(`Route displayed: ${distance}, ${time}`);
+        }
+
+        // Clear route function with animation
+        function clearRoute() {
+            if (routeControl) {
+                if (routeControl.routeLine) {
+                    map.removeLayer(routeControl.routeLine);
+                }
+                if (routeControl.routeInfo) {
+                    map.removeControl(routeControl.routeInfo);
+                }
+                routeControl = null;
+                showNotification("Đã xóa đường đi", 'info');
+            }
+        }
+
+        // Recalculate route
+        function recalculateRoute() {
+            clearRoute();
+            routingRetryCount = 0;
+            setTimeout(() => {
+                calculateAndShowRoute();
+            }, 300);
+        }
+
+        // Show loading overlay
+        function showLoadingOverlay(message) {
+            const overlay = document.createElement('div');
+            overlay.id = 'loadingOverlay';
+            overlay.className = 'loading-overlay';
+            overlay.innerHTML = `
+                <div class="loading-content">
+                    <div class="loading-spinner"></div>
+                    <p style="margin: 0; color: #333; font-weight: 500;">${message}</p>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+        }
+
+        // Hide loading overlay
+        function hideLoadingOverlay() {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) {
+                overlay.style.animation = 'fadeOut 0.3s ease-out';
+                setTimeout(() => {
+                    if (overlay.parentNode) {
+                        overlay.parentNode.removeChild(overlay);
+                    }
+                }, 300);
+            }
+        }
+
+        // Enhanced notification system
+        function showNotification(message, type = 'info') {
+            const icons = {
+                success: 'fas fa-check-circle',
+                error: 'fas fa-exclamation-circle',
+                warning: 'fas fa-exclamation-triangle',
+                info: 'fas fa-info-circle'
+            };
+            
+            const colors = {
+                success: '#28a745',
+                error: '#dc3545',
+                warning: '#ffc107',
+                info: '#17a2b8'
+            };
+            
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.innerHTML = `
+                <div style="background: white; border-left: 4px solid ${colors[type]}; border-radius: 6px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding: 15px; position: relative;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <i class="${icons[type]}" style="color: ${colors[type]}; font-size: 18px;"></i>
+                        <span style="color: #333; font-weight: 500; flex: 1;">${message}</span>
+                        <button onclick="this.parentElement.parentElement.parentElement.remove()" style="background: none; border: none; color: #999; font-size: 18px; cursor: pointer; padding: 0; width: 20px; height: 20px;">×</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Auto remove notification
+            const duration = type === 'error' ? 8000 : type === 'warning' ? 6000 : 4000;
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.style.animation = 'slideOutRight 0.3s ease-in';
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.parentNode.removeChild(notification);
+                        }
+                    }, 300);
+                }
+            }, duration);
+        }
+
+        // Cleanup function
+        function cleanup() {
+            if (watchId) {
+                navigator.geolocation.clearWatch(watchId);
+            }
+            if (routeControl) {
+                map.removeControl(routeControl);
+            }
+        }
+
+        // Add fadeOut animation to CSS
+        const fadeOutStyle = document.createElement('style');
+        fadeOutStyle.textContent = `
+            @@keyframes fadeOut {
+                from { opacity: 1; }
+                to { opacity: 0; }
+            }
+            
+            @@keyframes slideOutRight {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+            
+            .route-line {
+                animation: drawRoute 2s ease-in-out;
+            }
+            
+            @@keyframes drawRoute {
+                from { stroke-dasharray: 1000; stroke-dashoffset: 1000; }
+                to { stroke-dasharray: 1000; stroke-dashoffset: 0; }
+            }
+        `;
+        document.head.appendChild(fadeOutStyle);
+
+        // Cleanup when page unloads
+        window.addEventListener('beforeunload', cleanup);
+
+        // Toggle content function
+        function toggleContent(button) {
+            const container = button.closest('.content-container');
+            const textElement = container.querySelector('.summary-text');
+            const icon = button.querySelector('i');
+            const isExpanded = container.getAttribute('data-full-height') === 'true';
+
+            if (isExpanded) {
+                // Collapse
+                textElement.classList.add('collapsed-text');
+                container.setAttribute('data-full-height', 'false');
+                button.innerHTML = '<i class="fas fa-chevron-down me-1"></i>Xem thêm';
+            } else {
+                // Expand
+                textElement.classList.remove('collapsed-text');
+                container.setAttribute('data-full-height', 'true');
+                button.innerHTML = '<i class="fas fa-chevron-up me-1"></i>Thu gọn';
+            }
+        }
+
+        // Initialize map when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function () {
+            initMap();
+
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl('/scheduleHub')
+                .build();
+
+            const timeSlotGroups = document.querySelectorAll('.time-slots-for-date');
+            const bookButton = document.getElementById('bookAppointmentButton');
+            const formSelectedDate = document.getElementById('selectedDate');
+            const formSelectedTime = document.getElementById('selectedTime');
+            const timeSlotIdFunc = document.getElementById('timeSlotId');
+            
+            // Rest of the JavaScript code...
+            const validDates = [];
+            timeSlotGroups.forEach(group => {
+                validDates.push(group.getAttribute('data-date'));
+            });
+
+            const dateSelector = flatpickr("#appointmentDate", {
+                dateFormat: "Y-m-d",
+                minDate: "today",
+                enable: validDates,
+                onChange: function (selectedDates, dateStr) {
+                    if (dateStr) {
+                        localStorage.setItem('selectedDate', dateStr);
+                        updateTimeSlots();
+                    }
+                }
+            });
+
+            window.updateTimeSlots = function () {
+                const selectedDate = dateSelector.input.value;
+                
+                timeSlotGroups.forEach(group => {
+                    if (group.getAttribute('data-date') === selectedDate) {
+                        group.style.display = 'block';
+                    } else {
+                        group.style.display = 'none';
+                    }
+                });
+                resetSelection();
+            };
+
+            const savedSelectedDate = localStorage.getItem('selectedDate');
+            if (savedSelectedDate) {
+                dateSelector.setDate(savedSelectedDate);
                 updateTimeSlots();
             }
-        }
-    });
 
-    window.updateTimeSlots = function () {
-        const selectedDate = dateSelector.input.value;
-        
-        timeSlotGroups.forEach(group => {
-            if (group.getAttribute('data-date') === selectedDate) {
-                group.style.display = 'block';
-            } else {
-                group.style.display = 'none';
+            function createDateContainer(date) {
+                const dateContainer = document.createElement('div');
+                dateContainer.classList.add('time-slots-for-date');
+                dateContainer.setAttribute('data-date', date);
+                dateContainer.style.display = 'none';
+
+                const dateLabel = document.createElement('h5');
+                dateLabel.textContent = `Available slots for ${new Date(date).toLocaleDateString()}`;
+                dateContainer.appendChild(dateLabel);
+
+                const slotsRow = document.createElement('div');
+                slotsRow.classList.add('row', 'g-3', 'mt-3');
+                dateContainer.appendChild(slotsRow);
+                return dateContainer;
             }
-        });
-        resetSelection();
-    };
 
-    // Set the previously selected date if available
-    const savedSelectedDate = localStorage.getItem('selectedDate');
-    if (savedSelectedDate) {
-        dateSelector.setDate(savedSelectedDate);
-        updateTimeSlots();
-    }
+            function resetSelection() {
+                document.querySelectorAll('.time-slot-card').forEach(slot => {
+                    slot.classList.remove('selected');
+                });
+                bookButton.disabled = true;
+                bookButton.classList.add('disabled');
+                formSelectedDate.value = '';
+                formSelectedTime.value = '';
+            }
 
-    function createDateContainer(date) {
-        const dateContainer = document.createElement('div');
-        dateContainer.classList.add('time-slots-for-date');
-        dateContainer.setAttribute('data-date', date);
-        dateContainer.style.display = 'none';
-
-        const dateLabel = document.createElement('h5');
-        dateLabel.textContent = `Available slots for ${new Date(date).toLocaleDateString()}`;
-        dateContainer.appendChild(dateLabel);
-
-        const slotsRow = document.createElement('div');
-        slotsRow.classList.add('row', 'g-3', 'mt-3');
-        dateContainer.appendChild(slotsRow);
-        return dateContainer;
-    }
-
-    function resetSelection() {
-        document.querySelectorAll('.time-slot-card').forEach(slot => {
-            slot.classList.remove('selected');
-        });
-        bookButton.disabled = true;
-        bookButton.classList.add('disabled');
-        formSelectedDate.value = '';
-        formSelectedTime.value = '';
-    }
-
-    window.selectTimeSlot = function (timeSlotElement) {
-        const parentGroup = timeSlotElement.closest('.time-slots-for-date');
-        const allSlots = parentGroup.querySelectorAll('.time-slot-card');
-        allSlots.forEach(slot => slot.classList.remove('selected'));
-        timeSlotElement.classList.add('selected');
-        const selectedDate = dateSelector.input.value;
-        const selectedStartTime = timeSlotElement.getAttribute('data-start-time');
-        const timeOnly = new Date(selectedStartTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        const timeSlotId = timeSlotElement.getAttribute('data-slot-id');
-
-        if (selectedDate && timeOnly) {
-            formSelectedDate.value = selectedDate;
-            formSelectedTime.value = timeOnly;
-            timeSlotIdFunc.value = timeSlotId;
-            bookButton.disabled = false;
-            bookButton.classList.remove('disabled');
-        }
-    };
-
-    updateTimeSlots();
-
-    connection.start()
-        .then(() => {
-            console.log("Connected to SignalR Hub");
-
-            connection.on("UpdateDoctorProfile", (doctor) => {
-                console.log("Doctor detail is updated");
-
-                const scrollPosition = window.scrollY;
-                window.location.reload();
-                window.scrollTo(0, scrollPosition);
-            });
-
-            connection.on("ScheduleUpdated", (doctorId, updatedDate) => {
-                console.log("Schedule updated for doctor:", doctorId, "on date:", updatedDate);
-
-                const selectedDoctorId = document.querySelector('input[name="DoctorId"]').value;
+            window.selectTimeSlot = function (timeSlotElement) {
+                const parentGroup = timeSlotElement.closest('.time-slots-for-date');
+                const allSlots = parentGroup.querySelectorAll('.time-slot-card');
+                allSlots.forEach(slot => slot.classList.remove('selected'));
+                timeSlotElement.classList.add('selected');
                 const selectedDate = dateSelector.input.value;
+                const selectedStartTime = timeSlotElement.getAttribute('data-start-time');
+                const timeOnly = new Date(selectedStartTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const timeSlotId = timeSlotElement.getAttribute('data-slot-id');
 
-                if (selectedDoctorId === doctorId && selectedDate === updatedDate) {
-                    reloadScheduleForDate(doctorId, updatedDate);
+                if (selectedDate && timeOnly) {
+                    formSelectedDate.value = selectedDate;
+                    formSelectedTime.value = timeOnly;
+                    timeSlotIdFunc.value = timeSlotId;
+                    bookButton.disabled = false;
+                    bookButton.classList.remove('disabled');
+                }
+            };
+
+            updateTimeSlots();
+
+            connection.start()
+                .then(() => {
+                    console.log("Connected to SignalR Hub");
+
+                    connection.on("UpdateDoctorProfile", (doctor) => {
+                        console.log("Doctor detail is updated");
+
+                        const scrollPosition = window.scrollY;
+                        window.location.reload();
+                        window.scrollTo(0, scrollPosition);
+                    });
+
+                    connection.on("ScheduleUpdated", (doctorId, updatedDate) => {
+                        console.log("Schedule updated for doctor:", doctorId, "on date:", updatedDate);
+
+                        const selectedDoctorId = document.querySelector('input[name="DoctorId"]').value;
+                        const selectedDate = dateSelector.input.value;
+
+                        if (selectedDoctorId === doctorId && selectedDate === updatedDate) {
+                            reloadScheduleForDate(doctorId, updatedDate);
+                        }
+                    });
+                })
+                .catch(err => console.error("SignalR connection error:", err));
+
+            function formatTime(time) {
+                return new Date(time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+            }
+
+            function reloadScheduleForDate(doctorId, date) {
+                fetch(`/api/schedule?id=${doctorId}&date=${date}&isApiRequest=true`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`Failed to fetch schedule: ${response.statusText}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        const scrollPosition = window.scrollY;
+                        window.location.reload();
+                        window.scrollTo(0, scrollPosition);
+                    })
+                    .catch(err => console.error("Failed to reload schedule:", err));
+            }
+
+            // Initialize the first tab as active if no explicit active tab is set
+            document.addEventListener('DOMContentLoaded', function() {
+                const firstTab = document.querySelector('.nav-link');
+                const firstTabPane = document.querySelector('.tab-pane');
+                
+                if (firstTab && firstTabPane) {
+                    firstTab.classList.add('active');
+                    firstTabPane.classList.add('show', 'active');
                 }
             });
-        })
-        .catch(err => console.error("SignalR connection error:", err));
+        });
+    </script>
 
-    function formatTime(time) {
-        return new Date(time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
-    }
+    <style>
+        /* Custom styles for collapsed content */
+        .collapsed-text {
+            max-height: 300px;
+            overflow: hidden;
+            position: relative;
+        }
 
-    function reloadScheduleForDate(doctorId, date) {
-        fetch(`/api/schedule?id=${doctorId}&date=${date}&isApiRequest=true`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch schedule: ${response.statusText}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                const scrollPosition = window.scrollY;
-                window.location.reload();
-                window.scrollTo(0, scrollPosition);
-            })
-            .catch(err => console.error("Failed to reload schedule:", err));
-    }
-});
-</script>
+        .collapsed-text::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 50px;
+            background: linear-gradient(transparent, white);
+        }
 
+        .content-container[data-full-height="true"] .collapsed-text {
+            max-height: none;
+            overflow: visible;
+        }
 
+        .content-container[data-full-height="true"] .collapsed-text::after {
+            display: none;
+        }
+
+        .toggle-content {
+            color: #0d6efd;
+        }
+
+        .toggle-content:hover {
+            color: #0a58ca;
+        }
+    </style>
+</div>

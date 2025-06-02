@@ -1,4 +1,3 @@
-using AppointmentHospital.Entity;
 using AppointmentHospital.Models;
 using AppointmentHospital.Repositories;
 using AppointmentHospital.ViewModels;
@@ -21,8 +20,8 @@ public class DoctorService : IDoctorService
     public async Task<Doctor> updateDoctor(Doctor request, string phoneNumber) {
         return await doctorRepository.updateDoctor(request, phoneNumber);
     }
-    public async Task<List<Doctor>> getAllDoctors(string selectSpec){
-        return await doctorRepository.getAllDoctors(selectSpec);
+    public async Task<List<Doctor>> getAllDoctors(string selectSpec, int page){
+        return await doctorRepository.getAllDoctors(selectSpec, page);
     }
 
     public List<TimeSlot> getTimeSlotByDoctorId(Guid doctorId){

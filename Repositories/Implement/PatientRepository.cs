@@ -131,7 +131,7 @@ namespace AppointmentHospital.Repositories.Implement
                 CreatedAt = f.CreatedAt,
                 DoctorName = f.Doctor.FullName,
                 PatientName = f.Appointment.AcquaintanceId.HasValue ? f.Appointment.Acquaintance.Name : f.Patient.FullName,
-                DoctorSpecialization = EnumExtensions.GetDisplayName(f.Doctor.Specializaiton),
+                DoctorSpecialization = f.Doctor.Specialities.SpecialityName,
             }).FirstOrDefaultAsync();
             return feedback;
         }

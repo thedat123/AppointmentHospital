@@ -19,48 +19,51 @@ namespace AppointmentHospital.Areas.Admin.Repositories.Implement
             _context = context;
             _userManager = userManager;
         }
-        public async Task<Pagination<ManagingDoctorResponse>> GetAllDoctor(int page, string searchTerm, Specialization? specialization)
+        public async Task<Pagination<ManagingDoctorResponse>> GetAllDoctor(int page, string searchTerm, int specialityId)
         {
             var query = _context.Doctors.AsQueryable();
-            if (!string.IsNullOrEmpty(searchTerm) && specialization == null)
+            if (!string.IsNullOrEmpty(searchTerm) && specialityId == 0)
             {
                 query = query.Where(d => d.FullName.ToLower() == searchTerm.ToLower());
             }
-            if (string.IsNullOrEmpty(searchTerm) && specialization != null)
+            if (string.IsNullOrEmpty(searchTerm) && specialityId != 0)
             {
-                query = query.Where(d => d.Specializaiton == specialization);
+                query = query.Where(d => d.SpecialityId == specialityId);
             }
-            if (!string.IsNullOrEmpty(searchTerm) && specialization != null)
+            if (!string.IsNullOrEmpty(searchTerm) && specialityId != 0)
             {
-                query = query.Where(d => d.FullName.ToLower() == searchTerm.ToLower() && d.Specializaiton == specialization);
+                query = query.Where(d => d.FullName.ToLower() == searchTerm.ToLower() && d.SpecialityId == specialityId);
             }
             var paginatedList = await Pagination<Doctor>.PaginatedList(query, page);
             var doctorList = paginatedList.Select(d => new ManagingDoctorResponse {
                 EmailAddress = d.User.Email,
-                PhoneNumber = d.User.PhoneNumber,
                 FullName = d.FullName,
-                Gender = d.Gender,
                 Degree = d.Degree,
                 Id = d.DoctorId,
-                ExperienceYear = d.ExperienceYear,
-                Specializaiton = EnumExtensions.GetDisplayName(d.Specializaiton)
+                SpecialityId = d.SpecialityId ?? 0,
+                SpecialityName = d.Specialities.SpecialityName,
+                ImagePath = d.ImagePath,
+                Introduction = d.Introduction,
+                Awards = d.Awards,
+                Expertise = d.Expertise,
+                OrganizationMember = d.OrganizationMember,
+                ResearchProject = d.ResearchProject,
+                TrainingProcess = d.TrainingProcess,
+                WorkExperience = d.WorkExperience,
+                
             }).ToList();
             return new Pagination<ManagingDoctorResponse> (doctorList, page, paginatedList.TotalItems);
         }
 
         public List<SelectListItem> GetSpecialization()
         {
-            var selectListItem = Enum.GetValues(typeof(Specialization)).Cast<Specialization>().Select(s => new SelectListItem
+            var selectListItem = _context.Specialities.Select(s => new SelectListItem
             {
-                Text = GetDisplayNameEnum(s),
-                Value = ((int)s).ToString()
+                Text = s.SpecialityName,
+                Value = s.Id.ToString(),
             }).ToList();
+
             return selectListItem;
-        }
-        public static string GetDisplayNameEnum(Enum value)
-        {
-            var displayName =  value.GetType().GetField(value.ToString()).GetCustomAttribute<DisplayAttribute>()?.Name ?? value.ToString();
-            return displayName;
         }
 
         public async Task CreateNewDoctorAsync(ManagingDoctorRequest request)
@@ -69,19 +72,21 @@ namespace AppointmentHospital.Areas.Admin.Repositories.Implement
             {
                 Email = request.EmailAddress,
                 UserName = request.EmailAddress,
-                EmailConfirmed = true,
-                PhoneNumber = request.PhoneNumber
+                EmailConfirmed = true
             };
             var doctor = new Doctor
             {
-                Specializaiton = request.Specializaiton,
-                ExperienceYear = request.ExperienceYear,
+                SpecialityId = request.SpecialityId,
                 FullName = request.FullName,
                 Degree = request.Degree,
-                Description = request.Description,
-                DateOfBirth = request.DateOfBirth,
-                Gender = request.Gender,
-                ImagePath = "~/images/doctor.png",
+                ImagePath = request.ImagePath,
+                Introduction = request.Introduction,
+                Awards = request.Awards,
+                Expertise = request.Expertise,
+                OrganizationMember = request.OrganizationMember,
+                ResearchProject = request.ResearchProject,
+                TrainingProcess = request.TrainingProcess,
+                WorkExperience = request.WorkExperience,
                 User = user
             };
             await _userManager.CreateAsync(user, "Doctor123#");
@@ -104,14 +109,17 @@ namespace AppointmentHospital.Areas.Admin.Repositories.Implement
             {
                 FullName = d.FullName,
                 EmailAddress = d.User.Email,
-                PhoneNumber = d.User.PhoneNumber,
                 Degree = d.Degree,
-                Gender = d.Gender,
-                Description = d.Description,
                 ImagePath = d.ImagePath,
-                Specializaiton = EnumExtensions.GetDisplayName(d.Specializaiton),
-                ExperienceYear = d.ExperienceYear,
-                Id = d.DoctorId
+                SpecialityId = d.SpecialityId ?? 0,
+                Id = d.DoctorId,
+                Introduction = d.Introduction,
+                Awards = d.Awards,
+                Expertise = d.Expertise,
+                OrganizationMember = d.OrganizationMember,
+                ResearchProject = d.ResearchProject,
+                TrainingProcess = d.TrainingProcess,
+                WorkExperience = d.WorkExperience,
             }).FirstOrDefaultAsync();
             return doctor;
         }
@@ -123,12 +131,16 @@ namespace AppointmentHospital.Areas.Admin.Repositories.Implement
             doctor.User.UserName = request.EmailAddress;
             doctor.User.NormalizedEmail = request.EmailAddress.ToUpper();
             doctor.User.Email = request.EmailAddress;
-            doctor.User.PhoneNumber = request.PhoneNumber;
-            doctor.ExperienceYear = request.ExperienceYear;
-            doctor.Specializaiton = request.Specializaiton;
-            doctor.Gender = request.Gender;
-            doctor.Description = request.Description;
+            doctor.SpecialityId = request.SpecialityId;
             doctor.Degree = request.Degree;
+            doctor.ImagePath = request.ImagePath;
+            doctor.Introduction = request.Introduction;
+            doctor.Awards = request.Awards;
+            doctor.Expertise = request.Expertise;
+            doctor.OrganizationMember = request.OrganizationMember;
+            doctor.ResearchProject = request.ResearchProject;
+            doctor.TrainingProcess = request.TrainingProcess;
+            doctor.WorkExperience = request.WorkExperience;
             _context.Update(doctor);
             await _context.SaveChangesAsync();
         }
