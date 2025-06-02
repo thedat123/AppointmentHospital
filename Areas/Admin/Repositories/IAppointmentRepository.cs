@@ -7,7 +7,7 @@ namespace AppointmentHospital.Areas.Admin.Repositories
 {
     public interface IAppointmentRepository
     {
-        Task<Pagination<AppointmentResponse>> GetAllAppointmentAsync(int page, string? searchTerm, Specialization? specialization);
+        Task<Pagination<AppointmentResponse>> GetAllAppointmentAsync(int page, string? searchTerm, int SpecialityId);
         List<SelectListItem> GetSpecialization();
         List<SelectListItem> GetStatus();
         Task<AppointmentResponse> GetAppointmentAsync(Guid id);

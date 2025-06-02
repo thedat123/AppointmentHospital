@@ -15,10 +15,6 @@ using AppointmentHospital.Configuration.EmailConfiguaration;
 using Hangfire;
 using AppointmentHospital.Configuration.BaseUrl;
 using DotNetEnv;
-using FinalProject.Repositories;
-using FinalProject.Repositories.Implement;
-using FinalProject.Services;
-using FinalProject.Services.Implement;
 
 using System;
 using System.Net;
@@ -59,6 +55,8 @@ namespace AppointmentHospital
             builder.Services.AddScoped<IStatisticRepository, StatisticRepository>();
             builder.Services.AddScoped<IAppointmentService, AppointmentService>();
             builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
+            builder.Services.AddScoped<ISpecialityService, SpecialityService>();
+            builder.Services.AddScoped<ISpecialityRepository, SpecialityRepository>();
      
             builder.Services.AddScoped<IPatientService, PatientService>();
             builder.Services.AddScoped<IPatientRepository, PatientRepository>();
@@ -149,11 +147,6 @@ namespace AppointmentHospital
             });;
 
             var app = builder.Build();
-            using(var scope = app.Services.CreateScope())
-            {
-                var seedData = scope.ServiceProvider.GetService<SeedData>();
-                seedData.InitialData().Wait();
-            }
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {

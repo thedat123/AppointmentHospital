@@ -76,12 +76,13 @@ namespace AppointmentHospital.Areas.Admin.Repositories.Implement
             {
                 Address = p.Address,
                 EmailAddress = p.User.Email,
-                PhoneNumber = p.User.PhoneNumber,
+                PhoneNumber = p.PhoneNumber,
                 FullName = p.FullName,
                 DateOfBirth = p.DateOfBirth,
             }).FirstOrDefaultAsync();
             return patient;
         }
+
         public async Task<Pagination<ManagingPatientResponse>> GetAllPatientAsync(int page, string searchTerm)
         {
             var query =  _context.Patients.Select(p => new ManagingPatientResponse
@@ -91,7 +92,7 @@ namespace AppointmentHospital.Areas.Admin.Repositories.Implement
                 Address = p.Address,
                 FullName = p.FullName,
                 EmailAddress = p.User.Email,
-                PhoneNumber = p.User.PhoneNumber,
+                PhoneNumber = p.PhoneNumber,
             });
             if(!searchTerm.IsNullOrEmpty())
             {

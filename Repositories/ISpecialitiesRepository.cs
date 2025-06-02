@@ -1,13 +1,15 @@
 using System;
 using System.Collections.Generic;
+using AppointmentHospital.Models;
 using System.Linq;
 using System.Threading.Tasks;
-using FinalProject.Entity;
+using AppointmentHospital.Helpers;
 
-namespace FinalProject.Repositories
+namespace AppointmentHospital.Repositories
 {
     public interface ISpecialitiesRepository
     {
-        public List<Specialities> GetAllSpecialities();
+        public Task<Pagination<Specialities>> GetAllSpecialitiesAsync(int page);
+        public Specialities GetSpecialityById(int specialityId);
     }
 }

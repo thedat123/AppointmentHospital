@@ -15,6 +15,8 @@ namespace AppointmentHospital.Models
         [MaxLength(255)]
         public string? Address  { get; set; }
         public DateTime? DateOfBirth { get; set; }
+        [MaxLength(20)]
+        public string PhoneNumber { get; set; }
         [ForeignKey("PatientId")]
         public virtual User User { set;get; }
         public virtual ICollection<Appointment> Appointments { set; get; }

@@ -35,6 +35,9 @@ namespace AppointmentHospital.DTOs.Account
 
             [Required]
             public string Address { get; set; }
+            [Required(ErrorMessage = "Vui lòng nhập số điện thoại.")]
+            public string PhoneNumber { get; set; }
+
             public DateTime DateOfBirth { get; set; }
         }
         public class ForgetPasswordRequest

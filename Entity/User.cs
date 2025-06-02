@@ -6,5 +6,6 @@ namespace AppointmentHospital.Models
     {
         public virtual Patient Patient { get; set; }
         public virtual Doctor Doctor { get; set; }
+        public virtual Collaborator Collaborator { get; set; }
     }
 }

@@ -100,14 +100,6 @@ body {
   padding-right: 40px;
 }
 
-.search-container i {
-  position: absolute;
-  right: 15px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-gray);
-}
-
 .language-selector {
   display: flex;
   align-items: center;
@@ -124,7 +116,6 @@ body {
 }
 
 .user-actions a {
-  color: var(--primary-blue);
   text-decoration: none;
 }
 

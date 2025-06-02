@@ -14,12 +14,13 @@ namespace AppointmentHospital.Areas.Admin.DTOs.Appointment
 
         public Guid DoctorId { get; set; } 
 
-        public string Specialization { get; set; }
+        public int? SpecialityId { get; set; }
+
+        public string? SpecialityName { get; set; }
 
         public DateTime AppointmentTime { get; set; }
         public AppointmentStatus Status { get; set; } 
 
-   
         public string? CancellationReason { get; set; }
 
         public string? Notes { get; set; }

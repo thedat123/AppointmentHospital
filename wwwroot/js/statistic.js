@@ -314,15 +314,15 @@ async function submitStatistic() {
         }
         const data = await response.json();
         console.log(data);
-        const amountAppointmentData = data.amountAppointment[dateFilter];
+        const amountAppointmentData = data.amountAppointment?.[dateFilter] || data.amountAppointment?.["All Data"] || 0;
         console.log('Value amount appointment', amountAppointmentData);
-        const oldAndNewUserData = data.oldAndNewUser[dateFilter].$values || [];
+        const oldAndNewUserData = data.oldAndNewUser?.[dateFilter]?.$values || data.oldAndNewUser?.["All Data"]?.$values || [];
         console.log('Value amount old and new user', oldAndNewUserData);
-        const topDoctorAmountAppointmentData = data.topDoctorAppointment[dateFilter]?.$values || [];
+        const topDoctorAmountAppointmentData = data.topDoctorAppointment?.[dateFilter]?.$values || data.topDoctorAppointment?.["All Data"]?.$values || [];
         console.log('Value amount of top doctor amount appointment', topDoctorAmountAppointmentData);
         var compareAmountAppointmentData = data.compareAmountAppointment;
         console.log('Value compare amount appointment', compareAmountAppointmentData);
-        const compareOldAndNewUserData = data.compareAmountOldAndNewUser;
+        const compareOldAndNewUserData = data.compareAmountOldAndNewUser || {};
         console.log('Value compare new and old user:', compareOldAndNewUserData);
 
         // Tạo mảng để lưu trữ dữ liệu cho từng người dùng (New User và Old User)
@@ -337,31 +337,51 @@ async function submitStatistic() {
 
 
 
-        const compareDataEntries = Object.entries(compareOldAndNewUserData).filter(([key, value]) => key !== '$id');
+        const compareDataEntries = Object.entries(compareOldAndNewUserData)
+            .filter(([key, value]) => key !== '$id' && value?.$values);
 
-        // Sắp xếp các khóa nếu cần thiết (ví dụ: theo thứ tự tăng dần)
-        compareDataEntries.sort(([keyA], [keyB]) => Number(keyA) - Number(keyB));
+        // Bước 2: Nếu không có dữ liệu, dùng mặc định
+        let labels = ['No Data'];
+        let newUserData = [0];
+        let oldUserData = [0];
 
-        // Tạo các mảng labels, newUserData và oldUserData
-        const labels = compareDataEntries.map(([key]) => `Month ${key}`); // Bạn có thể thay đổi định dạng nhãn theo nhu cầu
-        const newUserData = compareDataEntries.map(([_, value]) => value.$values[0] || 0);
-        const oldUserData = compareDataEntries.map(([_, value]) => value.$values[1] || 0);
+        if (compareDataEntries.length > 0) {
+            // Sắp xếp theo số nếu có thể, ngược lại sort theo string
+            compareDataEntries.sort(([keyA], [keyB]) => {
+                const numA = Number(keyA);
+                const numB = Number(keyB);
+                if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+                return keyA.localeCompare(keyB);
+            });
 
-        console.log('Labels:', labels);
-        console.log('New User Data:', newUserData);
-        console.log('Old User Data:', oldUserData);
+            // Map nhãn và dữ liệu
+            labels = compareDataEntries.map(([key]) => {
+                const num = Number(key);
+                return (!isNaN(num) && num >= 1 && num <= 12) ? `Month ${key}` : key;
+            });
 
-        if (Array.isArray(topDoctorAmountAppointmentData)) {
-            var doctorName = topDoctorAmountAppointmentData.map(doctor => doctor.doctorName || 'N/A');
+            newUserData = compareDataEntries.map(([_, value]) => value.$values?.[0] || 0);
+            oldUserData = compareDataEntries.map(([_, value]) => value.$values?.[1] || 0);
+        }
+
+        let doctorName = [];
+        let specialization = [];
+        let appointmentAmount = [];
+
+        if (Array.isArray(topDoctorAmountAppointmentData) && topDoctorAmountAppointmentData.length > 0) {
+            doctorName = topDoctorAmountAppointmentData.map(doctor => doctor.doctorName || 'N/A');
             console.log("Doctor Name", doctorName);
 
-            var specialization = topDoctorAmountAppointmentData.map(doctor => doctor.specialization || 'N/A');
+            specialization = topDoctorAmountAppointmentData.map(doctor => doctor.specialityName || doctor.specialization || 'N/A');
             console.log("Specialization", specialization);
 
-            var appointmentAmount = topDoctorAmountAppointmentData.map(doctor => doctor.appointmentAmount || 0);
+            appointmentAmount = topDoctorAmountAppointmentData.map(doctor => doctor.appointmentAmount || 0);
             console.log("AppointmentAmount", appointmentAmount);
         } else {
-            console.error('topDoctorAmountAppointmentData is not a valid array.');
+            console.log('No doctor data available');
+            doctorName = ['No Data'];
+            specialization = ['No Data'];
+            appointmentAmount = [0];
         }
         topDoctorAmountAppointment = new Chart(document.getElementById("topDoctorAmountAppointment"), {
             type: 'bar',

@@ -1,5 +1,4 @@
 using System;
-using AppointmentHospital.Entity;
 using AppointmentHospital.EnumStatus;
 using AppointmentHospital.Helpers;
 using AppointmentHospital.Models;
@@ -21,4 +20,5 @@ public interface IAppointmentDateService
     public DiagnosisHistory GetDiagnosisHistoriesByAppointmentID(Guid appointmentId);
     public List<Appointment> GetAppointmentsByDoctorIdAndDate(Guid doctorId, DateTime date);
     public int CountAppointmentDoctorIdStatus(Guid doctorId, AppointmentStatus status);
+    public Task<Pagination<Appointment>> GetAllPendingAppointments(int page);
 }

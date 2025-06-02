@@ -19,12 +19,12 @@ namespace AppointmentHospital.Areas.Admin.Controllers
         {
             _managingDoctorService = managingDoctorService;
         }
-        public async Task<IActionResult> Index(int? page, string searchTerm, Specialization? specialization)
+        public async Task<IActionResult> Index(int? page, string searchTerm, int SpecialityId)
         {
             ViewData["SelectSpecialization"] = _managingDoctorService.GetSpecialization();
-            ViewData["Specialization"] = specialization;
+            ViewData["Specialization"] = SpecialityId;
             ViewBag.SearchTerm = searchTerm;
-            var doctorList = await _managingDoctorService.GetAllDoctor(page ?? 1, searchTerm, specialization);
+            var doctorList = await _managingDoctorService.GetAllDoctor(page ?? 1, searchTerm, SpecialityId);
             return View(doctorList);
         }
         public IActionResult CreateDoctor()
@@ -47,6 +47,8 @@ namespace AppointmentHospital.Areas.Admin.Controllers
             await _managingDoctorService.DeleteDoctorAsync(id);
             return RedirectToAction("Index");
         }
+
+        [HttpGet]
         public async Task<IActionResult> EditDoctor(Guid id)
         {
             var doctor = await _managingDoctorService.GetDoctorAsync(id);
@@ -59,8 +61,44 @@ namespace AppointmentHospital.Areas.Admin.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return View(request);
+                Console.WriteLine($"Editing doctor with ID: {id}");
+                Console.WriteLine("Model state is invalid.");
+                
+                // Debug: In ra các lỗi validation
+                foreach (var modelError in ModelState)
+                {
+                    var key = modelError.Key;
+                    var errors = modelError.Value.Errors;
+                    foreach (var error in errors)
+                    {
+                        Console.WriteLine($"Key: {key}, Error: {error.ErrorMessage}");
+                    }
+                }
+                
+                ViewData["SpecializationList"] = _managingDoctorService.GetSpecialization();
+                
+                // Chuyển đổi request thành response để hiển thị lại trong view
+                var responseModel = new ManagingDoctorResponse
+                {
+                    Id = id,
+                    FullName = request.FullName,
+                    EmailAddress = request.EmailAddress,
+                    Degree = request.Degree,
+                    SpecialityId = request.SpecialityId,
+                    ImagePath = request.ImagePath,
+                    Introduction = request.Introduction,
+                    Awards = request.Awards,
+                    Expertise = request.Expertise,
+                    OrganizationMember = request.OrganizationMember,
+                    ResearchProject = request.ResearchProject,
+                    TrainingProcess = request.TrainingProcess,
+                    WorkExperience = request.WorkExperience
+                };
+                
+                return View(responseModel);
             }
+            
+            Console.WriteLine($"Editing doctor with ID: {id}");
             await _managingDoctorService.EditDoctorAsync(id, request);
             return RedirectToAction("Index");
         }

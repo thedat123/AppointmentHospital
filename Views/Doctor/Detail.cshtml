@@ -14,7 +14,7 @@
                     </div>
                     <h2 class="doctor-name mt-3">@Model.Doctor.FullName</h2>
                     <p class="doctor-specialization">
-                        <i class="fas fa-user-md me-2"></i>@Model.Doctor.Specializaiton.GetDisplayName()
+                        <i class="fas fa-user-md me-2"></i>@Model.Doctor.Specialities.SpecialityName
                     </p>
                 </div>
             </div>
@@ -46,11 +46,9 @@
                             <table class="table info-table">
                                 <tr>
                                     <th>Gender:</th>
-                                    <td>@(Model.Doctor.Gender)</td>
                                 </tr>
                                 <tr>
                                     <th>Date of Birth:</th>
-                                    <td>@Model.Doctor.DateOfBirth.ToString("MM/dd/yyyy")</td>
                                 </tr>
                             </table>
                         </div>
@@ -63,13 +61,11 @@
                                 </tr>
                                 <tr>
                                     <th>Experience:</th>
-                                    <td>@Model.Doctor.ExperienceYear years</td>
                                 </tr>
                             </table>
                         </div>
                     </div>
                     <h5 class="section-title mt-4"><i class="fas fa-file-alt me-2 text-info"></i>Summary</h5>
-                    <p class="summary-text">@Model.Doctor.Description</p>
                 </div>
             </div>
         </div>

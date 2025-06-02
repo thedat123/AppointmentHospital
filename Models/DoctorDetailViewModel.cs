@@ -1,5 +1,4 @@
 using System;
-using AppointmentHospital.Entity;
 using AppointmentHospital.Models;
 
 namespace AppointmentHospital.Models

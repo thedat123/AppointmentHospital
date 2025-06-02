@@ -43,7 +43,7 @@ namespace AppointmentHospital.Controllers
         }
         public IActionResult Register()
         {
-            return View(new RegisterUserRequest() { Email = string.Empty, FullName = string.Empty, Password = string.Empty, ConfirmPassword = string.Empty, Address = string.Empty });
+            return View(new RegisterUserRequest() { Email = string.Empty, FullName = string.Empty, Password = string.Empty, ConfirmPassword = string.Empty, Address = string.Empty, PhoneNumber = string.Empty});
         }
         [HttpPost]
         public async Task<IActionResult> Login(LoginUserRequest request)
@@ -79,6 +79,12 @@ namespace AppointmentHospital.Controllers
             {
                 _contextAccessor.HttpContext.Session.SetString("DoctorId", user.Id.ToString());
                 return RedirectToAction("Index", "Doctor");
+            }
+
+            if (user != null && _contextAccessor.HttpContext != null && _contextAccessor.HttpContext.User.IsInRole("Collaborator"))
+            {
+                _contextAccessor.HttpContext.Session.SetString("CollaboratorId", user.Id.ToString());
+                return RedirectToAction("Index", "Collaborator");
             }
             return View(request);
         }

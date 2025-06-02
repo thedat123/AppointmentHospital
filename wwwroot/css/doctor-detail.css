@@ -88,14 +88,47 @@
     border: 1px solid #ecf0f1;
 }
 
+/* Improved text formatting */
 .summary-text {
-    background-color: #f1f5f8;
-    padding: 20px;
-    border-radius: 8px;
-    line-height: 1.6;
-    font-size: 1rem;
+    background-color: #f8fafc;
+    padding: 24px;
+    border-radius: 10px;
+    line-height: 1.8;
+    font-size: 1.05rem;
     color: #2c3e50;
     border-left: 4px solid #3498db;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.summary-text p {
+    margin-bottom: 16px;
+}
+
+.summary-text ul {
+    margin-left: 20px;
+    margin-bottom: 16px;
+    padding-left: 0;
+}
+
+.summary-text li {
+    margin-bottom: 10px;
+    position: relative;
+    padding-left: 28px;
+    list-style-type: none;
+}
+
+.summary-text li:before {
+    content: "•";
+    color: #3498db;
+    font-size: 1.5em;
+    position: absolute;
+    left: 0;
+    top: -3px;
+}
+
+.summary-text strong {
+    color: #2c3e50;
+    font-weight: 600;
 }
 
 .time-slots-for-date {
@@ -201,8 +234,7 @@
 
 .card-body {
     padding: 20px;
-    font-size: 20px;
-} 
+}
 
 .contact-list {
     margin: 0;
@@ -214,7 +246,7 @@
     display: flex;
     align-items: center;
     margin-bottom: 15px;
-    font-size: 20px;
+    font-size: 1rem;
 }
 
 .contact-icon {
@@ -238,4 +270,31 @@
     opacity: 0.5;
     pointer-events: none;
     cursor: not-allowed;
+}
+
+/* Tab Navigation Enhancement */
+.doctor-profile-nav .nav-link {
+    color: #505965;
+    font-weight: 500;
+    padding: 10px 20px;
+    border-radius: 6px 6px 0 0;
+    transition: all 0.3s ease;
+}
+
+.doctor-profile-nav .nav-link:hover {
+    background-color: #f0f4f8;
+    color: #3498db;
+}
+
+.doctor-profile-nav .nav-link.active {
+    color: #3498db;
+    background-color: #e6f2fa;
+    border-bottom: 3px solid #3498db;
+}
+
+.tab-content-wrapper {
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 0 0 10px 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }

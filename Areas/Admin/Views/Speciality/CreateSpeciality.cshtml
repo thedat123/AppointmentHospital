@@ -1,0 +1,271 @@
+﻿@using AppointmentHospital.Models;
+@using AppointmentHospital.Helpers;
+@model Specialities;
+@{
+    var searchTerm = ViewBag.SearchTerm as string;
+    var isEdit = Model?.Id > 0;
+}
+<div class="container-fluid py-4">
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-12 col-md-10 mx-auto">
+                    <form asp-action="@(isEdit ? "EditSpeciality" : "CreateSpeciality")" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        @if(isEdit)
+                        {
+                            <input asp-for="Id" type="hidden" />
+                        }
+                        
+                        <div class="text-center mb-4">
+                            <h3 class="text-primary">@(isEdit ? "Edit" : "Add New") Speciality</h3>
+                            <p class="text-muted">Enter speciality information below</p>
+                        </div>
+
+                        <div class="row g-4">
+                            <!-- Basic Information Section -->
+                            <div class="col-12">
+                                <h5 class="text-secondary border-bottom pb-2 mb-3">
+                                    <i class="fas fa-stethoscope me-2"></i>Basic Information
+                                </h5>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="SpecialityName" class="form-control" placeholder="Speciality Name" />
+                                    <label asp-for="SpecialityName">Speciality Name</label>
+                                    <span asp-validation-for="SpecialityName" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="file" asp-for="SpecialityImage" class="form-control" accept="image/*" />
+                                    <label asp-for="SpecialityImage">Speciality Image</label>
+                                    <span asp-validation-for="SpecialityImage" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <textarea asp-for="Introduction" class="form-control" style="height: 120px" placeholder="Introduction"></textarea>
+                                    <label asp-for="Introduction">Introduction</label>
+                                    <span asp-validation-for="Introduction" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <textarea asp-for="Mission" class="form-control" style="height: 120px" placeholder="Mission"></textarea>
+                                    <label asp-for="Mission">Mission</label>
+                                    <span asp-validation-for="Mission" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <!-- Detailed Information Section -->
+                            <div class="col-12 mt-5">
+                                <h5 class="text-secondary border-bottom pb-2 mb-3">
+                                    <i class="fas fa-info-circle me-2"></i>Detailed Information
+                                </h5>
+                            </div>
+
+                            <!-- Amenities Section -->
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Amenities</label>
+                                <div class="border rounded p-3 bg-light">
+                                    <div class="mb-2">
+                                        <small class="text-muted">Enter each amenity on a separate line. Each line will be displayed as a bullet point.</small>
+                                    </div>
+                                    <textarea asp-for="Aminities" class="form-control" rows="4"
+                                        placeholder="Example:&#10;Phòng khám hiện đại&#10;Thiết bị y tế tiên tiến&#10;Khu vực chờ thoải mái&#10;Dịch vụ hỗ trợ 24/7"></textarea>
+                                    <span asp-validation-for="Aminities" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <!-- Achievement Section -->
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Achievements</label>
+                                <div class="border rounded p-3 bg-light">
+                                    <div class="mb-2">
+                                        <small class="text-muted">Enter each achievement on a separate line.</small>
+                                    </div>
+                                    <textarea asp-for="Archivement" class="form-control" rows="4"
+                                        placeholder="Example:&#10;Giải thưởng xuất sắc năm 2023&#10;Chứng nhận ISO 9001:2015&#10;Top 10 khoa tốt nhất Việt Nam&#10;Hơn 10,000 ca điều trị thành công"></textarea>
+                                    <span asp-validation-for="Archivement" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <!-- Equipment Section -->
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Equipment</label>
+                                <div class="border rounded p-3 bg-light">
+                                    <div class="mb-2">
+                                        <small class="text-muted">Enter each equipment on a separate line.</small>
+                                    </div>
+                                    <textarea asp-for="Equipment" class="form-control" rows="4"
+                                        placeholder="Example:&#10;Máy MRI 3 Tesla&#10;Máy CT Scan 64 dãy&#10;Hệ thống X-quang kỹ thuật số&#10;Thiết bị siêu âm 4D"></textarea>
+                                    <span asp-validation-for="Equipment" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <!-- Expertise Section -->
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Expertise</label>
+                                <div class="border rounded p-3 bg-light">
+                                    <div class="mb-2">
+                                        <small class="text-muted">Enter each area of expertise on a separate line.</small>
+                                    </div>
+                                    <textarea asp-for="Expertise" class="form-control" rows="4"
+                                        placeholder="Example:&#10;Điều trị bệnh tim mạch&#10;Phẫu thuật nội soi&#10;Chẩn đoán hình ảnh&#10;Can thiệp tim mạch"></textarea>
+                                    <span asp-validation-for="Expertise" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <!-- Services Section -->
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Services</label>
+                                <div class="border rounded p-3 bg-light">
+                                    <div class="mb-2">
+                                        <small class="text-muted">Enter each service on a separate line.</small>
+                                    </div>
+                                    <textarea asp-for="Service" class="form-control" rows="4"
+                                        placeholder="Example:&#10;Khám tổng quát&#10;Chẩn đoán chuyên sâu&#10;Điều trị nội trú&#10;Dịch vụ cấp cứu&#10;Tư vấn sức khỏe"></textarea>
+                                    <span asp-validation-for="Service" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <!-- Treatment Section -->
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Treatment Methods</label>
+                                <div class="border rounded p-3 bg-light">
+                                    <div class="mb-2">
+                                        <small class="text-muted">Enter each treatment method on a separate line.</small>
+                                    </div>
+                                    <textarea asp-for="Treatment" class="form-control" rows="4"
+                                        placeholder="Example:&#10;Điều trị nội khoa&#10;Phẫu thuật vi phẫu&#10;Liệu pháp vật lý&#10;Điều trị bằng thuốc&#10;Can thiệp không xâm lấn"></textarea>
+                                    <span asp-validation-for="Treatment" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-12 text-center mt-5">
+                                <button type="submit" class="btn btn-primary px-4 py-2 me-3">
+                                    <i class="fas fa-@(isEdit ? "save" : "plus-circle") me-2"></i>@(isEdit ? "Update" : "Add") Speciality
+                                </button>
+                                <a asp-action="SpecialityIndex" class="btn btn-secondary px-4 py-2">
+                                    <i class="fas fa-arrow-left me-2"></i>Back to List
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/create.css" />
+    <style>
+        .form-label.fw-bold {
+            color: #495057;
+            font-weight: 600 !important;
+        }
+        
+        .bg-light {
+            background-color: #f8f9fa !important;
+        }
+        
+        .border {
+            border: 1px solid #dee2e6 !important;
+        }
+        
+        .text-secondary {
+            color: #6c757d !important;
+        }
+        
+        textarea.form-control {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .form-floating > .form-control:focus ~ label,
+        .form-floating > .form-control:not(:placeholder-shown) ~ label {
+            opacity: .65;
+            transform: scale(.85) translateY(-0.5rem) translateX(0.15rem);
+        }
+
+        .card {
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border: 1px solid rgba(0, 0, 0, 0.125);
+        }
+
+        .text-primary {
+            color: #0d6efd !important;
+        }
+
+        .btn-primary {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+            border-color: #0a58ca;
+        }
+    </style>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Auto-resize textareas
+        document.querySelectorAll('textarea').forEach(function(textarea) {
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = this.scrollHeight + 'px';
+            });
+        });
+        
+        // Preview functionality for image upload
+        document.querySelector('input[type="file"]').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // Create image preview
+                    let existingPreview = document.querySelector('.image-preview');
+                    if (existingPreview) {
+                        existingPreview.remove();
+                    }
+                    
+                    const preview = document.createElement('div');
+                    preview.className = 'image-preview mt-2';
+                    preview.innerHTML = `
+                        <img src="${e.target.result}" alt="Preview" style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 1px solid #dee2e6;">
+                        <p class="text-muted small mt-1">Selected: ${file.name}</p>
+                    `;
+                    
+                    const fileInput = document.querySelector('input[type="file"]');
+                    fileInput.parentNode.insertAdjacentElement('afterend', preview);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Form validation enhancement
+        (function() {
+            'use strict';
+            window.addEventListener('load', function() {
+                var forms = document.getElementsByClassName('needs-validation');
+                var validation = Array.prototype.filter.call(forms, function(form) {
+                    form.addEventListener('submit', function(event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+    </script>
+}

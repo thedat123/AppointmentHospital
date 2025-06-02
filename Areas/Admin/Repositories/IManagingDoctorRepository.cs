@@ -7,7 +7,7 @@ namespace AppointmentHospital.Areas.Admin.Repositories
 {
     public interface IManagingDoctorRepository
     {
-        Task<Pagination<ManagingDoctorResponse>> GetAllDoctor(int page, string searchTerm, Specialization? specialization);
+        Task<Pagination<ManagingDoctorResponse>> GetAllDoctor(int page, string searchTerm, int specialityId);
         List<SelectListItem> GetSpecialization();
         Task CreateNewDoctorAsync(ManagingDoctorRequest request);
         Task DeleteDoctorAsync(Guid id);

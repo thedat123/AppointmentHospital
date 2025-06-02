@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading.Tasks;
 using AppointmentHospital.Models;
-using FinalProject.Entity;
+using AppointmentHospital.Helpers;
 
-namespace FinalProject.Repositories.Implement
+namespace AppointmentHospital.Repositories.Implement
 {
     public class SpecialitiesRepository : ISpecialitiesRepository
     {
@@ -13,16 +14,28 @@ namespace FinalProject.Repositories.Implement
         public SpecialitiesRepository(AppDbContext context){
             _context = context; 
         }
-        public List<Specialities> GetAllSpecialities()
+
+        public async Task<Pagination<Specialities>> GetAllSpecialitiesAsync(int page)
         {
-            // Kiểm tra xem _context có phải null không
             if (_context == null)
             {
                 throw new InvalidOperationException("DbContext is not initialized.");
             }
 
-            // Trả về danh sách các khoa, hoặc có thể trả về một danh sách rỗng nếu không có dữ liệu
-            return _context.Specialities?.ToList() ?? new List<Specialities>();
+            var query = _context.Specialities.AsQueryable();
+            return await Pagination<Specialities>.PaginatedList(query, page);
+        }
+
+        public Specialities GetSpecialityById(int specialityId)
+        {
+            var speciality = _context.Specialities
+                .Include(s => s.Doctor)
+                .FirstOrDefault(s => s.Id == specialityId);
+            if (speciality == null)
+            {
+                throw new InvalidOperationException("Speciality not found.");
+            }
+            return speciality;
         }
     }
 }

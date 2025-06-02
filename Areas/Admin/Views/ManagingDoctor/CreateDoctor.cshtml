@@ -8,7 +8,7 @@
     <div class="card">
         <div class="card-body">
             <div class="row">
-                <div class="col-12 col-md-8 mx-auto">
+                <div class="col-12 col-md-10 mx-auto">
                     <form asp-action="CreateDoctor" method="post" enctype="multipart/form-data" class="needs-validation"
                         novalidate>
                         <div class="text-center mb-4">
@@ -17,6 +17,13 @@
                         </div>
 
                         <div class="row g-4">
+                            <!-- Basic Information Section -->
+                            <div class="col-12">
+                                <h5 class="text-secondary border-bottom pb-2 mb-3">
+                                    <i class="fas fa-user me-2"></i>Basic Information
+                                </h5>
+                            </div>
+
                             <div class="col-md-6">
                                 <div class="form-floating">
                                     <input asp-for="@Model.FullName" class="form-control" placeholder="Full Name" />
@@ -24,60 +31,16 @@
                                     <span asp-validation-for="@Model.FullName" class="text-danger"></span>
                                 </div>
                             </div>
+
                             <div class="col-md-6">
                                 <div class="form-floating">
-                                    <input asp-for="@Model.EmailAddress" class="form-control"
-                                        placeholder="Email Address" />
+                                    <input asp-for="@Model.EmailAddress" type="email" class="form-control" placeholder="Email Address" />
                                     <label asp-for="@Model.EmailAddress"></label>
                                     <span asp-validation-for="@Model.EmailAddress" class="text-danger"></span>
                                 </div>
                             </div>
-
+                            
                             <div class="col-md-6">
-                                <div class="form-floating">
-                                    <input asp-for="@Model.PhoneNumber" class="form-control"
-                                        placeholder="Phone Number" />
-                                    <label asp-for="@Model.PhoneNumber"></label>
-                                    <span asp-validation-for="@Model.PhoneNumber" class="text-danger"></span>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <select asp-for="@Model.Specializaiton" class="form-select">
-                                        <option value="">Select Specialization</option>
-                                        @foreach(var specialization in specializationList){
-                                            <option value="@specialization.Value" >@specialization.Text</option>
-                                        }
-                                    </select>
-                                    <label asp-for="Specializaiton"></label>
-                                    <span asp-validation-for="Specializaiton" class="text-danger"></span>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <input asp-for="@Model.ExperienceYear" class="form-control"
-                                        placeholder="Years of Experience" />
-                                    <label asp-for="@Model.ExperienceYear"></label>
-                                    <span asp-validation-for="@Model.ExperienceYear" class="text-danger"></span>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <select asp-for="@Model.Gender" class="form-select">
-                                        <option value="">Select Gender</option>
-                                        <option value="Male">Male</option>
-                                        <option value="Female">Female</option>
-                                        <option value="Other">Other</option>
-                                    </select>
-                                    <label asp-for="@Model.Gender"></label>
-                                    <span asp-validation-for="@Model.Gender" class="text-danger"></span>
-                                </div>
-                            </div>
-
-                            <div class="col-md-12">
                                 <div class="form-floating">
                                     <input asp-for="@Model.Degree" class="form-control" placeholder="Degree" />
                                     <label asp-for="@Model.Degree"></label>
@@ -85,24 +48,123 @@
                                 </div>
                             </div>
 
-                            <div class="col-12">
+                            <div class="col-md-6">
                                 <div class="form-floating">
-                                    <textarea asp-for="@Model.Description" class="form-control" style="height: 100px"
-                                        placeholder="Description"></textarea>
-                                    <label asp-for="@Model.Description"></label>
-                                    <span asp-validation-for="@Model.Description" class="text-danger"></span>
-                                </div>
-                            </div>
-                            <div class="col-md-12">
-                                <div class="form-floating">
-                                    <input value="1999-01-01" type="date" asp-for="@Model.DateOfBirth" class="form-control" placeholder="Date of birth" />
-                                    <label asp-for="@Model.DateOfBirth"></label>
-                                    <span asp-validation-for="@Model.DateOfBirth" class="text-danger"></span>
+                                    <select asp-for="@Model.SpecialityId" class="form-select">
+                                        <option value="">Select Specialization</option>
+                                        @foreach(var specialization in specializationList){
+                                            <option value="@specialization.Value" >@specialization.Text</option>
+                                        }
+                                    </select>
+                                    <label asp-for="SpecialityId"></label>
+                                    <span asp-validation-for="SpecialityId" class="text-danger"></span>
                                 </div>
                             </div>
 
-                            <div class="col-12 text-center mt-4">
-                                <button type="submit" class="btn btn-primary px-4 py-2">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="file" asp-for="@Model.ImagePath" class="form-control" accept="image/*" />
+                                    <label asp-for="@Model.ImagePath">Doctor Photo</label>
+                                    <span asp-validation-for="@Model.ImagePath" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <!-- Professional Details Section -->
+                            <div class="col-12 mt-5">
+                                <h5 class="text-secondary border-bottom pb-2 mb-3">
+                                    <i class="fas fa-award me-2"></i>Professional Details
+                                </h5>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <textarea asp-for="@Model.Introduction" class="form-control" style="height: 120px"
+                                        placeholder="Introduction"></textarea>
+                                    <label asp-for="@Model.Introduction">Introduction</label>
+                                    <span asp-validation-for="@Model.Introduction" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <!-- Awards Section -->
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Awards & Recognition</label>
+                                <div class="border rounded p-3 bg-light">
+                                    <div class="mb-2">
+                                        <small class="text-muted">Enter each award on a separate line. Each line will be displayed as a bullet point.</small>
+                                    </div>
+                                    <textarea asp-for="@Model.Awards" class="form-control" rows="4"
+                                        placeholder="Example:&#10;Bằng khen của Bộ Y tế&#10;Danh hiệu lao động tiên tiến, chiến sĩ thi đua&#10;Giải 1 – Hội nghị Nhi khoa tập đoàn Hoàn Mỹ 2018"></textarea>
+                                    <span asp-validation-for="@Model.Awards" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <!-- Expertise Section -->
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Expertise</label>
+                                <div class="border rounded p-3 bg-light">
+                                    <div class="mb-2">
+                                        <small class="text-muted">Enter each area of expertise on a separate line.</small>
+                                    </div>
+                                    <textarea asp-for="@Model.Expertise" class="form-control" rows="4"
+                                        placeholder="Example:&#10;Điều trị bệnh tim mạch&#10;Phẫu thuật tim hở&#10;Can thiệp tim mạch qua da"></textarea>
+                                    <span asp-validation-for="@Model.Expertise" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <!-- Organization Member Section -->
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Organization Membership</label>
+                                <div class="border rounded p-3 bg-light">
+                                    <div class="mb-2">
+                                        <small class="text-muted">Enter each organization membership on a separate line.</small>
+                                    </div>
+                                    <textarea asp-for="@Model.OrganizationMember" class="form-control" rows="3"
+                                        placeholder="Example:&#10;Hội tim mạch học Việt Nam&#10;Hội nội khoa Việt Nam&#10;American Heart Association"></textarea>
+                                    <span asp-validation-for="@Model.OrganizationMember" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <!-- Research Projects Section -->
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Research Projects</label>
+                                <div class="border rounded p-3 bg-light">
+                                    <div class="mb-2">
+                                        <small class="text-muted">Enter each research project on a separate line.</small>
+                                    </div>
+                                    <textarea asp-for="@Model.ResearchProject" class="form-control" rows="4"
+                                        placeholder="Example:&#10;Nghiên cứu về bệnh tim bẩm sinh ở trẻ em&#10;Đề tài cấp bộ về điều trị suy tim&#10;Nghiên cứu ứng dụng AI trong chẩn đoán tim mạch"></textarea>
+                                    <span asp-validation-for="@Model.ResearchProject" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <!-- Training Process Section -->
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Training & Education</label>
+                                <div class="border rounded p-3 bg-light">
+                                    <div class="mb-2">
+                                        <small class="text-muted">Enter each training/education achievement on a separate line.</small>
+                                    </div>
+                                    <textarea asp-for="@Model.TrainingProcess" class="form-control" rows="4"
+                                        placeholder="Example:&#10;Tốt nghiệp Đại học Y Hà Nội&#10;Thạc sĩ Tim mạch - Đại học Y dược TP.HCM&#10;Đào tạo tại Bệnh viện Johns Hopkins, Mỹ"></textarea>
+                                    <span asp-validation-for="@Model.TrainingProcess" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <!-- Work Experience Section -->
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Work Experience</label>
+                                <div class="border rounded p-3 bg-light">
+                                    <div class="mb-2">
+                                        <small class="text-muted">Enter each work experience on a separate line.</small>
+                                    </div>
+                                    <textarea asp-for="@Model.WorkExperience" class="form-control" rows="4"
+                                        placeholder="Example:&#10;Bác sĩ Tim mạch - Bệnh viện Chợ Rẫy (2015-2020)&#10;Trưởng khoa Tim mạch - Bệnh viện ABC (2020-nay)&#10;Bác sĩ tư vấn - Phòng khám XYZ"></textarea>
+                                    <span asp-validation-for="@Model.WorkExperience" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-12 text-center mt-5">
+                                <button type="submit" class="btn btn-primary px-4 py-2 me-3">
                                     <i class="fas fa-plus-circle me-2"></i>Add Doctor
                                 </button>
                                 <a asp-action="Index" class="btn btn-secondary px-4 py-2">
@@ -119,4 +181,59 @@
 
 @section Styles {
     <link rel="stylesheet" href="~/css/create.css" />
+    <style>
+        .form-label.fw-bold {
+            color: #495057;
+            font-weight: 600 !important;
+        }
+        
+        .bg-light {
+            background-color: #f8f9fa !important;
+        }
+        
+        .border {
+            border: 1px solid #dee2e6 !important;
+        }
+        
+        .text-secondary {
+            color: #6c757d !important;
+        }
+        
+        textarea.form-control {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .form-floating > .form-control:focus ~ label,
+        .form-floating > .form-control:not(:placeholder-shown) ~ label {
+            opacity: .65;
+            transform: scale(.85) translateY(-0.5rem) translateX(0.15rem);
+        }
+    </style>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Auto-resize textareas
+        document.querySelectorAll('textarea').forEach(function(textarea) {
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = this.scrollHeight + 'px';
+            });
+        });
+        
+        // Preview functionality for image upload
+        document.querySelector('input[type="file"]').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // You can add image preview functionality here if needed
+                    console.log('Image selected:', file.name);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
 }

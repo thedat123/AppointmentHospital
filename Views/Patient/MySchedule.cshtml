@@ -1,51 +1,355 @@
 ﻿@model List<Appointment>
 @section Styles {
     <link href="~/css/my-schedule.css" rel="stylesheet" />
+    <!-- Thêm Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Thêm Google Font */
+        @@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+        .dashboard-container {
+            padding: 2rem 0;
+        }
+
+        /* Sidebar styling - cải thiện */
+        .sidebar {
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            padding: 1.8rem;
+            height: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .nav-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #f0f3f8;
+            padding-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-title i {
+            color: #4299e1;
+            margin-right: 10px;
+        }
+
+        .nav-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .nav-item {
+            margin-bottom: 0.75rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.85rem 1.2rem;
+            border-radius: 10px;
+            color: #4a5568;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .nav-link i {
+            margin-right: 12px;
+            width: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .nav-link:hover {
+            background-color: #ebf8ff;
+            color: #3182ce;
+        }
+
+        .nav-link.active {
+            background-color: #3182ce;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(49, 130, 206, 0.25);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 1.8rem;
+            background-color: white;
+            border-bottom: 1px solid #f0f3f8;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title i {
+            color: #4299e1;
+            margin-right: 12px;
+        }
+
+        /* Table styling - cải thiện */
+        .table-container {
+            padding: 0.5rem 1.5rem 1.5rem;
+        }
+
+        .table {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+            background-color: white;
+        }
+
+        .table thead th {
+            background-color: #f8fafc;
+            padding: 1rem 1rem;
+            font-weight: 600;
+            color: #64748b;
+            border-bottom: 1px solid #edf2f7;
+            text-transform: uppercase;
+            font-size: 1rem;
+            letter-spacing: 0.05em;
+        }
+
+        .table thead th i {
+            color: #4299e1;
+            margin-right: 8px;
+        }
+
+        .table tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .table tbody td {
+            padding: 1.2rem 1rem;
+            border-bottom: 1px solid #f0f3f8;
+            vertical-align: middle;
+        }
+
+        .table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Badge styling - cải thiện */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.35rem;
+            padding: 0.55rem 0.85rem;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.75rem;
+            white-space: nowrap;
+        }
+
+        .badge i {
+            font-size: 0.7rem;
+        }
+
+        .bg-warning {
+            background-color: #fffbeb;
+            color: #d97706;
+        }
+                
+        /* Empty state styling - cải thiện */
+        .empty-state {
+            text-align: center;
+            padding: 5rem 2rem;
+        }
+
+        .empty-state i {
+            font-size: 3.5rem;
+            color: #cbd5e0;
+            margin-bottom: 1.5rem;
+            opacity: 0.7;
+        }
+
+        .empty-state h4 {
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 0.75rem;
+            font-size: 1.25rem;
+        }
+
+        .empty-state p {
+            color: #718096;
+            max-width: 400px;
+            margin: 0 auto 1.5rem;
+        }
+
+        /* Action buttons - cải thiện */
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            border: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .btn-view {
+            background-color: #ebf8ff;
+            color: #3182ce;
+        }
+
+        .btn-view:hover {
+            background-color: #bee3f8;
+            transform: translateY(-2px);
+        }
+
+        .btn-cancel {
+            background-color: #fff5f5;
+            color: #e53e3e;
+        }
+
+        .btn-cancel:hover {
+            background-color: #fed7d7;
+            transform: translateY(-2px);
+        }
+
+        .btn-feedback {
+            background-color: #f0fff4;
+            color: #38a169;
+        }
+
+        .btn-feedback:hover {
+            background-color: #c6f6d5;
+            transform: translateY(-2px);
+        }
+
+        /* Cải thiện doctor avatar */
+        .doctor-avatar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            margin-right: 10px;
+        }
+
+        .doctor-avatar i {
+            font-size: 1.1rem;
+        }
+
+        .doctor-name {
+            font-weight: 500;
+            color: #2d3748;
+        }
+
+        /* Nút "Đặt lịch hẹn mới" */
+        .btn-primary {
+            background-color: #3182ce;
+            border-color: #3182ce;
+            font-weight: 500;
+            padding: 0.65rem 1.25rem;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #2b6cb0;
+            border-color: #2b6cb0;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(49, 130, 206, 0.25);
+        }
+
+        /* Responsive improvements */
+        @@media (max-width: 767.98px) {
+            .sidebar {
+                margin-bottom: 1.5rem;
+                padding: 1.3rem;
+            }
+            
+            .section-header {
+                padding: 1.3rem;
+            }
+            
+            .table-container {
+                padding: 0;
+            }
+            
+            .table {
+                display: block;
+                overflow-x: auto;
+            }
+            
+            .empty-state {
+                padding: 3rem 1rem;
+            }
+        }
+    </style>
 }
+
 <div class="dashboard-container">
     <div class="row g-4">
         <div class="col-12 col-md-3">
             <div class="sidebar">
                 <h3 class="nav-title">
-                    <i class="fas fa-filter me-2"></i>Filter Status
+                    <i class="fas fa-filter me-2"></i>Lọc theo trạng thái
                 </h3>
                 <ul class="nav-list">
                     <li class="nav-item">
                         <a class="nav-link @(string.IsNullOrEmpty(Context.Request.Query["status"]) ? "active" : "")" 
                         asp-page="/User/Order/MyOrder">
                             <i class="fas fa-th-list"></i>
-                            All Appointments
+                            Tất cả cuộc hẹn
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link @(Context.Request.Query["status"] == ((int)AppointmentHospital.EnumStatus.AppointmentStatus.Pending).ToString() ? "active" : "")" 
                         asp-route-status="@((int)AppointmentHospital.EnumStatus.AppointmentStatus.Pending)">
                             <i class="fas fa-clock"></i>
-                            Pending
+                            Đang chờ
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link @(Context.Request.Query["status"] == ((int)AppointmentHospital.EnumStatus.AppointmentStatus.Confirmed).ToString() ? "active" : "")" 
                         asp-route-status="@((int)AppointmentHospital.EnumStatus.AppointmentStatus.Confirmed)">
                             <i class="fas fa-check-circle"></i>
-                            Confirmed
+                            Đã xác nhận
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link @(Context.Request.Query["status"] == ((int)AppointmentHospital.EnumStatus.AppointmentStatus.Completed).ToString() ? "active" : "")" 
                         asp-route-status="@((int)AppointmentHospital.EnumStatus.AppointmentStatus.Completed)">
-                            <i class="fas fa-calendar-alt"></i>
-                            Completed
+                            <i class="fas fa-calendar-check"></i>
+                            Đã hoàn thành
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link @(Context.Request.Query["status"] == ((int)AppointmentHospital.EnumStatus.AppointmentStatus.Canceled).ToString() ? "active" : "")" 
                         asp-route-status="@((int)AppointmentHospital.EnumStatus.AppointmentStatus.Canceled)">
                             <i class="fas fa-times-circle"></i>
-                            Cancelled
+                            Đã hủy
                         </a>
                     </li>
-                    
                 </ul>
             </div>
         </div>
@@ -54,7 +358,7 @@
             <div class="main-content">
                 <div class="section-header">
                     <h2 class="section-title">
-                        <i class="fas fa-calendar-alt me-2"></i>My Appointments
+                        <i class="fas fa-calendar-alt me-2"></i>Lịch hẹn của tôi
                     </h2>
                 </div>
                 @if (Model != null && Model.Any())
@@ -63,12 +367,12 @@
                         <table class="table">
                             <thead>
                                 <tr>
-                                    <th><i class="fas fa-user-md me-2"></i>Doctor</th>
-                                    <th><i class="fas fa-notes-medical me-2">Specialist</i></th>
-                                    <th><i class="fas fa-clock me-2"></i>Appointment Time</th>
-                                    <th><i class="fas fa-notes-medical me-2"></i>Symptoms</th>
-                                    <th><i class="fas fa-info-circle me-2"></i>Status</th>
-                                    <th><i class="fas fa-cog me-2"></i>Action</th>
+                                    <th><i class="fas fa-user-md me-2"></i>Bác sĩ</th>
+                                    <th><i class="fas fa-stethoscope me-2"></i>Chuyên khoa</th>
+                                    <th><i class="fas fa-clock me-2"></i>Thời gian</th>
+                                    <th><i class="fas fa-notes-medical me-2"></i>Triệu chứng</th>
+                                    <th><i class="fas fa-info-circle me-2"></i>Trạng thái</th>
+                                    <th><i class="fas fa-cog me-2"></i>Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -77,23 +381,25 @@
                                     <tr>
                                         <td>
                                             <div class="d-flex align-items-center gap-2">
-                                                <i class="fas fa-user-md text-primary"></i>
-                                                <span>Dr. @appointment.Doctor.FullName</span>
+                                                <div class="doctor-avatar bg-primary bg-opacity-10 text-primary rounded-circle p-2">
+                                                    <i class="fas fa-user-md"></i>
+                                                </div>
+                                                <span class="fw-medium">BS. @appointment.Doctor.FullName</span>
                                             </div>
                                         </td>
                                         <td>
-                                            <div class="d-flex align-items-center gap-2">
-                                                <span>@appointment.Doctor.Specializaiton</span>
+                                            <div class="d-flex align-items-center">
+                                                <span>@appointment.Doctor.Specialities.SpecialityName</span>
                                             </div>
                                         </td>
                                         <td>
                                             <div class="d-flex flex-column">
-                                                <span class="fw-bold">@appointment.AppointmentTime.ToString("dddd, MMMM d, yyyy")</span>
-                                                <small class="text-muted">@appointment.AppointmentTime.ToString("h:mm tt")</small>
+                                                <span class="fw-medium">@appointment.AppointmentTime.ToString("dddd, dd/MM/yyyy")</span>
+                                                <small class="text-muted">@appointment.AppointmentTime.ToString("HH:mm")</small>
                                             </div>
                                         </td>
                                         <td>
-                                            <div class="text-truncate" style="max-width: 200px;" title="@appointment.Symptoms">
+                                            <div class="text-truncate" style="max-width: 150px;" title="@appointment.Symptoms">
                                                 @appointment.Symptoms
                                             </div>
                                         </td>
@@ -103,34 +409,48 @@
                                                 case AppointmentHospital.EnumStatus.AppointmentStatus.Pending:
                                                     <span class="badge bg-warning">
                                                         <i class="fas fa-clock"></i>
-                                                        Pending
+                                                        Đang chờ
                                                     </span>
                                                     break;
                                                 case AppointmentHospital.EnumStatus.AppointmentStatus.Confirmed:
                                                     <span class="badge bg-success">
                                                         <i class="fas fa-check-circle"></i>
-                                                        Confirmed
+                                                        Đã xác nhận
                                                     </span>
                                                     break;
                                                 case AppointmentHospital.EnumStatus.AppointmentStatus.Completed:
                                                     <span class="badge bg-success">
-                                                        <i class="fas fa-calendar-alt"></i>
-                                                        Completed
+                                                        <i class="fas fa-calendar-check"></i>
+                                                        Đã hoàn thành
                                                     </span>
                                                     break;
                                                 default:
                                                     <span class="badge bg-danger">
                                                         <i class="fas fa-times-circle"></i>
-                                                        Cancelled
+                                                        Đã hủy
                                                     </span>
                                                     break;
                                             }
                                         </td>
-                                        <td class="action"
+                                        <td class="action-cell"
                                             data-appointment-id="@appointment.AppointmentId"
-                                            data-appointment-time="@appointment.AppointmentTime.ToString("o")"
-                                            ;
-                                        >
+                                            data-appointment-time="@appointment.AppointmentTime.ToString("o")">
+                                            <div class="action-buttons">
+                                                @if(appointment.Status == AppointmentHospital.EnumStatus.AppointmentStatus.Completed)
+                                                {
+                                                    <button type="button" class="btn-action btn-view view-appointment" title="Xem chi tiết">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                }
+                                                
+                                                @if (appointment.Status == AppointmentHospital.EnumStatus.AppointmentStatus.Pending)
+                                                {
+                                                    <button type="button" class="btn-action btn-cancel cancel-appointment" title="Hủy lịch hẹn">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                }
+                                                
+                                            </div>
                                         </td>
                                     </tr>
                                 }
@@ -142,14 +462,16 @@
                 {
                     <div class="empty-state">
                         <i class="fas fa-calendar-times"></i>
-                        <h4>No Appointments Found</h4>
-                        <p>You don't have any appointments matching the selected criteria.</p>
+                        <h4>Không tìm thấy lịch hẹn</h4>
+                        <p>Bạn chưa có lịch hẹn nào phù hợp với tiêu chí đã chọn.</p>
                     </div>
                 }
             </div>
         </div>
     </div>
 </div>
+
+<!-- Modal đánh giá -->
 <div class="modal fade" id="feedbackModal" tabindex="-1" 
      aria-labelledby="feedbackModalLabel" 
      role="dialog">
@@ -158,34 +480,44 @@
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title" id="feedbackModalLabel">
                     <span class="fas fa-comment-medical me-2" role="presentation"></span>
-                    Appointment Feedback
+                    Đánh giá cuộc hẹn
                 </h5>
                 <button type="button" 
                         class="btn-close btn-close-white" 
                         data-bs-dismiss="modal"
-                        aria-label="Close feedback form"></button>
+                        aria-label="Đóng"></button>
             </div>
             <div class="modal-body">
                 <div class="appointment-summary mb-4">
-                    <div class="row">
+                    <div class="row g-4">
                         <div class="col-md-4">
-                            <div class="doctor-profile text-center">
-                                <img src="" id="doctorImage" class="rounded-circle mb-2" alt="Doctor" />
-                                <h6 id="doctorNameView" class="mb-1"></h6>
-                                <small id="doctorSpecializationView" class="text-muted"></small>
+                            <div class="doctor-profile text-center p-3 border rounded">
+                                <div class="doctor-avatar bg-primary bg-opacity-10 text-primary rounded-circle p-4 mx-auto mb-3" style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-user-md fa-2x"></i>
+                                </div>
+                                <h6 id="doctorNameView" class="mb-1 fw-bold"></h6>
+                                <span id="doctorSpecializationView" class="badge rounded-pill bg-light text-dark"></span>
                             </div>
                         </div>
                         <div class="col-md-8">
-                            <div class="appointment-details">
-                                <h6 class="text-primary mb-3">Appointment Details</h6>
+                            <div class="appointment-details p-3 border rounded h-100">
+                                <h6 class="text-primary mb-3 fw-bold">Chi tiết cuộc hẹn</h6>
                                 <div class="info-grid">
                                     <div class="info-item">
-                                        <i class="fas fa-calendar-day"></i>
-                                        <span id="appointmentDate"></span>
+                                        <i class="fas fa-calendar-day text-primary"></i>
+                                        <span id="appointmentDate" class="fw-medium"></span>
                                     </div>
                                     <div class="info-item">
-                                        <i class="fas fa-clock"></i>
-                                        <span id="appointmentTime"></span>
+                                        <i class="fas fa-clock text-primary"></i>
+                                        <span id="appointmentTime" class="fw-medium"></span>
+                                    </div>
+                                    <div class="info-item">
+                                        <i class="fas fa-map-marker-alt text-primary"></i>
+                                        <span class="fw-medium">Bệnh viện đa khoa MedicalCare</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <i class="fas fa-check-circle text-primary"></i>
+                                        <span class="fw-medium">Đã hoàn thành</span>
                                     </div>
                                 </div>
                             </div>
@@ -193,11 +525,11 @@
                     </div>
                 </div>
 
-                <form id="feedbackForm">
+                <form id="feedbackForm" class="border rounded p-4">
                     <input type="hidden" id="appointmentId" name="appointmentId" />
                     
                     <div class="rating-section mb-4">
-                        <h6 class="text-primary mb-3">Overall Rating</h6>
+                        <h6 class="text-primary mb-3 fw-bold">Đánh giá tổng quan</h6>
                         <div class="rating">
                             <i class="far fa-star" data-rating="1"></i>
                             <i class="far fa-star" data-rating="2"></i>
@@ -205,74 +537,76 @@
                             <i class="far fa-star" data-rating="4"></i>
                             <i class="far fa-star" data-rating="5"></i>
                         </div>
+                        <div class="rating-text mt-2 text-muted">Hãy chọn số sao để đánh giá</div>
                         <input type="hidden" name="rating" id="rating" required />
                     </div>
 
                     <div class="feedback-categories mb-4">
-                        <h6 class="text-primary mb-3">Rate These Aspects</h6>
+                        <h6 class="text-primary mb-3 fw-bold">Đánh giá khía cạnh</h6>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Professional Skills</label>
+                                <label class="form-label">Kỹ năng chuyên môn</label>
                                 <select class="form-select" name="professionalSkills" required>
-                                    <option value="">Select rating</option>
-                                    <option value="5">Excellent</option>
-                                    <option value="4">Very Good</option>
-                                    <option value="3">Good</option>
-                                    <option value="2">Fair</option>
-                                    <option value="1">Poor</option>
+                                    <option value="">Chọn đánh giá</option>
+                                    <option value="5">Xuất sắc</option>
+                                    <option value="4">Rất tốt</option>
+                                    <option value="3">Tốt</option>
+                                    <option value="2">Trung bình</option>
+                                    <option value="1">Kém</option>
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Communication</label>
+                                <label class="form-label">Kỹ năng giao tiếp</label>
                                 <select class="form-select" name="communication" required>
-                                    <option value="">Select rating</option>
-                                    <option value="5">Excellent</option>
-                                    <option value="4">Very Good</option>
-                                    <option value="3">Good</option>
-                                    <option value="2">Fair</option>
-                                    <option value="1">Poor</option>
+                                    <option value="">Chọn đánh giá</option>
+                                    <option value="5">Xuất sắc</option>
+                                    <option value="4">Rất tốt</option>
+                                    <option value="3">Tốt</option>
+                                    <option value="2">Trung bình</option>
+                                    <option value="1">Kém</option>
                                 </select>
                             </div>
                         </div>
                     </div>
 
                     <div class="mb-4">
-                        <h6 class="text-primary mb-3">Your Comments</h6>
+                        <h6 class="text-primary mb-3 fw-bold">Nhận xét của bạn</h6>
                         <textarea class="form-control" name="comment" rows="4" 
-                                placeholder="Share your experience with the doctor..." required></textarea>
+                                placeholder="Chia sẻ trải nghiệm của bạn với bác sĩ..." required></textarea>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-light" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-2"></i>Cancel
+                    <i class="fas fa-times me-2"></i>Hủy
                 </button>
                 <button type="button" class="btn btn-primary" id="submitFeedback">
-                    <i class="fas fa-paper-plane me-2"></i>Submit Feedback
+                    <i class="fas fa-paper-plane me-2"></i>Gửi đánh giá
                 </button>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Modal xem đánh giá -->
 <div class="modal fade" id="viewFeedbackModal" tabindex="-1" aria-labelledby="viewFeedbackModalLabel" role="dialog">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-success text-white">
                 <h5 class="modal-title" id="viewFeedbackModalLabel">
                     <i class="fas fa-comment-dots me-2"></i>
-                    Feedback Details
+                    Chi tiết đánh giá
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
             </div>
             <div class="modal-body">
-                <div class="doctor-info mb-4">
+                <div class="doctor-info mb-4 p-3 border rounded">
                     <div class="d-flex align-items-center">
-                        <div class="doctor-avatar me-3">
-                            <i class="fas fa-user-md fa-3x"></i>
+                        <div class="doctor-avatar me-3 bg-success bg-opacity-10 text-success rounded-circle p-3" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-user-md fa-2x"></i>
                         </div>
                         <div>
-                            <h6 id="doctorName" class="mb-1"></h6>
+                            <h6 id="doctorName" class="mb-1 fw-bold"></h6>
                             <p id="doctorSpecialization" class="text-muted mb-0"></p>
                         </div>
                     </div>
@@ -282,19 +616,19 @@
                     <div class="row g-3">
                         <div class="col-md-4">
                             <div class="rating-card p-3 border rounded">
-                                <h6 class="text-muted mb-2">Overall Rating</h6>
+                                <h6 class="text-muted mb-2">Đánh giá tổng quan</h6>
                                 <div id="overallRating" class="rating-stars"></div>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="rating-card p-3 border rounded">
-                                <h6 class="text-muted mb-2">Professional Skills</h6>
+                                <h6 class="text-muted mb-2">Kỹ năng chuyên môn</h6>
                                 <div id="professionalRating" class="rating-stars"></div>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="rating-card p-3 border rounded">
-                                <h6 class="text-muted mb-2">Communication</h6>
+                                <h6 class="text-muted mb-2">Kỹ năng giao tiếp</h6>
                                 <div id="communicationRating" class="rating-stars"></div>
                             </div>
                         </div>
@@ -303,10 +637,10 @@
 
                 <!-- Comments Section -->
                 <div class="comments-section">
-                    <h6 class="text-muted mb-2">Comments</h6>
+                    <h6 class="text-muted mb-2 fw-bold">Nhận xét</h6>
                     <div id="feedbackComment" class="p-3 bg-light rounded"></div>
                     <small class="text-muted mt-2 d-block">
-                        Submitted on <span id="feedbackDate"></span>
+                        Gửi vào <span id="feedbackDate"></span>
                     </small>
                 </div>
             </div>
@@ -315,27 +649,6 @@
 </div>
 
 @section Scripts {
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
     <script src="~/js/myschedule.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const connection = new signalR.HubConnectionBuilder()
-                .withUrl('/scheduleHub')
-                .build();
-
-            connection.start()
-                .then(() => {
-                    console.log("Connected to SignalR Hub");
-                })
-                .catch(err => console.error("SignalR connection error:", err));
-
-            connection.on("UpdateStatus", (appointmentId, status) => {
-                console.log(`Appointment ${appointmentId} updated to status ${status}`);
-
-                const scrollPosition = window.scrollY;
-                window.location.reload();
-                window.scrollTo(0, scrollPosition);
-            });
-        });
-    </script>
 }

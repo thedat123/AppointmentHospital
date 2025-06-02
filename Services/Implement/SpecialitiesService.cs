@@ -2,10 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using FinalProject.Entity;
-using FinalProject.Repositories;
+using AppointmentHospital.Helpers;
+using AppointmentHospital.Repositories;
+using AppointmentHospital.Models;
 
-namespace FinalProject.Services.Implement
+namespace AppointmentHospital.Services.Implement
 {
     public class SpecialitiesService : ISpecialitiesService
     {
@@ -13,8 +14,12 @@ namespace FinalProject.Services.Implement
         public SpecialitiesService(ISpecialitiesRepository specialitiesRepository){
             this.specialitiesRepository = specialitiesRepository;
         }
-        public List<Specialities> GetAllSpecialities(){
-            return specialitiesRepository.GetAllSpecialities();
+        public async Task<Pagination<Specialities>> GetAllSpecialitiesAsync(int page){
+            return await specialitiesRepository.GetAllSpecialitiesAsync(page);
+        }
+
+        public Specialities GetSpecialityById(int specialityId){
+            return specialitiesRepository.GetSpecialityById(specialityId);
         }
     }
 }

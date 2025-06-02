@@ -1,5 +1,4 @@
 using System;
-using AppointmentHospital.Entity;
 using AppointmentHospital.Helpers;
 using AppointmentHospital.Models;
 using Microsoft.EntityFrameworkCore;

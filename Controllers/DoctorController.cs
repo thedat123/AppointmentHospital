@@ -1,6 +1,5 @@
 ﻿using System.Security.Claims;
 using AppointmentHospital.Areas.Admin.Services;
-using AppointmentHospital.Entity;
 using AppointmentHospital.EnumStatus;
 using AppointmentHospital.Helpers;
 using AppointmentHospital.Models;
@@ -39,7 +38,7 @@ namespace AppointmentHospital.Controllers
             this._managingDoctorService = managingDoctorService;
         }
 
-        public async Task<IActionResult> Index(AppointmentStatus? status = AppointmentStatus.Pending, int page = 1)
+        public async Task<IActionResult> Index(AppointmentStatus? status = AppointmentStatus.Confirmed, int page = 1)
         {
             var doctorId = _contextAccessor.HttpContext?.Session.GetString("DoctorId");
 
@@ -73,7 +72,6 @@ namespace AppointmentHospital.Controllers
             return View(filteredAppointments);
         }
 
-
         [HttpPost]
         public async Task<IActionResult> UpdateStatus(Guid id, int status)
         {
@@ -100,7 +98,7 @@ namespace AppointmentHospital.Controllers
             var doctorId = _contextAccessor.HttpContext?.Session.GetString("DoctorId");
             var doctor = doctorService.getDoctorById(Guid.Parse(doctorId));
             ViewBag.DoctorName = doctor.FullName ?? "Unknown Doctor";
-            ViewBag.Speciality = doctor.Specializaiton.GetDisplayName().ToString() ?? "Unknown Speciality";
+            ViewBag.Speciality = doctor.Specialities.SpecialityName ?? "Unknown Speciality";
             ViewBag.CurrentSort = sortBy;
             ViewBag.CurrentSortOrder = sortOrder;
             ViewBag.FilterDate = filterDate?.ToString("yyyy-MM-dd");    

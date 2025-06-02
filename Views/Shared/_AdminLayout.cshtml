@@ -107,39 +107,44 @@
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm border-bottom box-shadow mb-3">
             <div class="container-fluid">
                 <a class="navbar-brand">
-                    <img src="~/images/MedicalCarelogo.png"  height="40" />MedicalCare
+                    <img src="~/images/MedicalCarelogo.png" height="40" />MedicalCare
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                        aria-expanded="false" aria-label="Chuyển đổi điều hướng">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
                             <a class="nav-link" asp-area="Admin" asp-controller="ManagingPatient" asp-action="Index">
-                                <i class="fa-solid fa-bed-pulse me-1"></i>User
+                                <i class="fa-solid fa-bed-pulse me-1"></i>Quản lý người dùng
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" asp-area="Admin" asp-controller="ManagingDoctor" asp-action="Index">
-                                <i class="fas fa-users me-1"></i>Doctor                            
+                                <i class="fas fa-users me-1"></i>Quản lý bác sĩ
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" asp-area="Admin" asp-controller="Appointment" asp-action="Index">
-                                <i class="fa-solid fa-clock-rotate-left me-1"></i>Appointment
+                                <i class="fa-solid fa-clock-rotate-left me-1"></i>Lịch hẹn
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" asp-area="Admin" asp-controller="Statistic" asp-action="Index">
-                                <i class="fa-solid fa-chart-simple me-1"></i>Statistic
+                                <i class="fa-solid fa-chart-simple me-1"></i>Thống kê
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="Admin" asp-controller="Speciality" asp-action="SpecialityIndex">
+                                <i class="fa-solid fa-stethoscope me-1"></i>Chuyên khoa
                             </a>
                         </li>
                     </ul>
                     <ul class="navbar-nav">
                         <li class="nav-item">
                             <a class="nav-link logout-link" asp-action="Login" asp-controller="Account">
-                                <i class="fas fa-sign-out-alt me-1"></i>Log out
+                                <i class="fas fa-sign-out-alt me-1"></i>Đăng xuất
                             </a>
                         </li>
                     </ul>

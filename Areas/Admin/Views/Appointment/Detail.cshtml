@@ -17,7 +17,8 @@
                             {
                                 "Pending" => "Chờ xác nhận",
                                 "Confirmed" => "Đã xác nhận",
-                                "Cancelled" => "Đã hủy",
+                                "Completed" => "Hoàn thành",
+                                "Canceled" => "Đã hủy",
                                 _ => "Không xác định"
                             };
                         }
@@ -47,7 +48,7 @@
                     </div>
                     <div class="info-body">
                         <p><strong>Họ tên:</strong> @Model.DoctorName</p>
-                        <p><strong>Chuyên khoa:</strong> @Model.Specialization</p>
+                        <p><strong>Chuyên khoa:</strong> @Model.SpecialityName</p>
                     </div>
                 </div>
             </div>
