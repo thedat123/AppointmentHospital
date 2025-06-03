@@ -18,72 +18,76 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout source code
-      uses: actions/checkout@v3
+      - name: Checkout source code
+        uses: actions/checkout@v3
 
-    - name: Setup .NET SDK
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 8.0.x
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
 
-    - name: Restore dependencies
-      run: dotnet restore
-      
-    - name: Build project
-      run: dotnet build --no-restore --configuration Release
+      - name: Restore dependencies
+        run: dotnet restore
 
-    - name: Run tests
-      run: dotnet test --no-build --verbosity normal
+      - name: Build project
+        run: dotnet build --no-restore --configuration Release
 
-    - name: Publish project
-      run: dotnet publish -c Release -o out
+      - name: Run tests
+        run: dotnet test --no-build --verbosity normal
 
-    - name: Upload published artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: publish-output
-        path: ./out
+      - name: Publish project
+        run: dotnet publish -c Release -o out
+
+      - name: Upload published artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: publish-output
+          path: ./out
 
   push:
     runs-on: ubuntu-latest
     needs: build
 
     steps:
-    - name: Checkout source code
-      uses: actions/checkout@v3
+      - name: Checkout source code
+        uses: actions/checkout@v3
 
-    - name: Download publish artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: publish-output
-        path: ./out
+      - name: Download publish artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: publish-output
+          path: ./out
 
-    - name: Login to DockerHub
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+      # Copy published output into context so Dockerfile can use it
+      - name: Copy publish output to build context
+        run: cp -r ./out ./publish
 
-    - name: Build & Push Docker image
-      run: |
-        docker build -t $IMAGE_NAME:develop-${{ github.sha }} .
-        docker tag $IMAGE_NAME:develop-${{ github.sha }} $IMAGE_NAME:develop-latest
-        docker push $IMAGE_NAME:develop-${{ github.sha }}
-        docker push $IMAGE_NAME:develop-latest
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build & Push Docker image
+        run: |
+          docker build -t ${{ env.IMAGE_NAME }}:develop-${{ github.sha }} .
+          docker tag ${{ env.IMAGE_NAME }}:develop-${{ github.sha }} ${{ env.IMAGE_NAME }}:develop-latest
+          docker push ${{ env.IMAGE_NAME }}:develop-${{ github.sha }}
+          docker push ${{ env.IMAGE_NAME }}:develop-latest
 
   deploy:
     runs-on: ubuntu-latest
     needs: push
 
     steps:
-    - name: Deploy to VPS via SSH
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.VPS_HOST }}
-        username: ${{ secrets.VPS_USER }}
-        key: ${{ secrets.VPS_SSH_KEY }}
-        script: |
-          docker pull $IMAGE_NAME:develop-latest
-          docker stop backend || true
-          docker rm backend || true
-          docker run -d --name backend -p 80:80 $IMAGE_NAME:develop-latest
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            docker pull ${{ env.IMAGE_NAME }}:develop-latest
+            docker stop backend || true
+            docker rm backend || true
+            docker run -d --name backend -p 80:80 ${{ env.IMAGE_NAME }}:develop-latest
