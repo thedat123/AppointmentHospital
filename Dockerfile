@@ -1,44 +1,18 @@
-name: Deploy C#
+# Build stage
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /app
 
-on:
-  push:
-    branches:
-      - develop
-    paths:
-      - '**/*.cs'
-      - '**/*.csproj'
-      - 'Dockerfile'
+COPY *.sln .
+COPY */*.csproj ./                       # Hoặc điều chỉnh nếu project không có folder con
+RUN for file in */*.csproj; do dotnet restore "$file"; done
 
-env:
-  IMAGE_NAME: davidvothe/appointment
+COPY . .
+RUN dotnet publish -c Release -o /app/out
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
+# Runtime stage
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
+WORKDIR /app
+COPY --from=build /app/out .
 
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-
-    - name: Docker login
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-
-    - name: Build & Push Docker image
-      run: |
-        docker build -t $IMAGE_NAME:latest .
-        docker push $IMAGE_NAME:latest
-
-    - name: Deploy to VPS via SSH
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.VPS_HOST }}
-        username: ${{ secrets.VPS_USER }}
-        key: ${{ secrets.VPS_SSH_KEY }}
-        script: |
-          docker pull $IMAGE_NAME:latest
-          docker stop backend || true
-          docker rm backend || true
-          docker run -d --name backend -p 80:80 $IMAGE_NAME:latest
+EXPOSE 80
+ENTRYPOINT ["dotnet", "AppointmentHospital.dll"]
