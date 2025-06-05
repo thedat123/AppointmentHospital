@@ -21,7 +21,7 @@ namespace AppointmentHospital.Models
         public string Gender { get; set;}
 
         [Required]
-        public int IdentificationNumber { get; set;}
+        public string IdentificationNumber { get; set;}
 
         [Required]
         [MaxLength(100)]

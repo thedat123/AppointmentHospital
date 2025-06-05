@@ -17,8 +17,8 @@ public class DoctorService : IDoctorService
         return doctorRepository.getDoctorById(doctorId);
     }
 
-    public async Task<Doctor> updateDoctor(Doctor request, string phoneNumber) {
-        return await doctorRepository.updateDoctor(request, phoneNumber);
+    public async Task<Doctor> UpdateDoctor(DoctorInfoUpdate request, string phoneNumber){
+        return await doctorRepository.UpdateDoctor(request, phoneNumber);
     }
     public async Task<List<Doctor>> getAllDoctors(string selectSpec, int page){
         return await doctorRepository.getAllDoctors(selectSpec, page);

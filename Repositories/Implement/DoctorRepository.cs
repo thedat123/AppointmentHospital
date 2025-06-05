@@ -35,16 +35,60 @@ public class DoctorRepository : IDoctorRepository
         .Include(d => d.User)
         .FirstOrDefault(d => d.DoctorId == doctorId)!;
     }
-    public async Task<Doctor> updateDoctor(Doctor request, string phoneNumber) {
-        var doctor = _context.Doctors.Where(d => d.DoctorId == request.DoctorId).FirstOrDefault();
-        doctor.FullName = request.FullName;
-        doctor.Degree = request.Degree;
-        doctor.SpecialityId = request.SpecialityId;
-        doctor.User.PhoneNumber = phoneNumber;
-        _context.Update(doctor);
+
+    public async Task<Doctor> UpdateDoctor(DoctorInfoUpdate request, string phoneNumber)
+    {
+        var doctor = await _context.Doctors
+            .Include(d => d.User) // Đảm bảo có thể cập nhật số điện thoại
+            .FirstOrDefaultAsync(d => d.DoctorId == request.DoctorId);
+
+        if (doctor == null)
+        {
+            throw new Exception("Doctor not found");
+        }
+
+        // Cập nhật các trường từ DTO nếu có giá trị
+        if (!string.IsNullOrEmpty(request.FullName))
+            doctor.FullName = request.FullName;
+
+        if (!string.IsNullOrEmpty(request.Degree))
+            doctor.Degree = request.Degree;
+
+        if (request.SpecialityId.HasValue)
+            doctor.SpecialityId = request.SpecialityId;
+
+        if (!string.IsNullOrEmpty(request.ImagePath))
+            doctor.ImagePath = request.ImagePath;
+
+        if (!string.IsNullOrEmpty(request.Introduction))
+            doctor.Introduction = request.Introduction;
+
+        if (!string.IsNullOrEmpty(request.OrganizationMember))
+            doctor.OrganizationMember = request.OrganizationMember;
+
+        if (!string.IsNullOrEmpty(request.Expertise))
+            doctor.Expertise = request.Expertise;
+
+        if (!string.IsNullOrEmpty(request.Awards))
+            doctor.Awards = request.Awards;
+
+        if (!string.IsNullOrEmpty(request.ResearchProject))
+            doctor.ResearchProject = request.ResearchProject;
+
+        if (!string.IsNullOrEmpty(request.TrainingProcess))
+            doctor.TrainingProcess = request.TrainingProcess;
+
+        if (!string.IsNullOrEmpty(request.WorkExperience))
+            doctor.WorkExperience = request.WorkExperience;
+
+        if (!string.IsNullOrEmpty(phoneNumber))
+            doctor.User.PhoneNumber = phoneNumber;
+
         await _context.SaveChangesAsync();
+
         return doctor;
     }
+
 
     public List<TimeSlot> getTimeSlotByDoctorId(Guid doctorId){
         return _context.TimeSlots.Where(x => x.DoctorId == doctorId).ToList();

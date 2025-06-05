@@ -191,9 +191,9 @@ namespace AppointmentHospital.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> UpdateProfile(Doctor request, string phoneNumber, Specialization specialization)
+        public async Task<IActionResult> UpdateProfile(DoctorInfoUpdate request, string phoneNumber)
         {
-            var doctor = await doctorService.updateDoctor(request, phoneNumber);
+            var doctor = await doctorService.UpdateDoctor(request, phoneNumber);
             ViewBag.Specializaiton = _managingDoctorService.GetSpecialization();
             ViewBag.DoctorId = doctor.DoctorId;
 

@@ -179,7 +179,7 @@ namespace AppointmentHospital.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> BookForOther(Guid DoctorId, DateTime AppointmentDateTime, string acquaintanceName, string gender, string symptom, Guid TimeSlotId, DateTime birthDate, int identificationNumber, string address)
+        public async Task<IActionResult> BookForOther(Guid DoctorId, DateTime AppointmentDateTime, string acquaintanceName, string gender, string symptom, Guid TimeSlotId, DateTime birthDate, string identificationNumber, string address, string phoneNumber)
         {
             var doctor = _doctorService.getDoctorById(DoctorId);
             if (doctor == null)
@@ -202,6 +202,7 @@ namespace AppointmentHospital.Controllers
                 DateOfBirth = birthDate,
                 Gender = gender,
                 IdentificationNumber = identificationNumber,
+                PhoneNumber = phoneNumber,
                 Address = address,
                 PatientId = Guid.Parse(patientId)
             };

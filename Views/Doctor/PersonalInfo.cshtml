@@ -8,7 +8,7 @@
     <div class="profile-header">
         <div class="profile-avatar">
             <img src="@Url.Content(string.IsNullOrEmpty(Model.ImagePath) ? "~/images/user-default.png" : $"~/images/{Model.ImagePath}")"
-                                    alt="@Model.FullName" class="w-100 h-100 object-fit-cover">
+                 alt="@Model.FullName" class="w-100 h-100 object-fit-cover">
         </div>
         <div class="profile-title">
             <h2>@Model.FullName</h2>
@@ -17,12 +17,12 @@
 
     <form id="submitForm" asp-action="UpdateProfile" method="post" class="profile-form">
         <div class="profile-section">
-            <h3>Personal Information</h3>
+            <h3>Thông tin cá nhân</h3>
             <div asp-validation-summary="All"></div>
             <div class="form-grid">
                 <input asp-for="@Model.DoctorId" class="form-control" type="hidden" value="@Model.DoctorId" />
                 <div class="form-group">
-                    <label asp-for="@Model.FullName">Full Name</label>
+                    <label asp-for="@Model.FullName">Họ và tên</label>
                     <input asp-for="@Model.FullName" class="form-control" required />
                     <span asp-validation-for="@Model.FullName"></span>
                 </div>
@@ -30,21 +30,21 @@
         </div>
 
         <div class="profile-section">
-            <h3>Professional Details</h3>
+            <h3>Thông tin chuyên môn</h3>
             <div class="form-grid">
                 <div class="form-group">
-                    <label asp-for="@Model.Specialities.SpecialityName">Specialization</label>
-                    <select asp-for="@Model.Specialities.Id" class="form-select">
-                        <option value="" disabled selected>Choose specialization</option>
+                    <label asp-for="@Model.Specialities.SpecialityName">Chuyên khoa</label>
+                    <select asp-for="@Model.Specialities.Id" class="form-select" disabled>
+                        <option value="" disabled>Chọn chuyên khoa</option>
                         @foreach (var specialization in specializations)
                         {
-                            <option value="@specialization.Value">@specialization.Text</option>
+                            <option value="@specialization.Value" selected="@(specialization.Value == Model.Specialities.Id.ToString() ? "selected" : null)">@specialization.Text</option>
                         }
                     </select>
                     <span asp-validation-for="@Model.Specialities.SpecialityName"></span>
                 </div>
                 <div class="form-group">
-                    <label asp-for="@Model.Degree">Degree</label>
+                    <label asp-for="@Model.Degree">Bằng cấp</label>
                     <input asp-for="@Model.Degree" class="form-control" />
                     <span asp-validation-for="@Model.Degree"></span>
                 </div>
@@ -52,7 +52,7 @@
         </div>
 
         <div class="profile-section">
-            <h3>Contact Information</h3>
+            <h3>Thông tin liên hệ</h3>
             <div class="form-grid">
                 <div class="form-group">
                     <label asp-for="@Model.User.Email">Email</label>
@@ -60,7 +60,7 @@
                     <span asp-validation-for="@Model.User.Email"></span>
                 </div>
                 <div class="form-group">
-                    <label asp-for="@Model.User.PhoneNumber">Phone Number</label>
+                    <label asp-for="@Model.User.PhoneNumber">Số điện thoại</label>
                     <input name="phoneNumber" value="@Model.User.PhoneNumber" class="form-control" />
                     <span asp-validation-for="@Model.User.PhoneNumber"></span>
                 </div>
@@ -69,10 +69,7 @@
 
         <div class="button-group">
             <button type="submit" id="buttonSubmit" class="btn btn-primary">
-                <i class="fas fa-save"></i> Save Changes
-            </button>
-            <button type="reset" class="btn btn-secondary">
-                <i class="fas fa-undo"></i> Reset
+                <i class="fas fa-save"></i> Lưu thay đổi
             </button>
         </div>
     </form>

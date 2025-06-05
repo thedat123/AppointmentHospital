@@ -29,13 +29,13 @@
     <div class="row g-4 mb-5">
         @{
             var statCards = new[] {
-                (AppointmentStatus.Pending, (int)ViewBag.Stats.PendingCount, "fa-clock", "#FFA500", "#FFF5E6"),
-                (AppointmentStatus.Confirmed, (int)ViewBag.Stats.ConfirmedCount, "fa-check-circle", "#10B981", "#ECFDF5"),
-                (AppointmentStatus.Completed, (int)ViewBag.Stats.CompletedCount, "fa-check-double", "#3B82F6", "#EFF6FF"),
-                (AppointmentStatus.Canceled, (int)ViewBag.Stats.CanceledCount, "fa-times-circle", "#6B7280", "#F3F4F6")
+                (AppointmentStatus.Pending, (int)ViewBag.Stats.PendingCount, "fa-clock", "#FFA500", "#FFF5E6", "Đang chờ"),
+                (AppointmentStatus.Confirmed, (int)ViewBag.Stats.ConfirmedCount, "fa-check-circle", "#10B981", "#ECFDF5", "Đã xác nhận"),
+                (AppointmentStatus.Completed, (int)ViewBag.Stats.CompletedCount, "fa-check-double", "#3B82F6", "#EFF6FF", "Hoàn thành"),
+                (AppointmentStatus.Canceled, (int)ViewBag.Stats.CanceledCount, "fa-times-circle", "#6B7280", "#F3F4F6", "Đã hủy")
             };
         }
-        @foreach (var (status, count, icon, color, bgColor) in statCards)
+        @foreach (var (status, count, icon, color, bgColor, label) in statCards)
         {
             <div class="col-md-3">
                 <div class="card stat-card h-100 border-0 shadow-sm" style="background: @bgColor">
@@ -44,7 +44,7 @@
                             <div class="icon-circle mb-3 mx-auto" style="background: @color">
                                 <i class="fas @icon text-white"></i>
                             </div>
-                            <h6 class="text-muted mb-2">@status</h6>
+                            <h6 class="text-muted mb-2">@label</h6>
                             <h3 class="fw-bold mb-0" style="color: @color">@count</h3>
                         </div>
                     </div>
@@ -64,15 +64,15 @@
                     </div>
                 </div>
                 <div class="col-md-6 text-md-end">
-                    @foreach (var (status, icon) in new[]
+                    @foreach (var (status, icon, label) in new[]
                     {
-                        (AppointmentStatus.Confirmed, "fa-check-circle"),
-                        (AppointmentStatus.Completed, "fa-check-double"),
-                        (AppointmentStatus.Canceled, "fa-times-circle")
+                        (AppointmentStatus.Confirmed, "fa-check-circle", "Đã xác nhận"),
+                        (AppointmentStatus.Completed, "fa-check-double", "Hoàn thành"),
+                        (AppointmentStatus.Canceled, "fa-times-circle", "Đã hủy")
                     })
                     {
                         <a asp-action="Index" asp-route-status="@status" class="btn @(ViewBag.SelectedStatus == status ? "btn-primary" : "btn-outline-primary") btn-rounded me-2 mb-2">
-                            <i class="fas @icon me-1"></i> @status
+                            <i class="fas @icon me-1"></i> @label
                         </a>
                     }
                 </div>
@@ -85,7 +85,7 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="bg-light">
                     <tr>
-                        <th class="border-0 ps-4">#</th>
+                        <th class="border-0 ps-4">STT</th>
                         <th class="border-0">Thời gian</th>
                         <th class="border-0">Bệnh nhân</th>
                         <th class="border-0">Triệu chứng</th>
@@ -101,7 +101,7 @@
                             <tr>
                                 <td class="ps-4">@(i + 1)</td>
                                 <td>
-                                    <div class="fw-semibold">@appointment.AppointmentTime.ToString("dddd, dd/MM/yyyy")</div>
+                                    <div class="fw-semibold">@appointment.AppointmentTime.ToString("dddd, dd/MM/yyyy", new System.Globalization.CultureInfo("vi-VN"))</div>
                                     <div class="small text-muted">@appointment.AppointmentTime.ToString("HH:mm")</div>
                                 </td>
                                 <td>
@@ -167,13 +167,13 @@
                 </tbody>
             </table>
             <div class="d-flex justify-content-center align-items-center p-4">
-                <nav aria-label="Page navigation" class="mx-auto">
+                <nav aria-label="Điều hướng trang" class="mx-auto">
                     <ul class="pagination pagination-rounded mb-0">
                         @if (Model.HasPreviousPage)
                         {
                             <li class="page-item">
-                                <a class="page-link" href="javascript:void(0)" onclick="changePage(@(Model.CurrentPage - 1))" aria-label="Trước">
-                                    <span aria-hidden="true">&laquo;</span>
+                                <a class="page-link" href="javascript:void(0)" onclick="changePage(@(Model.CurrentPage - 1))" aria-label="Trang trước">
+                                    <span aria-hidden="true">«</span>
                                 </a>
                             </li>
                         }
@@ -188,8 +188,8 @@
                         @if (Model.HasNextPage)
                         {
                             <li class="page-item">
-                                <a class="page-link" href="javascript:void(0)" onclick="changePage(@(Model.CurrentPage + 1))" aria-label="Sau">
-                                    <span aria-hidden="true">&raquo;</span>
+                                <a class="page-link" href="javascript:void(0)" onclick="changePage(@(Model.CurrentPage + 1))" aria-label="Trang sau">
+                                    <span aria-hidden="true">»</span>
                                 </a>
                             </li>
                         }
@@ -200,20 +200,19 @@
     </div>
 </div>
 
-
-<!-- View Feedback Modal -->
+<!-- Modal Xem Đánh Giá -->
 <div class="modal fade" id="viewFeedbackModal" tabindex="-1" aria-labelledby="viewFeedbackModalLabel" role="dialog">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title" id="viewFeedbackModalLabel">
-                    <i class="fas fa-comment-dots me-2"></i>Patient Feedback
+                    <i class="fas fa-comment-dots me-2"></i>Đánh giá từ bệnh nhân
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                    aria-label="Close"></button>
+                    aria-label="Đóng"></button>
             </div>
             <div class="modal-body">
-                <!-- Patient Info Section -->
+                <!-- Thông tin bệnh nhân -->
                 <div class="patient-info mb-4">
                     <div class="d-flex align-items-center">
                         <div class="patient-avatar me-3">
@@ -226,36 +225,36 @@
                     </div>
                 </div>
 
-                <!-- Ratings Grid -->
+                <!-- Lưới đánh giá -->
                 <div class="ratings-grid mb-4">
                     <div class="row g-3">
                         <div class="col-md-4">
                             <div class="rating-card p-3 border rounded bg-light">
-                                <h6 class="text-muted mb-2">Overall Rating</h6>
+                                <h6 class="text-muted mb-2">Đánh giá tổng thể</h6>
                                 <div id="overallRating" class="rating-stars"></div>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="rating-card p-3 border rounded bg-light">
-                                <h6 class="text-muted mb-2">Professional Skills</h6>
+                                <h6 class="text-muted mb-2">Kỹ năng chuyên môn</h6>
                                 <div id="professionalRating" class="rating-stars"></div>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="rating-card p-3 border rounded bg-light">
-                                <h6 class="text-muted mb-2">Communication</h6>
+                                <h6 class="text-muted mb-2">Giao tiếp</h6>
                                 <div id="communicationRating" class="rating-stars"></div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Comment Section -->
+                <!-- Phần nhận xét -->
                 <div class="comment-section">
-                    <h6 class="text-muted mb-2">Patient Comments</h6>
+                    <h6 class="text-muted mb-2">Nhận xét của bệnh nhân</h6>
                     <div id="feedbackComment" class="p-3 bg-light rounded"></div>
                     <small class="text-muted mt-2 d-block">
-                        Submitted on <span id="feedbackDate"></span>
+                        Gửi vào ngày <span id="feedbackDate"></span>
                     </small>
                 </div>
             </div>

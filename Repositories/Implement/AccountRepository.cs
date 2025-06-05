@@ -26,19 +26,45 @@ namespace AppointmentHospital.Repositories.Implement
             var user = await _userManager.FindByEmailAsync(request.Email);
             if (user == null)
             {
-                throw new Exception("Cannot find user");
+                // Trả về lỗi rõ ràng thay vì throw exception
+                return new AccountResponse
+                {
+                    Success = false,
+                    Status = 404,
+                    Message = "Cannot find user"
+                };
             }
-            if(!await _userManager.IsEmailConfirmedAsync(user))
+
+            if (!await _userManager.IsEmailConfirmedAsync(user))
             {
-                return new AccountResponse { Success = false, Status = 403 };
+                return new AccountResponse
+                {
+                    Success = false,
+                    Status = 403,
+                    Message = "Email not confirmed"
+                };
             }
-            if(!await _userManager.CheckPasswordAsync(user, request.Password))
+
+            if (!await _userManager.CheckPasswordAsync(user, request.Password))
             {
-                return new AccountResponse { Success = false, Status = 400 };
+                return new AccountResponse
+                {
+                    Success = false,
+                    Status = 400,
+                    Message = "Incorrect password"
+                };
             }
+
             var signInResult = await _signInManager.PasswordSignInAsync(user, request.Password, false, false);
-            return new AccountResponse { Status = 200, Success = true };
+            
+            return new AccountResponse
+            {
+                Success = true,
+                Status = 200,
+                Message = "Login successful"
+            };
         }
+
 
         public async Task<User> RegisterAsync(RegisterUserRequest request)
         {

@@ -52,40 +52,67 @@ namespace AppointmentHospital.Controllers
             {
                 return View(request);
             }
+
             var result = await _accountService.LoginAsync(request);
-            if (result.Status == 403)
+            Console.WriteLine(result.Message);
+            Console.WriteLine(result.Status);
+            Console.WriteLine("===================");
+
+            if (result.Status == 404 || result.Message == "Cannot find user")
             {
-                ModelState.AddModelError("", "Please confirmed before login");
-                var userFounded = await _userManager.FindByEmailAsync(request.Email);
-                await SendMail(userFounded);
+                ModelState.AddModelError("", "User not found. Please check your email address.");
                 return View(request);
-            }
-            if (result.Status == 400)
-            {
-                ModelState.AddModelError("", "Incorrect password, please write correct password");
-                return View(request);
-            }
-            if (_contextAccessor.HttpContext.User.IsInRole("Admin"))
-            {
-                return RedirectToAction("Index", "ManagingPatient", new { area = "Admin" });
-            }
-            var user = await _userManager.FindByEmailAsync(request.Email);
-            if (user != null && _contextAccessor.HttpContext != null && _contextAccessor.HttpContext.User.IsInRole("Patient"))
-            {
-                _contextAccessor.HttpContext.Session.SetString("PatientId", user.Id.ToString());
-                return RedirectToAction("Index", "Patient");
-            }
-            if (user != null && _contextAccessor.HttpContext != null && _contextAccessor.HttpContext.User.IsInRole("Doctor"))
-            {
-                _contextAccessor.HttpContext.Session.SetString("DoctorId", user.Id.ToString());
-                return RedirectToAction("Index", "Doctor");
             }
 
-            if (user != null && _contextAccessor.HttpContext != null && _contextAccessor.HttpContext.User.IsInRole("Collaborator"))
+            if (result.Status == 403)
             {
-                _contextAccessor.HttpContext.Session.SetString("CollaboratorId", user.Id.ToString());
-                return RedirectToAction("Index", "Collaborator");
+                ModelState.AddModelError("", "Please confirm your email before logging in.");
+                var userFounded = await _userManager.FindByEmailAsync(request.Email);
+                if (userFounded != null)
+                {
+                    await SendMail(userFounded);
+                }
+                return View(request);
             }
+
+            if (result.Status == 400)
+            {
+                ModelState.AddModelError("", "Incorrect password. Please try again.");
+                return View(request);
+            }
+
+            var user = await _userManager.FindByEmailAsync(request.Email);
+            if (user == null)
+            {
+                ModelState.AddModelError("", "User not found after login. Please contact support.");
+                return View(request);
+            }
+
+            var context = _contextAccessor.HttpContext;
+            if (context != null)
+            {
+                if (context.User.IsInRole("Admin"))
+                {
+                    return RedirectToAction("Index", "ManagingPatient", new { area = "Admin" });
+                }
+                if (context.User.IsInRole("Patient"))
+                {
+                    context.Session.SetString("PatientId", user.Id.ToString());
+                    return RedirectToAction("Index", "Patient");
+                }
+                if (context.User.IsInRole("Doctor"))
+                {
+                    context.Session.SetString("DoctorId", user.Id.ToString());
+                    return RedirectToAction("Index", "Doctor");
+                }
+                if (context.User.IsInRole("Collaborator"))
+                {
+                    context.Session.SetString("CollaboratorId", user.Id.ToString());
+                    return RedirectToAction("Index", "Collaborator");
+                }
+            }
+
+            ModelState.AddModelError("", "Unable to determine user role. Please contact support.");
             return View(request);
         }
 

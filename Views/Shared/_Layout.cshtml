@@ -10,131 +10,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
-    <style>
-        /* Chatbot styles */
-        .chatbot-container {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 400px;
-            height: 450px;
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-            display: flex;
-            flex-direction: column;
-            z-index: 1000;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            display: none;
-        }
-        
-        .chatbot-header {
-            background-color: #3498db;
-            color: white;
-            padding: 15px;
-            font-weight: bold;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .chatbot-close {
-            cursor: pointer;
-            font-size: 18px;
-        }
-        
-        .chatbot-messages {
-            flex-grow: 1;
-            padding: 15px;
-            overflow-y: auto;
-        }
-        
-        .message {
-            margin-bottom: 10px;
-            padding: 8px 12px;
-            border-radius: 18px;
-            max-width: 80%;
-            word-wrap: break-word;
-        }
-        
-        .bot-message {
-            background-color: #f1f0f0;
-            color: #333;
-            align-self: flex-start;
-            margin-right: auto;
-        }
-        
-        .user-message {
-            background-color: #3498db;
-            color: white;
-            align-self: flex-end;
-            margin-left: auto;
-            text-align: right;
-        }
-        
-        .chatbot-input {
-            display: flex;
-            padding: 10px;
-            border-top: 1px solid #e0e0e0;
-        }
-        
-        .chatbot-input input {
-            flex-grow: 1;
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 20px;
-            margin-right: 10px;
-        }
-        
-        .chatbot-input button {
-            background-color: #3498db;
-            color: white;
-            border: none;
-            border-radius: 20px;
-            padding: 8px 15px;
-            cursor: pointer;
-        }
-        
-        .doctor-suggestion {
-            background-color: #e8f4fd;
-            border-radius: 8px;
-            padding: 12px;
-            margin-top: 10px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .doctor-suggestion:hover {
-            background-color: #d0e8fb;
-        }
-        
-        .doctor-img {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-        
-        .symptom-option {
-            display: inline-block;
-            margin: 5px;
-            padding: 8px 12px;
-            background-color: #f1f0f0;
-            border-radius: 16px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .symptom-option:hover {
-            background-color: #e0e0e0;
-        }
-        
-        .symptom-selected {
-            background-color: #3498db;
-            color: white;
-        }
-    </style>
     @RenderSection("Styles", required: false)
 </head>
 <body>
@@ -146,7 +21,7 @@
                         <img src="~/images/MedicalCarelogo.png" alt="MedicalCare Logo" class="logo">
                     </a>
                 </div>
-                <div class="col-6">
+                <div class="col-7">
                     <div class="main-nav-links text-center">
                         <a href="@Url.Action("Index", "Patient")">Giới thiệu</a>
                         <a href="@Url.Action("Specialities", "Patient")">Chuyên khoa</a>
@@ -154,17 +29,15 @@
                         <a href="@Url.Action("Chatbot", "Patient")" class="require-auth">Hỗ trợ Chatbot</a>
                     </div>
                 </div>
-                <div class="col-5">
+                <div class="col-4">
                     <div class="search-and-actions">
                         <div class="booking-container">
                             <button type="button" id="bookingButton">Đặt lịch khám bệnh</button>
                         </div>
                         <div class="user-actions">
-                            <a href="#" class="calendar-icon">
-                                <i class="far fa-calendar" style="margin-right: 15px;"></i>
-                            </a>
                             @if (User.Identity.IsAuthenticated)
                             {
+                                <span class="user-greeting">@(User.Identity.Name?.Split('@')[0])</span>
                                 <div class="dropdown">
                                     <a href="#" class="dropdown-toggle" id="userDropdown" data-bs-toggle="dropdown">
                                         <img src="~/images/user-default.png" class="rounded-circle" width="32" height="32" alt="Người dùng">

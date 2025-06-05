@@ -19,7 +19,7 @@ namespace AppointmentHospital.DTOs.Patient
         public string Name { get; set; }
         public DateTime DateOfBirth { get; set; }
         public string Gender { get; set; }
-        public int IdentificationNumber { get; set; }
+        public string IdentificationNumber { get; set; }
         public string Address { get; set; }
     }
         public class FeedbackResponse

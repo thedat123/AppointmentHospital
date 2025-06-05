@@ -103,7 +103,11 @@ namespace AppointmentHospital.Repositories.Implement
         }
 
         public async Task<Pagination<Appointment>> GetAllPendingAppointments(int page){
-            var appointments = _context.Appointments.Where(a => a.Status == AppointmentStatus.Pending);
+            var appointments = _context.Appointments.Where(a => a.Status == AppointmentStatus.Pending || a.Status == AppointmentStatus.Confirmed || a.Status == AppointmentStatus.Canceled)
+                .Include(a => a.Doctor)
+                .Include(a => a.Patient)
+                .Include(a => a.Collaborator)
+                .OrderByDescending(a => a.AppointmentTime);
             var paginatedAppointments = await Pagination<Appointment>.PaginatedList(appointments, page);
             return paginatedAppointments;
         }
