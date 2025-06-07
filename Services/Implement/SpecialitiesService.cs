@@ -18,6 +18,10 @@ namespace AppointmentHospital.Services.Implement
             return await specialitiesRepository.GetAllSpecialitiesAsync(page);
         }
 
+        public async Task<Pagination<Specialities>> GetAllSpecialitiesAsync(int page, string searchTerm, string filter){
+            return await specialitiesRepository.GetAllSpecialitiesAsync(page, searchTerm, filter);
+        }
+
         public Specialities GetSpecialityById(int specialityId){
             return specialitiesRepository.GetSpecialityById(specialityId);
         }

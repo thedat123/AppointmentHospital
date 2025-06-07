@@ -5,7 +5,7 @@
 @{
     var specializations = ViewData["SelectSpecialization"] as List<SelectListItem>;
     var searchTerm = ViewBag.SearchTerm as string;
-    var specializationViewData = ViewData["Specialization"] as Specialization?;
+    var specializationViewData = ViewData["Specialization"] as int?;
 }
 
 <div class="card shadow-sm mb-4">
@@ -26,28 +26,21 @@
             </div>
             <div class="col-md-3">
                 <label class="form-label">Chuyên khoa</label>
-                <select name="specialization" class="form-select">
-                    @if (!specializationViewData.HasValue)
+                <select name="SpecialityId" class="form-select">
+                    @if (!specializationViewData.HasValue || specializationViewData.Value == 0)
                     {
-                        <option value="" disabled selected>Chọn chuyên khoa</option>
+                        <option value="0" selected>Tất cả chuyên khoa</option>
                     }
                     else
                     {
-                        <option value="" disabled>Chọn chuyên khoa</option>
+                        <option value="0">Tất cả chuyên khoa</option>
                     }
 
                     @foreach (var specialization in specializations)
                     {
-                        if (specializationViewData.HasValue)
+                        if (specializationViewData.HasValue && specializationViewData.Value.ToString() == specialization.Value)
                         {
-                            if (((int)specializationViewData).ToString() == specialization.Value)
-                            {
-                                <option value="@specialization.Value" selected>@specialization.Text</option>
-                            }
-                            else
-                            {
-                                <option value="@specialization.Value">@specialization.Text</option>
-                            }
+                            <option value="@specialization.Value" selected>@specialization.Text</option>
                         }
                         else
                         {
@@ -146,6 +139,24 @@
             startPage = 1;
             endPage = totalPages;
         }
+
+        // Helper method để tạo route values với filter parameters
+        object CreateRouteValues(int page)
+        {
+            var routeValues = new RouteValueDictionary { { "page", page } };
+            
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                routeValues.Add("searchTerm", searchTerm);
+            }
+            
+            if (specializationViewData.HasValue && specializationViewData.Value > 0)
+            {
+                routeValues.Add("SpecialityId", specializationViewData.Value);
+            }
+            
+            return routeValues;
+        }
     }
 
     <div class="d-flex justify-content-center align-items-center p-4">
@@ -155,7 +166,7 @@
                 @if (Model.HasPreviousPage)
                 {
                     <li class="page-item">
-                        <a class="page-link" href="@Url.Action("ListDoctor", "Patient", new { page = Model.CurrentPage - 1 })" aria-label="Trang trước">
+                        <a class="page-link" href="@Url.Action("Index", "ManagingDoctor", CreateRouteValues(Model.CurrentPage - 1))" aria-label="Trang trước">
                             <span aria-hidden="true">&laquo;</span>
                         </a>
                     </li>
@@ -164,7 +175,7 @@
                 @if (startPage > 1)
                 {
                     <li class="page-item">
-                        <a class="page-link" href="@Url.Action("ListDoctor", "Patient", new { page = 1 })">1</a>
+                        <a class="page-link" href="@Url.Action("Index", "ManagingDoctor", CreateRouteValues(1))">1</a>
                     </li>
                     @if (startPage > 2)
                     {
@@ -175,7 +186,7 @@
                 @for (int i = startPage; i <= endPage; i++)
                 {
                     <li class="page-item @(i == currentPage ? "active" : "")">
-                        <a class="page-link" href="@Url.Action("ListDoctor", "Patient", new { page = i })">@i</a>
+                        <a class="page-link" href="@Url.Action("Index", "ManagingDoctor", CreateRouteValues(i))">@i</a>
                     </li>
                 }
 
@@ -186,14 +197,14 @@
                         <li class="page-item disabled"><span class="page-link">...</span></li>
                     }
                     <li class="page-item">
-                        <a class="page-link" href="@Url.Action("ListDoctor", "Patient", new { page = totalPages })">@totalPages</a>
+                        <a class="page-link" href="@Url.Action("Index", "ManagingDoctor", CreateRouteValues(totalPages))">@totalPages</a>
                     </li>
                 }
 
                 @if (Model.HasNextPage)
                 {
                     <li class="page-item">
-                        <a class="page-link" href="@Url.Action("ListDoctor", "Patient", new { page = Model.CurrentPage + 1 })" aria-label="Trang sau">
+                        <a class="page-link" href="@Url.Action("Index", "ManagingDoctor", CreateRouteValues(Model.CurrentPage + 1))" aria-label="Trang sau">
                             <span aria-hidden="true">&raquo;</span>
                         </a>
                     </li>

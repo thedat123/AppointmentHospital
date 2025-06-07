@@ -27,6 +27,7 @@ namespace AppointmentHospital.DTOs.Patient
         [EmailAddress(ErrorMessage = "Invalid Email Address format.")]
         [Display(Name = "Email Address")]
         public string EmailAddress { get; set; }
+        public string? PhoneNumber { get; set; }
     }
     public class FeedbackRequest
     {

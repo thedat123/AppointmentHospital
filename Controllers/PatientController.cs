@@ -52,19 +52,21 @@ namespace AppointmentHospital.Controllers
         }
 
         [AllowAnonymous]
-        public async Task<IActionResult> Index(string? selectSpec, int page = 1)
+        public async Task<IActionResult> Index(string? selectSpec, int page = 1, string searchTerm = null)
         {
-            List<Doctor> doctors = await _doctorService.getAllDoctors(selectSpec, page);
+            List<Doctor> doctors = await _doctorService.getAllDoctors(selectSpec, searchTerm, page);
             ViewBag.Specialization = _managingDoctorService.GetSpecialization();
             ViewBag.SelectedSpec = selectSpec;
+            ViewBag.SearchTerm = searchTerm;
             return View(doctors);
         }
 
         [AllowAnonymous]
-        public async Task<IActionResult> ListDoctor(string? selectSpec, int page = 1)
+        public async Task<IActionResult> ListDoctor(string? selectSpec, string? searchTerm, int page = 1)
         {
-            List<Doctor> doctors = await _doctorService.getAllDoctors(selectSpec, page);
+            List<Doctor> doctors = await _doctorService.getAllDoctors(selectSpec, searchTerm, page);
             ViewBag.SelectedSpec = selectSpec;
+            ViewBag.SearchTerm = searchTerm;
             return View(doctors);
         }
 
@@ -90,6 +92,7 @@ namespace AppointmentHospital.Controllers
             if(User.HasClaim(c => c.Type == ClaimTypes.NameIdentifier))
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                Console.WriteLine($"User ID: {userId}");
                 var patient = await _patientService.GetPatientById(Guid.Parse(userId));
                 ViewBag.PatientInfo = patient;
                 return View(new PatientRequest());
@@ -367,8 +370,11 @@ namespace AppointmentHospital.Controllers
         }
 
         [AllowAnonymous]
-        public async Task<IActionResult> Specialities(int page = 1){
-            var specialities = await _specialitiesService.GetAllSpecialitiesAsync(page);
+        public async Task<IActionResult> Specialities(string searchTerm = null, int page = 1, string filter = "all")
+        {
+            var specialities = await _specialitiesService.GetAllSpecialitiesAsync(page, searchTerm, filter);
+            ViewBag.SearchTerm = searchTerm;
+            ViewBag.Filter = filter;
             return View(specialities);
         }
 
@@ -698,8 +704,6 @@ namespace AppointmentHospital.Controllers
                 return BadRequest(new { error = ex.Message });
             }
         }
-
-
     }
 
 }

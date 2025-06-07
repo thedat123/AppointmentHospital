@@ -24,7 +24,14 @@ namespace AppointmentHospital.Areas.Admin.Controllers
             ViewData["SelectSpecialization"] = _managingDoctorService.GetSpecialization();
             ViewData["Specialization"] = SpecialityId;
             ViewBag.SearchTerm = searchTerm;
-            var doctorList = await _managingDoctorService.GetAllDoctor(page ?? 1, searchTerm, SpecialityId);
+            
+            // Nếu không có searchTerm hoặc SpecialityId thì load full data
+            var doctorList = await _managingDoctorService.GetAllDoctor(
+                page ?? 1, 
+                string.IsNullOrEmpty(searchTerm) ? null : searchTerm, 
+                SpecialityId
+            );
+            
             return View(doctorList);
         }
         public IActionResult CreateDoctor()

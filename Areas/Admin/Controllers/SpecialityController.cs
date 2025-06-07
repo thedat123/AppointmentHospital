@@ -27,6 +27,8 @@ namespace AppointmentHospital.Areas.Admin.Controllers
         public async Task<IActionResult> SpecialityIndex(int? page, string searchTerm)
         {
             var specialities = await _specialityService.GetAllSpeciality(page ?? 1, searchTerm);
+            ViewBag.SearchTerm = searchTerm;
+            
             return View(specialities);
         }
 

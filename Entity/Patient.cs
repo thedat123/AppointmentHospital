@@ -16,7 +16,7 @@ namespace AppointmentHospital.Models
         public string? Address  { get; set; }
         public DateTime? DateOfBirth { get; set; }
         [MaxLength(20)]
-        public string PhoneNumber { get; set; }
+        public string? PhoneNumber { get; set; }
         [ForeignKey("PatientId")]
         public virtual User User { set;get; }
         public virtual ICollection<Appointment> Appointments { set; get; }

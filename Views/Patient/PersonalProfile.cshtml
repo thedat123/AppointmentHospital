@@ -49,8 +49,16 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-floating">
+                                    <input type="tel" class="form-control" asp-for="@Model.PhoneNumber"
+                                        value="@response.PhoneNumber" id="phoneNumber" placeholder="Số điện thoại" />
+                                    <label for="phoneNumber">Số điện thoại</label>
+                                    <span asp-validation-for="@Model.PhoneNumber"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
                                     <input type="date" class="form-control" asp-for="@Model.DateOfBirth"
-                                        value="@(response.DateOfBirth?.ToString("yyyy-MM-dd"))" id="dob" placeholder="Ngày sinh" readonly />
+                                        value="@(response.DateOfBirth?.ToString("yyyy-MM-dd"))" id="dob" placeholder="Ngày sinh"/>
                                     <label for="dob">Ngày sinh</label>
                                     <span asp-validation-for="@Model.DateOfBirth"></span>
                                 </div>
@@ -60,6 +68,7 @@
                                     <input type="text" class="form-control" asp-for="@Model.Address"
                                         value="@response.Address" id="address" placeholder="Địa chỉ" />
                                     <label for="address">Địa chỉ</label>
+                                    <span asp-validation-for="@Model.Address"></span>
                                 </div>
                             </div>
                         </div>
@@ -101,7 +110,6 @@
             </div>
         </div>
     </div>
-
 </div>
 
 @section Styles {

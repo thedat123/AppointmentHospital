@@ -54,10 +54,6 @@ namespace AppointmentHospital.Controllers
             }
 
             var result = await _accountService.LoginAsync(request);
-            Console.WriteLine(result.Message);
-            Console.WriteLine(result.Status);
-            Console.WriteLine("===================");
-
             if (result.Status == 404 || result.Message == "Cannot find user")
             {
                 ModelState.AddModelError("", "User not found. Please check your email address.");
@@ -148,7 +144,6 @@ namespace AppointmentHospital.Controllers
             }
             else
             {
-                //var user = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
                 if (info.Principal.HasClaim(c => c.Type == ClaimTypes.Email))
                 {
                     externalMail = info.Principal.FindFirstValue(ClaimTypes.Email) ?? "null";
@@ -156,61 +151,70 @@ namespace AppointmentHospital.Controllers
                 var user = await _userManager.FindByEmailAsync(externalMail);
                 if (user == null)
                 {
-                    if (user == null)
+                    // Tạo người dùng mới
+                    var newUser = new User
                     {
-                        var newUser = new User
-                        {
-                            UserName = externalMail,
-                            Email = externalMail
-                        };
-                        var createResult = await _userManager.CreateAsync(newUser);
+                        UserName = externalMail,
+                        Email = externalMail,
+                    };
+                    var createResult = await _userManager.CreateAsync(newUser);
+                    if (createResult.Succeeded)
+                    {
+                        // Tạo bản ghi Patient giống như trong Register
                         var patient = new Patient
                         {
-                            FullName = externalMail,
-                            User = newUser,
+                            FullName = newUser.UserName,
+                            Address = string.Empty, // Hoặc yêu cầu người dùng nhập sau
+                            PhoneNumber = string.Empty, // Hoặc yêu cầu người dùng nhập sau
+                            User = newUser
                         };
-                        if (createResult.Succeeded)
+                        await _userManager.AddToRoleAsync(newUser, "Patient");
+                        await _appDbContext.AddAsync(patient);
+                        await _appDbContext.SaveChangesAsync();
+
+                        var addLoginNewUserResult = await _userManager.AddLoginAsync(newUser, info);
+                        if (addLoginNewUserResult.Succeeded)
                         {
-                            await _userManager.AddToRoleAsync(newUser, "Patient");
-                            await _appDbContext.AddAsync(patient);
-                            await _appDbContext.SaveChangesAsync();
-                            var addLoginNewUserResult = await _userManager.AddLoginAsync(newUser, info);
-                            if (addLoginNewUserResult.Succeeded)
-                            {
-                                var tokenNewUser = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
-                                await _userManager.ConfirmEmailAsync(newUser, tokenNewUser);
-                                await _signInManager.SignInAsync(newUser, isPersistent: false);
-                                return RedirectToAction("Index", "Patient");
-                            }
+                            var tokenNewUser = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
+                            await _userManager.ConfirmEmailAsync(newUser, tokenNewUser);
+                            await _signInManager.SignInAsync(newUser, isPersistent: false);
+                            _contextAccessor.HttpContext.Session.SetString("PatientId", newUser.Id.ToString());
+                            return RedirectToAction("Index", "Patient");
                         }
                     }
                 }
-                //Existed user but dont confiremed email -> Confirmed email - Link
-                if (!(await _userManager.IsEmailConfirmedAsync(user)))
+                else
                 {
-                    var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                    var identityResult = await _userManager.ConfirmEmailAsync(user, token);
-                    if (!identityResult.Succeeded)
+                    // Người dùng đã tồn tại nhưng chưa xác nhận email
+                    if (!(await _userManager.IsEmailConfirmedAsync(user)))
                     {
-                        return RedirectToAction("Login");
+                        var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                        var identityResult = await _userManager.ConfirmEmailAsync(user, token);
+                        if (!identityResult.Succeeded)
+                        {
+                            return RedirectToAction("Login");
+                        }
+                        var addLoginResult = await _userManager.AddLoginAsync(user, info);
+                        await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, false);
+                        if (!addLoginResult.Succeeded)
+                        {
+                            return RedirectToAction("Login");
+                        }
+                        _contextAccessor.HttpContext.Session.SetString("PatientId", user.Id.ToString());
+                        return RedirectToAction("Index", "Patient");
                     }
-                    var addLoginResult = await _userManager.AddLoginAsync(user, info);
+                    // Người dùng đã tồn tại nhưng chưa liên kết với nhà cung cấp bên thứ ba
+                    var addResult = await _userManager.AddLoginAsync(user, info);
                     await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, false);
-                    if (!addLoginResult.Succeeded)
+                    if (!addResult.Succeeded)
                     {
                         return RedirectToAction("Login");
                     }
+                    _contextAccessor.HttpContext.Session.SetString("PatientId", user.Id.ToString());
                     return RedirectToAction("Index", "Patient");
                 }
-                //Existed user but dont link with external provider
-                var addResult = await _userManager.AddLoginAsync(user, info);
-                await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, false);
-                if (!addResult.Succeeded)
-                {
-                    return RedirectToAction("Login");
-                }
-                return RedirectToAction("Index", "Patient");
             }
+            return RedirectToAction("Login");
         }
 
         [HttpPost]

@@ -45,7 +45,6 @@
                                     <ul class="dropdown-menu dropdown-menu-end">
                                         <li><a class="dropdown-item" href="/Patient/PersonalProfile">Hồ sơ cá nhân</a></li>
                                         <li><a class="dropdown-item" href="/Patient/MySchedule">Lịch khám của tôi</a></li>
-                                        <li><a class="dropdown-item" href="/settings">Cài đặt</a></li>
                                         <li><hr class="dropdown-divider"></li>
                                         <li>
                                             <form method="post" action="/account/logout">
@@ -535,7 +534,7 @@
                 const symptomsText = selectedSymptoms.join(', ');
                 userSymptoms = [...selectedSymptoms];
                 
-                addUserMessage(`tôi đang bị: ${symptomsText} thì khả năng cao bị bệnh gì?`);
+                addUserMessage(`tôi đang bị: ${symptomsText}`);
                 
                 // Hide symptom selection interface
                 const symptomSelection = document.querySelector('.symptom-selection');

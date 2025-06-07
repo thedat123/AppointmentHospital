@@ -1,6 +1,6 @@
+@model Pagination<Doctor>
 @using AppointmentHospital.Models
 @using AppointmentHospital.Helpers
-@model Pagination<Doctor>
 @using AppointmentHospital.EnumStatus
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @inject IUrlHelper Url
@@ -16,7 +16,7 @@
                     <div class="search-container">
                         <div class="search-box">
                             <i class="bi bi-search search-icon"></i>
-                            <input type="text" id="doctorSearch" class="form-control" placeholder="Tìm kiếm theo tên bác sĩ hoặc chuyên khoa...">
+                            <input type="text" id="doctorSearch" class="form-control" placeholder="Tìm kiếm theo tên bác sĩ hoặc chuyên khoa..." value="@ViewBag.SearchTerm">
                         </div>
                     </div>
                 </div>
@@ -36,10 +36,17 @@
                     <div class="controls-wrapper">
                         <div class="filter-wrapper">
                             <div class="filter-pills" id="specialtyFilters">
-                                <button class="filter-pill active" data-specialty="all">
+                                <button class="filter-pill @(ViewBag.SelectedSpec == null ? "active" : "")" data-specialty="all">
                                     <i class="bi bi-grid-fill"></i>
                                     Tất cả
                                 </button>
+                                @foreach (var specialty in Model.Select(d => d.Specialities.SpecialityName).Distinct())
+                                {
+                                    <button class="filter-pill @(ViewBag.SelectedSpec == specialty.ToLower() ? "active" : "")" data-specialty="@specialty.ToLower()">
+                                        <i class="bi bi-tag"></i>
+                                        @specialty
+                                    </button>
+                                }
                             </div>
                         </div>
                         <div class="view-options">
@@ -76,7 +83,7 @@
                                     double averageRating = (doctor.Feedbacks != null && doctor.Feedbacks.Count > 0)
                                         ? doctor.Feedbacks.Average(f => f.Rating)
                                         : 0;
-                                    double percentage = (averageRating / 5.0) * 100; // chuyển sang phần trăm
+                                    double percentage = (averageRating / 5.0) * 100;
                                 }
                                 <div class="star-rating">
                                     <div class="star-rating-top" style="width: @percentage%"></div>
@@ -113,7 +120,7 @@
                 </div>
 
                 <!-- Empty State -->
-                <div class="state-message empty-state d-none">
+                <div class="state-message empty-state @(Model.Any() ? "d-none" : "")">
                     <i class="bi bi-search"></i>
                     <h3>Không tìm thấy bác sĩ</h3>
                     <p>Vui lòng thử lại với tiêu chí tìm kiếm khác</p>
@@ -127,7 +134,7 @@
             @{
                 int totalPages = Model.TotalPage;
                 int currentPage = Model.CurrentPage;
-                int maxDisplayedPages = 7; // Số nút phân trang hiển thị tối đa
+                int maxDisplayedPages = 8;
                 int startPage = Math.Max(1, currentPage - 3);
                 int endPage = Math.Min(totalPages, currentPage + 3);
 
@@ -149,17 +156,36 @@
                     startPage = 1;
                     endPage = totalPages;
                 }
+
+                object CreateRouteValues(int page)
+                {
+                    var routeValues = new RouteValueDictionary 
+                    { 
+                        { "page", page }
+                    };
+                    
+                    if (!string.IsNullOrEmpty(ViewBag.SearchTerm))
+                    {
+                        routeValues.Add("searchTerm", ViewBag.SearchTerm);
+                    }
+                    
+                    if (!string.IsNullOrEmpty(ViewBag.SelectedSpec))
+                    {
+                        routeValues.Add("selectSpec", ViewBag.SelectedSpec);
+                    }
+                    
+                    return routeValues;
+                }
             }
 
             <div class="d-flex justify-content-center align-items-center p-4">
                 <nav aria-label="Page navigation" class="mx-auto">
                     <ul class="pagination pagination-rounded mb-0">
-
                         @if (Model.HasPreviousPage)
                         {
                             <li class="page-item">
-                                <a class="page-link" href="@Url.Action("ListDoctor", "Patient", new { page = Model.CurrentPage - 1 })" aria-label="Trước">
-                                    <span aria-hidden="true">&laquo;</span>
+                                <a class="page-link" href="@Url.Action("ListDoctor", "Patient", CreateRouteValues(Model.CurrentPage - 1))" aria-label="Trang trước">
+                                    <span aria-hidden="true">«</span>
                                 </a>
                             </li>
                         }
@@ -167,7 +193,7 @@
                         @if (startPage > 1)
                         {
                             <li class="page-item">
-                                <a class="page-link" href="@Url.Action("ListDoctor", "Patient", new { page = 1 })">1</a>
+                                <a class="page-link" href="@Url.Action("ListDoctor", "Patient", CreateRouteValues(1))">1</a>
                             </li>
                             @if (startPage > 2)
                             {
@@ -178,7 +204,7 @@
                         @for (int i = startPage; i <= endPage; i++)
                         {
                             <li class="page-item @(i == currentPage ? "active" : "")">
-                                <a class="page-link" href="@Url.Action("ListDoctor", "Patient", new { page = i })">@i</a>
+                                <a class="page-link" href="@Url.Action("ListDoctor", "Patient", CreateRouteValues(i))">@i</a>
                             </li>
                         }
 
@@ -189,19 +215,18 @@
                                 <li class="page-item disabled"><span class="page-link">...</span></li>
                             }
                             <li class="page-item">
-                                <a class="page-link" href="@Url.Action("ListDoctor", "Patient", new { page = totalPages })">@totalPages</a>
+                                <a class="page-link" href="@Url.Action("ListDoctor", "Patient", CreateRouteValues(totalPages))">@totalPages</a>
                             </li>
                         }
 
                         @if (Model.HasNextPage)
                         {
                             <li class="page-item">
-                                <a class="page-link" href="@Url.Action("ListDoctor", "Patient", new { page = Model.CurrentPage + 1 })" aria-label="Sau">
-                                    <span aria-hidden="true">&raquo;</span>
+                                <a class="page-link" href="@Url.Action("ListDoctor", "Patient", CreateRouteValues(Model.CurrentPage + 1))" aria-label="Trang sau">
+                                    <span aria-hidden="true">»</span>
                                 </a>
                             </li>
                         }
-
                     </ul>
                 </nav>
             </div>
@@ -209,11 +234,10 @@
     </div>
 </div>
 
-
 @section Styles {
     <style>
+        /* Existing styles remain unchanged */
         :root {
-            /* Base colors */
             --primary-50: #eff6ff;
             --primary-100: #dbeafe;
             --primary-200: #bfdbfe;
@@ -224,13 +248,9 @@
             --primary-700: #1d4ed8;
             --primary-800: #1e40af;
             --primary-900: #1e3a8a;
-            
-            /* Supporting colors */
             --success: #10b981;
             --warning: #f59e0b;
             --danger: #ef4444;
-            
-            /* Neutrals */
             --gray-50: #f9fafb;
             --gray-100: #f3f4f6;
             --gray-200: #e5e7eb;
@@ -241,26 +261,21 @@
             --gray-700: #374151;
             --gray-800: #1f2937;
             --gray-900: #111827;
-            
-            /* Shadows */
             --shadow-sm: 0 1px 2px 0 rgba(0,0,0,0.05);
             --shadow: 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px 0 rgba(0,0,0,0.06);
             --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
             --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
             --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
-            
-            /* Border radius */
-            --radius-sm: 0.125rem;  /* 2px */
-            --radius: 0.25rem;      /* 4px */
-            --radius-md: 0.375rem;  /* 6px */
-            --radius-lg: 0.5rem;    /* 8px */
-            --radius-xl: 0.75rem;   /* 12px */
-            --radius-2xl: 1rem;     /* 16px */
-            --radius-3xl: 1.5rem;   /* 24px */
-            --radius-full: 9999px;  /* Fully rounded */
+            --radius-sm: 0.125rem;
+            --radius: 0.25rem;
+            --radius-md: 0.375rem;
+            --radius-lg: 0.5rem;
+            --radius-xl: 0.75rem;
+            --radius-2xl: 1rem;
+            --radius-3xl: 1.5rem;
+            --radius-full: 9999px;
         }
 
-        /* Hero Section */
         .hero-section {
             background: linear-gradient(135deg, var(--primary-600), var(--primary-800));
             padding: 4rem 0;
@@ -268,7 +283,6 @@
             position: relative;
             overflow: hidden;
             margin-bottom: 2rem;
-            border-radius: 0 0 var(--radius-3xl) var(--radius-3xl);
             box-shadow: var(--shadow-lg);
         }
 
@@ -350,13 +364,11 @@
             filter: drop-shadow(0 20px 13px rgba(0, 0, 0, 0.08));
         }
 
-        /* Main Content */
         .main-content {
             position: relative;
             padding-bottom: 4rem;
         }
 
-        /* Filter Section */
         .filter-section {
             margin-bottom: 2rem;
         }
@@ -469,7 +481,6 @@
             border-color: var(--primary-600);
         }
 
-        /* Doctors Grid */
         .doctors-wrapper {
             position: relative;
             min-height: 300px;
@@ -593,14 +604,6 @@
             text-overflow: ellipsis;
         }
 
-        .rating, .experience {
-            display: flex;
-            align-items: center;
-            gap: 0.375rem;
-            color: var(--gray-700);
-            font-size: 0.875rem;
-        }
-
         .star-rating {
             position: relative;
             display: flex;
@@ -610,7 +613,7 @@
         }
 
         .star-rating-top {
-            color: #ffc107; /* màu sao vàng */
+            color: #ffc107;
             position: absolute;
             z-index: 1;
             overflow: hidden;
@@ -618,27 +621,19 @@
         }
 
         .star-rating-bottom {
-            color: #e4e5e9; /* màu sao xám */
+            color: #e4e5e9;
             z-index: 0;
         }
 
-        /* Dùng biểu tượng sao của Bootstrap Icons hoặc Font Awesome */
         .star-rating-top::before,
         .star-rating-bottom::before {
-            content: "★★★★★"; /* 5 sao */
+            content: "★★★★★";
         }
+
         .rating-text {
             margin-left: 8px;
             color: #333;
             font-size: 0.95rem;
-        }
-
-        .rating i {
-            color: var(--warning);
-        }
-
-        .rating span {
-            font-weight: 600;
         }
 
         .doctor-actions {
@@ -672,24 +667,11 @@
             border-color: var(--primary-700);
         }
 
-        .btn-outline-primary {
-            background: transparent;
-            color: var(--primary-600);
-            border: 1px solid var(--primary-200);
-        }
-
-        .btn-outline-primary:hover {
-            background: var(--primary-50);
-            color: var(--primary-700);
-            border-color: var(--primary-300);
-        }
-
-        /* States */
         .state-message {
             text-align: center;
             padding: 4rem 2rem;
             background: white;
-            border-radius: var(--radius-xl);
+            border-radius: var(--radius-xl crazy);
             box-shadow: var(--shadow);
             display: flex;
             flex-direction: column;
@@ -717,7 +699,6 @@
             margin-top: 0.5rem;
         }
 
-        /* Responsive Design for Introduction */
         @@media (max-width: 576px) {
             .doctor-introduction {
                 padding: 0.5rem;
@@ -729,7 +710,6 @@
             }
         }
 
-        /* Responsive Design */
         @@media (max-width: 992px) {
             .hero-title {
                 font-size: 2rem;
@@ -797,528 +777,137 @@
 
 @section Scripts {
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elements
+            const doctorSearch = document.getElementById('doctorSearch');
+            const filterPills = document.querySelectorAll('.filter-pill');
+            const viewButtons = document.querySelectorAll('.btn-view');
+            const doctorsContainer = document.getElementById('doctorsContainer');
+            const resetSearchBtn = document.querySelector('.btn-reset-search');
+            const loadingState = document.querySelector('.loading-state');
+            const emptyState = document.querySelector('.empty-state');
 
-    // Authentication check function
-        function showLoginAlert() {
-            Swal.fire({
-                title: 'Yêu cầu đăng nhập',
-                text: 'Vui lòng đăng nhập để sử dụng tính năng này',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Đăng nhập',
-                cancelButtonText: 'Hủy'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = '/Account/Login';
-                }
+            // Debounce function for search input
+            function debounce(func, wait) {
+                let timeout;
+                return function(...args) {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => func(...args), wait);
+                };
+            }
+
+            // Update URL with search and filter parameters
+            function updateUrl(searchTerm, specialty) {
+                const params = new URLSearchParams();
+                params.set('page', '1'); // Reset to page 1 on new search/filter
+                if (searchTerm) params.set('searchTerm', searchTerm);
+                if (specialty && specialty !== 'all') params.set('selectSpec', specialty);
+                window.location.href = `/Patient/ListDoctor?${params.toString()}`;
+            }
+
+            // Handle search input
+            doctorSearch.addEventListener('input', debounce(function() {
+                const searchTerm = doctorSearch.value.trim();
+                const activeSpecialty = document.querySelector('.filter-pill.active')?.dataset.specialty || 'all';
+                updateUrl(searchTerm, activeSpecialty);
+            }, 500));
+
+            // Handle filter pill click
+            filterPills.forEach(pill => {
+                pill.addEventListener('click', function() {
+                    filterPills.forEach(p => p.classList.remove('active'));
+                    pill.classList.add('active');
+                    const specialty = pill.dataset.specialty;
+                    const searchTerm = doctorSearch.value.trim();
+                    updateUrl(searchTerm, specialty);
+                });
             });
-        }
 
-        // Nếu người dùng chưa đăng nhập => gắn sự kiện cho các liên kết cần bảo vệ
-        @if (!User.Identity.IsAuthenticated)
-        {
-            <text>
-                document.addEventListener('DOMContentLoaded', function () {
-                    document.querySelectorAll('.require-auth').forEach(function (el) {
-                        el.addEventListener('click', function (e) {
+            // Handle reset search
+            if (resetSearchBtn) {
+                resetSearchBtn.addEventListener('click', function() {
+                    doctorSearch.value = '';
+                    updateUrl('', 'all');
+                });
+            }
+
+            // View toggle
+            viewButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    viewButtons.forEach(b => b.classList.remove('active'));
+                    button.classList.add('active');
+                    const viewType = button.dataset.view;
+                    doctorsContainer.className = viewType === 'grid' ? 'doctors-grid' : 'doctors-list';
+                });
+            });
+
+            // Lazy loading images
+            if ('IntersectionObserver' in window) {
+                const imageObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const img = entry.target;
+                            if (img.dataset.src) {
+                                img.src = img.dataset.src;
+                                img.removeAttribute('data-src');
+                            }
+                            imageObserver.unobserve(img);
+                        }
+                    });
+                }, { rootMargin: '50px 0px', threshold: 0.1 });
+
+                document.querySelectorAll('.doctor-image img').forEach(img => imageObserver.observe(img));
+            }
+
+            // Animate doctor cards
+            if ('IntersectionObserver' in window) {
+                const animateObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('animate-in');
+                            animateObserver.unobserve(entry.target);
+                        }
+                    });
+                }, { rootMargin: '0px', threshold: 0.1 });
+
+                document.querySelectorAll('.doctor-card').forEach(card => animateObserver.observe(card));
+            }
+
+            // Animation styles
+            const styleSheet = document.createElement('style');
+            styleSheet.textContent = `
+                @@keyframes fadeInUp {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .doctor-card { opacity: 0; }
+                .doctor-card.animate-in { animation: fadeInUp 0.5s ease forwards; }
+            `;
+            document.head.appendChild(styleSheet);
+
+            // Authentication check
+            @if (!User.Identity.IsAuthenticated)
+            {
+                <text>
+                    document.querySelectorAll('.require-auth').forEach(el => {
+                        el.addEventListener('click', e => {
                             e.preventDefault();
-                            showLoginAlert();
+                            Swal.fire({
+                                title: 'Yêu cầu đăng nhập',
+                                text: 'Vui lòng đăng nhập để sử dụng tính năng này',
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonText: 'Đăng nhập',
+                                cancelButtonText: 'Hủy'
+                            }).then(result => {
+                                if (result.isConfirmed) {
+                                    window.location.href = '/Account/Login';
+                                }
+                            });
                         });
                     });
-                });
-            </text>
-        }
-    document.addEventListener('DOMContentLoaded', function() {
-    // Elements
-    const doctorSearch = document.getElementById('doctorSearch');
-    const specialtyFilters = document.getElementById('specialtyFilters');
-    const filterPills = document.querySelectorAll('.filter-pill');
-    const doctorCards = document.querySelectorAll('.doctor-card');
-    const viewButtons = document.querySelectorAll('.btn-view');
-    const doctorsContainer = document.getElementById('doctorsContainer');
-    const loadingState = document.querySelector('.loading-state');
-    const emptyState = document.querySelector('.empty-state');
-    const resetSearchBtn = document.querySelector('.btn-reset-search');
-
-    // Set up specialty filters container with horizontal scrolling
-    function setupSpecialtyFiltersContainer() {
-        // Create a container for horizontal scrolling with fixed width
-        const filtersScrollContainer = document.createElement('div');
-        filtersScrollContainer.className = 'specialty-filters-scroll';
-        
-        // Create an inner container for the filters
-        const filtersInnerContainer = document.createElement('div');
-        filtersInnerContainer.className = 'specialty-filters-inner';
-        
-        // Move existing specialty filters into the inner container
-        if (specialtyFilters.parentNode) {
-            specialtyFilters.parentNode.insertBefore(filtersScrollContainer, specialtyFilters);
-            filtersInnerContainer.appendChild(specialtyFilters);
-            filtersScrollContainer.appendChild(filtersInnerContainer);
-        }
-        
-        // Add styles for horizontal scrolling and fixed width
-        const styleSheet = document.createElement('style');
-        styleSheet.textContent += `
-            .specialty-filters-scroll {
-                width: 85%;
-                max-width: 100vw;
-                overflow-x: auto;
-                position: relative;
-                scrollbar-width: thin;
-                -ms-overflow-style: -ms-autohiding-scrollbar;
-                padding: 10px 0;
-                margin: 0;
-                box-sizing: border-box;
-            }
-            
-            .specialty-filters-scroll::-webkit-scrollbar {
-                height: 4px;
-            }
-            
-            .specialty-filters-scroll::-webkit-scrollbar-thumb {
-                background-color: #ccc;
-                border-radius: 3px;
-            }
-            
-            .specialty-filters-inner {
-                display: inline-block;
-                white-space: nowrap;
-                padding: 0 5px;
-                box-sizing: border-box;
-            }
-            
-            #specialtyFilters {
-                display: inline-flex;
-                flex-wrap: nowrap;
-                gap: 10px;
-                padding: 0;
-                margin: 0;
-            }
-            
-            .filter-pill {
-                display: inline-block;
-                padding: 8px 16px;
-                border-radius: 50px;
-                border: 1px solid #ddd;
-                background-color: #f8f9fa;
-                cursor: pointer;
-                transition: all 0.3s ease;
-                white-space: nowrap;
-                text-align: center;
-            }
-            
-            .filter-pill:hover {
-                background-color: #e9ecef;
-            }
-            
-            .filter-pill.active {
-                background-color: #007bff;
-                color: white;
-                border-color: #007bff;
-            }
-        `;
-        document.head.appendChild(styleSheet);
-    }
-
-    function changePage(page) {
-        localStorage.setItem('scrollPosition', window.scrollY);
-        window.location.href = "/Patient/ListDoctor?page=" + page;
-    }
-
-    // Create specialty filters dynamically based on available specialties
-    function createSpecialtyFilters() {
-        // Get unique specialties from doctor cards
-        const specialties = new Set();
-        doctorCards.forEach(card => {
-            if (card.dataset.specialty) {
-                specialties.add(card.dataset.specialty);
+                </text>
             }
         });
-
-        // Add "All" button if it doesn't exist
-        if (!specialtyFilters.querySelector('[data-specialty="all"]')) {
-            const allButton = document.createElement('button');
-            allButton.className = 'filter-pill active';
-            allButton.dataset.specialty = 'all';
-            allButton.innerHTML = '<i class="bi bi-grid-fill"></i> Tất cả';
-            specialtyFilters.appendChild(allButton);
-            
-            allButton.addEventListener('click', (e) => {
-                handleFilterClick(e);
-            });
-        }
-
-        // Add each specialty as a filter pill
-        specialties.forEach(specialty => {
-            if (specialty && !specialtyFilters.querySelector(`[data-specialty="${specialty}"]`)) {
-                const specialtyButton = document.createElement('button');
-                specialtyButton.className = 'filter-pill';
-                specialtyButton.dataset.specialty = specialty;
-
-                // Get display name if possible, otherwise capitalize first letter
-                const displayName = getDisplayNameForSpecialty(specialty);
-                specialtyButton.innerHTML = `<i class="bi bi-tag"></i> ${displayName}`;
-                
-                specialtyFilters.appendChild(specialtyButton);
-                
-                specialtyButton.addEventListener('click', (e) => {
-                    handleFilterClick(e);
-                });
-            }
-        });
-    }
-
-    // Helper function to get display name for specialty
-    function getDisplayNameForSpecialty(specialty) {
-        // Find a doctor with this specialty to get the display name
-        const doctorWithSpecialty = Array.from(doctorCards).find(card => 
-            card.dataset.specialty === specialty
-        );
-        
-        if (doctorWithSpecialty) {
-            const specialtyElement = doctorWithSpecialty.querySelector('.doctor-specialty');
-            if (specialtyElement) {
-                return specialtyElement.textContent.trim();
-            }
-        }
-        
-        // Default to capitalized specialty name
-        return specialty.charAt(0).toUpperCase() + specialty.slice(1);
-    }
-
-    // Handle filter pill click with toggle functionality
-    function handleFilterClick(e) {
-        const pill = e.currentTarget;
-        const clickedSpecialty = pill.dataset.specialty;
-        
-        // If clicked on "All" button
-        if (clickedSpecialty === 'all') {
-            // Deactivate all other pills
-            filterPills.forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
-            // Activate only "All" button
-            pill.classList.add('active');
-        } else {
-            // Always deactivate "All" button when a specific specialty is clicked
-            document.querySelector('.filter-pill[data-specialty="all"]').classList.remove('active');
-            
-            // Toggle the clicked pill
-            pill.classList.toggle('active');
-            
-            // If no specific specialty pills are active, re-activate "All"
-            const activeSpecialtyPills = document.querySelectorAll('.filter-pill.active:not([data-specialty="all"])');
-            if (activeSpecialtyPills.length === 0) {
-                document.querySelector('.filter-pill[data-specialty="all"]').classList.add('active');
-            }
-        }
-        
-        filterDoctors();
-    }
-
-    // Search functionality with debounce
-    function debounce(func, wait) {
-        let timeout;
-        return function(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    }
-
-    // Improved filter function that handles accented Vietnamese characters
-    function normalizeVietnamese(str) {
-        return str.normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .toLowerCase();
-    }
-
-    function filterDoctors() {
-        const searchTerm = doctorSearch.value.trim();
-        console.log('Search term:', searchTerm);
-        const normalizedSearchTerm = normalizeVietnamese(searchTerm.toLowerCase());
-        const activePills = document.querySelectorAll('.filter-pill.active');
-        const isAllActive = document.querySelector('.filter-pill[data-specialty="all"].active') !== null;
-        
-        // Get all active specialties
-        const activeSpecialties = new Set();
-        activePills.forEach(pill => {
-            console.log('Active pill:', pill.dataset.specialty);
-            const specialty = pill.dataset.specialty;
-            if (specialty !== 'all') {
-                activeSpecialties.add(specialty);
-            }
-        });
-        
-        let visibleCount = 0;
-
-        // Show loading state briefly for better UX
-        if (searchTerm.length > 0) {
-            loadingState.classList.remove('d-none');
-            doctorsContainer.classList.add('d-none');
-            emptyState.classList.add('d-none');
-            
-            // Simulate loading delay for better UX
-            setTimeout(() => {
-                performFilter();
-            }, 300);
-        } else {
-            performFilter();
-        }
-
-        function performFilter() {
-            doctorCards.forEach(card => {
-                console.log('Doctor card:', card.querySelector('.doctor-name'));
-                const doctorName = normalizeVietnamese(card.querySelector('.doctor-name').textContent);
-                const doctorSpecialty = card.dataset.specialty;
-                
-                // Get specialty display name for searching
-                const specialtyElement = card.querySelector('.doctor-specialty');
-                const specialtyDisplayName = specialtyElement ? 
-                    normalizeVietnamese(specialtyElement.textContent) : '';
-                
-                // Check for matches in multiple fields
-                const matchesSearch = normalizedSearchTerm === '' || 
-                                     doctorName.includes(normalizedSearchTerm) || 
-                                     specialtyDisplayName.includes(normalizedSearchTerm);
-                                     
-                // A doctor matches if either "All" is active or its specialty is in the active specialties
-                const matchesSpecialty = isAllActive || activeSpecialties.has(doctorSpecialty);
-
-                if (matchesSearch && matchesSpecialty) {
-                    card.style.display = '';
-                    // Apply a staggered animation
-                    card.style.animationDelay = `${visibleCount * 0.05}s`;
-                    visibleCount++;
-                    
-                    // Highlight matching text if search term exists
-                    if (normalizedSearchTerm) {
-                        highlightMatches(card, searchTerm);
-                    } else {
-                        // Remove highlights if no search term
-                        removeHighlights(card);
-                    }
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-
-            // Toggle states
-            loadingState.classList.add('d-none');
-            
-            if (visibleCount === 0) {
-                emptyState.classList.remove('d-none');
-                doctorsContainer.classList.add('d-none');
-            } else {
-                emptyState.classList.add('d-none');
-                doctorsContainer.classList.remove('d-none');
-            }
-        }
-    }
-
-    // Highlight matching text in doctor cards
-    function highlightMatches(card, searchTerm) {
-        // First remove any existing highlights
-        removeHighlights(card);
-
-        if (!searchTerm) return;
-
-        const elements = [
-            card.querySelector('.doctor-name'),
-            card.querySelector('.doctor-description')
-        ];
-
-        elements.forEach(element => {
-            if (!element) return;
-            
-            const text = element.textContent;
-            const regex = new RegExp(escapeRegExp(searchTerm), 'gi');
-            
-            if (regex.test(text)) {
-                element.innerHTML = text.replace(regex, match => 
-                    `<span class="highlight">${match}</span>`
-                );
-            }
-        });
-    }
-
-    // Remove highlights
-    function removeHighlights(card) {
-        const highlightedElements = card.querySelectorAll('.highlight');
-        highlightedElements.forEach(el => {
-            const parent = el.parentNode;
-            if (parent) {
-                parent.textContent = parent.textContent;
-            }
-        });
-    }
-
-    // Helper to escape regex special characters
-    function escapeRegExp(string) {
-        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    }
-
-    // Reset search
-    function resetSearch() {
-        doctorSearch.value = '';
-        // Clear all active pills and set 'all' to active
-        document.querySelectorAll('.filter-pill').forEach(pill => {
-            pill.classList.remove('active');
-        });
-        document.querySelector('.filter-pill[data-specialty="all"]').classList.add('active');
-        removeAllHighlights();
-        filterDoctors();
-    }
-
-    function removeAllHighlights() {
-        doctorCards.forEach(card => removeHighlights(card));
-    }
-
-    // Event listeners
-    doctorSearch.addEventListener('input', debounce(filterDoctors, 300));
-    
-    // Add keydown event to handle Enter key on search input
-    doctorSearch.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            filterDoctors();
-        }
-    });
-    
-    // Add search icon click handler if present
-    const searchIcon = document.querySelector('.search-icon');
-    if (searchIcon) {
-        searchIcon.addEventListener('click', function() {
-            filterDoctors();
-        });
-    }
-    
-    if (resetSearchBtn) {
-        resetSearchBtn.addEventListener('click', resetSearch);
-    }
-
-    // Initialize filter pills event listeners
-    filterPills.forEach(pill => {
-        pill.addEventListener('click', (e) => {
-            handleFilterClick(e);
-        });
-    });
-
-    // View toggle
-    viewButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            viewButtons.forEach(b => b.classList.remove('active'));
-            button.classList.add('active');
-            
-            const viewType = button.dataset.view;
-            if (viewType === 'grid') {
-                doctorsContainer.className = 'doctors-grid';
-            } else {
-                doctorsContainer.className = 'doctors-list';
-            }
-        });
-    });
-
-    // Lazy loading images with Intersection Observer
-    if ('IntersectionObserver' in window) {
-        const imageObserver = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const img = entry.target;
-                    const src = img.getAttribute('src');
-                    if (src && src.includes('user-default.png')) {
-                        // Already loaded with default image
-                        observer.unobserve(img);
-                        return;
-                    }
-                    
-                    if (img.dataset.src) {
-                        img.src = img.dataset.src;
-                        img.removeAttribute('data-src');
-                    }
-                    observer.unobserve(img);
-                }
-            });
-        }, {
-            rootMargin: '50px 0px',
-            threshold: 0.1
-        });
-
-        document.querySelectorAll('.doctor-image img').forEach(img => {
-            imageObserver.observe(img);
-        });
-    }
-
-    // Animate doctor cards when they come into view
-    if ('IntersectionObserver' in window) {
-        const animateObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('animate-in');
-                    animateObserver.unobserve(entry.target);
-                }
-            });
-        }, {
-            rootMargin: '0px',
-            threshold: 0.1
-        });
-
-        doctorCards.forEach(card => {
-            animateObserver.observe(card);
-        });
-    }
-
-    // Add animation and highlight styles dynamically
-    const styleSheet = document.createElement('style');
-    styleSheet.textContent = `
-        @@keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .doctor-card {
-            opacity: 0;
-        }
-        
-        .doctor-card.animate-in {
-            animation: fadeInUp 0.5s ease forwards;
-        }
-        
-        .highlight {
-            background-color: #ffeb3b;
-            padding: 0 2px;
-            border-radius: 2px;
-            font-weight: bold;
-        }
-    `;
-    document.head.appendChild(styleSheet);
-
-    // Make sure specialty filters container takes full width
-    function ensureFullWidth() {
-        const containerWidth = document.querySelector('.specialty-filters-scroll').offsetWidth;
-        document.documentElement.style.setProperty('--filter-container-width', containerWidth + 'px');
-    }
-
-    // Run on load and window resize
-    window.addEventListener('resize', ensureFullWidth);
-    
-    // Initialize fixed-width specialty filters container
-    setupSpecialtyFiltersContainer();
-    
-    // Initialize specialty filters
-    createSpecialtyFilters();
-    
-    // Ensure proper width calculation after DOM is fully loaded
-    setTimeout(ensureFullWidth, 0);
-});
     </script>
 }

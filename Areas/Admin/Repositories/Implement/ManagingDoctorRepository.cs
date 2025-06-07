@@ -21,27 +21,37 @@ namespace AppointmentHospital.Areas.Admin.Repositories.Implement
         }
         public async Task<Pagination<ManagingDoctorResponse>> GetAllDoctor(int page, string searchTerm, int specialityId)
         {
-            var query = _context.Doctors.AsQueryable();
-            if (!string.IsNullOrEmpty(searchTerm) && specialityId == 0)
+            // Include các quan hệ cần thiết
+            var query = _context.Doctors
+                .Include(d => d.User)
+                .Include(d => d.Specialities)
+                .AsQueryable();
+
+            // Tìm theo tên gần đúng (chứa, không phân biệt hoa thường)
+            if (!string.IsNullOrWhiteSpace(searchTerm))
             {
-                query = query.Where(d => d.FullName.ToLower() == searchTerm.ToLower());
+                string normalizedTerm = searchTerm.Trim().ToLower();
+                query = query.Where(d => d.FullName.ToLower().Contains(normalizedTerm));
             }
-            if (string.IsNullOrEmpty(searchTerm) && specialityId != 0)
+
+            // Lọc theo chuyên khoa nếu có chọn
+            if (specialityId != 0)
             {
                 query = query.Where(d => d.SpecialityId == specialityId);
             }
-            if (!string.IsNullOrEmpty(searchTerm) && specialityId != 0)
-            {
-                query = query.Where(d => d.FullName.ToLower() == searchTerm.ToLower() && d.SpecialityId == specialityId);
-            }
+
+            // Phân trang dữ liệu
             var paginatedList = await Pagination<Doctor>.PaginatedList(query, page);
-            var doctorList = paginatedList.Select(d => new ManagingDoctorResponse {
-                EmailAddress = d.User.Email,
+
+            // Mapping sang response
+            var doctorList = paginatedList.Select(d => new ManagingDoctorResponse
+            {
+                EmailAddress = d.User?.Email,
                 FullName = d.FullName,
                 Degree = d.Degree,
                 Id = d.DoctorId,
                 SpecialityId = d.SpecialityId ?? 0,
-                SpecialityName = d.Specialities.SpecialityName,
+                SpecialityName = d.Specialities?.SpecialityName,
                 ImagePath = d.ImagePath,
                 Introduction = d.Introduction,
                 Awards = d.Awards,
@@ -49,11 +59,12 @@ namespace AppointmentHospital.Areas.Admin.Repositories.Implement
                 OrganizationMember = d.OrganizationMember,
                 ResearchProject = d.ResearchProject,
                 TrainingProcess = d.TrainingProcess,
-                WorkExperience = d.WorkExperience,
-                
+                WorkExperience = d.WorkExperience
             }).ToList();
-            return new Pagination<ManagingDoctorResponse> (doctorList, page, paginatedList.TotalItems);
+
+            return new Pagination<ManagingDoctorResponse>(doctorList, page, paginatedList.TotalItems);
         }
+
 
         public List<SelectListItem> GetSpecialization()
         {

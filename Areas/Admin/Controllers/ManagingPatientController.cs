@@ -19,7 +19,7 @@ namespace AppointmentHospital.Areas.Admin.Controllers
             var patientList = await _managingPatientService.GetAllPatientAsync(page ?? 1, searchTerm);
             ViewBag.PatientList = patientList;
             ViewBag.SearchTerm = searchTerm;
-            return View();
+            return View(patientList);
         }
         [HttpGet]
         public IActionResult CreatePatient()

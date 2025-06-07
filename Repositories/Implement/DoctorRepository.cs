@@ -15,20 +15,28 @@ public class DoctorRepository : IDoctorRepository
         _context = context; 
     }
 
-    public async Task<List<Doctor>> getAllDoctors(string selectSpec, int page)
+    public async Task<List<Doctor>> getAllDoctors(string selectSpec, string searchTerm, int page)
     {
-        var query = _context.Doctors.AsQueryable();
-        int selectSpecInt = 0;
+        var query = _context.Doctors
+            .Include(d => d.User)
+            .AsQueryable();
+
+        if (!string.IsNullOrEmpty(searchTerm))
+        {
+            query = query.Where(d => d.FullName.Contains(searchTerm));
+        }
 
         if (!string.IsNullOrEmpty(selectSpec))
         {
-            int.TryParse(selectSpec, out selectSpecInt);
-            query = query.Where(d => d.SpecialityId == selectSpecInt);
+            int selectSpecInt;
+            if (int.TryParse(selectSpec, out selectSpecInt))
+            {
+                query = query.Where(d => d.SpecialityId == selectSpecInt);
+            }
         }
 
         return await Pagination<Doctor>.PaginatedList(query, page);
     }
-
 
     public Doctor getDoctorById(Guid doctorId){
         return _context.Doctors
