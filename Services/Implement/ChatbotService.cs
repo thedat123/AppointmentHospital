@@ -28,7 +28,7 @@ public class ChatbotService : IChatbotService
         var sessionContent = new StringContent(sessionJson, Encoding.UTF8, "application/json");
         
         Console.WriteLine("Creating/validating session...");
-        var sessionResponse = await _httpClient.PostAsync("http://192.168.1.103:8000/session", sessionContent);
+        var sessionResponse = await _httpClient.PostAsync("http://medicalcare.io.vn/session", sessionContent);
         
         if (!sessionResponse.IsSuccessStatusCode)
         {
@@ -47,7 +47,7 @@ public class ChatbotService : IChatbotService
         var content = new StringContent(json, Encoding.UTF8, "application/json");
         
         Console.WriteLine($"Sending chat with session ID: {chatRequest.SessionId}");
-        var response = await _httpClient.PostAsync("http://192.168.1.103:8000/chat", content);
+        var response = await _httpClient.PostAsync("http://medicalcare.io.vn/chat", content);
         
         if (response.IsSuccessStatusCode)
         {
