@@ -1,15 +1,24 @@
-﻿const radioButton = document.querySelectorAll('input[name="statisticType"]');
-document.getElementById('statistic-table').style.display = 'none'
+﻿// Select DOM elements
+const radioButton = document.querySelectorAll('input[name="statisticType"]');
+const statisticTable = document.getElementById('statistic-table');
 const weekInput = document.getElementById('weekInput');
 const dayInput = document.getElementById('dayInput');
 const monthInput = document.getElementById('monthInput');
+const yearInput = document.getElementById('yearInput');
+const rangeInput = document.getElementById('rangeInput');
+
+// Chart variables
 let oldAndNewUserChart;
 let amountAppointmentChart;
 let topDoctorAmountAppointment;
 let compareAmountAppointment;
 let compareOldAndNewUser;
-initializeSignalR();
 
+// Initialize SignalR and load all data by default
+initializeSignalR();
+fetchAndDisplayAllData();
+
+// SignalR setup for real-time updates
 function initializeSignalR() {
     try {
         const connection = new signalR.HubConnectionBuilder()
@@ -18,41 +27,30 @@ function initializeSignalR() {
             .configureLogging(signalR.LogLevel.Debug)
             .build();
 
-        connection.onreconnecting((error) => {
-            console.log('Reconnecting:', error);
-        });
-
-        connection.onreconnected((connectionId) => {
-            console.log('Reconnected:', connectionId);
-        });
-
-        connection.onclose((error) => {
-            console.log('Connection closed:', error);
-        });
+        connection.onreconnecting((error) => console.log('Reconnecting:', error));
+        connection.onreconnected((connectionId) => console.log('Reconnected:', connectionId));
+        connection.onclose((error) => console.log('Connection closed:', error));
 
         connection.on('UpdateStatistics', async () => {
             console.log("Received update statistic event from server");
-            const dateFilter = getCurrentDateFilter();
-            await updateChart(dateFilter);
+            await fetchAndDisplayAllData();
         });
 
-        connection.start();
-        console.log("SignalR Connected successfully");
+        connection.start().then(() => console.log("SignalR Connected successfully"));
     } catch (error) {
         console.error("SignalR Connection Error:", error);
     }
 }
 
+// Fetch weeks for year selection
 document.getElementById('yearSelect').addEventListener('change', async function () {
     const year = this.value;
     try {
         const response = await fetch(`/Statistic/GetWeeksByYear?year=${year}`);
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        var weeks = await response.json();
-        console.log('week', weeks);
-        var weekSelect = document.getElementById('weekSelect');
+        if (!response.ok) throw new Error('Network response was not ok');
+        const weeks = await response.json();
+        console.log('weeks', weeks);
+        const weekSelect = document.getElementById('weekSelect');
         weekSelect.innerHTML = '<option disabled selected value="">Choose week</option>';
         weeks.forEach(week => {
             const option = document.createElement('option');
@@ -60,31 +58,26 @@ document.getElementById('yearSelect').addEventListener('change', async function 
             option.textContent = week.text;
             weekSelect.appendChild(option);
         });
-    }
-    catch (error) {
+    } catch (error) {
         console.log('Error fetching weeks', error);
     }
 });
 
-
+// Get current date filter (optional, defaults to "all")
 function getCurrentDateFilter() {
     const singleDate = document.getElementById("singleDate").value;
     const monthSelect = document.getElementById("monthSelect").value;
     const weekSelect = document.getElementById("weekSelect").value;
     const startDate = document.getElementById("startDate").value;
     const endDate = document.getElementById("endDate").value;
+    const yearSelect = document.getElementById("yearSelect").value;
 
-    console.log(`startDate ${startDate}, endDate ${endDate}`);
-    console.log('SingleDate', singleDate);
     let dateFilter = null;
-    let filterType = '';
+    let filterType = 'all'; // Default to all data
     if (startDate && endDate) {
-        console.log(`startDate ${startDate}, endDate ${endDate}`);
         dateFilter = `${startDate}|${endDate}`;
-        filterType = 'custom'
-    }
-    if (singleDate) {
-        console.log('SingleDate', singleDate);
+        filterType = 'custom';
+    } else if (singleDate) {
         dateFilter = singleDate;
         filterType = 'day';
     } else if (monthSelect) {
@@ -94,127 +87,304 @@ function getCurrentDateFilter() {
         dateFilter = weekSelect;
         filterType = 'week';
     }
-    console.log(`dateFilter ${dateFilter}, filterType ${filterType}`);
-
-    return { dateFilter, filterType };
+    console.log(`dateFilter: ${dateFilter}, filterType: ${filterType}`);
+    return { dateFilter, filterType, yearSelect };
 }
 
-async function updateChart(dateFilter) {
-    let yearSelect = document.getElementById("yearSelect").value;
-    document.getElementById('statistic-table').style.display = 'block';
+// Fetch and display all appointment data
+async function fetchAndDisplayAllData() {
+    statisticTable.style.display = 'block';
+    const { dateFilter, filterType, yearSelect } = getCurrentDateFilter();
     let url = '/Statistic/Statistic?';
-    console.log(dateFilter);
-    if (dateFilter.filterType == 'day') {
-        url = `${url}singleDate=${encodeURIComponent(dateFilter.dateFilter)}`;
-    } else if (dateFilter.filterType === 'week') {
-        url = `${url}week=${encodeURIComponent(dateFilter.dateFilter)}&&year=${yearSelect}`;
-    } else if (dateFilter.filterType === 'month') {
-        url = `${url}month=${encodeURIComponent(dateFilter.dateFilter)}&&year=${yearSelect}`;
-    } else if (dateFilter.filterType === 'custom') {
-        url = `${url}dateRange=${encodeURIComponent(dateFilter.dateFilter)}`
-    }
+    if (filterType === 'day') {
+        url = `${url}singleDate=${encodeURIComponent(dateFilter)}`;
+    } else if (filterType === 'week') {
+        url = `${url}week=${encodeURIComponent(dateFilter)}&year=${yearSelect}`;
+    } else if (filterType === 'month') {
+        url = `${url}month=${encodeURIComponent(dateFilter)}&year=${yearSelect}`;
+    } else if (filterType === 'custom') {
+        url = `${url}dateRange=${encodeURIComponent(dateFilter)}`;
+    } // No params for 'all' - assume API handles "all data" by default
+
     try {
         const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`Http error! Status ${response.status}`)
-        }
-        var data = await response.json();
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        const data = await response.json();
+        console.log('Fetched data:', data);
 
-        // Hàm lọc bỏ key $id trong dữ liệu
+        // Remove $id from objects
         const removeIdKey = (obj) => {
+            if (!obj || typeof obj !== 'object') return obj;
             return Object.entries(obj)
-                .filter(([key]) => key !== '$id')  // Loại bỏ key $id
+                .filter(([key]) => key !== '$id')
                 .reduce((acc, [key, value]) => {
                     acc[key] = value;
                     return acc;
                 }, {});
+        };
+
+        // Process data for charts
+        const amountData = removeIdKey(data.amountAppointment || {});
+        const oldAndNewUserData = removeIdKey(data.oldAndNewUser || {});
+        const topDoctorData = removeIdKey(data.topDoctorAppointment || {});
+        const compareAmountData = removeIdKey(data.compareAmountAppointment || {});
+        const compareOldNewData = removeIdKey(data.compareAmountOldAndNewUser || {});
+
+        // Destroy existing charts
+        [oldAndNewUserChart, amountAppointmentChart, topDoctorAmountAppointment, 
+         compareAmountAppointment, compareOldAndNewUser].forEach(chart => chart?.destroy());
+
+        // Prepare data for all appointments
+        const allAmountLabels = Object.keys(amountData).length > 0 ? Object.keys(amountData) : ['No Data'];
+        const allAmountValues = Object.values(amountData).length > 0 ? Object.values(amountData) : [0];
+
+        // Prepare old vs new users data
+        const allOldNewLabels = Object.keys(oldAndNewUserData).length > 0 ? Object.keys(oldAndNewUserData) : ['No Data'];
+        const oldUserValues = allOldNewLabels.map(key => oldAndNewUserData[key]?.$values?.[0] || 0);
+        const newUserValues = allOldNewLabels.map(key => oldAndNewUserData[key]?.$values?.[1] || 0);
+
+        // Prepare top doctors data
+        const allDoctorData = topDoctorData['All Data']?.$values || Object.values(topDoctorData).flatMap(v => v.$values || []);
+        const doctorLabels = allDoctorData.length > 0 
+            ? allDoctorData.map(d => d.specialityName || d.specialization || 'N/A')
+            : ['No Data'];
+        const doctorNames = allDoctorData.length > 0 
+            ? allDoctorData.map(d => d.doctorName || 'N/A')
+            : ['No Data'];
+        const doctorAmounts = allDoctorData.length > 0 
+            ? allDoctorData.map(d => d.appointmentAmount || 0)
+            : [0];
+
+        // Prepare comparison data
+        const compareAmountLabels = Object.keys(compareAmountData).length > 0 
+            ? Object.keys(compareAmountData) : ['No Data'];
+        const compareAmountValues = Object.values(compareAmountData).length > 0 
+            ? Object.values(compareAmountData) : [0];
+
+        // Prepare old vs new user comparison
+        const compareEntries = Object.entries(compareOldNewData).filter(([key]) => key !== '$id' && key);
+        let compareLabels = ['No Data'];
+        let compareOldUsers = [0];
+        let compareNewUsers = [0];
+        if (compareEntries.length > 0) {
+            compareEntries.sort(([keyA], [keyB]) => {
+                const numA = Number(keyA);
+                const numB = Number(keyB);
+                return !isNaN(numA) && !isNaN(numB) ? numA - numB : keyA.localeCompare(keyB);
+            });
+            compareLabels = compareEntries.map(([key]) => 
+                !isNaN(Number(key)) && Number(key) >= 1 && Number(key) <= 12 ? `Month ${key}` : key
+            );
+            compareOldUsers = compareEntries.map(([_, value]) => value.$values?.[0] || 0);
+            compareNewUsers = compareEntries.map(([_, value]) => value.$values?.[1] || 0);
         }
 
-        if (dateFilter.filterType == 'day') {
-            const dateObj = new Date(dateFilter.dateFilter);
-            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-            const day = String(dateObj.getDate()).padStart(2, '0');
-            dateFilter.dateFilter = `${month}/${day}`;
-            console.log(`DateFilter ${dateFilter.dateFilter}`);
-        }
-
-        if (data.amountAppointment && amountAppointmentChart) {
-            const amountData = removeIdKey(data.amountAppointment);  // Loại bỏ $id
-            amountAppointmentChart.data.datasets[0].data = [amountData[dateFilter.dateFilter]];
-            amountAppointmentChart.update();
-        }
-
-        if (data.oldAndNewUser && oldAndNewUserChart) {
-            const oldAndNewUserData = removeIdKey(data.oldAndNewUser);  // Loại bỏ $id
-
-            // Lấy giá trị từ mảng $values trong dữ liệu
-            const values = oldAndNewUserData[dateFilter.dateFilter]?.$values;
-
-            // Kiểm tra nếu values tồn tại và cập nhật chart
-            if (values) {
-                oldAndNewUserChart.data.datasets[0].data = [values[1]];  // Người dùng mới
-                oldAndNewUserChart.data.datasets[1].data = [values[0]];  // Người dùng cũ
-                oldAndNewUserChart.update();
-            } else {
-                console.error("Không tìm thấy dữ liệu cho ngày này.");
-            }
-        }
-
-        if (data.topDoctorAppointment && topDoctorAmountAppointment) {
-            const doctorData = removeIdKey(data.topDoctorAppointment[dateFilter.dateFilter]);
-            console.log("DoctorData", doctorData)
-            const doctorAppointments = doctorData.$values.map(doctor => ({
-                doctorName: doctor.doctorName,
-                specialization: doctor.specialization,
-                appointmentAmount: doctor.appointmentAmount
-            }));
-            topDoctorAmountAppointment.data.labels = doctorAppointments.map(doctor => doctor.specialization);
-            topDoctorAmountAppointment.data.datasets[0].data = doctorAppointments.map(doctor => doctor.appointmentAmount);
-            topDoctorAmountAppointment.update();
-        }
-
-        if (data.compareAmountAppointment && compareAmountAppointment) {
-            const compareAmountData = removeIdKey(data.compareAmountAppointment);  // Loại bỏ $id
-            compareAmountAppointment.data.labels = Object.keys(compareAmountData);
-            compareAmountAppointment.data.datasets[0].data = Object.values(compareAmountData);
-            compareAmountAppointment.update();
-        }
-
-        if (data.compareAmountOldAndNewUser && compareOldAndNewUser) {
-            // Loại bỏ $id và lấy dữ liệu từ mảng $values
-            const compareAmountOldAndNewUserData = removeIdKey(data.compareAmountOldAndNewUser);  // Loại bỏ $id
-
-            // Chuyển đổi dữ liệu thành mảng để lấy giá trị người dùng mới và người dùng cũ
-            const oldUserData = Object.values(compareAmountOldAndNewUserData).map(d => d.$values[0]);  // Người dùng cũ
-            const newUserData = Object.values(compareAmountOldAndNewUserData).map(d => d.$values[1]);  // Người dùng mới
-
-            // Cập nhật dữ liệu cho biểu đồ
-            compareOldAndNewUser.data.datasets[0].data = oldUserData;  // Dữ liệu người dùng cũ
-            compareOldAndNewUser.data.datasets[1].data = newUserData;  // Dữ liệu người dùng mới
-            compareOldAndNewUser.update();  // Cập nhật biểu đồ
-        }
+        // Create charts
+        amountAppointmentChart = createAmountAppointmentChart(allAmountLabels, allAmountValues);
+        oldAndNewUserChart = createOldAndNewUserChart(allOldNewLabels, oldUserValues, newUserValues);
+        topDoctorAmountAppointment = createTopDoctorChart(doctorLabels, doctorNames, doctorAmounts);
+        compareAmountAppointment = createCompareAmountChart(compareAmountLabels, compareAmountValues);
+        compareOldAndNewUser = createCompareOldNewChart(compareLabels, compareOldUsers, compareNewUsers);
 
     } catch (error) {
-        console.error('Error: ', error)
+        console.error('Error fetching statistics:', error);
+        statisticTable.innerHTML = '<p>Error loading data. Please try again.</p>';
     }
 }
 
+// Chart creation functions
+function createAmountAppointmentChart(labels, data) {
+    return new Chart(document.getElementById("amountAppointment"), {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: "Appointments",
+                data: data,
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1,
+                barPercentage: 0.7
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: { duration: 1000, easing: 'easeInOutQuart' },
+            plugins: {
+                title: { display: true, text: 'Total Appointments Over Time', font: { size: 16, weight: 'bold' } },
+                legend: { position: 'bottom' },
+                tooltip: { mode: 'index', intersect: false }
+            },
+            scales: {
+                y: { beginAtZero: true, title: { display: true, text: 'Number of Appointments' } },
+                x: { title: { display: true, text: 'Period' } }
+            }
+        }
+    });
+}
+
+function createOldAndNewUserChart(labels, oldData, newData) {
+    return new Chart(document.getElementById("oldAndNewUser"), {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: "Old Users",
+                    backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1,
+                    data: oldData,
+                    barPercentage: 0.7
+                },
+                {
+                    label: "New Users",
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1,
+                    data: newData,
+                    barPercentage: 0.7
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: { duration: 1000, easing: 'easeInOutQuart' },
+            plugins: {
+                title: { display: true, text: 'New vs Old Users Over Time', font: { size: 16, weight: 'bold' } },
+                legend: { position: 'bottom' },
+                tooltip: { mode: 'index', intersect: false }
+            },
+            scales: {
+                y: { beginAtZero: true, title: { display: true, text: 'Number of Users' } },
+                x: { title: { display: true, text: 'Period' } }
+            }
+        }
+    });
+}
+
+function createTopDoctorChart(labels, doctorNames, data) {
+    return new Chart(document.getElementById("topDoctorAmountAppointment"), {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Appointments',
+                data: data,
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            const index = context.dataIndex;
+                            return `${doctorNames[index]}: ${data[index]} appointments`;
+                        }
+                    }
+                },
+                title: { display: true, text: 'Top Doctors by Appointments', font: { size: 16, weight: 'bold' } },
+                legend: { position: 'bottom' }
+            },
+            scales: {
+                x: { beginAtZero: true, title: { display: true, text: 'Number of Appointments' } },
+                y: { title: { display: true, text: 'Specialization' } }
+            }
+        }
+    });
+}
+
+function createCompareAmountChart(labels, data) {
+    return new Chart(document.getElementById("compareAmountAppointment"), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Appointments',
+                data: data,
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 2,
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: { display: true, text: 'Appointments Trend Comparison', font: { size: 16, weight: 'bold' } },
+                legend: { position: 'bottom' },
+                tooltip: { mode: 'index', intersect: false }
+            },
+            scales: {
+                y: { beginAtZero: true, title: { display: true, text: 'Number of Appointments' } },
+                x: { title: { display: true, text: 'Period' } }
+            },
+            animations: { tension: { duration: 1000, easing: 'easeOutQuad' } }
+        }
+    });
+}
+
+function createCompareOldNewChart(labels, oldData, newData) {
+    return new Chart(document.getElementById("compareOldAndNewUser"), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: "New Users",
+                    data: newData,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: "Old Users",
+                    data: oldData,
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    tension: 0.4,
+                    fill: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: { display: true, text: 'New vs Old Users Trend Comparison', font: { size: 16, weight: 'bold' } },
+                legend: { position: 'bottom' },
+                tooltip: { mode: 'index', intersect: false }
+            },
+            scales: {
+                y: { beginAtZero: true, title: { display: true, text: 'Number of Users' } },
+                x: { title: { display: true, text: 'Period' } }
+            },
+            animations: { tension: { duration: 1000, easing: 'linear' } }
+        }
+    });
+}
+
+// Radio button logic for filter selection
 radioButton.forEach(radio => {
     radio.addEventListener('change', function () {
+        const singleDate = document.getElementById("singleDate");
+        const monthSelect = document.getElementById("monthSelect");
+        const weekSelect = document.getElementById("weekSelect");
+        const startDate = document.getElementById('startDate');
+        const endDate = document.getElementById('endDate');
 
-        let singleDate = document.getElementById("singleDate");
-        let monthSelect = document.getElementById("monthSelect");
-        let weekSelect = document.getElementById("weekSelect");
-        let yearInput = document.getElementById("yearInput");
-
-        let rangeInput = document.getElementById("rangeInput");
-        let startDate = document.getElementById('startDate');
-        let endDate = document.getElementById('endDate');
-
-        const periodComparison = document.getElementById("period-comparison");
-        const userTrends = document.getElementById("user-trends");
-        document.getElementById('statistic-table').style.display = 'none'
-
+        statisticTable.style.display = 'none';
         dayInput.style.display = 'none';
         weekInput.style.display = 'none';
         monthInput.style.display = 'none';
@@ -227,7 +397,6 @@ radioButton.forEach(radio => {
             weekSelect.value = null;
             startDate.value = null;
             endDate.value = null;
-
         } else if (this.value === 'week') {
             weekInput.style.display = 'block';
             yearInput.style.display = 'block';
@@ -243,407 +412,26 @@ radioButton.forEach(radio => {
             startDate.value = null;
             endDate.value = null;
         } else if (this.value === 'range') {
-            rangeInput.style.display = 'block'
+            rangeInput.style.display = 'block';
             singleDate.value = null;
             monthSelect.value = null;
             weekSelect.value = null;
         }
-    })
-})
+    });
+});
 
+// Submit button to fetch filtered or all data
 async function submitStatistic() {
-    document.getElementById('statistic-table').style.display = 'block'
+    const periodComparison = document.getElementById('periodComparison');
+    const userTrends = document.getElementById('userTrends');
+    const amountChartContainer = document.getElementById('amountAppointment').parentElement;
+    const oldNewChartContainer = document.getElementById('oldAndNewUser').parentElement;
 
-    let dateFilter;
-    let singleDate = document.getElementById("singleDate").value;
-    let date;
-    if (singleDate) {
-        // Convert YYYY-MM-DD to MM/DD
-        const dateObj = new Date(singleDate);
-        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-        const day = String(dateObj.getDate()).padStart(2, '0');
-        date = `${month}/${day}`;
-    }
-    let startDate = document.getElementById('startDate').value
-    console.log('startDate', startDate);
-    let endDate = document.getElementById('endDate').value;
-    console.log('endDate', endDate);
+    // Reset layout
+    periodComparison.style.display = 'block';
+    userTrends.style.display = 'block';
+    amountChartContainer.classList.remove('center-chart');
+    oldNewChartContainer.classList.remove('center-chart');
 
-    let monthSelect = document.getElementById("monthSelect").value;
-    console.log('Month', monthSelect);
-    let weekSelect = document.getElementById("weekSelect").value;
-    console.log('Week', weekSelect);
-    let yearSelect = document.getElementById("yearSelect").value;
-
-    singleDate ? dateFilter = date : monthSelect ? dateFilter = monthSelect : weekSelect ? dateFilter = weekSelect : dateFilter = `${startDate}|${endDate}`;
-    console.log("dateFilter", dateFilter);
-    let url = '/Statistic/Statistic?';
-    if (startDate && endDate) {
-        customRange = `${startDate}%7C${endDate}`;
-        url = `${url}dateRange=${customRange}`;
-        const periodComparison = document.getElementById('periodComparison');
-        const userTrends = document.getElementById('userTrends');
-
-        periodComparison.style.display = 'none';
-        userTrends.style.display = 'none';
-        document.getElementById('amountAppointment').parentElement.classList.add('center-chart');
-        document.getElementById('oldAndNewUser').parentElement.classList.add('center-chart');
-    }
-    if (singleDate) {
-        url = `${url}singleDate=${encodeURIComponent(singleDate)}`;
-        periodComparison.style.display = 'block';
-        userTrends.style.display = 'block';
-    }
-    if (monthSelect) {
-        url = `${url}month=${encodeURIComponent(monthSelect)}&&year=${yearSelect}`;
-        periodComparison.style.display = 'block';
-        userTrends.style.display = 'block';
-    }
-    if (weekSelect) {
-        url = `${url}week=${encodeURIComponent(weekSelect)}&&year=${yearSelect}`;
-        periodComparison.style.display = 'block';
-        userTrends.style.display = 'block';
-    }
-    try {
-
-        const response = await fetch(url, {
-            method: 'GET'
-        });
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`)
-        }
-        const data = await response.json();
-        console.log(data);
-        const amountAppointmentData = data.amountAppointment?.[dateFilter] || data.amountAppointment?.["All Data"] || 0;
-        console.log('Value amount appointment', amountAppointmentData);
-        const oldAndNewUserData = data.oldAndNewUser?.[dateFilter]?.$values || data.oldAndNewUser?.["All Data"]?.$values || [];
-        console.log('Value amount old and new user', oldAndNewUserData);
-        const topDoctorAmountAppointmentData = data.topDoctorAppointment?.[dateFilter]?.$values || data.topDoctorAppointment?.["All Data"]?.$values || [];
-        console.log('Value amount of top doctor amount appointment', topDoctorAmountAppointmentData);
-        var compareAmountAppointmentData = data.compareAmountAppointment;
-        console.log('Value compare amount appointment', compareAmountAppointmentData);
-        const compareOldAndNewUserData = data.compareAmountOldAndNewUser || {};
-        console.log('Value compare new and old user:', compareOldAndNewUserData);
-
-        // Tạo mảng để lưu trữ dữ liệu cho từng người dùng (New User và Old User)
-
-        if (oldAndNewUserChart || amountAppointmentChart || topDoctorAmountAppointment || compareAmountAppointment || compareOldAndNewUser) {
-            oldAndNewUserChart.destroy();
-            amountAppointmentChart.destroy();
-            topDoctorAmountAppointment.destroy();
-            compareAmountAppointment.destroy();
-            compareOldAndNewUser.destroy();
-        }
-
-
-
-        const compareDataEntries = Object.entries(compareOldAndNewUserData)
-            .filter(([key, value]) => key !== '$id' && value?.$values);
-
-        // Bước 2: Nếu không có dữ liệu, dùng mặc định
-        let labels = ['No Data'];
-        let newUserData = [0];
-        let oldUserData = [0];
-
-        if (compareDataEntries.length > 0) {
-            // Sắp xếp theo số nếu có thể, ngược lại sort theo string
-            compareDataEntries.sort(([keyA], [keyB]) => {
-                const numA = Number(keyA);
-                const numB = Number(keyB);
-                if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
-                return keyA.localeCompare(keyB);
-            });
-
-            // Map nhãn và dữ liệu
-            labels = compareDataEntries.map(([key]) => {
-                const num = Number(key);
-                return (!isNaN(num) && num >= 1 && num <= 12) ? `Month ${key}` : key;
-            });
-
-            newUserData = compareDataEntries.map(([_, value]) => value.$values?.[0] || 0);
-            oldUserData = compareDataEntries.map(([_, value]) => value.$values?.[1] || 0);
-        }
-
-        let doctorName = [];
-        let specialization = [];
-        let appointmentAmount = [];
-
-        if (Array.isArray(topDoctorAmountAppointmentData) && topDoctorAmountAppointmentData.length > 0) {
-            doctorName = topDoctorAmountAppointmentData.map(doctor => doctor.doctorName || 'N/A');
-            console.log("Doctor Name", doctorName);
-
-            specialization = topDoctorAmountAppointmentData.map(doctor => doctor.specialityName || doctor.specialization || 'N/A');
-            console.log("Specialization", specialization);
-
-            appointmentAmount = topDoctorAmountAppointmentData.map(doctor => doctor.appointmentAmount || 0);
-            console.log("AppointmentAmount", appointmentAmount);
-        } else {
-            console.log('No doctor data available');
-            doctorName = ['No Data'];
-            specialization = ['No Data'];
-            appointmentAmount = [0];
-        }
-        topDoctorAmountAppointment = new Chart(document.getElementById("topDoctorAmountAppointment"), {
-            type: 'bar',
-            data: {
-                labels: specialization,
-                datasets: [{
-                    label: 'Appointments',
-                    data: appointmentAmount,
-                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
-                    x: {
-                        beginAtZero: true,
-                        max: 100
-                    }
-                },
-                indexAxis: 'y',
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: function (context) {
-                                const index = context.dataIndex;
-                                return `${doctorName[index]}: ${appointmentAmount[index]} appointments`;
-                            }
-                        }
-                    },
-
-                    title: {
-                        display: true,
-                        text: "Doctor Appointments by Specialization",
-                        font: { size: 16 }
-                    },
-                    legend: {
-                        position: 'bottom'
-                    }
-
-                }
-            }
-        });
-        amountAppointmentChart = new Chart(document.getElementById("amountAppointment"), {
-            type: 'bar',
-            data: {
-                labels: [dateFilter],
-                datasets: [{
-                    label: "Appointments",
-                    data: [amountAppointmentData],
-                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1,
-                    barPercentage: 0.7
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                animation: {
-                    duration: 1000,
-                    easing: 'easeInOutQuart'
-                },
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Appointments',
-                        font: { size: 16, weight: 'bold' }
-                    },
-                    legend: {
-                        position: 'bottom'
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 150,
-                        title: {
-                            display: true,
-                            text: 'Number of Appointments'
-                        }
-                    }
-                }
-            }
-        });
-
-        const filteredCompareAmountAppointmentData = Object.entries(compareAmountAppointmentData)
-            .filter(([key]) => key !== '$id') 
-            .reduce((acc, [key, value]) => {
-                acc[key] = value; 
-                return acc;
-            }, {});
-
-        
-        compareAmountAppointment = new Chart(document.getElementById("compareAmountAppointment"), {
-            type: 'line',
-            data: {
-                labels: Object.keys(filteredCompareAmountAppointmentData), 
-                datasets: [{
-                    label: 'Appointments',
-                    data: Object.values(filteredCompareAmountAppointmentData), 
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 2,
-                    tension: 0.4, 
-                    fill: true 
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Appointments Comparison',
-                        font: { size: 16, weight: 'bold' }
-                    },
-                    legend: {
-                        position: 'bottom'
-                    }
-                },
-                scales: {
-                    y: {
-                        max: 150,
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Number of Appointments'
-                        }
-                    },
-                    x: {
-                        title: {
-                            display: true,
-                        }
-                    }
-                },
-                animations: {
-                    tension: {
-                        duration: 1000,
-                        easing: 'easeOutQuad'
-                    }
-                }
-            }
-        });
-
-        oldAndNewUserChart = new Chart(document.getElementById("oldAndNewUser"), {
-            type: 'bar',
-            data: {
-                labels: [dateFilter],
-                datasets: [
-                    {
-                        label: "Old Users",
-                        backgroundColor: 'rgba(255, 99, 132, 0.6)',
-                        borderColor: 'rgba(255, 99, 132, 1)',
-                        borderWidth: 1,
-                        data: [oldAndNewUserData[1]],
-                        barPercentage: 0.7
-                    },
-                    {
-                        label: "New Users",
-                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 1,
-                        data: [oldAndNewUserData[0]],
-                        barPercentage: 0.7
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                animation: {
-                    duration: 1000,
-                    easing: 'easeInOutQuart'
-                },
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'New And Old Users',
-                        font: { size: 16, weight: 'bold' }
-                    },
-                    legend: {
-                        position: 'bottom'
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 100,
-                        title: {
-                            display: true,
-                            text: 'Number of Users'
-                        }
-                    }
-                }
-            }
-        });
-        compareOldAndNewUser = new Chart(document.getElementById("compareOldAndNewUser"), {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: "New User ",
-                    data: newUserData,
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    tension: 0.4,
-                    fill: true
-                }, {
-                    label: 'Old User',
-                    data: oldUserData,
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                    tension: 0.4,
-                    fill: true
-                }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'New And Old User Comparison',
-                        font: { size: 16, weight: 'bold' }
-                    },
-                    legend: {
-                        position: 'bottom'
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Number of Users'
-                        }
-                    },
-                    x: {
-                        title: {
-                            display: true,
-                        }
-                    }
-                },
-                animations: {
-                    tension: {
-                        duration: 1000,
-                        easing: 'linear'
-                    }
-                }
-            }
-
-        });
-    }
-    catch (error) {
-        console.error('Error fetching statistic', error);
-    }
-
-
-
-
+    await fetchAndDisplayAllData();
 }
