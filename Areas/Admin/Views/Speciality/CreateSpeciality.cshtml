@@ -5,6 +5,12 @@
     var searchTerm = ViewBag.SearchTerm as string;
     var isEdit = Model?.Id > 0;
 }
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+</head>
+<body>
 <div class="container-fluid py-4">
     <div class="card">
         <div class="card-body">
@@ -17,22 +23,22 @@
                         }
                         
                         <div class="text-center mb-4">
-                            <h3 class="text-primary">@(isEdit ? "Edit" : "Add New") Speciality</h3>
-                            <p class="text-muted">Enter speciality information below</p>
+                            <h3 class="text-primary">@(isEdit ? "Chỉnh sửa" : "Thêm mới") Chuyên khoa</h3>
+                            <p class="text-muted">Nhập thông tin chuyên khoa dưới đây</p>
                         </div>
 
                         <div class="row g-4">
                             <!-- Basic Information Section -->
                             <div class="col-12">
                                 <h5 class="text-secondary border-bottom pb-2 mb-3">
-                                    <i class="fas fa-stethoscope me-2"></i>Basic Information
+                                    <i class="fas fa-stethoscope me-2"></i>Thông tin cơ bản
                                 </h5>
                             </div>
 
                             <div class="col-md-6">
                                 <div class="form-floating">
-                                    <input asp-for="SpecialityName" class="form-control" placeholder="Speciality Name" />
-                                    <label asp-for="SpecialityName">Speciality Name</label>
+                                    <input asp-for="SpecialityName" class="form-control" placeholder="Tên chuyên khoa" />
+                                    <label asp-for="SpecialityName">Tên chuyên khoa</label>
                                     <span asp-validation-for="SpecialityName" class="text-danger"></span>
                                 </div>
                             </div>
@@ -40,23 +46,23 @@
                             <div class="col-md-6">
                                 <div class="form-floating">
                                     <input type="file" asp-for="SpecialityImage" class="form-control" accept="image/*" />
-                                    <label asp-for="SpecialityImage">Speciality Image</label>
+                                    <label asp-for="SpecialityImage">Hình ảnh chuyên khoa</label>
                                     <span asp-validation-for="SpecialityImage" class="text-danger"></span>
                                 </div>
                             </div>
 
                             <div class="col-12">
                                 <div class="form-floating">
-                                    <textarea asp-for="Introduction" class="form-control" style="height: 120px" placeholder="Introduction"></textarea>
-                                    <label asp-for="Introduction">Introduction</label>
+                                    <textarea asp-for="Introduction" class="form-control" style="height: 120px" placeholder="Giới thiệu"></textarea>
+                                    <label asp-for="Introduction">Giới thiệu</label>
                                     <span asp-validation-for="Introduction" class="text-danger"></span>
                                 </div>
                             </div>
 
                             <div class="col-12">
                                 <div class="form-floating">
-                                    <textarea asp-for="Mission" class="form-control" style="height: 120px" placeholder="Mission"></textarea>
-                                    <label asp-for="Mission">Mission</label>
+                                    <textarea asp-for="Mission" class="form-control" style="height: 120px" placeholder="Sứ mệnh"></textarea>
+                                    <label asp-for="Mission">Sứ mệnh</label>
                                     <span asp-validation-for="Mission" class="text-danger"></span>
                                 </div>
                             </div>
@@ -64,94 +70,120 @@
                             <!-- Detailed Information Section -->
                             <div class="col-12 mt-5">
                                 <h5 class="text-secondary border-bottom pb-2 mb-3">
-                                    <i class="fas fa-info-circle me-2"></i>Detailed Information
+                                    <i class="fas fa-info-circle me-2"></i>Thông tin chi tiết
                                 </h5>
                             </div>
 
                             <!-- Amenities Section -->
                             <div class="col-12">
-                                <label class="form-label fw-bold">Amenities</label>
+                                <label class="form-label fw-bold">Tiện nghi</label>
                                 <div class="border rounded p-3 bg-light">
                                     <div class="mb-2">
-                                        <small class="text-muted">Enter each amenity on a separate line. Each line will be displayed as a bullet point.</small>
+                                        <small class="text-muted">Nhập mỗi tiện nghi trên một dòng riêng. Mỗi dòng sẽ được hiển thị dưới dạng dấu đầu dòng.</small>
                                     </div>
                                     <textarea asp-for="Aminities" class="form-control" rows="4"
-                                        placeholder="Example:&#10;Phòng khám hiện đại&#10;Thiết bị y tế tiên tiến&#10;Khu vực chờ thoải mái&#10;Dịch vụ hỗ trợ 24/7"></textarea>
+                                        placeholder="Ví dụ:
+Phòng khám hiện đại
+Thiết bị y tế tiên tiến
+Khu vực chờ thoải mái
+Dịch vụ hỗ trợ 24/7"></textarea>
                                     <span asp-validation-for="Aminities" class="text-danger"></span>
                                 </div>
                             </div>
 
                             <!-- Achievement Section -->
                             <div class="col-12">
-                                <label class="form-label fw-bold">Achievements</label>
+                                <label class="form-label fw-bold">Thành tựu</label>
                                 <div class="border rounded p-3 bg-light">
                                     <div class="mb-2">
-                                        <small class="text-muted">Enter each achievement on a separate line.</small>
+                                        <small class="text-muted">Nhập mỗi thành tựu trên một dòng riêng.</small>
                                     </div>
                                     <textarea asp-for="Archivement" class="form-control" rows="4"
-                                        placeholder="Example:&#10;Giải thưởng xuất sắc năm 2023&#10;Chứng nhận ISO 9001:2015&#10;Top 10 khoa tốt nhất Việt Nam&#10;Hơn 10,000 ca điều trị thành công"></textarea>
+                                        placeholder="Ví dụ:
+Giải thưởng xuất sắc năm 2023
+Chứng nhận ISO 9001:2015
+Top 10 khoa tốt nhất Việt Nam
+Hơn 10.000 ca điều trị thành công"></textarea>
                                     <span asp-validation-for="Archivement" class="text-danger"></span>
                                 </div>
                             </div>
 
                             <!-- Equipment Section -->
                             <div class="col-12">
-                                <label class="form-label fw-bold">Equipment</label>
+                                <label class="form-label fw-bold">Thiết bị</label>
                                 <div class="border rounded p-3 bg-light">
                                     <div class="mb-2">
-                                        <small class="text-muted">Enter each equipment on a separate line.</small>
+                                        <small class="text-muted">Nhập mỗi thiết bị trên một dòng riêng.</small>
                                     </div>
                                     <textarea asp-for="Equipment" class="form-control" rows="4"
-                                        placeholder="Example:&#10;Máy MRI 3 Tesla&#10;Máy CT Scan 64 dãy&#10;Hệ thống X-quang kỹ thuật số&#10;Thiết bị siêu âm 4D"></textarea>
+                                        placeholder="Ví dụ:
+Máy MRI 3 Tesla
+Máy CT Scan 64 dãy
+Hệ thống X-quang kỹ thuật số
+Thiết bị siêu âm 4D"></textarea>
                                     <span asp-validation-for="Equipment" class="text-danger"></span>
                                 </div>
                             </div>
 
                             <!-- Expertise Section -->
                             <div class="col-12">
-                                <label class="form-label fw-bold">Expertise</label>
+                                <label class="form-label fw-bold">Chuyên môn</label>
                                 <div class="border rounded p-3 bg-light">
                                     <div class="mb-2">
-                                        <small class="text-muted">Enter each area of expertise on a separate line.</small>
+                                        <small class="text-muted">Nhập mỗi lĩnh vực chuyên môn trên một dòng riêng.</small>
                                     </div>
                                     <textarea asp-for="Expertise" class="form-control" rows="4"
-                                        placeholder="Example:&#10;Điều trị bệnh tim mạch&#10;Phẫu thuật nội soi&#10;Chẩn đoán hình ảnh&#10;Can thiệp tim mạch"></textarea>
+                                        placeholder="Ví dụ:
+Điều trị bệnh tim mạch
+Phẫu thuật nội soi
+Chẩn đoán hình ảnh
+Can thiệp tim mạch"></textarea>
                                     <span asp-validation-for="Expertise" class="text-danger"></span>
                                 </div>
                             </div>
 
                             <!-- Services Section -->
                             <div class="col-12">
-                                <label class="form-label fw-bold">Services</label>
+                                <label class="form-label fw-bold">Dịch vụ</label>
                                 <div class="border rounded p-3 bg-light">
                                     <div class="mb-2">
-                                        <small class="text-muted">Enter each service on a separate line.</small>
+                                        <small class="text-muted">Nhập mỗi dịch vụ trên một dòng riêng.</small>
                                     </div>
                                     <textarea asp-for="Service" class="form-control" rows="4"
-                                        placeholder="Example:&#10;Khám tổng quát&#10;Chẩn đoán chuyên sâu&#10;Điều trị nội trú&#10;Dịch vụ cấp cứu&#10;Tư vấn sức khỏe"></textarea>
+                                        placeholder="Ví dụ:
+Khám tổng quát
+Chẩn đoán chuyên sâu
+Điều trị nội trú
+Dịch vụ cấp cứu
+Tư vấn sức khỏe"></textarea>
                                     <span asp-validation-for="Service" class="text-danger"></span>
                                 </div>
                             </div>
 
                             <!-- Treatment Section -->
                             <div class="col-12">
-                                <label class="form-label fw-bold">Treatment Methods</label>
+                                <label class="form-label fw-bold">Phương pháp điều trị</label>
                                 <div class="border rounded p-3 bg-light">
                                     <div class="mb-2">
-                                        <small class="text-muted">Enter each treatment method on a separate line.</small>
+                                        <small class="text-muted">Nhập mỗi phương pháp điều trị trên một dòng riêng.</small>
                                     </div>
                                     <textarea asp-for="Treatment" class="form-control" rows="4"
-                                        placeholder="Example:&#10;Điều trị nội khoa&#10;Phẫu thuật vi phẫu&#10;Liệu pháp vật lý&#10;Điều trị bằng thuốc&#10;Can thiệp không xâm lấn"></textarea>
+                                        placeholder="Ví dụ:
+Điều trị nội khoa
+Phẫu thuật vi phẫu
+Liệu pháp vật lý
+Điều trị bằng thuốc
+Can thiệp không xâm lấn"></textarea>
                                     <span asp-validation-for="Treatment" class="text-danger"></span>
                                 </div>
                             </div>
 
                             <div class="col-12 text-center mt-5">
                                 <button type="submit" class="btn btn-primary px-4 py-2 me-3">
-                                    <i class="fas fa-@(isEdit ? "save" : "plus-circle") me-2"></i>@(isEdit ? "Update" : "Add") Speciality
+                                    <i class="fas fa-@(isEdit ? "save" : "plus-circle") me-2"></i>@(isEdit ? "Cập nhật" : "Thêm") Chuyên khoa
                                 </button>
                                 <a asp-action="SpecialityIndex" class="btn btn-secondary px-4 py-2">
-                                    <i class="fas fa-arrow-left me-2"></i>Back to List
+                                    <i class="fas fa-arrow-left me-2"></i>Quay lại danh sách
                                 </a>
                             </div>
                         </div>
@@ -161,6 +193,8 @@
         </div>
     </div>
 </div>
+</body>
+</html>
 
 @section Styles {
     <link rel="stylesheet" href="~/css/create.css" />
@@ -240,8 +274,8 @@
                     const preview = document.createElement('div');
                     preview.className = 'image-preview mt-2';
                     preview.innerHTML = `
-                        <img src="${e.target.result}" alt="Preview" style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 1px solid #dee2e6;">
-                        <p class="text-muted small mt-1">Selected: ${file.name}</p>
+                        <img src="${e.target.result}" alt="Xem trước" style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 1px solid #dee2e6;">
+                        <p class="text-muted small mt-1">Đã chọn: ${file.name}</p>
                     `;
                     
                     const fileInput = document.querySelector('input[type="file"]');

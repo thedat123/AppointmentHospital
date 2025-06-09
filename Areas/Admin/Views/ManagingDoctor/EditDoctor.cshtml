@@ -1,7 +1,7 @@
 ﻿@using AppointmentHospital.Areas.Admin.DTOs.ManagingDoctor;
 @model ManagingDoctorResponse;
 @{
-    ViewData["Title"] = "Edit Doctor";
+    ViewData["Title"] = "Chỉnh Sửa Bác Sĩ";
     var specializationList = ViewData["SpecializationList"] as List<SelectListItem> ?? new List<SelectListItem>();
 }
 <div class="container-fluid py-4">
@@ -14,39 +14,39 @@
                         <input type="hidden" name="ImagePath" value="@(Model?.ImagePath ?? "")" />
 
                         <div class="text-center mb-4">
-                            <h3 class="text-primary fw-bold">Edit Doctor Profile</h3>
-                            <p class="text-muted">Update doctor's information below</p>
+                            <h3 class="text-primary fw-bold">Chỉnh Sửa Hồ Sơ Bác Sĩ</h3>
+                            <p class="text-muted">Cập nhật thông tin bác sĩ bên dưới</p>
                         </div>
 
-                        <!-- Basic Information Section -->
+                        <!-- Phần Thông Tin Cơ Bản -->
                         <div class="card mb-4">
                             <div class="card-header bg-light">
                                 <h5 class="mb-0 text-primary">
-                                    <i class="fas fa-user-md me-2"></i>Basic Information
+                                    <i class="fas fa-user-md me-2"></i>Thông Tin Cơ Bản
                                 </h5>
                             </div>
                             <div class="card-body">
                                 <div class="row g-4">
                                     <div class="col-md-6">
                                         <div class="form-floating">
-                                            <input name="FullName" class="form-control" placeholder="Full Name" value="@(Model?.FullName ?? "")" required />
-                                            <label for="FullName">Full Name</label>
+                                            <input name="FullName" class="form-control" placeholder="Họ và Tên" value="@(Model?.FullName ?? "")" required />
+                                            <label for="FullName">Họ và Tên</label>
                                             <span asp-validation-for="FullName" class="text-danger"></span>
                                         </div>
                                     </div>
 
                                     <div class="col-md-6">
                                         <div class="form-floating">
-                                            <input name="EmailAddress" type="email" class="form-control" placeholder="Email Address" value="@(Model?.EmailAddress ?? "")" required />
-                                            <label for="EmailAddress">Email Address</label>
+                                            <input name="EmailAddress" type="email" class="form-control" placeholder="Địa Chỉ Email" value="@(Model?.EmailAddress ?? "")" required />
+                                            <label for="EmailAddress">Địa Chỉ Email</label>
                                             <span asp-validation-for="EmailAddress" class="text-danger"></span>
                                         </div>
                                     </div>
 
                                     <div class="col-md-6">
                                         <div class="form-floating">
-                                            <input name="Degree" class="form-control" placeholder="Degree" value="@(Model?.Degree ?? "")" required />
-                                            <label for="Degree">Degree</label>
+                                            <input name="Degree" class="form-control" placeholder="Bằng Cấp" value="@(Model?.Degree ?? "")" required />
+                                            <label for="Degree">Bằng Cấp</label>
                                             <span asp-validation-for="Degree" class="text-danger"></span>
                                         </div>
                                     </div>
@@ -54,7 +54,7 @@
                                     <div class="col-md-6">
                                         <div class="form-floating">
                                             <select name="SpecialityId" class="form-select" required>
-                                                <option value="">Select Specialization</option>
+                                                <option value="">Chọn Chuyên Môn</option>
                                                 @if (specializationList != null && specializationList.Any())
                                                 {
                                                     @foreach(var specialization in specializationList)
@@ -70,110 +70,110 @@
                                                     }
                                                 }
                                             </select>
-                                            <label for="SpecialityId">Specialization</label>
+                                            <label for="SpecialityId">Chuyên Môn</label>
                                             <span asp-validation-for="SpecialityId" class="text-danger"></span>
                                         </div>
                                     </div>
 
                                     <div class="col-12">
-                                        <label class="form-label fw-bold">Profile Image</label>
+                                        <label class="form-label fw-bold">Hình Ảnh Hồ Sơ</label>
                                         <input type="file" class="form-control" name="ImageFile" accept="image/*">
                                         @if (!string.IsNullOrEmpty(Model?.ImagePath))
                                         {
                                             <div class="mt-2">
-                                                <img src="@Model.ImagePath" alt="Current Image" class="img-thumbnail" style="max-height: 100px;">
-                                                <small class="text-muted d-block">Current image (leave file input empty to keep current image)</small>
+                                                <img src="@Model.ImagePath" alt="Hình Ảnh Hiện Tại" class="img-thumbnail" style="max-height: 100px;">
+                                                <small class="text-muted d-block">Hình ảnh hiện tại (để trống ô tải lên để giữ hình ảnh hiện tại)</small>
                                             </div>
                                         }
                                         else
                                         {
-                                            <small class="text-muted">No current image</small>
+                                            <small class="text-muted">Chưa có hình ảnh</small>
                                         }
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Professional Details Section -->
+                        <!-- Phần Chi Tiết Chuyên Môn -->
                         <div class="card mb-4">
                             <div class="card-header bg-light">
                                 <h5 class="mb-0 text-primary">
-                                    <i class="fas fa-graduation-cap me-2"></i>Professional Details
+                                    <i class="fas fa-graduation-cap me-2"></i>Chi Tiết Chuyên Môn
                                 </h5>
                             </div>
                             <div class="card-body">
                                 <div class="row g-4">
                                     <div class="col-12">
                                         <div class="form-floating">
-                                            <textarea name="Awards" class="form-control" style="height: 120px" placeholder="Awards and Recognition">@(Model?.Awards ?? "")</textarea>
-                                            <label for="Awards">Awards and Recognition</label>
+                                            <textarea name="Awards" class="form-control" style="height: 120px" placeholder="Giải Thưởng và Ghi Nhận">@(Model?.Awards ?? "")</textarea>
+                                            <label for="Awards">Giải Thưởng và Ghi Nhận</label>
                                         </div>
                                     </div>
 
                                     <div class="col-12">
                                         <div class="form-floating">
-                                            <textarea name="Expertise" class="form-control" style="height: 120px" placeholder="Areas of Expertise">@(Model?.Expertise ?? "")</textarea>
-                                            <label for="Expertise">Areas of Expertise</label>
+                                            <textarea name="Expertise" class="form-control" style="height: 120px" placeholder="Lĩnh Vực Chuyên Môn">@(Model?.Expertise ?? "")</textarea>
+                                            <label for="Expertise">Lĩnh Vực Chuyên Môn</label>
                                         </div>
                                     </div>
 
                                     <div class="col-12">
                                         <div class="form-floating">
-                                            <textarea name="Introduction" class="form-control" style="height: 150px" placeholder="Professional Introduction">@(Model?.Introduction ?? "")</textarea>
-                                            <label for="Introduction">Professional Introduction</label>
+                                            <textarea name="Introduction" class="form-control" style="height: 150px" placeholder="Giới Thiệu Chuyên Môn">@(Model?.Introduction ?? "")</textarea>
+                                            <label for="Introduction">Giới Thiệu Chuyên Môn</label>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Professional Experience Section -->
+                        <!-- Phần Kinh Nghiệm Chuyên Môn -->
                         <div class="card mb-4">
                             <div class="card-header bg-light">
                                 <h5 class="mb-0 text-primary">
-                                    <i class="fas fa-briefcase me-2"></i>Professional Experience
+                                    <i class="fas fa-briefcase me-2"></i>Kinh Nghiệm Chuyên Môn
                                 </h5>
                             </div>
                             <div class="card-body">
                                 <div class="row g-4">
                                     <div class="col-12">
                                         <div class="form-floating">
-                                            <textarea name="OrganizationMember" class="form-control" style="height: 120px" placeholder="Organization Memberships">@(Model?.OrganizationMember ?? "")</textarea>
-                                            <label for="OrganizationMember">Organization Memberships</label>
+                                            <textarea name="OrganizationMember" class="form-control" style="height: 120px" placeholder="Thành Viên Tổ Chức">@(Model?.OrganizationMember ?? "")</textarea>
+                                            <label for="OrganizationMember">Thành Viên Tổ Chức</label>
                                         </div>
                                     </div>
 
                                     <div class="col-12">
                                         <div class="form-floating">
-                                            <textarea name="ResearchProject" class="form-control" style="height: 120px" placeholder="Research Projects">@(Model?.ResearchProject ?? "")</textarea>
-                                            <label for="ResearchProject">Research Projects</label>
+                                            <textarea name="ResearchProject" class="form-control" style="height: 120px" placeholder="Dự Án Nghiên Cứu">@(Model?.ResearchProject ?? "")</textarea>
+                                            <label for="ResearchProject">Dự Án Nghiên Cứu</label>
                                         </div>
                                     </div>
 
                                     <div class="col-12">
                                         <div class="form-floating">
-                                            <textarea name="TrainingProcess" class="form-control" style="height: 120px" placeholder="Training and Education">@(Model?.TrainingProcess ?? "")</textarea>
-                                            <label for="TrainingProcess">Training and Education</label>
+                                            <textarea name="TrainingProcess" class="form-control" style="height: 120px" placeholder="Đào Tạo và Giáo Dục">@(Model?.TrainingProcess ?? "")</textarea>
+                                            <label for="TrainingProcess">Đào Tạo và Giáo Dục</label>
                                         </div>
                                     </div>
 
                                     <div class="col-12">
                                         <div class="form-floating">
-                                            <textarea name="WorkExperience" class="form-control" style="height: 150px" placeholder="Work Experience">@(Model?.WorkExperience ?? "")</textarea>
-                                            <label for="WorkExperience">Work Experience</label>
+                                            <textarea name="WorkExperience" class="form-control" style="height: 150px" placeholder="Kinh Nghiệm Làm Việc">@(Model?.WorkExperience ?? "")</textarea>
+                                            <label for="WorkExperience">Kinh Nghiệm Làm Việc</label>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Action Buttons -->
+                        <!-- Nút Hành Động -->
                         <div class="col-12 text-center mt-4">
                             <button type="submit" class="btn btn-primary px-5 py-2 me-2">
-                                <i class="fas fa-save me-2"></i>Save Changes
+                                <i class="fas fa-save me-2"></i>Lưu Thay Đổi
                             </button>
                             <a asp-action="Index" class="btn btn-outline-secondary px-4 py-2">
-                                <i class="fas fa-arrow-left me-2"></i>Back to List
+                                <i class="fas fa-arrow-left me-2"></i>Quay Lại Danh Sách
                             </a>
                         </div>
                     </form>
@@ -184,7 +184,7 @@
 </div>
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/create.css" />
+    <link rel="stylesheet" href="~/css/create.css" asp-append-version="true" />
     <style>
         .card-header {
             border-bottom: 2px solid #dee2e6;

@@ -5,6 +5,8 @@
     var searchTerm = ViewBag.SearchTerm as string;
     var isEdit = Model?.Id > 0;
 }
+<!-- Ensuring UTF-8 encoding for proper Vietnamese character display -->
+<meta charset="utf-8" />
 <div class="container-fluid py-4">
     <div class="card shadow-sm">
         <div class="card-body p-4">
@@ -15,51 +17,51 @@
                         <input type="hidden" asp-for="SpecialityImage" value="@Model.SpecialityImage" />
 
                         <div class="text-center mb-4">
-                            <h3 class="text-primary fw-bold">Edit Speciality Information</h3>
-                            <p class="text-muted">Update speciality details below</p>
+                            <h3 class="text-primary fw-bold">Chỉnh Sửa Thông Tin Chuyên Khoa</h3>
+                            <p class="text-muted">Cập nhật chi tiết chuyên khoa dưới đây</p>
                         </div>
 
-                        <!-- Basic Information Section -->
+                        <!-- Phần Thông Tin Cơ Bản -->
                         <div class="card mb-4">
                             <div class="card-header bg-light">
                                 <h5 class="mb-0 text-primary">
-                                    <i class="fas fa-hospital me-2"></i>Basic Information
+                                    <i class="fas fa-hospital me-2"></i>Thông Tin Cơ Bản
                                 </h5>
                             </div>
                             <div class="card-body">
                                 <div class="row g-4">
                                     <div class="col-12">
                                         <div class="form-floating">
-                                            <input asp-for="@Model.SpecialityName" class="form-control" placeholder="Speciality Name" required />
-                                            <label asp-for="@Model.SpecialityName">Speciality Name</label>
+                                            <input asp-for="@Model.SpecialityName" class="form-control" placeholder="Tên chuyên khoa" required />
+                                            <label asp-for="@Model.SpecialityName">Tên Chuyên Khoa</label>
                                             <span asp-validation-for="@Model.SpecialityName" class="text-danger"></span>
                                         </div>
                                     </div>
 
                                     <div class="col-12">
-                                        <label class="form-label fw-bold">Speciality Image</label>
+                                        <label class="form-label fw-bold">Ảnh Chuyên Khoa</label>
                                         <input type="file" class="form-control" name="ImageFile" accept="image/*">
                                         @if (!string.IsNullOrEmpty(Model.SpecialityImage))
                                         {
                                             <div class="mt-2">
-                                                <img src="@Model.SpecialityImage" alt="Current Image" class="img-thumbnail" style="max-height: 100px;">
-                                                <small class="text-muted d-block">Current image</small>
+                                                <img src="@Model.SpecialityImage" alt="Ảnh hiện tại" class="img-thumbnail" style="max-height: 100px;">
+                                                <small class="text-muted d-block">Ảnh hiện tại</small>
                                             </div>
                                         }
                                     </div>
 
                                     <div class="col-12">
                                         <div class="form-floating">
-                                            <textarea asp-for="@Model.Introduction" class="form-control" style="height: 150px" placeholder="Speciality Introduction"></textarea>
-                                            <label asp-for="@Model.Introduction">Introduction</label>
+                                            <textarea asp-for="@Model.Introduction" class="form-control" style="height: 150px" placeholder="Giới thiệu chuyên khoa"></textarea>
+                                            <label asp-for="@Model.Introduction">Giới Thiệu Chuyên Khoa</label>
                                             <span asp-validation-for="@Model.Introduction" class="text-danger"></span>
                                         </div>
                                     </div>
 
                                     <div class="col-12">
                                         <div class="form-floating">
-                                            <textarea asp-for="@Model.Mission" class="form-control" style="height: 120px" placeholder="Mission Statement"></textarea>
-                                            <label asp-for="@Model.Mission">Mission</label>
+                                            <textarea asp-for="@Model.Mission" class="form-control" style="height: 120px" placeholder="Sứ mệnh"></textarea>
+                                            <label asp-for="@Model.Mission">Sứ Mệnh</label>
                                             <span asp-validation-for="@Model.Mission" class="text-danger"></span>
                                         </div>
                                     </div>
@@ -67,35 +69,35 @@
                             </div>
                         </div>
 
-                        <!-- Services & Expertise Section -->
+                        <!-- Phần Dịch Vụ & Chuyên Môn -->
                         <div class="card mb-4">
                             <div class="card-header bg-light">
                                 <h5 class="mb-0 text-primary">
-                                    <i class="fas fa-stethoscope me-2"></i>Services & Expertise
+                                    <i class="fas fa-stethoscope me-2"></i>Dịch Vụ & Chuyên Môn
                                 </h5>
                             </div>
                             <div class="card-body">
                                 <div class="row g-4">
                                     <div class="col-12">
                                         <div class="form-floating">
-                                            <textarea asp-for="@Model.Service" class="form-control" style="height: 150px" placeholder="Services Offered"></textarea>
-                                            <label asp-for="@Model.Service">Services</label>
+                                            <textarea asp-for="@Model.Service" class="form-control" style="height: 150px" placeholder="Dịch vụ cung cấp"></textarea>
+                                            <label asp-for="@Model.Service">Dịch Vụ</label>
                                             <span asp-validation-for="@Model.Service" class="text-danger"></span>
                                         </div>
                                     </div>
 
                                     <div class="col-12">
                                         <div class="form-floating">
-                                            <textarea asp-for="@Model.Expertise" class="form-control" style="height: 120px" placeholder="Areas of Expertise"></textarea>
-                                            <label asp-for="@Model.Expertise">Expertise</label>
+                                            <textarea asp-for="@Model.Expertise" class="form-control" style="height: 120px" placeholder="Lĩnh vực chuyên môn"></textarea>
+                                            <label asp-for="@Model.Expertise">Chuyên Môn</label>
                                             <span asp-validation-for="@Model.Expertise" class="text-danger"></span>
                                         </div>
                                     </div>
 
                                     <div class="col-12">
                                         <div class="form-floating">
-                                            <textarea asp-for="@Model.Treatment" class="form-control" style="height: 150px" placeholder="Treatment Methods"></textarea>
-                                            <label asp-for="@Model.Treatment">Treatment</label>
+                                            <textarea asp-for="@Model.Treatment" class="form-control" style="height: 150px" placeholder="Phương pháp điều trị"></textarea>
+                                            <label asp-for="@Model.Treatment">Phương Pháp Điều Trị</label>
                                             <span asp-validation-for="@Model.Treatment" class="text-danger"></span>
                                         </div>
                                     </div>
@@ -103,35 +105,35 @@
                             </div>
                         </div>
 
-                        <!-- Facilities & Achievements Section -->
+                        <!-- Phần Cơ Sở Vật Chất & Thành Tựu -->
                         <div class="card mb-4">
                             <div class="card-header bg-light">
                                 <h5 class="mb-0 text-primary">
-                                    <i class="fas fa-trophy me-2"></i>Facilities & Achievements
+                                    <i class="fas fa-trophy me-2"></i>Cơ Sở Vật Chất & Thành Tựu
                                 </h5>
                             </div>
                             <div class="card-body">
                                 <div class="row g-4">
                                     <div class="col-12">
                                         <div class="form-floating">
-                                            <textarea asp-for="@Model.Aminities" class="form-control" style="height: 120px" placeholder="Amenities Available"></textarea>
-                                            <label asp-for="@Model.Aminities">Amenities</label>
+                                            <textarea asp-for="@Model.Aminities" class="form-control" style="height: 120px" placeholder="Tiện ích hiện có"></textarea>
+                                            <label asp-for="@Model.Aminities">Tiện Ích</label>
                                             <span asp-validation-for="@Model.Aminities" class="text-danger"></span>
                                         </div>
                                     </div>
 
                                     <div class="col-12">
                                         <div class="form-floating">
-                                            <textarea asp-for="@Model.Equipment" class="form-control" style="height: 120px" placeholder="Medical Equipment"></textarea>
-                                            <label asp-for="@Model.Equipment">Equipment</label>
+                                            <textarea asp-for="@Model.Equipment" class="form-control" style="height: 120px" placeholder="Thiết bị y tế"></textarea>
+                                            <label asp-for="@Model.Equipment">Thiết Bị</label>
                                             <span asp-validation-for="@Model.Equipment" class="text-danger"></span>
                                         </div>
                                     </div>
 
                                     <div class="col-12">
                                         <div class="form-floating">
-                                            <textarea asp-for="@Model.Archivement" class="form-control" style="height: 120px" placeholder="Achievements and Recognition"></textarea>
-                                            <label asp-for="@Model.Archivement">Achievements</label>
+                                            <textarea asp-for="@Model.Archivement" class="form-control" style="height: 120px" placeholder="Thành tựu và ghi nhận"></textarea>
+                                            <label asp-for="@Model.Archivement">Thành Tựu</label>
                                             <span asp-validation-for="@Model.Archivement" class="text-danger"></span>
                                         </div>
                                     </div>
@@ -139,13 +141,13 @@
                             </div>
                         </div>
 
-                        <!-- Action Buttons -->
+                        <!-- Nút Hành Động -->
                         <div class="col-12 text-center mt-4">
                             <button type="submit" class="btn btn-primary px-5 py-2 me-2">
-                                <i class="fas fa-save me-2"></i>Save Changes
+                                <i class="fas fa-save me-2"></i>Lưu Thay Đổi
                             </button>
                             <a asp-action="SpecialityIndex" class="btn btn-outline-secondary px-4 py-2">
-                                <i class="fas fa-arrow-left me-2"></i>Back to List
+                                <i class="fas fa-arrow-left me-2"></i>Quay Lại Danh Sách
                             </a>
                         </div>
                     </form>
