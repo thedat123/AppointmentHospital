@@ -11,6 +11,7 @@ using AppointmentHospital.Areas.Admin.Repositories;
 using AppointmentHospital.Areas.Admin.Repositories.Implement;
 using AppointmentHospital.Areas.Admin.Services;
 using AppointmentHospital.Areas.Admin.Services.Implement;
+using Microsoft.AspNetCore.HttpOverrides;
 using AppointmentHospital.Configuration.EmailConfiguaration;
 using Hangfire;
 using AppointmentHospital.Configuration.BaseUrl;
@@ -158,6 +159,10 @@ namespace AppointmentHospital
             app.UseStaticFiles();
             app.UseSession();
             app.UseRouting();
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseHangfireDashboard();
