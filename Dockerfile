@@ -19,7 +19,7 @@ WORKDIR /app
 COPY --from=build /app/out .
 
 # Set environment variables (can be overridden at runtime)
-ENV ASPNETCORE_ENVIRONMENT=Development
+ENV ASPNETCORE_ENVIRONMENT=Production
 ENV ASPNETCORE_URLS=http://+:80
 
 # Expose port
