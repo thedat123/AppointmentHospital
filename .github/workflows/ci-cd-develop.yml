@@ -7,6 +7,7 @@ on:
     paths:
       - '**/*.cs'
       - '**/*.csproj'
+      - '**/appsettings.*.json'
       - 'Dockerfile'
       - '.github/workflows/ci-cd-develop.yml'
 
@@ -25,7 +26,7 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
-        
+          
       - name: Restore dependencies
         run: dotnet restore
         
@@ -57,13 +58,13 @@ jobs:
         with:
           name: publish-output
           path: ./out
-        
+          
       - name: Login to DockerHub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-        
+          
       - name: Build & Push Docker image
         run: |
           docker build -t ${{ env.IMAGE_NAME }}:develop-${{ github.sha }} .
@@ -90,12 +91,13 @@ jobs:
             docker stop backend || true
             docker rm backend || true
             
-            # Run new container with proper environment variables
+            # Run new container with environment variables
             docker run -d \
               --name backend \
               --network host \
+              --restart unless-stopped \
               -e ASPNETCORE_ENVIRONMENT=Production \
               -e "ConnectionStrings__AppointmentHospitalDB=${{ secrets.DB_CONNECTION_STRING }}" \
-              -e "GOOGLE_CLIENTID=${{ secrets.GOOGLE_CLIENT_ID }}" \
-              -e "GOOGLE_CLIENTSECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" \
+              -e "SMTP__UserName=${{ secrets.SMTP_USERNAME }}" \
+              -e "SMTP__Password=${{ secrets.SMTP_PASSWORD }}" \
               ${{ env.IMAGE_NAME }}:develop-latest
