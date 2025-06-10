@@ -42,6 +42,13 @@ namespace AppointmentHospital
                 options.IdleTimeout = TimeSpan.FromMinutes(30);
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
+                
+                // Thêm cho production
+                if (builder.Environment.IsProduction())
+                {
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                    options.Cookie.SameSite = SameSiteMode.Lax;
+                }
             });
             var configuration = builder.Configuration;
             builder.Services.AddHttpContextAccessor();
@@ -89,9 +96,17 @@ namespace AppointmentHospital
             {
                 var clientId = Environment.GetEnvironmentVariable("GOOGLE_CLIENTID");
                 var clientSecret = Environment.GetEnvironmentVariable("GOOGLE_CLIENTSECRET");
+                
                 option.CallbackPath = "/dang-nhap-bang-google";
                 option.ClientId = clientId;
                 option.ClientSecret = clientSecret;
+                
+                // Thêm cấu hình cho production
+                if (builder.Environment.IsProduction())
+                {
+                    option.CorrelationCookie.SameSite = SameSiteMode.Lax;
+                    option.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
+                }
             });
             builder.Services.AddScoped<IAppointmentDateRepository, AppointmentDateRepository>();
             builder.Services.AddScoped<IAppointmentDateService, AppointmentDateService>();
@@ -128,14 +143,18 @@ namespace AppointmentHospital
             });
             builder.Services.ConfigureApplicationCookie(options =>
             {
-                options.Cookie.HttpOnly = true;
-                options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; // Hoặc Always cho production
-                options.Cookie.SameSite = SameSiteMode.Lax;
-                options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
-                options.SlidingExpiration = true;
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(45);
                 options.LoginPath = "/Account/Login";
                 options.LogoutPath = "/Account/Logout";
                 options.AccessDeniedPath = "/Account/AccessDeny";
+                
+                // Thêm cấu hình cho production
+                if (builder.Environment.IsProduction())
+                {
+                    options.Cookie.Domain = "medicalcare.io.vn";
+                    options.Cookie.SameSite = SameSiteMode.Lax;
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                }
             });
 
             builder.Services.AddHangfire(config =>

@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿// AccountController.cs - Đã cập nhật để tự động dùng BaseUrl phù hợp cho LocalHost và Production
+
+using Microsoft.AspNetCore.Mvc;
 using AppointmentHospital.Services;
 using static AppointmentHospital.DTOs.Account.AccountRequest;
 using Microsoft.AspNetCore.Identity;
@@ -23,7 +25,6 @@ namespace AppointmentHospital.Controllers
         private readonly IEmailService _emailService;
         private readonly IOptions<BaseUrl> _options;
         private readonly AppDbContext _appDbContext;
-        private readonly ILogger<AccountController> _logger;
 
         public AccountController(
             IAccountService accountService,
@@ -32,8 +33,7 @@ namespace AppointmentHospital.Controllers
             IEmailService emailService,
             IHttpContextAccessor contextAccessor,
             UserManager<User> userManager,
-            SignInManager<User> signInManager,
-            ILogger<AccountController> logger)
+            SignInManager<User> signInManager)
         {
             _accountService = accountService;
             _contextAccessor = contextAccessor;
@@ -42,18 +42,10 @@ namespace AppointmentHospital.Controllers
             _emailService = emailService;
             _options = options;
             _appDbContext = appDbContext;
-            _logger = logger;
         }
 
         private string GetBaseUrl()
         {
-            var request = _contextAccessor.HttpContext?.Request;
-            if (request != null)
-            {
-                var scheme = request.Scheme;
-                var host = request.Host.Value;
-                return $"{scheme}://{host}";
-            }
             return Request.Host.Host.Contains("localhost") ? _options.Value.LocalHost : _options.Value.Production;
         }
 
@@ -140,126 +132,70 @@ namespace AppointmentHospital.Controllers
         [HttpPost]
         public async Task<IActionResult> ExternalLogin(string provider)
         {
-            try
+            var externalList = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+            var externalAuthen = externalList.Find(e => e.Name == provider);
+            if (externalAuthen == null)
             {
-                var externalList = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-                var externalAuthen = externalList.Find(e => e.Name == provider);
-                if (externalAuthen == null)
-                {
-                    _logger.LogWarning("External authentication provider {Provider} not found", provider);
-                    return NotFound("Cannot find authenticated provider " + provider);
-                }
-
-                // Ensure proper redirect URL with full domain
-                var redirectUrl = Url.Action("ExternalLoginCallback", "Account", null, Request.Scheme);
-                _logger.LogInformation("External login redirect URL: {RedirectUrl}", redirectUrl);
-                
-                var configureExternalLogin = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
-                return new ChallengeResult(provider, configureExternalLogin);
+                return NotFound("Cannot find authenticated provider " + provider);
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error in ExternalLogin for provider {Provider}", provider);
-                TempData["ErrorMessage"] = "An error occurred during external login. Please try again.";
-                return RedirectToAction("Login");
-            }
+            var redirectUrl = Url.Action("ExternalLoginCallback", "Account");
+            var configureExternalLogin = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+            return new ChallengeResult(provider, configureExternalLogin);
         }
 
         [HttpGet]
         public async Task<IActionResult> ExternalLoginCallback()
         {
-            try
+            string externalMail = null;
+            var info = await _signInManager.GetExternalLoginInfoAsync();
+            if (info == null)
             {
-                var info = await _signInManager.GetExternalLoginInfoAsync();
-                if (info == null)
-                {
-                    _logger.LogWarning("External login info is null - correlation may have failed");
-                    TempData["ErrorMessage"] = "External login failed. Please try again.";
-                    return RedirectToAction("Login");
-                }
+                return RedirectToAction("Login");
+            }
 
-                _logger.LogInformation("External login callback received for provider: {Provider}", info.LoginProvider);
+            var loginResult = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, false);
+            if (loginResult.Succeeded)
+            {
+                var userId = _accountService.GetIdByEmail(info.Principal.FindFirstValue(ClaimTypes.Email));
+                _contextAccessor.HttpContext.Session.SetString("PatientId", userId.ToString());
+                return RedirectToAction("Index", "Patient");
+            }
 
-                var loginResult = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, false);
-                if (loginResult.Succeeded)
+            externalMail = info.Principal.FindFirstValue(ClaimTypes.Email);
+            var user = await _userManager.FindByEmailAsync(externalMail);
+
+            if (user == null)
+            {
+                var newUser = new User { UserName = externalMail, Email = externalMail };
+                var createResult = await _userManager.CreateAsync(newUser);
+                if (!createResult.Succeeded) return RedirectToAction("Login");
+
+                var patient = new Patient { FullName = newUser.UserName, User = newUser };
+                await _userManager.AddToRoleAsync(newUser, "Patient");
+                await _appDbContext.AddAsync(patient);
+                await _appDbContext.SaveChangesAsync();
+
+                var addLoginNewUserResult = await _userManager.AddLoginAsync(newUser, info);
+                if (addLoginNewUserResult.Succeeded)
                 {
-                    var email = info.Principal.FindFirstValue(ClaimTypes.Email);
-                    var userId = _accountService.GetIdByEmail(email);
-                    _contextAccessor.HttpContext.Session.SetString("PatientId", userId.ToString());
+                    var token = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
+                    await _userManager.ConfirmEmailAsync(newUser, token);
+                    await _signInManager.SignInAsync(newUser, false);
+                    _contextAccessor.HttpContext.Session.SetString("PatientId", newUser.Id.ToString());
                     return RedirectToAction("Index", "Patient");
                 }
-
-                var externalMail = info.Principal.FindFirstValue(ClaimTypes.Email);
-                if (string.IsNullOrEmpty(externalMail))
-                {
-                    _logger.LogWarning("External login did not provide email claim");
-                    TempData["ErrorMessage"] = "Unable to retrieve email from external provider.";
-                    return RedirectToAction("Login");
-                }
-
-                var user = await _userManager.FindByEmailAsync(externalMail);
-
-                if (user == null)
-                {
-                    // Create new user
-                    var newUser = new User 
-                    { 
-                        UserName = externalMail, 
-                        Email = externalMail,
-                        EmailConfirmed = true // Auto-confirm for external logins
-                    };
-                    
-                    var createResult = await _userManager.CreateAsync(newUser);
-                    if (!createResult.Succeeded) 
-                    {
-                        _logger.LogError("Failed to create user: {Errors}", string.Join(", ", createResult.Errors.Select(e => e.Description)));
-                        TempData["ErrorMessage"] = "Failed to create user account.";
-                        return RedirectToAction("Login");
-                    }
-
-                    var patient = new Patient { FullName = newUser.UserName, User = newUser };
-                    await _userManager.AddToRoleAsync(newUser, "Patient");
-                    await _appDbContext.AddAsync(patient);
-                    await _appDbContext.SaveChangesAsync();
-
-                    var addLoginResult = await _userManager.AddLoginAsync(newUser, info);
-                    if (addLoginResult.Succeeded)
-                    {
-                        await _signInManager.SignInAsync(newUser, false);
-                        _contextAccessor.HttpContext.Session.SetString("PatientId", newUser.Id.ToString());
-                        return RedirectToAction("Index", "Patient");
-                    }
-                    else
-                    {
-                        _logger.LogError("Failed to add external login: {Errors}", string.Join(", ", addLoginResult.Errors.Select(e => e.Description)));
-                    }
-                }
-                else
-                {
-                    // Existing user
-                    if (!await _userManager.IsEmailConfirmedAsync(user))
-                    {
-                        user.EmailConfirmed = true;
-                        await _userManager.UpdateAsync(user);
-                    }
-
-                    var addLoginResult = await _userManager.AddLoginAsync(user, info);
-                    if (addLoginResult.Succeeded || addLoginResult.Errors.Any(e => e.Code == "LoginAlreadyAssociated"))
-                    {
-                        await _signInManager.SignInAsync(user, false);
-                        _contextAccessor.HttpContext.Session.SetString("PatientId", user.Id.ToString());
-                        return RedirectToAction("Index", "Patient");
-                    }
-                    else
-                    {
-                        _logger.LogError("Failed to add external login to existing user: {Errors}", string.Join(", ", addLoginResult.Errors.Select(e => e.Description)));
-                    }
-                }
             }
-            catch (Exception ex)
+            else
             {
-                _logger.LogError(ex, "Exception in ExternalLoginCallback");
-                TempData["ErrorMessage"] = "An error occurred during external login. Please try again.";
+                if (!await _userManager.IsEmailConfirmedAsync(user))
+                {
+                    var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    await _userManager.ConfirmEmailAsync(user, token);
+                }
+                await _userManager.AddLoginAsync(user, info);
+                await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, false);
+                _contextAccessor.HttpContext.Session.SetString("PatientId", user.Id.ToString());
+                return RedirectToAction("Index", "Patient");
             }
 
             return RedirectToAction("Login");
@@ -376,14 +312,6 @@ namespace AppointmentHospital.Controllers
         public IActionResult AccessDeny()
         {
             return View();
-        }
-
-        // Add this action to handle external login errors
-        [AllowAnonymous]
-        public IActionResult ExternalLoginError()
-        {
-            ViewBag.ErrorMessage = "An error occurred during external authentication. Please try again or use regular login.";
-            return View("Login", new LoginUserRequest { Email = string.Empty, Password = string.Empty });
         }
     }
 }
