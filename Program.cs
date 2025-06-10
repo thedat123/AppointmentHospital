@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.DataProtection;
 using AppointmentHospital.Helpers;
 using AppointmentHospital.Repositories;
 using AppointmentHospital.Repositories.Implement;
@@ -171,7 +172,6 @@ namespace AppointmentHospital
             });;
 
             var app = builder.Build();
-            // Configure the HTTP request pipeline.
             if (builder.Environment.IsProduction())
             {
                 // Data Protection
@@ -186,7 +186,7 @@ namespace AppointmentHospital
                     options.Cookie.HttpOnly = true;
                 });
             }
-
+            // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
