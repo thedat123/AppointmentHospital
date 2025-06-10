@@ -172,12 +172,21 @@ namespace AppointmentHospital
 
             var app = builder.Build();
             // Configure the HTTP request pipeline.
-            if (app.Environment.IsProduction())
+            if (builder.Environment.IsProduction())
             {
+                // Data Protection
                 builder.Services.AddDataProtection()
-                    .PersistKeysToFileSystem(new DirectoryInfo("/app/keys"))
                     .SetApplicationName("AppointmentHospital");
+                
+                // Antiforgery
+                builder.Services.AddAntiforgery(options =>
+                {
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                    options.Cookie.SameSite = SameSiteMode.Lax;
+                    options.Cookie.HttpOnly = true;
+                });
             }
+
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
