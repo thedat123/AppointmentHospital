@@ -158,20 +158,7 @@ namespace AppointmentHospital
                 }
             });
 
-            builder.Services.AddHangfire(config =>
-            {
-                config.SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
-                .UseSimpleAssemblyNameTypeSerializer()
-                .UseRecommendedSerializerSettings()
-                .UseSqlServerStorage(configuration.GetConnectionString("AppointmentHospitalDB"));
-            });
-            builder.Services.AddHangfireServer();
-            builder.Services.AddSignalR().AddNewtonsoftJsonProtocol(options =>
-            {
-                options.PayloadSerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-            });;
-
-            var app = builder.Build();
+            // DI CHUYỂN ĐOẠN NÀY LÊN TRƯỚC KHI BUILD APP
             if (builder.Environment.IsProduction())
             {
                 // Data Protection
@@ -186,6 +173,23 @@ namespace AppointmentHospital
                     options.Cookie.HttpOnly = true;
                 });
             }
+
+            builder.Services.AddHangfire(config =>
+            {
+                config.SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+                .UseSimpleAssemblyNameTypeSerializer()
+                .UseRecommendedSerializerSettings()
+                .UseSqlServerStorage(configuration.GetConnectionString("AppointmentHospitalDB"));
+            });
+            builder.Services.AddHangfireServer();
+            builder.Services.AddSignalR().AddNewtonsoftJsonProtocol(options =>
+            {
+                options.PayloadSerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            });;
+
+            // BUILD APP SAU KHI ĐÃ CẤU HÌNH TẤT CẢ SERVICES
+            var app = builder.Build();
+            
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
