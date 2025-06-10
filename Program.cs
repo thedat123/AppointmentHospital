@@ -38,19 +38,25 @@ namespace AppointmentHospital
                 options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
             });
 
+            // Cấu hình Session với điều kiện môi trường
             builder.Services.AddSession(options =>
             {
                 options.IdleTimeout = TimeSpan.FromMinutes(30);
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
                 
-                // Thêm cho production
+                // Chỉ bật secure policy khi có HTTPS
                 if (builder.Environment.IsProduction())
                 {
-                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; // Thay đổi từ Always thành SameAsRequest
                     options.Cookie.SameSite = SameSiteMode.Lax;
                 }
+                else
+                {
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+                }
             });
+
             var configuration = builder.Configuration;
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddScoped<SeedData>();
@@ -93,6 +99,7 @@ namespace AppointmentHospital
             builder.Services.AddScoped<ISpecialitiesService, SpecialitiesService>();
             builder.Services.AddScoped<IChatbotService, ChatbotService>();
 
+            // Cấu hình Google Authentication với điều kiện môi trường
             builder.Services.AddAuthentication().AddGoogle(option =>
             {
                 var clientId = Environment.GetEnvironmentVariable("GOOGLE_CLIENTID");
@@ -102,13 +109,14 @@ namespace AppointmentHospital
                 option.ClientId = clientId;
                 option.ClientSecret = clientSecret;
                 
-                // Thêm cấu hình cho production
+                // Cấu hình cookie cho production
                 if (builder.Environment.IsProduction())
                 {
                     option.CorrelationCookie.SameSite = SameSiteMode.Lax;
-                    option.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
+                    option.CorrelationCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; // Thay đổi từ Always
                 }
             });
+
             builder.Services.AddScoped<IAppointmentDateRepository, AppointmentDateRepository>();
             builder.Services.AddScoped<IAppointmentDateService, AppointmentDateService>();
             
@@ -118,6 +126,7 @@ namespace AppointmentHospital
             builder.Services.AddIdentity<User, IdentityRole<Guid>>()
                             .AddEntityFrameworkStores<AppDbContext>()
                             .AddDefaultTokenProviders();
+
             builder.Services.Configure<IdentityOptions>(options => {
                 // Thiết lập về Password
                 options.Password.RequireDigit = false;
@@ -127,7 +136,6 @@ namespace AppointmentHospital
                 options.Password.RequiredLength = 3;
                 options.Password.RequiredUniqueChars = 1; 
 
-                
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
                 options.Lockout.MaxFailedAccessAttempts = 5; 
                 options.Lockout.AllowedForNewUsers = true;
@@ -140,8 +148,9 @@ namespace AppointmentHospital
                 // Cấu hình đăng nhập.
                 options.SignIn.RequireConfirmedEmail = true;            
                 options.SignIn.RequireConfirmedPhoneNumber = false;    
-
             });
+
+            // Cấu hình ApplicationCookie với điều kiện môi trường
             builder.Services.ConfigureApplicationCookie(options =>
             {
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(45);
@@ -149,26 +158,36 @@ namespace AppointmentHospital
                 options.LogoutPath = "/Account/Logout";
                 options.AccessDeniedPath = "/Account/AccessDeny";
                 
-                // Thêm cấu hình cho production
+                // Cấu hình cho production
                 if (builder.Environment.IsProduction())
                 {
                     options.Cookie.Domain = "medicalcare.io.vn";
                     options.Cookie.SameSite = SameSiteMode.Lax;
-                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; // Thay đổi từ Always
                 }
             });
 
-            // DI CHUYỂN ĐOẠN NÀY LÊN TRƯỚC KHI BUILD APP
+            // Cấu hình Data Protection và Antiforgery
             if (builder.Environment.IsProduction())
             {
                 // Data Protection
                 builder.Services.AddDataProtection()
                     .SetApplicationName("AppointmentHospital");
                 
-                // Antiforgery
+                // Antiforgery - SỬA LỖI CHÍNH TẠI ĐÂY
                 builder.Services.AddAntiforgery(options =>
                 {
-                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; // Thay đổi từ Always thành SameAsRequest
+                    options.Cookie.SameSite = SameSiteMode.Lax;
+                    options.Cookie.HttpOnly = true;
+                });
+            }
+            else
+            {
+                // Cấu hình cho development
+                builder.Services.AddAntiforgery(options =>
+                {
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
                     options.Cookie.SameSite = SameSiteMode.Lax;
                     options.Cookie.HttpOnly = true;
                 });
@@ -185,7 +204,7 @@ namespace AppointmentHospital
             builder.Services.AddSignalR().AddNewtonsoftJsonProtocol(options =>
             {
                 options.PayloadSerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-            });;
+            });
 
             // BUILD APP SAU KHI ĐÃ CẤU HÌNH TẤT CẢ SERVICES
             var app = builder.Build();
@@ -197,14 +216,16 @@ namespace AppointmentHospital
                 app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
-            app.UseStaticFiles();
-            app.UseSession();
-            app.UseRouting();
+            // Cấu hình Forwarded Headers cho reverse proxy
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
             });
+
+            app.UseHttpsRedirection();
+            app.UseStaticFiles();
+            app.UseSession();
+            app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseHangfireDashboard();
