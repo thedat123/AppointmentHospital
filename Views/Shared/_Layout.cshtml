@@ -116,14 +116,14 @@
         @if (!User.Identity.IsAuthenticated)
         {
             <text>
-                document.addEventListener('DOMContentLoaded', function () {
-                    document.querySelectorAll('.require-auth').forEach(function (el) {
-                        el.addEventListener('click', function (e) {
-                            e.preventDefault();
-                            showLoginAlert();
-                        });
+            document.addEventListener('DOMContentLoaded', function () {
+                document.querySelectorAll('.require-auth').forEach(function (el) {
+                    el.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        showLoginAlert();
                     });
                 });
+            });
             </text>
         }
 
@@ -137,22 +137,19 @@
             const sendButton = document.getElementById('sendMessage');
             
             let userSymptoms = [];
-            let selectedSymptoms = []; // Track selected symptoms
+            let selectedSymptoms = [];
             let conversationState = 'greeting';
             let sessionId = null;
             
             // Show chatbot when booking button is clicked
             bookingButton.addEventListener('click', function() {
-                // Check if user is authenticated
                 @if (User.Identity.IsAuthenticated)
                 {
                     <text>
                     chatbotContainer.style.display = 'flex';
                     if (chatbotMessages.children.length === 0) {
-                        // Generate new session ID
                         sessionId = generateSessionId();
-                        // First time opening the chatbot
-                        addBotMessage("🏥 Xin chào! Tôi là trợ lý ảo hỗ trợ đặt lịch khám. Để giúp bạn tìm bác sĩ phù hợp, vui lòng cho tôi biết về các triệu chứng bạn đang gặp phải.");
+                        addBotMessage("🏥 Xin chào! Tôi là trợ lý ảo hỗ trợ đặt lịch khám. Vui lòng nhập triệu chứng theo cú pháp: 'tôi bị [triệu chứng]', ví dụ: 'tôi bị đau đầu'.");
                         setTimeout(() => {
                             showSymptomOptions();
                         }, 500);
@@ -208,19 +205,36 @@
                 chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
             }
             
+            // Function to validate user input
+            function isValidSymptomInput(message) {
+                const symptomRegex = /^tôi bị\s+(.+)/i;
+                return symptomRegex.test(message.trim());
+            }
+            
             // Function to send user message
             function sendUserMessage() {
                 const message = userInput.value.trim();
                 if (message === '') return;
                 
-                addUserMessage(message);
-                userInput.value = '';
-                
-                // Show typing indicator
-                showTypingIndicator();
-                
-                // Process the message based on the current conversation state
-                processUserInput(message);
+                if (isValidSymptomInput(message)) {
+                    addUserMessage(message);
+                    userInput.value = '';
+                    showTypingIndicator();
+                    processUserInput(message);
+                } else {
+                    Swal.fire({
+                        title: 'Cú pháp không hợp lệ',
+                        text: "Vui lòng nhập triệu chứng theo cú pháp 'tôi bị [triệu chứng]', ví dụ: 'tôi bị đau đầu'. Nếu bạn có câu hỏi khác, vui lòng truy cập /Patient/Chatbot để được hỗ trợ.",
+                        icon: 'error',
+                        confirmButtonText: 'Đi đến Chatbot',
+                        showCancelButton: true,
+                        cancelButtonText: 'Thử lại'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = '/Patient/Chatbot';
+                        }
+                    });
+                }
             }
             
             // Show typing indicator
@@ -248,19 +262,27 @@
             
             // Process user input based on conversation state
             async function processUserInput(message) {
-                if (conversationState === 'greeting') {
-                    // Add symptoms and call API
+                if (conversationState === 'greeting' || conversationState === 'collecting_symptoms') {
                     await callChatbotAPI(message);
                     conversationState = 'diagnosis_complete';
-                } 
-                else if (conversationState === 'collecting_symptoms') {
-                    // Call API with additional symptoms
-                    await callChatbotAPI(message);
-                    conversationState = 'diagnosis_complete';
-                }
-                else if (conversationState === 'diagnosis_complete') {
-                    // Handle follow-up questions or booking
-                    await callChatbotAPI(message);
+                } else if (conversationState === 'diagnosis_complete') {
+                    if (isValidSymptomInput(message)) {
+                        await callChatbotAPI(message);
+                    } else {
+                        removeTypingIndicator();
+                        Swal.fire({
+                            title: 'Cú pháp không hợp lệ',
+                            text: "Vui lòng nhập triệu chứng theo cú pháp 'tôi bị [triệu chứng]'. Nếu bạn có câu hỏi khác, vui lòng truy cập /Patient/Chatbot.",
+                            icon: 'error',
+                            confirmButtonText: 'Đi đến Chatbot',
+                            showCancelButton: true,
+                            cancelButtonText: 'Thử lại'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = '/Patient/Chatbot';
+                            }
+                        });
+                    }
                 }
             }
             
@@ -280,11 +302,9 @@
                     
                     const data = await response.json();
                     
-                    // Remove typing indicator
                     removeTypingIndicator();
                     
                     if (data.botReply) {
-                        // Parse and format the bot reply
                         formatAndDisplayBotReply(data.botReply);
                     } else {
                         addBotMessage("❌ Xin lỗi, tôi không thể xử lý yêu cầu của bạn lúc này. Vui lòng thử lại sau.");
@@ -299,41 +319,33 @@
             
             // Format and display bot reply
             function formatAndDisplayBotReply(reply) {
-                // Check if reply contains diagnosis information
                 if (reply.includes('🎯') && reply.includes('DỰ ĐOÁN BỆNH LÝ')) {
                     formatDiagnosisReply(reply);
                 } else {
-                    // Regular reply
                     addBotMessage(reply);
                 }
             }
             
             // Format diagnosis reply
             function formatDiagnosisReply(reply) {
-                // Split reply into sections
                 const sections = reply.split(/(?=🎯|🔄|🏥|👨‍⚕️)/);
                 
                 sections.forEach((section, index) => {
                     if (section.trim()) {
                         setTimeout(() => {
                             if (section.includes('🎯')) {
-                                // Main diagnosis
                                 formatMainDiagnosis(section);
                             } else if (section.includes('🔄')) {
-                                // Alternative diagnoses
                                 formatAlternativeDiagnoses(section);
                             } else if (section.includes('🏥')) {
-                                // Department recommendations
                                 formatDepartmentRecommendations(section);
                             } else if (section.includes('👨‍⚕️')) {
-                                // Doctor recommendations
                                 formatDoctorRecommendations(section);
                             }
                         }, index * 1000);
                     }
                 });
                 
-                // Add follow-up options
                 setTimeout(() => {
                     addFollowUpOptions();
                 }, sections.length * 1000 + 500);
@@ -466,7 +478,7 @@
                 optionsHTML += "<div class='symptom-actions'>";
                 optionsHTML += "<button class='btn-submit-symptoms' onclick='submitSelectedSymptoms()' style='display: none;'>Gửi triệu chứng đã chọn</button>";
                 optionsHTML += "</div>";
-                optionsHTML += "<div class='or-text'>Hoặc bạn có thể nhập triệu chứng khác vào ô chat bên dưới</div>";
+                optionsHTML += "<div class='or-text'>Hoặc nhập triệu chứng theo cú pháp 'tôi bị [triệu chứng]' vào ô chat bên dưới</div>";
                 optionsHTML += "</div>";
                 
                 addBotMessage(optionsHTML);
@@ -477,11 +489,9 @@
                 const index = selectedSymptoms.indexOf(symptom);
                 
                 if (index === -1) {
-                    // Add symptom
                     selectedSymptoms.push(symptom);
                     element.classList.add('symptom-selected');
                 } else {
-                    // Remove symptom
                     selectedSymptoms.splice(index, 1);
                     element.classList.remove('symptom-selected');
                 }
@@ -515,7 +525,6 @@
                 if (index !== -1) {
                     selectedSymptoms.splice(index, 1);
                     
-                    // Update the visual state of the symptom option
                     const symptomOption = document.querySelector(`[data-symptom="${symptom}"]`);
                     if (symptomOption) {
                         symptomOption.classList.remove('symptom-selected');
@@ -531,25 +540,23 @@
                     return;
                 }
                 
-                const symptomsText = selectedSymptoms.join(', ');
+                const symptomsText = `tôi bị ${selectedSymptoms.join(', ')}`;
                 userSymptoms = [...selectedSymptoms];
                 
-                addUserMessage(`tôi bị: ${symptomsText}`);
+                addUserMessage(symptomsText);
                 
-                // Hide symptom selection interface
                 const symptomSelection = document.querySelector('.symptom-selection');
                 if (symptomSelection) {
                     symptomSelection.style.opacity = '0.5';
                     symptomSelection.style.pointerEvents = 'none';
                 }
                 
-                // Show typing indicator and call API
                 showTypingIndicator();
                 await callChatbotAPI(symptomsText);
                 conversationState = 'diagnosis_complete';
             }
             
-            // Legacy function for single symptom selection (keep for backward compatibility)
+            // Legacy function for single symptom selection
             window.selectSymptom = async function(symptom) {
                 selectedSymptoms = [symptom];
                 await submitSelectedSymptoms();
@@ -573,7 +580,7 @@
             
             // Add more symptoms
             window.addMoreSymptoms = function() {
-                addBotMessage("💊 Vui lòng cho tôi biết thêm triệu chứng khác bạn đang gặp phải:");
+                addBotMessage("💊 Vui lòng nhập triệu chứng theo cú pháp: 'tôi bị [triệu chứng]', ví dụ: 'tôi bị đau đầu'. Hoặc chọn từ danh sách:");
                 setTimeout(() => {
                     showSymptomOptions();
                 }, 500);
@@ -582,8 +589,10 @@
             
             // Ask for more information
             window.askMoreInfo = function() {
-                addBotMessage("❓ Bạn muốn biết thêm thông tin gì về chẩn đoán hoặc phương pháp điều trị? Hãy đặt câu hỏi cho tôi.");
-                conversationState = 'diagnosis_complete';
+                addBotMessage("❓ Bạn có câu hỏi khác? Vui lòng truy cập /Patient/Chatbot để được hỗ trợ thêm.");
+                setTimeout(() => {
+                    window.location.href = '/Patient/Chatbot';
+                }, 1000);
             }
             
             // Restart consultation
@@ -593,7 +602,7 @@
                 conversationState = 'greeting';
                 sessionId = generateSessionId();
                 
-                addBotMessage("🔄 Tôi sẽ bắt đầu tư vấn lại từ đầu. Vui lòng cho tôi biết về các triệu chứng bạn đang gặp phải:");
+                addBotMessage("🔄 Tôi sẽ bắt đầu tư vấn lại từ đầu. Vui lòng nhập triệu chứng theo cú pháp: 'tôi bị [triệu chứng]', ví dụ: 'tôi bị đau đầu':");
                 setTimeout(() => {
                     showSymptomOptions();
                 }, 500);
