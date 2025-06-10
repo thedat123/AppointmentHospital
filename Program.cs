@@ -172,6 +172,12 @@ namespace AppointmentHospital
 
             var app = builder.Build();
             // Configure the HTTP request pipeline.
+            if (app.Environment.IsProduction())
+            {
+                builder.Services.AddDataProtection()
+                    .PersistKeysToFileSystem(new DirectoryInfo("/app/keys"))
+                    .SetApplicationName("AppointmentHospital");
+            }
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
