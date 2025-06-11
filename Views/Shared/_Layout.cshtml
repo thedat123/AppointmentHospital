@@ -319,14 +319,165 @@
             
             // Format and display bot reply
             function formatAndDisplayBotReply(reply) {
-                if (reply.includes('🎯') && reply.includes('DỰ ĐOÁN BỆNH LÝ')) {
-                    formatDiagnosisReply(reply);
-                } else {
-                    addBotMessage(reply);
+                // Convert markdown-like formatting to HTML
+                let formattedReply = formatMarkdownToHTML(reply);
+                
+                // Split into sections based on emojis or line breaks
+                const sections = splitIntoSections(formattedReply);
+                
+                // Process each section
+                sections.forEach((section, index) => {
+                    if (section.trim()) {
+                        setTimeout(() => {
+                            displaySectionWithViewMore(section.trim());
+                        }, index * 800);
+                    }
+                });
+            }
+
+            function formatMarkdownToHTML(text) {
+                return text
+                    // Bold text **text** -> <strong>text</strong>
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    // Italic text *text* -> <em>text</em>
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    // Line breaks
+                    .replace(/\n/g, '<br>')
+                    // Lists starting with - or •
+                    .replace(/^[-•]\s(.+)$/gm, '<li>$1</li>')
+                    // Wrap consecutive <li> in <ul>
+                    .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
+                    // Clean up multiple <ul> tags
+                    .replace(/<\/ul>\s*<ul>/g, '');
+            }
+
+            // Split content into logical sections
+            function splitIntoSections(content) {
+                // Split by emoji headers or double line breaks
+                const emojiPattern = /(?=🎯|🔄|🏥|👨‍⚕️|💊|📋|❓|🔗|⭐|📌|💼)/;
+                let sections = content.split(emojiPattern);
+                
+                // If no emoji sections, split by double line breaks or long content
+                if (sections.length === 1) {
+                    sections = content.split(/<br><br>|<br>\s*<br>/);
                 }
+                
+                return sections.filter(section => section.trim().length > 0);
+            }
+
+            function truncateContent(content, maxLength, maxLines) {
+                let truncated = content;
+                
+                // First, truncate by lines
+                const lines = content.split('<br>');
+                if (lines.length > maxLines) {
+                    truncated = lines.slice(0, maxLines).join('<br>');
+                }
+                
+                // Then, truncate by length if still too long
+                if (truncated.length > maxLength) {
+                    // Find the last complete sentence or bullet point
+                    const sentences = truncated.split(/(?<=[.!?])\s+|(?<=<\/li>)/);
+                    let result = '';
+                    
+                    for (let sentence of sentences) {
+                        if ((result + sentence).length <= maxLength) {
+                            result += sentence;
+                        } else {
+                            break;
+                        }
+                    }
+                    
+                    truncated = result || truncated.substring(0, maxLength);
+                }
+                
+                return truncated;
+            }
+
+            // Display section with automatic View More for long content
+            function displaySectionWithViewMore(sectionContent) {
+                const maxLength = 500; // Maximum characters before truncation
+                const maxLines = 8; // Maximum lines before truncation
+                
+                // Count lines (br tags)
+                const lineCount = (sectionContent.match(/<br>/g) || []).length + 1;
+                const isLongContent = sectionContent.length > maxLength || lineCount > maxLines;
+                
+                if (isLongContent) {
+                    const truncatedContent = truncateContent(sectionContent, maxLength, maxLines);
+                    const remainingContent = sectionContent.replace(truncatedContent, '').trim();
+                    
+                    if (remainingContent.length > 0) {
+                        displayCollapsibleSection(truncatedContent, remainingContent);
+                        return;
+                    }
+                }
+                
+                // Display normal content
+                addBotMessage(formatSectionHTML(sectionContent));
+            }
+
+            function formatSectionHTML(content) {
+                let formatted = content;
+                
+                // Add appropriate CSS classes based on content type
+                if (content.includes('🎯')) {
+                    formatted = `<div class="diagnosis-section">${formatted}</div>`;
+                } else if (content.includes('🏥') || content.includes('👨‍⚕️')) {
+                    formatted = `<div class="recommendation-section">${formatted}</div>`;
+                } else if (content.includes('📋') || content.includes('💊')) {
+                    formatted = `<div class="info-section">${formatted}</div>`;
+                } else if (content.includes('🔄')) {
+                    formatted = `<div class="alternative-section">${formatted}</div>`;
+                } else {
+                    formatted = `<div class="general-section">${formatted}</div>`;
+                }
+                
+                return formatted;
+            }
+
+            window.toggleSectionViewMore = function(sectionId, button) {
+                const collapsibleContent = document.getElementById(sectionId);
+                const icon = button.querySelector('i');
+                const isCollapsed = collapsibleContent.style.display === 'none';
+                
+                if (isCollapsed) {
+                    collapsibleContent.style.display = 'block';
+                    button.innerHTML = '<i class="fas fa-chevron-up"></i> Thu gọn';
+                    button.classList.add('expanded');
+                } else {
+                    collapsibleContent.style.display = 'none';
+                    button.innerHTML = '<i class="fas fa-chevron-down"></i> Xem thêm';
+                    button.classList.remove('expanded');
+                }
+                
+                // Scroll to make sure content is visible
+                setTimeout(() => {
+                    chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+                }, 100);
+            }
+
+            function displayCollapsibleSection(visibleContent, hiddenContent) {
+                const sectionId = 'section_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                
+                const collapsibleHTML = `
+                    <div class="bot-response-section">
+                        <div class="visible-content">
+                            ${formatSectionHTML(visibleContent)}
+                        </div>
+                        <div class="collapsible-content" id="${sectionId}" style="display: none;">
+                            ${formatSectionHTML(hiddenContent)}
+                        </div>
+                        <button class="view-more-btn" onclick="toggleSectionViewMore('${sectionId}', this)">
+                            <i class="fas fa-chevron-down"></i> Xem thêm
+                        </button>
+                    </div>
+                `;
+                
+                addBotMessage(collapsibleHTML);
             }
             
-            // Format diagnosis reply
+            // Format diagnosis reply with collapsible sections for long content
             function formatDiagnosisReply(reply) {
                 const sections = reply.split(/(?=🎯|🔄|🏥|👨‍⚕️)/);
                 
@@ -371,18 +522,33 @@
                 addBotMessage(`<div class="diagnosis-card main-diagnosis">${formattedHTML}</div>`);
             }
             
-            // Format alternative diagnoses
+            // Format alternative diagnoses with View More for long lists
             function formatAlternativeDiagnoses(section) {
                 const lines = section.split('\n').filter(line => line.trim());
                 let formattedHTML = '<div class="alternative-diagnoses">';
+                let items = [];
+                let header = '';
                 
                 lines.forEach(line => {
                     if (line.includes('🔄')) {
-                        formattedHTML += `<div class="section-header">${line}</div>`;
+                        header = `<div class="section-header">${line}</div>`;
                     } else if (line.trim() && line.match(/^\d+\./)) {
-                        formattedHTML += `<div class="alternative-item">${line}</div>`;
+                        items.push(`<div class="alternative-item">${line}</div>`);
                     }
                 });
+                
+                formattedHTML += header;
+                
+                const maxVisibleItems = 3; // Show up to 3 items, collapse the rest
+                if (items.length > maxVisibleItems) {
+                    formattedHTML += '<div class="visible-items">';
+                    formattedHTML += items.slice(0, maxVisibleItems).join('');
+                    formattedHTML += '</div>';
+                    formattedHTML += `<div class="collapsible-items" style="display: none;">${items.slice(maxVisibleItems).join('')}</div>`;
+                    formattedHTML += `<button class="view-more-btn" onclick="toggleViewMore(this)">Xem thêm</button>`;
+                } else {
+                    formattedHTML += items.join('');
+                }
                 
                 formattedHTML += '</div>';
                 addBotMessage(formattedHTML);
@@ -409,32 +575,56 @@
                 addBotMessage(formattedHTML);
             }
             
-            // Format doctor recommendations
+            // Format doctor recommendations with View More for long lists
             function formatDoctorRecommendations(section) {
                 const lines = section.split('\n').filter(line => line.trim());
                 let formattedHTML = '<div class="doctor-recommendations">';
+                let items = [];
+                let header = '';
                 
                 lines.forEach(line => {
                     if (line.includes('👨‍⚕️')) {
-                        formattedHTML += `<div class="section-header">${line}</div>`;
+                        header = `<div class="section-header">${line}</div>`;
                     } else if (line.includes('⭐')) {
-                        formattedHTML += `<div class="doctor-title">${line}</div>`;
+                        items.push(`<div class="doctor-title">${line}</div>`);
                     } else if (line.includes('THS') || line.includes('BS')) {
                         const doctorName = line.replace(/^\*\*•\s*/, '').replace(/\*\*/g, '');
-                        formattedHTML += `<div class="doctor-name" onclick="selectDoctor('${doctorName}')">${doctorName}</div>`;
+                        items.push(`<div class="doctor-name" onclick="selectDoctor('${doctorName}')">${doctorName}</div>`);
                     } else if (line.includes('💼')) {
-                        formattedHTML += `<div class="doctor-experience">${line}</div>`;
+                        items.push(`<div class="doctor-experience">${line}</div>`);
                     } else if (line.includes('🎯')) {
-                        formattedHTML += `<div class="doctor-specialty">${line}</div>`;
+                        items.push(`<div class="doctor-specialty">${line}</div>`);
                     } else if (line.includes('📞')) {
-                        formattedHTML += `<div class="doctor-contact">${line}</div>`;
+                        items.push(`<div class="doctor-contact">${line}</div>`);
                     } else if (line.includes('🚀')) {
-                        formattedHTML += `<div class="booking-cta"><button class="btn-book-now" onclick="bookAppointment()">Đặt lịch ngay</button></div>`;
+                        items.push(`<div class="booking-cta"><button class="btn-book-now" onclick="bookAppointment()">Đặt lịch ngay</button></div>`);
                     }
                 });
                 
+                formattedHTML += header;
+                
+                const maxVisibleItems = 6; // Show up to 6 items (e.g., 2 doctors with details)
+                if (items.length > maxVisibleItems) {
+                    formattedHTML += '<div class="visible-items">';
+                    formattedHTML += items.slice(0, maxVisibleItems).join('');
+                    formattedHTML += '</div>';
+                    formattedHTML += `<div class="collapsible-items" style="display: none;">${items.slice(maxVisibleItems).join('')}</div>`;
+                    formattedHTML += `<button class="view-more-btn" onclick="toggleViewMore(this)">Xem thêm</button>`;
+                } else {
+                    formattedHTML += items.join('');
+                }
+                
                 formattedHTML += '</div>';
                 addBotMessage(formattedHTML);
+            }
+            
+            // Toggle View More/Collapse
+            window.toggleViewMore = function(button) {
+                const collapsibleItems = button.previousElementSibling;
+                const isCollapsed = collapsibleItems.style.display === 'none';
+                
+                collapsibleItems.style.display = isCollapsed ? 'block' : 'none';
+                button.textContent = isCollapsed ? 'Thu gọn' : 'Xem thêm';
             }
             
             // Add follow-up options

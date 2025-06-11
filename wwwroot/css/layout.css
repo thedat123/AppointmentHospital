@@ -360,3 +360,273 @@ body {
   font-weight: 600;
   color: var(--text-dark);
 }
+
+.chatbot-container {
+        display: none;
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 350px;
+        height: 500px;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        flex-direction: column;
+        z-index: 1000;
+    }
+
+    .chatbot-header {
+        background: #007bff;
+        color: white;
+        padding: 10px;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: bold;
+    }
+
+    .chatbot-close {
+        cursor: pointer;
+        font-size: 20px;
+    }
+
+    .chatbot-messages {
+        flex-grow: 1;
+        padding: 10px;
+        overflow-y: auto;
+        background: #f8f9fa;
+    }
+
+    .message {
+        margin: 10px 0;
+        padding: 8px 12px;
+        border-radius: 8px;
+        max-width: 80%;
+        word-wrap: break-word;
+    }
+
+    .bot-message {
+        background: #e9ecef;
+        margin-left: 10%;
+    }
+
+    .user-message {
+        background: #007bff;
+        color: white;
+        margin-left: 20%;
+        text-align: right;
+    }
+
+    .typing-indicator {
+        display: flex;
+        align-items: center;
+    }
+
+    .typing-dots span {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        background: #007bff;
+        border-radius: 50%;
+        margin: 0 2px;
+        animation: typing 1s infinite;
+    }
+
+    .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typing {
+        0%, 80% { transform: translateY(0); }
+        40% { transform: translateY(-5px); }
+    }
+
+    .chatbot-input {
+        display: flex;
+        padding: 10px;
+        border-top: 1px solid #ddd;
+    }
+
+    .chatbot-input input {
+        flex-grow: 1;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        margin-right: 10px;
+    }
+
+    .chatbot-input button {
+        padding: 8px 15px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .chatbot-input button:hover {
+        background: #0056b3;
+    }
+
+    .symptom-selection {
+        margin: 10px 0;
+    }
+
+    .symptom-title {
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .symptom-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .symptom-option {
+        padding: 8px;
+        background: #e9ecef;
+        border-radius: 5px;
+        cursor: pointer;
+        text-align: center;
+    }
+
+    .symptom-option:hover {
+        background: #d3d3d3;
+    }
+
+    .symptom-selected {
+        background: #007bff;
+        color: white;
+    }
+
+    .selected-symptoms {
+        margin-top: 10px;
+    }
+
+    .selected-title {
+        font-weight: bold;
+    }
+
+    .selected-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .selected-symptom-display {
+        background: #007bff;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+    }
+
+    .remove-symptom {
+        margin-left: 5px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .symptom-actions {
+        margin-top: 10px;
+    }
+
+    .btn-submit-symptoms {
+        padding: 8px 15px;
+        background: #28a745;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .btn-submit-symptoms:hover {
+        background: #218838;
+    }
+
+    .follow-up-options {
+        margin-top: 10px;
+    }
+
+    .option-title {
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .option-buttons {
+        display: flex;
+        gap: 10px;
+    }
+
+    .option-btn {
+        padding: 8px 15px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .option-btn:hover {
+        background: #0056b3;
+    }
+
+    .diagnosis-card, .alternative-diagnoses, .department-recommendations, .doctor-recommendations {
+        background: #fff;
+        padding: 10px;
+        border-radius: 5px;
+        margin: 10px 0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .diagnosis-header, .section-header {
+        font-weight: bold;
+        color: #007bff;
+    }
+
+    .diagnosis-symptoms, .diagnosis-info, .diagnosis-detail,
+    .alternative-item, .department-item, .department-specialty,
+    .department-link, .doctor-title, .doctor-name, .doctor-specialty,
+    .doctor-contact {
+        margin: 5px 0;
+    }
+
+    .doctor-name {
+        cursor: pointer;
+        color: #007bff;
+    }
+
+    .doctor-name:hover {
+        text-decoration: underline;
+    }
+
+    .booking-process {
+        text-align: center;
+    }
+
+    .booking-title {
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .view-more-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+.view-more-btn:hover {
+    background-color: #0056b3;
+}
+.collapsible-items {
+    margin-top: 10px;
+}
+.alternative-diagnoses, .doctor-recommendations {
+    margin-bottom: 15px;
+}

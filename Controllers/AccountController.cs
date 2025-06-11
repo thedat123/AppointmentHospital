@@ -302,7 +302,7 @@ namespace AppointmentHospital.Controllers
         {
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
-            var url = Url.Action("VerifyEmail", "Account", new { token = encodedToken, userId = user.Id });
+            var url = Url.Action("VerifyEmail", "Account", new { token = encodedToken, userId = user.Id }, protocol: "https");
             var fullUrl = $"{GetBaseUrl()}{url}";
             var body = await _emailService.GetConfirmedEmailTemplate(user.UserName, fullUrl);
             BackgroundJob.Enqueue<IEmailService>(es => es.SendMailAsync(user.Email, "Xác thực email", body));
