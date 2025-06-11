@@ -156,6 +156,7 @@ body {
   font-weight: 500;
   font-size: 1rem;
   transition: background-color 0.3s ease, color 0.3s ease;
+  margin-bottom: 5px;
 }
 
 .btn-login:hover {

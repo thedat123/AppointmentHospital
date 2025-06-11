@@ -9,8 +9,8 @@ public interface IAppointmentDateService
 {
     public List<Appointment> GetAppointmentByDoctorId(Guid DoctorId);
     public void AddAppointment(Appointment appointment);
-    public List<Appointment> GetAppointmentsByPatientId(Guid PatientId);
-    public List<Appointment> GetAppointmentsByPatientId(Guid patientId, AppointmentStatus status);
+    public Task<Pagination<Appointment>> GetAppointmentsByPatientId(Guid PatientId, int page);
+    public Task<Pagination<Appointment>> GetAppointmentsByPatientId(Guid patientId, AppointmentStatus status, int page);
     public Task<Pagination<Appointment>> GetAppointmentsByDoctorId(Guid DoctorId, int page);
     public Task<Pagination<Appointment>> GetAppointmentsByDoctorId(Guid doctorId, AppointmentStatus status, int page);
     public Appointment GetAppointmentsById(Guid appointmentId);

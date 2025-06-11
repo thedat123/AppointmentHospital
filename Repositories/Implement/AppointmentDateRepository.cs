@@ -35,14 +35,16 @@ namespace AppointmentHospital.Repositories.Implement
             _context.SaveChanges();
         }
 
-        public List<Appointment> GetAppointmentsByPatientId(Guid patientId){
-            List<Appointment> appointments = _context.Appointments.Where(a => a.PatientId == patientId).ToList();
-            return appointments;
+        public async Task<Pagination<Appointment>> GetAppointmentsByPatientId(Guid patientId, int page){
+            var appointments = _context.Appointments.Where(a => a.PatientId == patientId);
+            var paginatedAppointments = await Pagination<Appointment>.PaginatedList(appointments, page, 3);
+            return paginatedAppointments;
         }
 
-        public List<Appointment> GetAppointmentsByPatientId(Guid patientId, AppointmentStatus status){
-            List<Appointment> appointments = _context.Appointments.Where(a => a.PatientId == patientId && a.Status == status).ToList();
-            return appointments;
+        public async Task<Pagination<Appointment>> GetAppointmentsByPatientId(Guid patientId, AppointmentStatus status, int page){
+            var appointments = _context.Appointments.Where(a => a.PatientId == patientId && a.Status == status);
+            var paginatedAppointments = await Pagination<Appointment>.PaginatedList(appointments, page, 3);
+            return paginatedAppointments;
         }
 
         public async Task<Pagination<Appointment>> GetAppointmentsByDoctorId(Guid doctorId, int page){

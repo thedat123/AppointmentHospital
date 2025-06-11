@@ -272,15 +272,15 @@ namespace AppointmentHospital.Controllers
             return View();
         }
 
-        public IActionResult MySchedule(AppointmentStatus? status = null)
+        public async Task<IActionResult> MySchedule(AppointmentStatus? status = null, int page = 1)
         {
             var patientId = _contextAccessor.HttpContext?.Session.GetString("PatientId");
             if (patientId != null)
             {
-                var allAppointments = _appointmentDateService.GetAppointmentsByPatientId(Guid.Parse(patientId));
+                var allAppointments = await _appointmentDateService.GetAppointmentsByPatientId(Guid.Parse(patientId), page);
 
                 var filteredAppointments = status.HasValue
-                ? _appointmentDateService.GetAppointmentsByPatientId(Guid.Parse(patientId), status.Value)
+                ? await _appointmentDateService.GetAppointmentsByPatientId(Guid.Parse(patientId), status.Value, page)
                 : allAppointments;
 
                 return View(filteredAppointments); 

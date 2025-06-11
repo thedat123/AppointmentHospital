@@ -22,12 +22,12 @@ public class AppointmentDateService : IAppointmentDateService
         appointmentRepository.AddAppointment(appointment);
     }
 
-    public List<Appointment> GetAppointmentsByPatientId(Guid PatientId){
-        return appointmentRepository.GetAppointmentsByPatientId(PatientId);
+    public async Task<Pagination<Appointment>> GetAppointmentsByPatientId(Guid PatientId, int page){
+        return await appointmentRepository.GetAppointmentsByPatientId(PatientId, page);
     }
 
-    public List<Appointment> GetAppointmentsByPatientId(Guid PatientId, AppointmentStatus status){
-        return appointmentRepository.GetAppointmentsByPatientId(PatientId, status);
+    public async Task<Pagination<Appointment>> GetAppointmentsByPatientId(Guid PatientId, AppointmentStatus status, int page){
+        return await appointmentRepository.GetAppointmentsByPatientId(PatientId, status, page);
     }
 
     public async Task<Pagination<Appointment>> GetAppointmentsByDoctorId(Guid DoctorId, int page){
