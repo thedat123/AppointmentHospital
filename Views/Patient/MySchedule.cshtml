@@ -445,13 +445,20 @@
                                                     </button>
                                                 }
                                                 
-                                                @if (appointment.Status == AppointmentHospital.EnumStatus.AppointmentStatus.Pending)
+                                                @{
+                                                    // Đảm bảo múi giờ đồng bộ: giả sử CreatedAt là UTC
+                                                    var createdAt = appointment.CreatedAt.Kind == DateTimeKind.Unspecified 
+                                                        ? DateTime.SpecifyKind(appointment.CreatedAt, DateTimeKind.Utc) 
+                                                        : appointment.CreatedAt;
+                                                    var canCancel = appointment.Status == AppointmentHospital.EnumStatus.AppointmentStatus.Pending 
+                                                        && createdAt.AddDays(1) >= DateTime.UtcNow;
+                                                }
+                                                @if (canCancel)
                                                 {
                                                     <button type="button" class="btn-action btn-cancel cancel-appointment" title="Hủy lịch hẹn">
                                                         <i class="fas fa-times"></i>
                                                     </button>
                                                 }
-                                                
                                             </div>
                                         </td>
                                     </tr>
