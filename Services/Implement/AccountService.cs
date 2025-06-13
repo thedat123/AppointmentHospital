@@ -20,7 +20,7 @@ namespace AppointmentHospital.Services.Implement
             return signInResult;
         }
 
-        public async Task<User> RegisterAsync(RegisterUserRequest request)
+        public async Task<(User User, AccountResponse Response)> RegisterAsync(RegisterUserRequest request)
         {
             return await _accountRepository.RegisterAsync(request);
         }

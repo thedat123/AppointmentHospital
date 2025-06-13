@@ -6,37 +6,46 @@
     <!-- Tìm kiếm và Bộ lọc -->
     <div class="card border-0 shadow-sm rounded-4 mb-4" style="transition: all 0.2s ease-in-out;">
         <div class="card-body p-4">
-            <div class="row g-3 align-items-center">
-                <div class="col-md-4">
-                    <div class="input-group rounded-3 overflow-hidden">
-                        <span class="input-group-text bg-white border-end-0 pe-0">
-                            <i class="fas fa-search text-primary"></i>
-                        </span>
-                        <input type="text" class="form-control border-start-0 ps-2" id="searchAppointment" placeholder="Tìm theo tên hoặc mã lịch hẹn...">
+            <form method="get" id="filterForm">
+                <div class="row g-3 align-items-center">
+                    <div class="col-md-4">
+                        <div class="input-group rounded-3 overflow-hidden">
+                            <span class="input-group-text bg-white border-end-0 pe-0">
+                                <i class="fas fa-search text-primary"></i>
+                            </span>
+                            <input type="text" class="form-control border-start-0 ps-2" 
+                                   name="searchTerm" id="searchAppointment" 
+                                   value="@ViewBag.CurrentSearchTerm"
+                                   placeholder="Tìm theo tên hoặc mã lịch hẹn...">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="input-group rounded-3 overflow-hidden">
+                            <span class="input-group-text bg-white border-end-0 pe-0">
+                                <i class="fas fa-calendar-alt text-primary"></i>
+                            </span>
+                            <input type="date" class="form-control border-start-0 ps-2" 
+                                   name="appointmentDate" id="appointmentDate"
+                                   value="@ViewBag.CurrentDate">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select rounded-3" name="status" id="statusFilter">
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="1" selected="@(ViewBag.CurrentStatus?.ToString() == "1" ? "selected" : null)">Đã xác nhận</option>
+                            <option value="0" selected="@(ViewBag.CurrentStatus?.ToString() == "0" ? "selected" : null)">Chờ xử lý</option>
+                            <option value="3" selected="@(ViewBag.CurrentStatus?.ToString() == "3" ? "selected" : null)">Đã hủy</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100 rounded-3" style="transition: background-color 0.2s;">
+                            <i class="fas fa-filter me-1"></i> Lọc
+                        </button>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="input-group rounded-3 overflow-hidden">
-                        <span class="input-group-text bg-white border-end-0 pe-0">
-                            <i class="fas fa-calendar-alt text-primary"></i>
-                        </span>
-                        <input type="date" class="form-control border-start-0 ps-2" id="appointmentDate">
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <select class="form-select rounded-3" id="statusFilter">
-                        <option value="">Tất cả trạng thái</option>
-                        <option value="1">Đã xác nhận</option>
-                        <option value="2">Chờ xử lý</option>
-                        <option value="3">Đã hủy</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <button class="btn btn-primary w-100 rounded-3" style="transition: background-color 0.2s;">
-                        <i class="fas fa-filter me-1"></i> Lọc
-                    </button>
-                </div>
-            </div>
+                <!-- Hidden field to maintain page parameter -->
+                <input type="hidden" name="page" value="1">
+            </form>
         </div>
     </div>
 
@@ -184,32 +193,29 @@
                                                     data-bs-toggle="tooltip" title="Xem chi tiết">
                                                 <i class="fas fa-eye"></i>
                                             </button>
-                                            <div class="dropdown">
-                                                <button class="btn btn-sm btn-outline-secondary rounded-pill dropdown-toggle"
-                                                        type="button" data-bs-toggle="dropdown">
-                                                    <i class="fas fa-ellipsis-v"></i>
-                                                </button>
-                                                <ul class="dropdown-menu dropdown-menu-end rounded-3 shadow-sm">
-                                                    @if (appointment.Status != AppointmentStatus.Confirmed)
-                                                    {
+                                            @if (appointment.Status == AppointmentStatus.Pending)
+                                            {
+                                                <div class="dropdown">
+                                                    <button class="btn btn-sm btn-outline-secondary rounded-pill dropdown-toggle"
+                                                            type="button" data-bs-toggle="dropdown">
+                                                        <i class="fas fa-ellipsis-v"></i>
+                                                    </button>
+                                                    <ul class="dropdown-menu dropdown-menu-end rounded-3 shadow-sm">
                                                         <li>
                                                             <button class="dropdown-item text-success confirm-appointment"
                                                                     data-id="@appointment.AppointmentId">
                                                                 <i class="fas fa-check-circle me-2"></i> Xác nhận
                                                             </button>
                                                         </li>
-                                                    }
-                                                    @if (appointment.Status != AppointmentStatus.Canceled)
-                                                    {
                                                         <li>
                                                             <button class="dropdown-item text-danger cancel-appointment"
                                                                     data-id="@appointment.AppointmentId">
                                                                 <i class="fas fa-times-circle me-2"></i> Hủy lịch hẹn
                                                             </button>
                                                         </li>
-                                                    }
-                                                </ul>
-                                            </div>
+                                                    </ul>
+                                                </div>
+                                            }
                                         </div>
                                     </td>
                                 </tr>
@@ -237,19 +243,64 @@
             <div class="card-footer bg-white border-0 p-3">
                 <nav aria-label="Điều hướng trang">
                     <ul class="pagination justify-content-center mb-0">
+                        <!-- Nút Trang Trước -->
                         <li class="page-item @(Model.HasPreviousPage ? "" : "disabled")">
-                            <a class="page-link rounded-3" href="?page=@(Model.CurrentPage - 1)" aria-label="Trước">
+                            <a class="page-link rounded-3" href="?page=@(Model.CurrentPage - 1)&searchTerm=@ViewBag.CurrentSearchTerm&appointmentDate=@ViewBag.CurrentDate&status=@ViewBag.CurrentStatus" aria-label="Trước">
                                 <span aria-hidden="true">«</span>
                             </a>
                         </li>
-                        @for (int i = 1; i <= Model.TotalPage; i++)
+
+                        @{
+                            int maxPagesToShow = 7;
+                            int halfPages = maxPagesToShow / 2;
+                            int startPage = Math.Max(1, Model.CurrentPage - halfPages);
+                            int endPage = Math.Min(Model.TotalPage, startPage + maxPagesToShow - 1);
+
+                            if (endPage - startPage + 1 < maxPagesToShow)
+                            {
+                                startPage = Math.Max(1, endPage - maxPagesToShow + 1);
+                            }
+                        }
+
+                        <!-- Trang đầu tiên -->
+                        @if (startPage > 1)
+                        {
+                            <li class="page-item">
+                                <a class="page-link rounded-3" href="?page=1&searchTerm=@ViewBag.CurrentSearchTerm&appointmentDate=@ViewBag.CurrentDate&status=@ViewBag.CurrentStatus">1</a>
+                            </li>
+                            @if (startPage > 2)
+                            {
+                                <li class="page-item disabled">
+                                    <span class="page-link rounded-3">...</span>
+                                </li>
+                            }
+                        }
+
+                        <!-- Các trang lân cận -->
+                        @for (int i = startPage; i <= endPage; i++)
                         {
                             <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
-                                <a class="page-link rounded-3" href="?page=@i">@i</a>
+                                <a class="page-link rounded-3" href="?page=@i&searchTerm=@ViewBag.CurrentSearchTerm&appointmentDate=@ViewBag.CurrentDate&status=@ViewBag.CurrentStatus">@i</a>
                             </li>
                         }
+
+                        <!-- Trang cuối cùng -->
+                        @if (endPage < Model.TotalPage)
+                        {
+                            @if (endPage < Model.TotalPage - 1)
+                            {
+                                <li class="page-item disabled">
+                                    <span class="page-link rounded-3">...</span>
+                                </li>
+                            }
+                            <li class="page-item">
+                                <a class="page-link rounded-3" href="?page=@Model.TotalPage&searchTerm=@ViewBag.CurrentSearchTerm&appointmentDate=@ViewBag.CurrentDate&status=@ViewBag.CurrentStatus">@Model.TotalPage</a>
+                            </li>
+                        }
+
+                        <!-- Nút Trang Sau -->
                         <li class="page-item @(Model.HasNextPage ? "" : "disabled")">
-                            <a class="page-link rounded-3" href="?page=@(Model.CurrentPage + 1)" aria-label="Sau">
+                            <a class="page-link rounded-3" href="?page=@(Model.CurrentPage + 1)&searchTerm=@ViewBag.CurrentSearchTerm&appointmentDate=@ViewBag.CurrentDate&status=@ViewBag.CurrentStatus" aria-label="Sau">
                                 <span aria-hidden="true">»</span>
                             </a>
                         </li>
@@ -372,7 +423,26 @@
             tooltipTriggerList.map(function (tooltipTriggerEl) {
                 return new bootstrap.Tooltip(tooltipTriggerEl);
             });
-            
+
+            // Xử lý submit form lọc
+            $('#filterForm').on('submit', function(e) {
+                e.preventDefault();
+                const searchTerm = $('#searchAppointment').val().trim();
+                const appointmentDate = $('#appointmentDate').val();
+                const status = $('#statusFilter').val();
+                const page = $('input[name="page"]').val();
+
+                // Xây dựng URL với các tham số query
+                const params = new URLSearchParams();
+                if (searchTerm) params.append('searchTerm', searchTerm);
+                if (appointmentDate) params.append('appointmentDate', appointmentDate);
+                if (status) params.append('status', status);
+                params.append('page', page);
+
+                // Điều hướng đến URL mới
+                window.location.href = '?' + params.toString();
+            });
+
             // Xử lý nút xác nhận lịch hẹn
             $('.confirm-appointment').on('click', function() {
                 const appointmentId = $(this).data('id');
@@ -474,14 +544,9 @@
                 
                 $('#confirmModal').modal('hide');
             });
-            
-            // Xử lý tìm kiếm
-            $('#searchAppointment').on('keyup', function() {
-                const value = $(this).val().toLowerCase();
-                $("table tbody tr").filter(function() {
-                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-                });
-            });
+
+            // Xóa xử lý tìm kiếm phía client
+            // $('#searchAppointment').on('keyup', function() {...}); // Đã xóa vì tìm kiếm giờ được xử lý qua URL
         });
     </script>
 }
@@ -528,4 +593,3 @@
         background-color: #e6f2ff;
     }
 </style>
-

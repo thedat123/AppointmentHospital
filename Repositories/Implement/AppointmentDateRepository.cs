@@ -104,13 +104,53 @@ namespace AppointmentHospital.Repositories.Implement
             return _context.Appointments.Where(a => a.DoctorId == doctorId && a.Status == status).Count();
         }
 
-        public async Task<Pagination<Appointment>> GetAllPendingAppointments(int page){
-            var appointments = _context.Appointments.Where(a => a.Status == AppointmentStatus.Pending || a.Status == AppointmentStatus.Confirmed || a.Status == AppointmentStatus.Canceled)
+        public async Task<Pagination<Appointment>> GetAllPendingAppointments(int page, int? status = null, string searchTerm = null, DateTime? appointmentDate = null)
+        {
+            // Start with base query including all necessary relationships
+            var query = _context.Appointments
                 .Include(a => a.Doctor)
                 .Include(a => a.Patient)
                 .Include(a => a.Collaborator)
-                .OrderByDescending(a => a.AppointmentTime);
-            var paginatedAppointments = await Pagination<Appointment>.PaginatedList(appointments, page);
+                .Include(a => a.Acquaintance)
+                .AsQueryable();
+
+            // Filter by status
+            if (status.HasValue)
+            {
+                var appointmentStatus = (AppointmentStatus)status.Value;
+                query = query.Where(a => a.Status == appointmentStatus);
+            }
+            else
+            {
+                // Default: include Pending, Confirmed, Canceled statuses
+                query = query.Where(a => a.Status == AppointmentStatus.Pending || 
+                                        a.Status == AppointmentStatus.Confirmed || 
+                                        a.Status == AppointmentStatus.Canceled);
+            }
+
+            // Filter by search term (name or appointment code)
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                query = query.Where(a => 
+                    a.Patient.FullName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                    (a.Acquaintance != null && a.Acquaintance.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+                    a.AppointmentId.ToString().Contains(searchTerm));
+            }
+
+            // Filter by appointment date
+            if (appointmentDate.HasValue)
+            {
+                var startDate = appointmentDate.Value.Date;
+                var endDate = startDate.AddDays(1);
+                query = query.Where(a => a.AppointmentTime >= startDate && a.AppointmentTime < endDate);
+            }
+
+            // Order by appointment time (newest first)
+            query = query.OrderByDescending(a => a.AppointmentTime);
+
+            // Apply pagination
+            var paginatedAppointments = await Pagination<Appointment>.PaginatedList(query, page);
+            
             return paginatedAppointments;
         }
     }

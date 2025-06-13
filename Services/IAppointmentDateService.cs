@@ -20,5 +20,5 @@ public interface IAppointmentDateService
     public DiagnosisHistory GetDiagnosisHistoriesByAppointmentID(Guid appointmentId);
     public List<Appointment> GetAppointmentsByDoctorIdAndDate(Guid doctorId, DateTime date);
     public int CountAppointmentDoctorIdStatus(Guid doctorId, AppointmentStatus status);
-    public Task<Pagination<Appointment>> GetAllPendingAppointments(int page);
+    public Task<Pagination<Appointment>> GetAllPendingAppointments(int page, int? status = null, string searchTerm = null, DateTime? appointmentDate = null);
 }

@@ -407,11 +407,6 @@ body {
         word-wrap: break-word;
     }
 
-    .bot-message {
-        background: #e9ecef;
-        margin-left: 10%;
-    }
-
     .user-message {
         background: #007bff;
         color: white;

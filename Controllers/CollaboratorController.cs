@@ -25,9 +25,23 @@ public class CollaboratorController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index(int page = 1)
+    public async Task<IActionResult> Index(
+        int page = 1, 
+        int? status = null, 
+        string searchTerm = null, 
+        DateTime? appointmentDate = null)
     {
-        var appointments = await _appointmentDateService.GetAllPendingAppointments(page);
+        // Get filtered and paginated appointments
+        var appointments = await _appointmentDateService.GetAllPendingAppointments(
+                page, 
+                status, 
+                searchTerm, 
+                appointmentDate);
+
+        ViewBag.CurrentSearchTerm = searchTerm;
+        ViewBag.CurrentStatus = status;
+        ViewBag.CurrentDate = appointmentDate?.ToString("yyyy-MM-dd");
+        ViewBag.CurrentPage = page;
         return View(appointments);
     }
 

@@ -138,7 +138,7 @@ namespace AppointmentHospital.Controllers
             {
                 return NotFound("Cannot find authenticated provider " + provider);
             }
-            var redirectUrl = Url.Action("ExternalLoginCallback", "Account");
+            var redirectUrl = Url.Action("ExternalLoginCallback", "Account", null, Request.Scheme);
             var configureExternalLogin = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
             return new ChallengeResult(provider, configureExternalLogin);
         }
@@ -206,21 +206,34 @@ namespace AppointmentHospital.Controllers
         {
             if (!ModelState.IsValid) return View(request);
 
-            var user = await _accountService.RegisterAsync(request);
+            var (user, response) = await _accountService.RegisterAsync(request);
+            
+            if (!response.Success)
+            {
+                ModelState.AddModelError(string.Empty, response.Message);
+                return View(request);
+            }
+
             await SendMail(user);
             return View("ConfirmEmail", request.Email);
         }
 
+        [HttpGet]
         public async Task<IActionResult> VerifyEmail(string token, string userId)
         {
             if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(userId))
                 throw new Exception("Token or UserId is missing");
 
             var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+                throw new Exception("User not found");
+
             var tokenDecode = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token));
             var result = await _userManager.ConfirmEmailAsync(user, tokenDecode);
 
-            if (!result.Succeeded) throw new Exception("Failed to confirm email");
+            if (!result.Succeeded)
+                throw new Exception("Failed to confirm email");
+
             return View("ConfirmedEmail");
         }
 
@@ -248,8 +261,8 @@ namespace AppointmentHospital.Controllers
 
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
             var code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
-            var resetUrl = Url.Action("ResetPassword", "Account", new { code = code, email = request.EmailAddress });
-            var fullUrl = $"{GetBaseUrl()}{resetUrl}";
+            var resetUrl = Url.Action("ResetPassword", "Account", new { code = code, email = request.EmailAddress }, Request.Scheme);
+            var fullUrl = resetUrl; // Use the fully qualified URL directly
 
             var body = await _emailService.GetResetPasswordTemplate(user.UserName, fullUrl);
             BackgroundJob.Enqueue<EmailService>(emailService => emailService.SendMailAsync(request.EmailAddress, "Đặt lại mật khẩu", body));
@@ -302,8 +315,8 @@ namespace AppointmentHospital.Controllers
         {
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
-            var url = Url.Action("VerifyEmail", "Account", new { token = encodedToken, userId = user.Id }, protocol: "https");
-            var fullUrl = $"{GetBaseUrl()}{url}";
+            var url = Url.Action("VerifyEmail", "Account", new { token = encodedToken, userId = user.Id }, Request.Scheme);
+            var fullUrl = url; // Use the fully qualified URL directly
             var body = await _emailService.GetConfirmedEmailTemplate(user.UserName, fullUrl);
             BackgroundJob.Enqueue<IEmailService>(es => es.SendMailAsync(user.Email, "Xác thực email", body));
         }

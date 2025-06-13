@@ -65,42 +65,82 @@ namespace AppointmentHospital.Repositories.Implement
             };
         }
 
-
-        public async Task<User> RegisterAsync(RegisterUserRequest request)
+        public async Task<(User User, AccountResponse Response)> RegisterAsync(RegisterUserRequest request)
         {
+            // Check if user already exists
+            var existingUser = await _userManager.FindByEmailAsync(request.Email);
+            if (existingUser != null)
+            {
+                return (null, new AccountResponse
+                {
+                    Success = false,
+                    Status = 400,
+                    Message = "User with this email already exists"
+                });
+            }
+
+            var user = new User
+            {
+                Email = request.Email,
+                UserName = request.Email,
+            };
+
+            var result = await _userManager.CreateAsync(user, request.Password);
+            if (!result.Succeeded)
+            {
+                // Combine error messages from IdentityResult
+                var errorMessage = string.Join("; ", result.Errors.Select(e => e.Description));
+                return (null, new AccountResponse
+                {
+                    Success = false,
+                    Status = 400,
+                    Message = $"Failed to create user: {errorMessage}"
+                });
+            }
+
+            var resultAddRole = await _userManager.AddToRoleAsync(user, "Patient");
+            if (!resultAddRole.Succeeded)
+            {
+                // Combine error messages from IdentityResult
+                var errorMessage = string.Join("; ", resultAddRole.Errors.Select(e => e.Description));
+                return (null, new AccountResponse
+                {
+                    Success = false,
+                    Status = 400,
+                    Message = $"Failed to assign role to user: {errorMessage}"
+                });
+            }
+
+            var patient = new Patient
+            {
+                FullName = request.FullName,
+                Address = request.Address,
+                DateOfBirth = request.DateOfBirth,
+                PhoneNumber = request.PhoneNumber,
+                User = user
+            };
+
             try
             {
-                var user = new User
-                {
-                    Email = request.Email,
-                    UserName = request.Email,
-                };
-                var result = await _userManager.CreateAsync(user, request.Password);
-                if (!result.Succeeded)
-                {
-                    throw new Exception("Cannot create new user");
-                }
-                var resultAddRole = await _userManager.AddToRoleAsync(user, "Patient");
-                if (!resultAddRole.Succeeded)
-                {
-                    throw new Exception("Failed to assign role to user");
-                }
-                var patient = new Patient
-                {
-                    FullName = request.FullName,
-                    Address = request.Address,
-                    DateOfBirth = request.DateOfBirth,
-                    PhoneNumber = request.PhoneNumber,
-                    User = user
-                };
                 await _appDbContext.Patients.AddAsync(patient);
                 await _appDbContext.SaveChangesAsync();
-                return user;
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message);
+                return (null, new AccountResponse
+                {
+                    Success = false,
+                    Status = 500,
+                    Message = $"Failed to save patient data: {ex.Message}"
+                });
             }
+
+            return (user, new AccountResponse
+            {
+                Success = true,
+                Status = 200,
+                Message = "Registration successful"
+            });
         }
 
         public Guid GetIdByEmail(string email)

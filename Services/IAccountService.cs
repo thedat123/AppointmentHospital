@@ -6,7 +6,7 @@ namespace AppointmentHospital.Services
     public interface IAccountService
     {
         Task<AccountResponse> LoginAsync(LoginUserRequest request);
-        Task<User> RegisterAsync(RegisterUserRequest request);
+        Task<(User User, AccountResponse Response)> RegisterAsync(RegisterUserRequest request);
         Guid GetIdByEmail(string email);
     }
 }

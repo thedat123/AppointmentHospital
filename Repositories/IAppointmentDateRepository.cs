@@ -12,7 +12,7 @@ public interface IAppointmentDateRepository
     public Task<Pagination<Appointment>> GetAppointmentsByPatientId(Guid patientId, int page);
     public Task<Pagination<Appointment>> GetAppointmentsByDoctorId(Guid DoctorId, int page);
     public Task<Pagination<Appointment>> GetAppointmentsByDoctorId(Guid doctorId, AppointmentStatus status, int page);
-    public Task<Pagination<Appointment>> GetAllPendingAppointments(int page);
+    public Task<Pagination<Appointment>> GetAllPendingAppointments(int page, int? status = null, string searchTerm = null, DateTime? appointmentDate = null);
     public Appointment GetAppointmentsById(Guid appointmentId);
     public void UpdateStatusAppointment(Guid appointmentId, AppointmentStatus status);
     public List<Appointment> GetAllAppointments();

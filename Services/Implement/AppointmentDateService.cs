@@ -66,7 +66,7 @@ public class AppointmentDateService : IAppointmentDateService
         return appointmentRepository.CountAppointmentDoctorIdStatus(doctorId, status);
     }
 
-    public Task<Pagination<Appointment>> GetAllPendingAppointments(int page){
-        return appointmentRepository.GetAllPendingAppointments(page);
+    public Task<Pagination<Appointment>> GetAllPendingAppointments(int page, int? status = null, string searchTerm = null, DateTime? appointmentDate = null){
+        return appointmentRepository.GetAllPendingAppointments(page, status, searchTerm, appointmentDate);
     }
 }
