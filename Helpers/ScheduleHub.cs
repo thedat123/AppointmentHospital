@@ -12,6 +12,11 @@ public class ScheduleHub : Hub
         await Clients.All.SendAsync("ScheduleUpdated", doctorId, selectedDate.ToString("yyyy-MM-dd"));
     }
 
+    public async Task NotifyTimeSlotBooked(string doctorId, string date, string timeSlotId)
+    {
+        await Clients.All.SendAsync("TimeSlotBooked", doctorId, date, timeSlotId);
+    }
+
     public async Task NotifyAppointmentStatus(int appointmentId, AppointmentStatus status)
     {
         await Clients.All.SendAsync("UpdateStatus", appointmentId, status);
