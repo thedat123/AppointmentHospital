@@ -12,20 +12,20 @@ public class TimeSlotRepository : ITimeSlotRepository
         _context = context; 
     }
 
-    public async Task<Pagination<TimeSlot>> GetTimeSlotByDoctorId(Guid doctorId, int page,string sortBy, string sortOrder, DateTime? filterDate){
+    public async Task<Pagination<TimeSlot>> GetTimeSlotByDoctorId(Guid doctorId, int page = 1, string sortBy = "Days", string sortOrder = "asc", DateTime? filterDate = null)
+    {
         var query = _context.TimeSlots.Where(x => x.DoctorId == doctorId);
-        query = sortBy.ToLower() switch {
-            "days" => sortOrder == "asc" ? query = query.OrderBy(t => t.StartTime.Date)
-                                         : query = query.OrderByDescending(t => t.StartTime.Date),
-            "starttime" => sortOrder == "asc" ? query = query.OrderBy(t => t.StartTime.TimeOfDay)
-                                              : query = query.OrderByDescending(t => t.StartTime.TimeOfDay),
-            "endtime" => sortOrder == "asc" ? query = query.OrderBy(t => t.EndTime.TimeOfDay)
-                                           : query = query.OrderByDescending(t => t.EndTime.TimeOfDay)
-        };
-        if(filterDate.HasValue)
+        if (filterDate.HasValue)
         {
             query = query.Where(t => t.StartTime.Date == filterDate.Value.Date);
         }
+        query = sortBy.ToLower() switch
+        {
+            "days" => sortOrder.ToLower() == "asc" ? query.OrderBy(t => t.StartTime.Date) : query.OrderByDescending(t => t.StartTime.Date),
+            "starttime" => sortOrder.ToLower() == "asc" ? query.OrderBy(t => t.StartTime.TimeOfDay) : query.OrderByDescending(t => t.StartTime.TimeOfDay),
+            "endtime" => sortOrder.ToLower() == "asc" ? query.OrderBy(t => t.EndTime.TimeOfDay) : query.OrderByDescending(t => t.EndTime.TimeOfDay),
+            _ => query.OrderBy(t => t.StartTime.Date) // Default sorting
+        };
         var paginatedTimeSlots = await Pagination<TimeSlot>.PaginatedList(query, page);
         return paginatedTimeSlots;
     }

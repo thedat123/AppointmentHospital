@@ -36,14 +36,13 @@
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label for="Specialty" class="form-label">Chuyên khoa</label>
-                            <input type="text" class="form-control" id="DoctorName" name="DoctorName"
+                            <input type="text" class="form-control" id="Specialty" name="Specialty"
                                 value="@ViewBag.Speciality" disabled required />
                         </div>
                     </div>
                 </div>
             </form>
         </div>
-
     </div>
 
     <div class="card shadow-sm mb-4">
@@ -133,6 +132,7 @@
                 <form asp-action="Calendar" method="get" class="d-flex justify-content-center align-items-center filter-form">
                     <input type="hidden" name="sortBy" value="@ViewBag.CurrentSort" />
                     <input type="hidden" name="sortOrder" value="@ViewBag.CurrentSortOrder" />
+                    <input type="hidden" name="page" value="@Model.CurrentPage" />
 
                     <div class="date-picker-wrapper">
                         <div class="form-floating">
@@ -160,7 +160,7 @@
                     <thead class="table-light">
                         <tr>
                             <th class="sortable"
-                                onclick="location.href='@Url.Action("Calendar", new { sortBy = "Days", sortOrder = ViewBag.CurrentSort == "Days" && ViewBag.CurrentSortOrder == "asc" ? "desc" : "asc", page = 1 })'">
+                                onclick="location.href='@Url.Action("Calendar", new { sortBy = "Days", sortOrder = ViewBag.CurrentSort == "Days" && ViewBag.CurrentSortOrder == "asc" ? "desc" : "asc", page = Model.CurrentPage, filterDate = ViewBag.FilterDate })'">
                                 Ngày
                                 @if (ViewBag.CurrentSort == "Days")
                                 {
@@ -179,7 +179,7 @@
                                 }
                             </th>
                             <th class="sortable"
-                                onclick="location.href='@Url.Action("Calendar", new { sortBy = "StartTime", sortOrder = ViewBag.CurrentSort == "StartTime" && ViewBag.CurrentSortOrder == "asc" ? "desc" : "asc", page = 1 })'">
+                                onclick="location.href='@Url.Action("Calendar", new { sortBy = "StartTime", sortOrder = ViewBag.CurrentSort == "StartTime" && ViewBag.CurrentSortOrder == "asc" ? "desc" : "asc", page = Model.CurrentPage, filterDate = ViewBag.FilterDate })'">
                                 Bắt đầu
                                 @if (ViewBag.CurrentSort == "StartTime")
                                 {
@@ -198,7 +198,7 @@
                                 }
                             </th>
                             <th class="sortable"
-                                onclick="location.href='@Url.Action("Calendar", new { sortBy = "EndTime",  sortOrder = ViewBag.CurrentSort == "EndTime" && ViewBag.CurrentSortOrder == "asc" ? "desc" : "asc", page = 1 })'">
+                                onclick="location.href='@Url.Action("Calendar", new { sortBy = "EndTime", sortOrder = ViewBag.CurrentSort == "EndTime" && ViewBag.CurrentSortOrder == "asc" ? "desc" : "asc", page = Model.CurrentPage, filterDate = ViewBag.FilterDate })'">
                                 Kết thúc
                                 @if (ViewBag.CurrentSort == "EndTime")
                                 {
@@ -267,7 +267,7 @@
                                     endPage = totalPages;
                                 }
 
-                                // Helper method to create route values with filter parameters
+                                // Helper method to create route values with all parameters
                                 object CreateRouteValues(int page)
                                 {
                                     var routeValues = new RouteValueDictionary
@@ -527,6 +527,7 @@
 
             $('#specialTimeSection').hide();
         });
+
         $(document).ready(function () {
             $('.filter-form').on('submit', function () {
                 localStorage.setItem('scrollPosition', window.scrollY);
@@ -538,9 +539,12 @@
                 localStorage.removeItem('scrollPosition');
             }
         });
+
         function changeSchedulePage(page) {
+            const urlParams = new URLSearchParams(window.location.search);
+            urlParams.set('page', page);
             localStorage.setItem('scrollPosition', window.scrollY);
-            window.location.href = '@Url.Action("Calendar")?page=' + page;
+            window.location.href = '@Url.Action("Calendar", "Doctor")?' + urlParams.toString();
         }
 
         window.onload = function () {
@@ -550,49 +554,21 @@
                 localStorage.removeItem('scrollPosition');
             }
         }
+
         let currentSort = {
             column: -1,
             direction: 'asc'
         };
 
         function sortTable(column) {
-            const table = document.querySelector('table');
-            const headers = table.querySelectorAll('th');
-            const tbody = table.querySelector('tbody');
-            const rows = Array.from(tbody.querySelectorAll('tr'));
-
-            headers.forEach(header => {
-                header.classList.remove('sort-asc', 'sort-desc');
-            });
-
-            if (currentSort.column === column) {
-                currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
-            } else {
-                currentSort.column = column;
-                currentSort.direction = 'asc';
-            }
-
-            headers[column].classList.add(`sort-${currentSort.direction}`);
-
-            const sortedRows = rows.sort((a, b) => {
-                const aValue = a.cells[column].textContent.trim();
-                const bValue = b.cells[column].textContent.trim();
-
-                if (column === 0) {
-                    const [aDay, aMonth] = aValue.split('/').map(Number);
-                    const [bDay, bMonth] = bValue.split('/').map(Number);
-                    return currentSort.direction === 'asc'
-                        ? (aMonth - bMonth || aDay - bDay)
-                        : (bMonth - aMonth || bDay - aDay);
-                } else {
-                    return currentSort.direction === 'asc'
-                        ? aValue.localeCompare(bValue)
-                        : bValue.localeCompare(aValue);
-                }
-            });
-
-            tbody.innerHTML = '';
-            sortedRows.forEach(row => tbody.appendChild(row));
+            const urlParams = new URLSearchParams(window.location.search);
+            const sortBy = ['Days', 'StartTime', 'EndTime'][column];
+            const currentSortBy = urlParams.get('sortBy') || 'Days';
+            const currentSortOrder = urlParams.get('sortOrder') || 'asc';
+            const sortOrder = (currentSortBy === sortBy && currentSortOrder === 'asc') ? 'desc' : 'asc';
+            urlParams.set('sortBy', sortBy);
+            urlParams.set('sortOrder', sortOrder);
+            window.location.href = '@Url.Action("Calendar", "Doctor")?' + urlParams.toString();
         }
 
         const saveRegularScheduleButton = document.getElementById('saveRegularScheduleButton');
@@ -680,7 +656,5 @@
                 });
             });
         });
-
-
     </script>
 }

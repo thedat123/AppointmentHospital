@@ -104,7 +104,7 @@ namespace AppointmentHospital.Repositories.Implement
             return _context.Appointments.Where(a => a.DoctorId == doctorId && a.Status == status).Count();
         }
 
-        public async Task<Pagination<Appointment>> GetAllPendingAppointments(int page, int? status = null, string searchTerm = null, DateTime? appointmentDate = null)
+        public async Task<Pagination<Appointment>> GetAllPendingAppointments(int page, int? status = 0, string searchTerm = null, DateTime? appointmentDate = null)
         {
             // Start with base query including all necessary relationships
             var query = _context.Appointments

@@ -95,15 +95,24 @@ namespace AppointmentHospital.Controllers
 
         public async Task<IActionResult> Calendar(DateTime? filterDate, int page = 1, string sortBy = "Days", string sortOrder = "asc")
         {
+            if (string.IsNullOrEmpty(sortBy))
+                sortBy = "Days";
+            if (string.IsNullOrEmpty(sortOrder))
+                sortOrder = "asc";
+
             var doctorId = _contextAccessor.HttpContext?.Session.GetString("DoctorId");
+            if (string.IsNullOrEmpty(doctorId))
+                return RedirectToAction("Login", "Account");
+
             var doctor = doctorService.getDoctorById(Guid.Parse(doctorId));
-            ViewBag.DoctorName = doctor.FullName ?? "Unknown Doctor";
-            ViewBag.Speciality = doctor.Specialities.SpecialityName ?? "Unknown Speciality";
+            ViewBag.DoctorName = doctor?.FullName ?? "Unknown Doctor";
+            ViewBag.Speciality = doctor?.Specialities?.SpecialityName ?? "Unknown Speciality";
             ViewBag.CurrentSort = sortBy;
             ViewBag.CurrentSortOrder = sortOrder;
-            ViewBag.FilterDate = filterDate?.ToString("yyyy-MM-dd");    
-            var timeSlot = await _timeSlotService.GetTimeSlotByDoctorId(Guid.Parse(doctorId), page, sortBy, sortOrder, filterDate);
-            return View(timeSlot);
+            ViewBag.FilterDate = filterDate?.ToString("yyyy-MM-dd");
+
+            var timeSlots = await _timeSlotService.GetTimeSlotByDoctorId(Guid.Parse(doctorId), page, sortBy, sortOrder, filterDate);
+            return View(timeSlots);
         }
 
         [HttpPost]
