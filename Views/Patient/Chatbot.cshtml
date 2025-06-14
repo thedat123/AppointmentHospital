@@ -732,7 +732,7 @@ class Chatbot {
             e.preventDefault();
             this.sendMessage();
         });
-        
+
         // Enter key handler
         this.userInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
@@ -740,26 +740,17 @@ class Chatbot {
                 this.sendMessage();
             }
         });
-        
-        // Suggestion card handlers
-        document.querySelectorAll('.suggestion-card').forEach(card => {
-            card.addEventListener('click', () => {
-                const query = card.getAttribute('data-query');
-                this.userInput.value = query;
-                this.sendMessage();
-            });
-        });
-        
+
         // New chat button
         document.querySelector('.new-chat-btn').addEventListener('click', () => {
             this.startNewChat();
         });
-        
+
         // Auto-resize textarea
         this.userInput.addEventListener('input', () => {
             this.autoResizeTextarea();
         });
-        
+
         // Window resize
         window.addEventListener('resize', () => {
             this.scrollToBottom();
@@ -982,7 +973,7 @@ class Chatbot {
         const newChatId = 'chat_' + Date.now();
         const defaultTitle = 'Cuộc trò chuyện mới';
         const newSessionId = this.generateUUID();
-        
+
         // Chỉ tạo session trên database nếu có patientId
         if (this.patientId) {
             try {
@@ -996,10 +987,9 @@ class Chatbot {
                         sessionName: defaultTitle
                     })
                 });
-                
+
                 if (response.ok) {
                     const sessionData = await response.json();
-                    
                     this.state.chats.unshift({
                         id: newChatId,
                         title: sessionData.sessionName || defaultTitle,
@@ -1017,17 +1007,17 @@ class Chatbot {
         } else {
             this.createLocalChat(newChatId, defaultTitle, newSessionId);
         }
-        
+
         this.state.chatMessages[newChatId] = [];
         this.state.sessionIds[newChatId] = newSessionId;
-        
+
         this.state.currentChatId = newChatId;
         this.saveStateToStorage();
         this.renderChatHistory();
         this.clearChatContainer();
         this.showWelcomeScreen();
         this.chatTitleHeader.textContent = defaultTitle;
-        
+
         this.userInput.value = '';
         this.autoResizeTextarea();
         this.userInput.focus();
@@ -1148,19 +1138,19 @@ class Chatbot {
     async sendMessage() {
         const message = this.userInput.value.trim();
         if (!message) return;
-        
+
         if (!this.state.currentChatId) {
             await this.startNewChat();
         }
-        
+
         const currentSessionId = this.getCurrentSessionId();
-        
+
         await this.updateChatTitle(message);
-        
+
         this.hideWelcomeScreen();
         this.addMessage(message, 'user');
-        
-        // Lưu tin nhắn user
+
+        // Lưu tin nhắn user vào session hiện tại
         if (this.state.currentChatId) {
             if (!this.state.chatMessages[this.state.currentChatId]) {
                 this.state.chatMessages[this.state.currentChatId] = [];
@@ -1172,15 +1162,15 @@ class Chatbot {
                 timestamp: new Date().toISOString()
             });
             this.saveStateToStorage();
-            
-            // Lưu vào database
+
+            // Lưu vào database với sessionId hiện tại
             await this.saveMessageToDatabase(currentSessionId, message, true);
         }
-        
+
         this.userInput.value = '';
         this.autoResizeTextarea();
         this.showTyping();
-        
+
         try {
             const response = await fetch('/Patient/ChatbotMessage', {
                 method: 'POST',
@@ -1189,15 +1179,15 @@ class Chatbot {
                 },
                 body: `userMessage=${encodeURIComponent(message)}&sessionId=${encodeURIComponent(currentSessionId)}`
             });
-            
+
             const data = await response.json();
-            
+
             this.hideTyping();
-            
+
             if (data.botReply) {
                 this.addMessage(data.botReply, 'bot', true);
-                
-                // Lưu tin nhắn bot
+
+                // Lưu tin nhắn bot vào session hiện tại
                 if (this.state.currentChatId) {
                     this.state.chatMessages[this.state.currentChatId].push({
                         content: data.botReply,
@@ -1206,18 +1196,18 @@ class Chatbot {
                         timestamp: new Date().toISOString()
                     });
                     this.saveStateToStorage();
-                    
-                    // Lưu vào database
+
+                    // Lưu vào database với sessionId hiện tại
                     await this.saveMessageToDatabase(currentSessionId, data.botReply, false);
                 }
             }
         } catch (error) {
             console.error('Error:', error);
             this.hideTyping();
-            
+
             const errorMessage = 'Xin lỗi, có lỗi xảy ra. Vui lòng thử lại sau.';
             this.addMessage(errorMessage, 'bot');
-            
+
             if (this.state.currentChatId) {
                 this.state.chatMessages[this.state.currentChatId].push({
                     content: errorMessage,
