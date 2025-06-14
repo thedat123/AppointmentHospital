@@ -356,18 +356,13 @@
     <script>
         let map;
         let userLocationMarker;
-        let routeControl;
+        let routeLine;
         let watchId;
         let isRouting = false;
-        let routingRetryCount = 0;
-        const MAX_ROUTING_RETRIES = 3;
+        const HOSPITAL_LOCATION = [16.0572013, 108.217826]; // 123 Trưng Nữ Vương, Hải Châu, Đà Nẵng
 
-        // Initialize Leaflet Map with enhanced features
+        // Initialize Leaflet Map
         function initMap() {
-            // Hospital location coordinates
-            const hospitalLocation = [16.0572013, 108.217826];
-
-            // Create map with smooth zoom options
             map = L.map('map', {
                 zoomControl: false,
                 attributionControl: false,
@@ -375,34 +370,19 @@
                 zoomAnimation: true,
                 markerZoomAnimation: true,
                 preferCanvas: true
-            }).setView(hospitalLocation, 15);
+            }).setView(HOSPITAL_LOCATION, 15);
 
-            // Add custom zoom control
-            L.control.zoom({
-                position: 'bottomright'
+            // Use HTTPS tile layer
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                maxZoom: 19,
+                attribution: '© CARTO, © OpenStreetMap contributors'
             }).addTo(map);
 
-            // Add attribution control
-            L.control.attribution({
-                position: 'bottomleft',
-                prefix: false
-            }).addTo(map);
+            // Add custom controls
+            L.control.zoom({ position: 'bottomright' }).addTo(map);
+            L.control.attribution({ position: 'bottomleft', prefix: false }).addTo(map);
 
-            // Add multiple tile layer options for better performance
-            const osmLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19,
-                attribution: '© OpenStreetMap contributors'
-            });
-
-            const cartoLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-                maxZoom: 19,
-                attribution: '© CARTO'
-            });
-
-            // Use Carto layer for smoother experience
-            cartoLayer.addTo(map);
-
-            // Custom hospital icon with animation
+            // Hospital marker
             const hospitalIcon = L.divIcon({
                 html: `
                     <div class="hospital-marker">
@@ -417,13 +397,11 @@
                 className: 'custom-hospital-icon'
             });
 
-            // Add hospital marker with bounce animation
-            const hospitalMarker = L.marker(hospitalLocation, { 
+            const hospitalMarker = L.marker(HOSPITAL_LOCATION, { 
                 icon: hospitalIcon,
                 riseOnHover: true
             }).addTo(map);
 
-            // Enhanced popup content
             hospitalMarker.bindPopup(`
                 <div class="hospital-popup">
                     <div class="popup-header">
@@ -432,10 +410,15 @@
                     <div class="popup-body">
                         <p><i class="fas fa-map-marker-alt me-2"></i>123 Trưng Nữ Vương, Hải Châu, Đà Nẵng</p>
                         <p><i class="fas fa-clock me-2"></i>24/7 - Cấp cứu</p>
+                        <div id="manual-location-input" style="display: none;">
+                            <p>Nhập vị trí của bạn:</p>
+                            <input type="text" id="manual-location" placeholder="Nhập địa chỉ" style="width: 100%; padding: 5px; margin-bottom: 5px;">
+                            <button onclick="geocodeManualLocation()" class="btn-primary">Tìm vị trí</button>
+                        </div>
                     </div>
                     <div class="popup-actions">
-                        <button onclick="getDirections()" class="btn-primary">
-                            <i class="fas fa-route"></i> Chỉ đường
+                        <button onclick="drawRoute()" class="btn-primary">
+                            <i class="fas fa-route"></i> Vẽ đường đi
                         </button>
                         <button onclick="getCurrentLocation()" class="btn-secondary">
                             <i class="fas fa-crosshairs"></i> Vị trí tôi
@@ -447,10 +430,7 @@
                 className: 'custom-popup'
             }).openPopup();
 
-            // Add CSS styles for animations
             addCustomStyles();
-
-            // Initialize location tracking
             initLocationTracking();
         }
 
@@ -458,17 +438,15 @@
         function addCustomStyles() {
             const style = document.createElement('style');
             style.textContent = `
-                .custom-hospital-icon {
+                .custom-hospital-icon, .custom-user-icon {
                     background: none !important;
                     border: none !important;
                 }
-                
-                .hospital-marker {
+                .hospital-marker, .user-marker {
                     position: relative;
                     width: 40px;
                     height: 40px;
                 }
-                
                 .hospital-icon {
                     position: absolute;
                     top: 50%;
@@ -487,7 +465,6 @@
                     z-index: 2;
                     animation: hospitalBounce 2s ease-in-out infinite;
                 }
-                
                 .hospital-pulse {
                     position: absolute;
                     top: 50%;
@@ -499,23 +476,14 @@
                     border-radius: 50%;
                     animation: hospitalPulse 2s ease-in-out infinite;
                 }
-                
                 @@keyframes hospitalBounce {
                     0%, 100% { transform: translate(-50%, -50%) scale(1); }
                     50% { transform: translate(-50%, -60%) scale(1.1); }
                 }
-                
                 @@keyframes hospitalPulse {
                     0% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
                     100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
                 }
-                
-                .user-marker {
-                    position: relative;
-                    width: 30px;
-                    height: 30px;
-                }
-                
                 .user-icon {
                     position: absolute;
                     top: 50%;
@@ -534,7 +502,6 @@
                     border: 3px solid white;
                     z-index: 2;
                 }
-                
                 .user-pulse {
                     position: absolute;
                     top: 50%;
@@ -546,35 +513,19 @@
                     border-radius: 50%;
                     animation: userPulse 1.5s ease-in-out infinite;
                 }
-                
                 @@keyframes userPulse {
                     0% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
                     100% { transform: translate(-50%, -50%) scale(1.8); opacity: 0; }
                 }
-                
-                .hospital-popup {
+                .hospital-popup, .user-popup {
                     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
                 }
-                
                 .popup-header h6 {
                     margin: 0 0 8px 0;
                     color: #DC434C;
                     font-weight: 600;
                     font-size: 16px;
                 }
-                
-                .hospital-rating {
-                    display: flex;
-                    align-items: center;
-                    gap: 5px;
-                    margin-bottom: 10px;
-                }
-                
-                .stars {
-                    color: #ffc107;
-                    font-size: 14px;
-                }
-                
                 .popup-body p {
                     margin: 0 0 8px 0;
                     font-size: 13px;
@@ -582,18 +533,15 @@
                     display: flex;
                     align-items: center;
                 }
-                
                 .popup-body i {
                     color: #999;
                     width: 16px;
                 }
-                
                 .popup-actions {
                     display: flex;
                     gap: 8px;
                     margin-top: 12px;
                 }
-                
                 .popup-actions button {
                     flex: 1;
                     padding: 8px 12px;
@@ -608,27 +556,22 @@
                     justify-content: center;
                     gap: 4px;
                 }
-                
                 .btn-primary {
                     background: #007bff;
                     color: white;
                 }
-                
                 .btn-primary:hover {
                     background: #0056b3;
                     transform: translateY(-1px);
                 }
-                
                 .btn-secondary {
                     background: #6c757d;
                     color: white;
                 }
-                
                 .btn-secondary:hover {
                     background: #545b62;
                     transform: translateY(-1px);
                 }
-                
                 .loading-overlay {
                     position: fixed;
                     top: 0;
@@ -641,7 +584,6 @@
                     justify-content: center;
                     z-index: 10000;
                 }
-                
                 .loading-content {
                     background: white;
                     padding: 20px;
@@ -649,7 +591,6 @@
                     text-align: center;
                     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
                 }
-                
                 .loading-spinner {
                     width: 40px;
                     height: 40px;
@@ -659,12 +600,10 @@
                     animation: spin 1s linear infinite;
                     margin: 0 auto 10px;
                 }
-                
                 @@keyframes spin {
                     0% { transform: rotate(0deg); }
                     100% { transform: rotate(360deg); }
                 }
-                
                 .notification {
                     position: fixed;
                     top: 20px;
@@ -673,64 +612,17 @@
                     z-index: 9999;
                     animation: slideInRight 0.3s ease-out;
                 }
-                
                 @@keyframes slideInRight {
                     from { transform: translateX(100%); opacity: 0; }
                     to { transform: translateX(0); opacity: 1; }
                 }
-                
                 .custom-popup .leaflet-popup-content-wrapper {
                     border-radius: 10px;
                     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
                 }
-                
-                .route-control-container {
-                    background: white;
-                    border-radius: 10px;
-                    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-                    overflow: hidden;
-                }
-                
-                .leaflet-routing-container {
-                    background: white;
-                    border-radius: 10px;
-                    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
-                }
-                
-                .route-summary {
-                    background: linear-gradient(135deg, #007bff, #0056b3);
-                    color: white;
-                    padding: 15px;
-                    margin: 0;
-                    border-radius: 10px 10px 0 0;
-                }
-                
-                .route-summary h6 {
-                    margin: 0 0 8px 0;
-                    font-size: 16px;
-                    font-weight: 600;
-                }
-                
-                .route-summary p {
-                    margin: 0 0 5px 0;
-                    font-size: 14px;
-                    opacity: 0.9;
-                }
-                
-                @@keyframes fadeOut {
-                    from { opacity: 1; }
-                    to { opacity: 0; }
-                }
-                
-                @@keyframes slideOutRight {
-                    from { transform: translateX(0); opacity: 1; }
-                    to { transform: translateX(100%); opacity: 0; }
-                }
-                
                 .route-line {
                     animation: drawRoute 2s ease-in-out;
                 }
-                
                 @@keyframes drawRoute {
                     from { stroke-dasharray: 1000; stroke-dashoffset: 1000; }
                     to { stroke-dasharray: 1000; stroke-dashoffset: 0; }
@@ -739,13 +631,11 @@
             document.head.appendChild(style);
         }
 
-        // Initialize location tracking with high accuracy
+        // Initialize location tracking
         function initLocationTracking() {
+            console.log("Initializing location tracking...");
             if (navigator.geolocation) {
-                // Get initial position
                 getCurrentLocation();
-                
-                // Watch position for real-time updates
                 watchId = navigator.geolocation.watchPosition(
                     updateUserLocation,
                     handleLocationError,
@@ -756,24 +646,34 @@
                     }
                 );
             } else {
-                showNotification("Trình duyệt của bạn không hỗ trợ định vị địa lý.", 'warning');
+                console.error("Geolocation not supported");
+                showNotification("Trình duyệt không hỗ trợ định vị. Vui lòng nhập vị trí thủ công.", 'error');
+                document.getElementById('manual-location-input').style.display = 'block';
             }
         }
 
-        // Get user's current location with loading state
-        function getCurrentLocation() {
+        // Get user's current location with retries
+        function getCurrentLocation(attempt = 1, maxAttempts = 3) {
+            console.log(`Getting current location, attempt ${attempt}...`);
             showLoadingOverlay("Đang xác định vị trí của bạn...");
-            
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
-                    function(position) {
+                    position => {
+                        console.log("Location retrieved:", position.coords);
                         hideLoadingOverlay();
                         updateUserLocation(position);
                         showNotification("Đã xác định được vị trí của bạn!", 'success');
+                        document.getElementById('manual-location-input').style.display = 'none';
                     },
-                    function(error) {
+                    error => {
+                        console.error("Geolocation error:", error);
                         hideLoadingOverlay();
-                        handleLocationError(error);
+                        if (error.code === error.TIMEOUT && attempt < maxAttempts) {
+                            showNotification(`Đang thử lại xác định vị trí... (lần ${attempt}/${maxAttempts})`, 'info');
+                            setTimeout(() => getCurrentLocation(attempt + 1, maxAttempts), 2000);
+                        } else {
+                            handleLocationError(error);
+                        }
                     },
                     {
                         enableHighAccuracy: true,
@@ -783,22 +683,21 @@
                 );
             } else {
                 hideLoadingOverlay();
-                showNotification("Trình duyệt của bạn không hỗ trợ định vị địa lý.", 'warning');
+                showNotification("Trình duyệt không hỗ trợ định vị.", 'error');
+                document.getElementById('manual-location-input').style.display = 'block';
             }
         }
 
-        // Update user location with smooth animation
+        // Update user location
         function updateUserLocation(position) {
             const userLat = position.coords.latitude;
             const userLng = position.coords.longitude;
             const accuracy = position.coords.accuracy;
-            
-            // Remove existing user location marker
+
             if (userLocationMarker) {
                 map.removeLayer(userLocationMarker);
             }
-            
-            // Custom user location icon with animation
+
             const userIcon = L.divIcon({
                 html: `
                     <div class="user-marker">
@@ -812,26 +711,24 @@
                 iconAnchor: [15, 15],
                 className: 'custom-user-icon'
             });
-            
-            // Add user location marker with smooth animation
+
             userLocationMarker = L.marker([userLat, userLng], { 
                 icon: userIcon,
                 riseOnHover: true
             }).addTo(map);
-            
-            // Enhanced popup for user location
+
             userLocationMarker.bindPopup(`
                 <div class="user-popup">
                     <h6><i class="fas fa-user-circle me-2"></i>Vị trí của bạn</h6>
                     <p><i class="fas fa-map-marker-alt me-2"></i>Lat: ${userLat.toFixed(6)}</p>
                     <p><i class="fas fa-map-marker-alt me-2"></i>Lng: ${userLng.toFixed(6)}</p>
                     <p><i class="fas fa-bullseye me-2"></i>Độ chính xác: ${Math.round(accuracy)}m</p>
+                    <button onclick="drawRoute()" class="btn-primary">Vẽ đường đi</button>
                 </div>
             `, {
                 className: 'custom-popup'
             });
-            
-            // Add accuracy circle
+
             if (accuracy < 1000) {
                 L.circle([userLat, userLng], {
                     radius: accuracy,
@@ -841,117 +738,147 @@
                     weight: 1
                 }).addTo(map);
             }
-            
-            // Smooth pan to show both locations
-            const hospitalLocation = [16.0572013, 108.217826];
-            const bounds = L.latLngBounds([
-                [userLat, userLng],
-                hospitalLocation
-            ]);
-            
-            map.fitBounds(bounds, {
-                padding: [50, 50],
-                animate: true,
-                duration: 1
-            });
-            
+
+            const bounds = L.latLngBounds([[userLat, userLng], HOSPITAL_LOCATION]);
+            map.fitBounds(bounds, { padding: [50, 50], animate: true, duration: 1 });
+
             console.log("User location updated:", userLat, userLng, "Accuracy:", accuracy);
         }
 
-        // Handle location errors with user-friendly messages
+        // Handle location errors
         function handleLocationError(error) {
             let message = "";
             let type = 'warning';
-            
+
             switch(error.code) {
                 case error.PERMISSION_DENIED:
-                    message = "Bạn đã từ chối chia sẻ vị trí. Vui lòng bật định vị để sử dụng tính năng chỉ đường.";
+                    message = "Bạn đã từ chối chia sẻ vị trí. Vui lòng bật định vị hoặc nhập vị trí thủ công.";
+                    document.getElementById('manual-location-input').style.display = 'block';
                     break;
                 case error.POSITION_UNAVAILABLE:
-                    message = "Không thể xác định vị trí của bạn. Vui lòng kiểm tra kết nối internet.";
+                    message = "Không thể xác định vị trí. Vui lòng kiểm tra kết nối hoặc nhập vị trí thủ công.";
+                    document.getElementById('manual-location-input').style.display = 'block';
                     break;
                 case error.TIMEOUT:
-                    message = "Yêu cầu định vị đã hết thời gian chờ. Đang thử lại...";
-                    type = 'info';
-                    // Retry after timeout
-                    setTimeout(() => getCurrentLocation(), 2000);
+                    message = "Hết thời gian xác định vị trí.";
+                    document.getElementById('manual-location-input').style.display = 'block';
+                    type = 'error';
                     break;
                 default:
-                    message = "Đã xảy ra lỗi không xác định khi xác định vị trí.";
+                    message = "Lỗi xác định vị trí. Vui lòng nhập vị trí thủ công.";
+                    document.getElementById('manual-location-input').style.display = 'block';
                     type = 'error';
                     break;
             }
-            
+
             showNotification(message, type);
             console.error("Geolocation error:", error);
         }
 
-        // Get directions with enhanced routing
-        function getDirections() {
-            if (isRouting) {
-                showNotification("Đang tính toán đường đi...", 'info');
+        // Manual location geocoding
+        function geocodeManualLocation() {
+            const address = document.getElementById('manual-location').value;
+            if (!address) {
+                showNotification("Vui lòng nhập địa chỉ hợp lệ.", 'warning');
                 return;
             }
-            
+
+            showLoadingOverlay("Đang tìm vị trí...");
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`, {
+                headers: {
+                    'User-Agent': 'MedicalCareMap/1.0 (your-email@example.com)' // Replace with your app name and email
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    hideLoadingOverlay();
+                    if (data && data.length > 0) {
+                        const location = data[0];
+                        updateUserLocation({
+                            coords: {
+                                latitude: parseFloat(location.lat),
+                                longitude: parseFloat(location.lon),
+                                accuracy: 100
+                            }
+                        });
+                        showNotification("Đã tìm thấy vị trí của bạn!", 'success');
+                    } else {
+                        showNotification("Không tìm thấy địa chỉ. Vui lòng thử lại.", 'error');
+                    }
+                })
+                .catch(error => {
+                    hideLoadingOverlay();
+                    showNotification("Lỗi khi tìm địa chỉ. Vui lòng thử lại.", 'error');
+                    console.error("Geocoding error:", error);
+                });
+        }
+
+        // Draw route on map
+        async function drawRoute() {
+            if (isRouting) {
+                showNotification("Đang vẽ đường đi...", 'info');
+                return;
+            }
+
             if (!userLocationMarker) {
-                showNotification("Đang xác định vị trí của bạn trước khi chỉ đường...", 'info');
+                showNotification("Đang xác định vị trí của bạn...", 'info');
                 getCurrentLocation();
-                
                 setTimeout(() => {
                     if (userLocationMarker) {
-                        calculateAndShowRoute();
+                        drawRoute();
                     } else {
-                        showNotification("Không thể xác định vị trí của bạn. Vui lòng bật định vị.", 'warning');
+                        showNotification("Không thể xác định vị trí. Vui lòng nhập vị trí thủ công.", 'warning');
+                        document.getElementById('manual-location-input').style.display = 'block';
                     }
                 }, 3000);
                 return;
             }
-            
-            calculateAndShowRoute();
+
+            isRouting = true;
+            showLoadingOverlay("Đang vẽ đường đi...");
+
+            const userLocation = userLocationMarker.getLatLng();
+
+            // Clear existing route
+            if (routeLine) {
+                map.removeLayer(routeLine);
+                routeLine = null;
+            }
+
+            try {
+                const route = await calculateRoute(userLocation, HOSPITAL_LOCATION);
+                routeLine = L.polyline(route.coordinates, {
+                    color: '#007bff',
+                    weight: 6,
+                    opacity: 0.8,
+                    className: 'route-line'
+                }).addTo(map);
+
+                const bounds = L.latLngBounds(route.coordinates);
+                map.fitBounds(bounds, { padding: [30, 30], animate: true, duration: 1.5 });
+
+                showNotification("Đường đi đã được vẽ!", 'success');
+            } catch (error) {
+                console.error("Route drawing failed:", error);
+                showNotification("Không thể vẽ đường đi. Hiển thị đường thẳng.", 'warning');
+                drawSimpleRoute(userLocation, HOSPITAL_LOCATION);
+            } finally {
+                hideLoadingOverlay();
+                isRouting = false;
+            }
         }
 
-        // Multiple routing services for fallback
-        const routingServices = [
-            {
+        // Calculate route using OSRM
+        async function calculateRoute(userLocation, hospitalLocation) {
+            const service = {
                 name: 'OSRM',
                 url: 'https://router.project-osrm.org/route/v1',
                 timeout: 8000
-            },
-            {
-                name: 'GraphHopper',
-                url: 'https://graphhopper.com/api/1/route',
-                timeout: 10000
-            }
-        ];
+            };
 
-        // Fast route calculation with fallback services
-        async function calculateRouteWithFallback(userLocation, hospitalLocation) {
-            for (let i = 0; i < routingServices.length; i++) {
-                try {
-                    const service = routingServices[i];
-                    console.log(`Trying routing service: ${service.name}`);
-                    
-                    const route = await calculateRouteWithService(userLocation, hospitalLocation, service);
-                    if (route) {
-                        return route;
-                    }
-                } catch (error) {
-                    console.warn(`Routing service ${routingServices[i].name} failed:`, error);
-                }
-            }
-            
-            // If all services fail, create a simple straight line route
-            return createSimpleRoute(userLocation, hospitalLocation);
-        }
-
-        // Calculate route with specific service
-        function calculateRouteWithService(userLocation, hospitalLocation, service) {
             return new Promise((resolve, reject) => {
-                const timeout = setTimeout(() => {
-                    reject(new Error('Timeout'));
-                }, service.timeout);
+                const timeout = setTimeout(() => reject(new Error('OSRM timeout')), service.timeout);
 
-                // Try to use Leaflet Routing Machine with the service
                 const tempRouting = L.Routing.control({
                     waypoints: [
                         L.latLng(userLocation.lat, userLocation.lng),
@@ -959,178 +886,50 @@
                     ],
                     routeWhileDragging: false,
                     addWaypoints: false,
-                    createMarker: function() { return null; },
+                    createMarker: () => null,
                     router: L.Routing.osrmv1({
                         serviceUrl: service.url,
+                        profile: 'driving',
                         timeout: service.timeout - 1000
                     }),
                     show: false
                 });
 
-                tempRouting.on('routesfound', function(e) {
+                tempRouting.on('routesfound', e => {
                     clearTimeout(timeout);
                     resolve(e.routes[0]);
                 });
 
-                tempRouting.on('routingerror', function(e) {
+                tempRouting.on('routingerror', e => {
                     clearTimeout(timeout);
-                    reject(e);
+                    reject(new Error(`OSRM failed: ${e.error.message || 'Unknown error'}`));
                 });
 
-                // Don't add to map, just calculate
-                tempRouting.route();
+                try {
+                    tempRouting.route();
+                } catch (err) {
+                    clearTimeout(timeout);
+                    reject(err);
+                }
             });
         }
 
-        // Create simple straight line route as fallback
-        function createSimpleRoute(userLocation, hospitalLocation) {
-            const distance = map.distance([userLocation.lat, userLocation.lng], hospitalLocation);
-            const estimatedTime = (distance / 1000) * 3; // Rough estimate: 3 minutes per km in city
-            
-            return {
-                coordinates: [
-                    [userLocation.lat, userLocation.lng],
-                    hospitalLocation
-                ],
-                summary: {
-                    totalDistance: distance,
-                    totalTime: estimatedTime * 60
-                },
-                instructions: [
-                    { text: "Khởi hành từ vị trí hiện tại" },
-                    { text: `Di chuyển theo đường thẳng đến bệnh viện (khoảng ${(distance/1000).toFixed(1)} km)` },
-                    { text: "Đã đến đích - Bệnh viện Đa khoa MedicalCare" }
-                ]
-            };
-        }
+        // Draw simple straight-line route as fallback
+        function drawSimpleRoute(userLocation, hospitalLocation) {
+            const coordinates = [
+                [userLocation.lat, userLocation.lng],
+                hospitalLocation
+            ];
 
-        // Calculate and show route with optimized performance
-        async function calculateAndShowRoute() {
-            if (!userLocationMarker || isRouting) return;
-            
-            isRouting = true;
-            routingRetryCount = 0;
-            showLoadingOverlay("Đang tính toán đường đi nhanh nhất...");
-            
-            const hospitalLocation = [16.0572013, 108.217826];
-            const userLocation = userLocationMarker.getLatLng();
-            
-            // Remove existing route
-            if (routeControl) {
-                map.removeControl(routeControl);
-            }
-
-            try {
-                // Try fast route calculation with fallback
-                const route = await calculateRouteWithFallback(userLocation, hospitalLocation);
-                
-                if (route) {
-                    displayRoute(route, userLocation, hospitalLocation);
-                } else {
-                    throw new Error('All routing services failed');
-                }
-            } catch (error) {
-                console.error('Route calculation failed:', error);
-                
-                if (routingRetryCount < MAX_ROUTING_RETRIES) {
-                    routingRetryCount++;
-                    showNotification(`Đang thử lại... (lần ${routingRetryCount}/${MAX_ROUTING_RETRIES})`, 'info');
-                    setTimeout(() => {
-                        isRouting = false;
-                        calculateAndShowRoute();
-                    }, 1000);
-                } else {
-                    hideLoadingOverlay();
-                    isRouting = false;
-                    showNotification('Không thể tính toán đường đi. Hiển thị đường đi ước tính.', 'warning');
-                    
-                    // Show simple route as last resort
-                    const simpleRoute = createSimpleRoute(userLocation, hospitalLocation);
-                    displayRoute(simpleRoute, userLocation, hospitalLocation);
-                }
-            }
-        }
-
-        // Display route on map
-        function displayRoute(route, userLocation, hospitalLocation) {
-            hideLoadingOverlay();
-            isRouting = false;
-            
-            // Create route line
-            const routeLine = L.polyline(route.coordinates, {
+            routeLine = L.polyline(coordinates, {
                 color: '#007bff',
                 weight: 6,
                 opacity: 0.8,
                 className: 'route-line'
             }).addTo(map);
-            
-            // Calculate route info
-            const distance = (route.summary.totalDistance / 1000).toFixed(1) + ' km';
-            const time = Math.round(route.summary.totalTime / 60) + ' phút';
-            
-            // Create custom route control panel
-            const routeInfo = L.control({ position: 'topleft' });
-            routeInfo.onAdd = function() {
-                const div = L.DomUtil.create('div', 'route-control-container');
-                div.innerHTML = `
-                    <div class="route-summary">
-                        <h6><i class="fas fa-route me-2"></i>Thông tin đường đi</h6>
-                        <p><i class="fas fa-road me-2"></i>Khoảng cách: ${distance}</p>
-                        <p><i class="fas fa-clock me-2"></i>Thời gian: ${time}</p>
-                    </div>
-                    <div style="padding: 10px; background: white;">
-                        <button onclick="clearRoute()" class="btn-secondary" style="width: 48%; margin-right: 4%;">
-                            <i class="fas fa-times"></i> Xóa
-                        </button>
-                        <button onclick="recalculateRoute()" class="btn-primary" style="width: 48%;">
-                            <i class="fas fa-sync-alt"></i> Tính lại
-                        </button>
-                    </div>
-                `;
-                return div;
-            };
-            
-            routeInfo.addTo(map);
-            
-            // Store route control for cleanup
-            routeControl = {
-                routeLine: routeLine,
-                routeInfo: routeInfo
-            };
-            
-            // Fit map to show entire route
-            const bounds = L.latLngBounds(route.coordinates);
-            map.fitBounds(bounds, {
-                padding: [30, 30],
-                animate: true,
-                duration: 1.5
-            });
-            
-            showNotification(`🚗 Đường đi đã sẵn sàng: ${distance}, ${time}`, 'success');
-            console.log(`Route displayed: ${distance}, ${time}`);
-        }
 
-        // Clear route function with animation
-        function clearRoute() {
-            if (routeControl) {
-                if (routeControl.routeLine) {
-                    map.removeLayer(routeControl.routeLine);
-                }
-                if (routeControl.routeInfo) {
-                    map.removeControl(routeControl.routeInfo);
-                }
-                routeControl = null;
-                showNotification("Đã xóa đường đi", 'info');
-            }
-        }
-
-        // Recalculate route
-        function recalculateRoute() {
-            clearRoute();
-            routingRetryCount = 0;
-            setTimeout(() => {
-                calculateAndShowRoute();
-            }, 300);
+            const bounds = L.latLngBounds(coordinates);
+            map.fitBounds(bounds, { padding: [30, 30], animate: true, duration: 1.5 });
         }
 
         // Show loading overlay
@@ -1153,14 +952,12 @@
             if (overlay) {
                 overlay.style.animation = 'fadeOut 0.3s ease-out';
                 setTimeout(() => {
-                    if (overlay.parentNode) {
-                        overlay.parentNode.removeChild(overlay);
-                    }
+                    if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
                 }, 300);
             }
         }
 
-        // Enhanced notification system
+        // Notification system
         function showNotification(message, type = 'info') {
             const icons = {
                 success: 'fas fa-check-circle',
@@ -1168,14 +965,13 @@
                 warning: 'fas fa-exclamation-triangle',
                 info: 'fas fa-info-circle'
             };
-            
             const colors = {
                 success: '#28a745',
                 error: '#dc3545',
                 warning: '#ffc107',
                 info: '#17a2b8'
             };
-            
+
             const notification = document.createElement('div');
             notification.className = 'notification';
             notification.innerHTML = `
@@ -1187,18 +983,14 @@
                     </div>
                 </div>
             `;
-            
             document.body.appendChild(notification);
-            
-            // Auto remove notification
+
             const duration = type === 'error' ? 8000 : type === 'warning' ? 6000 : 4000;
             setTimeout(() => {
                 if (notification.parentNode) {
                     notification.style.animation = 'slideOutRight 0.3s ease-in';
                     setTimeout(() => {
-                        if (notification.parentNode) {
-                            notification.parentNode.removeChild(notification);
-                        }
+                        if (notification.parentNode) notification.parentNode.removeChild(notification);
                     }, 300);
                 }
             }, duration);
@@ -1209,34 +1001,13 @@
             if (watchId) {
                 navigator.geolocation.clearWatch(watchId);
             }
-            if (routeControl) {
-                map.removeControl(routeControl);
+            if (routeLine) {
+                map.removeLayer(routeLine);
             }
         }
 
-        // Add fadeOut animation to CSS
-        const fadeOutStyle = document.createElement('style');
-        fadeOutStyle.textContent = `
-            @@keyframes fadeOut {
-                from { opacity: 1; }
-                to { opacity: 0; }
-            }
-            
-            @@keyframes slideOutRight {
-                from { transform: translateX(0); opacity: 1; }
-                to { transform: translateX(100%); opacity: 0; }
-            }
-            
-            .route-line {
-                animation: drawRoute 2s ease-in-out;
-            }
-            
-            @@keyframes drawRoute {
-                from { stroke-dasharray: 1000; stroke-dashoffset: 1000; }
-                to { stroke-dasharray: 1000; stroke-dashoffset: 0; }
-            }
-        `;
-        document.head.appendChild(fadeOutStyle);
+        // Initialize map
+        document.addEventListener('DOMContentLoaded', initMap);
 
         // Cleanup when page unloads
         window.addEventListener('beforeunload', cleanup);

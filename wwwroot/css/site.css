@@ -57,7 +57,6 @@ body {
     font-family: var(--default-font);
 }
 a {
-    color: var(--accent-color);
     text-decoration: none;
     transition: 0.3s;
 }
