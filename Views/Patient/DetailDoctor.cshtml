@@ -1005,9 +1005,28 @@
                 map.removeLayer(routeLine);
             }
         }
-
-        // Initialize map
-        document.addEventListener('DOMContentLoaded', initMap);
+	const fadeOutStyle = document.createElement('style');
+        fadeOutStyle.textContent = `
+            @@keyframes fadeOut {
+                from { opacity: 1; }
+                to { opacity: 0; }
+            }
+            
+            @@keyframes slideOutRight {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+            
+            .route-line {
+                animation: drawRoute 2s ease-in-out;
+            }
+            
+            @@keyframes drawRoute {
+                from { stroke-dasharray: 1000; stroke-dashoffset: 1000; }
+                to { stroke-dasharray: 1000; stroke-dashoffset: 0; }
+            }
+        `;
+        document.head.appendChild(fadeOutStyle);
 
         // Cleanup when page unloads
         window.addEventListener('beforeunload', cleanup);

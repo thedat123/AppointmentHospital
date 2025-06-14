@@ -13,9 +13,9 @@ namespace AppointmentHospital.Areas.Admin.Services.Implement
         {
             _appointmentRepository = appointmentRepository;
         }
-        public async Task<Pagination<AppointmentResponse>> GetAllAppointmentAsync(int page, string? searchTerm, int specialityId)
+        public async Task<Pagination<AppointmentResponse>> GetAllAppointmentAsync(int page, string? searchTerm, int? specialityId, AppointmentStatus? status, string? appointmentDate)
         {
-            return await _appointmentRepository.GetAllAppointmentAsync(page, searchTerm, specialityId);
+            return await _appointmentRepository.GetAllAppointmentAsync(page, searchTerm, specialityId, status, appointmentDate);
         }
 
         public async Task<AppointmentResponse> GetAppointmentAsync(Guid id)

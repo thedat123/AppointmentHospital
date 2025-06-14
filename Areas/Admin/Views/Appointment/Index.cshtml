@@ -8,6 +8,8 @@
     var statusList = ViewData["StatusList"] as List<SelectListItem>;
     var searchTerm = ViewData["SearchTerm"] as string;
     var specializationViewData = ViewData["SpecialityId"] as int?;
+    var statusViewData = ViewData["Status"] as string;
+    var appointmentDate = ViewData["AppointmentDate"] as string;
 
     // Map Status enum to Vietnamese
     Func<string, string> GetVietnameseStatus = status => status switch
@@ -24,53 +26,42 @@
     <div class="card-body">
         <form method="get" asp-action="Index" class="row g-3 align-items-end justify-content-center">
             <div asp-validation-summary="ModelOnly"></div>
-            <div class="col-md-5">
+            <div class="col-md-4">
                 <label class="form-label">Tìm kiếm</label>
                 <div class="input-group">
                     <span class="input-group-text">
                         <i class="bi bi-search"></i>
                     </span>
-                    <input name="searchTerm"
-                           class="form-control"
-                           placeholder="Nhập tên bệnh nhân hoặc bác sĩ"
-                           value="@searchTerm">
+                    <input name="searchTerm" class="form-control" placeholder="Nhập tên bệnh nhân hoặc bác sĩ" value="@searchTerm">
                 </div>
             </div>
             <div class="col-md-3">
                 <label class="form-label">Chuyên khoa</label>
                 <select name="SpecialityId" class="form-select">
-                    @if (!specializationViewData.HasValue)
-                    {
-                        <option value="" disabled selected>Chọn chuyên khoa</option>
-                    }
-                    else
-                    {
-                        <option value="" disabled>Chọn chuyên khoa</option>
-                    }
-
+                    <option value="" disabled selected="@(!specializationViewData.HasValue)">Chọn chuyên khoa</option>
                     @foreach (var specialization in specializationList)
                     {
-                        if (specializationViewData.HasValue)
-                        {
-                            if (specialization.Value == ((int)specializationViewData).ToString())
-                            {
-                                <option value="@specialization.Value" selected>@specialization.Text</option>
-                            }
-                            else
-                            {
-                                <option value="@specialization.Value">@specialization.Text</option>
-                            }
-                        }
-                        else
-                        {
-                            <option value="@specialization.Value">@specialization.Text</option>
-                        }
+                        <option value="@specialization.Value" selected="@(specialization.Value == specializationViewData?.ToString())">@specialization.Text</option>
                     }
                 </select>
             </div>
+            <div class="col-md-2">
+                <label class="form-label">Trạng thái</label>
+                <select name="status" class="form-select">
+                    <option value="" selected="@(string.IsNullOrEmpty(statusViewData))">Tất cả trạng thái</option>
+                    @foreach (var status in statusList)
+                    {
+                        <option value="@status.Value" selected="@(status.Value == statusViewData)">@GetVietnameseStatus(status.Text)</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Ngày hẹn</label>
+                <input type="date" name="appointmentDate" class="form-control" value="@appointmentDate" />
+            </div>
             <div class="col-md-1">
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-search me-2"></i>Tìm
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-filter me-2"></i>Lọc
                 </button>
             </div>
         </form>
@@ -152,14 +143,14 @@
         <ul class="pagination">
             <!-- Nút "Trước" -->
             <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
-                <a class="page-link" asp-action="Index" asp-route-page="@(Model.CurrentPage-1)" asp-route-SpecialityId="@(specializationViewData)" asp-route-searchTerm="@(searchTerm)">Trước</a>
+                <a class="page-link" asp-action="Index" asp-route-page="@(Model.CurrentPage-1)" asp-route-SpecialityId="@(specializationViewData)" asp-route-searchTerm="@(searchTerm)" asp-route-status="@(statusViewData)" asp-route-appointmentDate="@(appointmentDate)">Trước</a>
             </li>
 
             <!-- Hiển thị trang đầu tiên -->
             @if (Model.TotalPage > 1)
             {
                 <li class="page-item @(Model.CurrentPage == 1 ? "active" : "")">
-                    <a class="page-link" asp-action="Index" asp-route-page="1" asp-route-SpecialityId="@(specializationViewData)" asp-route-searchTerm="@(searchTerm)">1</a>
+                    <a class="page-link" asp-action="Index" asp-route-page="1" asp-route-SpecialityId="@(specializationViewData)" asp-route-searchTerm="@(searchTerm)" asp-route-status="@(statusViewData)" asp-route-appointmentDate="@(appointmentDate)">1</a>
                 </li>
             }
 
@@ -188,7 +179,7 @@
                 for (int i = startPage; i <= endPage; i++)
                 {
                     <li class="page-item @(Model.CurrentPage == i ? "active" : "")">
-                        <a class="page-link" asp-action="Index" asp-route-page="@i" asp-route-SpecialityId="@(specializationViewData)" asp-route-searchTerm="@(searchTerm)">@i</a>
+                        <a class="page-link" asp-action="Index" asp-route-page="@i" asp-route-SpecialityId="@(specializationViewData)" asp-route-searchTerm="@(searchTerm)" asp-route-status="@(statusViewData)" asp-route-appointmentDate="@(appointmentDate)">@i</a>
                     </li>
                 }
             }
@@ -205,13 +196,13 @@
             @if (Model.TotalPage > 1)
             {
                 <li class="page-item @(Model.CurrentPage == Model.TotalPage ? "active" : "")">
-                    <a class="page-link" asp-action="Index" asp-route-page="@Model.TotalPage" asp-route-SpecialityId="@(specializationViewData)" asp-route-searchTerm="@(searchTerm)">@Model.TotalPage</a>
+                    <a class="page-link" asp-action="Index" asp-route-page="@Model.TotalPage" asp-route-SpecialityId="@(specializationViewData)" asp-route-searchTerm="@(searchTerm)" asp-route-status="@(statusViewData)" asp-route-appointmentDate="@(appointmentDate)">@Model.TotalPage</a>
                 </li>
             }
 
             <!-- Nút "Tiếp" -->
             <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
-                <a class="page-link" asp-action="Index" asp-route-page="@(Model.CurrentPage+1)" asp-route-SpecialityId="@(specializationViewData)" asp-route-searchTerm="@(searchTerm)">Tiếp</a>
+                <a class="page-link" asp-action="Index" asp-route-page="@(Model.CurrentPage+1)" asp-route-SpecialityId="@(specializationViewData)" asp-route-searchTerm="@(searchTerm)" asp-route-status="@(statusViewData)" asp-route-appointmentDate="@(appointmentDate)">Tiếp</a>
             </li>
         </ul>
     </nav>

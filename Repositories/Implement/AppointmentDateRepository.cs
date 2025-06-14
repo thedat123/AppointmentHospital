@@ -36,13 +36,13 @@ namespace AppointmentHospital.Repositories.Implement
         }
 
         public async Task<Pagination<Appointment>> GetAppointmentsByPatientId(Guid patientId, int page){
-            var appointments = _context.Appointments.Where(a => a.PatientId == patientId);
+            var appointments = _context.Appointments.Where(a => a.PatientId == patientId).OrderByDescending(a => a.CreatedAt);
             var paginatedAppointments = await Pagination<Appointment>.PaginatedList(appointments, page, 3);
             return paginatedAppointments;
         }
 
         public async Task<Pagination<Appointment>> GetAppointmentsByPatientId(Guid patientId, AppointmentStatus status, int page){
-            var appointments = _context.Appointments.Where(a => a.PatientId == patientId && a.Status == status);
+            var appointments = _context.Appointments.Where(a => a.PatientId == patientId && a.Status == status).OrderByDescending(a => a.CreatedAt);
             var paginatedAppointments = await Pagination<Appointment>.PaginatedList(appointments, page, 3);
             return paginatedAppointments;
         }

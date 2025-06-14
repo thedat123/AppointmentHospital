@@ -378,7 +378,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var appointment in Model.OrderByDescending(a => a.AppointmentTime))
+                                @foreach (var appointment in Model.OrderByDescending(a => a.CreatedAt))
                                 {
                                     <tr>
                                         <td>

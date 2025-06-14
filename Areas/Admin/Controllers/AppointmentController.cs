@@ -15,14 +15,15 @@ namespace AppointmentHospital.Areas.Admin.Controllers
         {
             _appointmentService = appointmentService;
         }
-        public async Task<IActionResult> Index(int? page, string? searchTerm, int specialityId )
+        public async Task<IActionResult> Index(int? page, string? searchTerm, int? specialityId, AppointmentStatus? status, string? appointmentDate)
         {
-            // kẹp giá trị của Specialization hiện tại vào
             ViewData["StatusList"] = _appointmentService.GetStatus();
             ViewData["SpecializationList"] = _appointmentService.GetSpecialization();
             ViewData["SearchTerm"] = searchTerm;
-            ViewData["Specialization"] = specialityId;
-            var appointmentList = await _appointmentService.GetAllAppointmentAsync(page ?? 1, searchTerm, specialityId);
+            ViewData["SpecialityId"] = specialityId;
+            ViewData["Status"] = status?.ToString();
+            ViewData["AppointmentDate"] = appointmentDate;
+            var appointmentList = await _appointmentService.GetAllAppointmentAsync(page ?? 1, searchTerm, specialityId, status, appointmentDate);
             return View(appointmentList);
         }
         public async Task<IActionResult> Detail(Guid id)
