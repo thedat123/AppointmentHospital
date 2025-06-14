@@ -4,11 +4,6 @@ on:
   push:
     branches:
       - develop
-    paths:
-      - '**/*.cs'
-      - '**/*.csproj'
-      - 'Dockerfile'
-      - '.github/workflows/ci-cd-develop.yml'
 
 env:
   IMAGE_NAME: davidvothe/appointment
