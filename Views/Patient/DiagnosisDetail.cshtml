@@ -876,29 +876,6 @@
 
             // Add initial animation to active tab
             $('.tab-pane.active').addClass('animate__animated animate__fadeIn');
-
-            // Show a notification when page loads
-            setTimeout(function() {
-                const toastHTML = `
-                    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-                        <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
-                            <div class="toast-header bg-success text-white">
-                                <i class="bi bi-check-circle me-2"></i>
-                                <strong class="me-auto">Success</strong>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
-                            </div>
-                            <div class="toast-body">
-                                Patient diagnosis record loaded successfully.
-                            </div>
-                        </div>
-                    </div>
-                `;
-                $('body').append(toastHTML);
-                
-                setTimeout(function() {
-                    $('.toast').toast('hide');
-                }, 3000);
-            }, 500);
         });
 
         function showPrintPreview() {
