@@ -231,10 +231,10 @@
                             <span class="text-muted">Bác sĩ phụ trách: @diagnosisHistory.Doctor.FullName</span>
                         </div>
                         <div>
-                            <button class="btn btn-sm btn-primary me-2">
-                                <i class="bi bi-printer me-1"></i> In
+                            <button class="btn btn-sm btn-primary me-2" onclick="showPrintPreview()">
+                                <i class="bi bi-printer me-1"></i> Xem trước & In
                             </button>
-                            <button class="btn btn-sm btn-outline-secondary">
+                            <button class="btn btn-sm btn-outline-secondary" onclick="downloadPDF()">
                                 <i class="bi bi-download me-1"></i> Tải PDF
                             </button>
                         </div>
@@ -247,555 +247,625 @@
 
 <style>
     /* Modern User-Friendly Design System */
-:root {
-    /* Colors - Bảng màu hiện đại, dễ nhìn */
-    --primary: #4f46e5;           /* Indigo nhẹ nhàng hơn */
-    --primary-light: #e0e7ff;
-    --primary-dark: #3730a3;
-    --success: #10b981;
-    --success-light: #d1fae5;
-    --warning: #f59e0b;
-    --warning-light: #fef3c7;
-    --info: #0ea5e9;
-    --info-light: #e0f2fe;
-    --danger: #ef4444;
-    --danger-light: #fee2e2;
-    --gray-50: #f9fafb;
-    --gray-100: #f3f4f6;
-    --gray-200: #e5e7eb;
-    --gray-300: #d1d5db;
-    --gray-600: #4b5563;
-    --gray-700: #374151;
-    --gray-800: #1f2937;
-    
-    /* Shadows - Đổ bóng tinh tế */
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
-    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.08);
-    
-    /* Transitions - Chuyển động mượt mà */
-    --transition: all 0.25s ease;
-    
-    /* Border Radius - Bo tròn nhất quán */
-    --radius-sm: 0.375rem;
-    --radius-md: 0.5rem;
-    --radius-lg: 0.75rem;
-    --radius-xl: 1rem;
-    
-    /* Font Sizes - Kích thước font thống nhất */
-    --text-xs: 0.75rem;
-    --text-sm: 0.875rem;
-    --text-base: 1rem;
-    --text-lg: 1.125rem;
-    --text-xl: 1.25rem;
-    --text-2xl: 1.5rem;
-    --text-3xl: 1.875rem;
-}
+    :root {
+        --primary: #4f46e5;
+        --primary-light: #e0e7ff;
+        --primary-dark: #3730a3;
+        --success: #10b981;
+        --success-light: #d1fae5;
+        --warning: #f59e0b;
+        --warning-light: #fef3c7;
+        --info: #0ea5e9;
+        --info-light: #e0f2fe;
+        --danger: #ef4444;
+        --danger-light: #fee2e2;
+        --gray-50: #f9fafb;
+        --gray-100: #f3f4f6;
+        --gray-200: #e5e7eb;
+        --gray-300: #d1d5db;
+        --gray-600: #4b5563;
+        --gray-700: #374151;
+        --gray-800: #1f2937;
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+        --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+        --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.08);
+        --transition: all 0.25s ease;
+        --radius-sm: 0.375rem;
+        --radius-md: 0.5rem;
+        --radius-lg: 0.75rem;
+        --radius-xl: 1rem;
+        --text-xs: 0.75rem;
+        --text-sm: 0.875rem;
+        --text-base: 1rem;
+        --text-lg: 1.125rem;
+        --text-xl: 1.25rem;
+        --text-2xl: 1.5rem;
+        --text-3xl: 1.875rem;
+    }
 
-/* Core Layout */
-.medical-record {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 1.5rem;
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    color: var(--gray-800);
-    line-height: 1.6;
-    background-color: #f8fafc;
-}
-
-/* Breadcrumb Navigation - Dễ theo dõi vị trí */
-.breadcrumb-nav {
-    background: white;
-    padding: 0.75rem 1rem;
-    border-radius: var(--radius-md);
-    margin-bottom: 1.5rem;
-    box-shadow: var(--shadow-sm);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: var(--text-sm);
-}
-
-.breadcrumb-item {
-    color: var(--gray-600);
-    display: flex;
-    align-items: center;
-}
-
-.breadcrumb-item::after {
-    content: '/';
-    margin: 0 0.5rem;
-    color: var(--gray-300);
-}
-
-.breadcrumb-item:last-child::after {
-    display: none;
-}
-
-.breadcrumb-item.active {
-    color: var(--primary);
-    font-weight: 500;
-}
-
-/* Header Section - Tiêu đề nổi bật */
-.record-header {
-    text-align: center;
-    margin-bottom: 2.5rem;
-    position: relative;
-}
-
-.record-header::after {
-    content: '';
-    position: absolute;
-    bottom: -0.75rem;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 80px;
-    height: 3px;
-    background: var(--primary);
-    border-radius: 1.5px;
-}
-
-.record-title {
-    color: var(--gray-800);
-    font-size: var(--text-3xl);
-    font-weight: 700;
-    margin-bottom: 0.75rem;
-}
-
-.record-subtitle {
-    color: var(--gray-600);
-    font-size: var(--text-lg);
-    font-weight: 400;
-}
-
-/* Enhanced Cards - Thiết kế thẻ hiện đại */
-.info-card {
-    background: white;
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-md);
-    transition: var(--transition);
-    overflow: hidden;
-    border: 1px solid var(--gray-200);
-    margin-bottom: 1.5rem;
-}
-
-.info-card:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-lg);
-}
-
-.card-header {
-    padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid var(--gray-200);
-    background: white;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.card-header-title {
-    font-size: var(--text-xl);
-    font-weight: 600;
-    color: var(--gray-800);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.card-header-icon {
-    color: var(--primary);
-}
-
-/* Information Groups - Nhóm thông tin rõ ràng */
-.info-group {
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid var(--gray-200);
-    display: flex;
-    align-items: center;
-    gap: 1.25rem;
-    transition: var(--transition);
-}
-
-.info-group:hover {
-    background-color: var(--gray-50);
-}
-
-.info-group:last-child {
-    border-bottom: none;
-}
-
-.info-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--primary-light);
-    color: var(--primary);
-    flex-shrink: 0;
-}
-
-.info-content {
-    flex: 1;
-}
-
-.info-label {
-    font-size: var(--text-sm);
-    color: var(--gray-600);
-    margin-bottom: 0.25rem;
-}
-
-.info-value {
-    font-size: var(--text-base);
-    color: var(--gray-800);
-    font-weight: 500;
-}
-
-/* Symptoms Section - Nổi bật triệu chứng */
-.symptoms-card {
-    background: linear-gradient(135deg, var(--info), #38bdf8);
-    color: white;
-    padding: 1.75rem;
-    border-radius: var(--radius-lg);
-    margin-bottom: 1.5rem;
-    box-shadow: var(--shadow-md);
-}
-
-.symptoms-title {
-    font-size: var(--text-xl);
-    font-weight: 600;
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.symptoms-text {
-    font-size: var(--text-lg);
-    line-height: 1.7;
-    opacity: 0.95;
-}
-
-/* Diagnosis Tabs - Tab chẩn đoán cải tiến */
-.diagnosis-tabs {
-    margin-top: 1.5rem;
-}
-
-.nav-tabs {
-    display: flex;
-    gap: 0.5rem;
-    border: none;
-    flex-wrap: wrap;
-}
-
-.nav-tabs .nav-link {
-    border: none;
-    padding: 0.75rem 1.25rem;
-    border-radius: var(--radius-md);
-    color: var(--gray-700);
-    font-weight: 500;
-    transition: var(--transition);
-    background: white;
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--gray-200);
-}
-
-.nav-tabs .nav-link:hover {
-    background: var(--gray-100);
-    color: var(--primary);
-}
-
-.nav-tabs .nav-link.active {
-    background: var(--primary);
-    color: white;
-    border-color: var(--primary);
-    box-shadow: 0 2px 10px rgba(79, 70, 229, 0.2);
-}
-
-/* Tab Content - Nội dung tab rõ ràng */
-.tab-content {
-    background: white;
-    border-radius: var(--radius-lg);
-    padding: 1.75rem;
-    margin-top: 1rem;
-    box-shadow: var(--shadow-md);
-    border: 1px solid var(--gray-200);
-}
-
-/* Status Indicators - Trạng thái trực quan */
-.status-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
-    padding: 0.375rem 0.875rem;
-    border-radius: 2rem;
-    font-size: var(--text-sm);
-    font-weight: 500;
-}
-
-.status-badge.pending {
-    background: var(--warning-light);
-    color: var(--warning);
-}
-
-.status-badge.completed {
-    background: var(--success-light);
-    color: var(--success);
-}
-
-.status-badge.active {
-    background: var(--info-light);
-    color: var(--info);
-}
-
-/* Progress Indicators - Tiến trình đẹp mắt */
-.progress-container {
-    margin: 1.25rem 0;
-}
-
-.progress-label {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 0.5rem;
-    font-size: var(--text-sm);
-}
-
-.progress-title {
-    color: var(--gray-700);
-    font-weight: 500;
-}
-
-.progress-value {
-    color: var(--primary);
-    font-weight: 600;
-}
-
-.progress {
-    height: 0.5rem;
-    border-radius: 1rem;
-    background: var(--gray-200);
-    overflow: hidden;
-}
-
-.progress-bar {
-    border-radius: 1rem;
-    background: linear-gradient(to right, var(--primary), #818cf8);
-    height: 100%;
-    transition: width 0.5s ease;
-}
-
-/* Action Buttons - Nút bấm hấp dẫn */
-.action-buttons {
-    display: flex;
-    gap: 1rem;
-    margin-top: 1.5rem;
-    flex-wrap: wrap;
-}
-
-.btn-action {
-    padding: 0.75rem 1.25rem;
-    border-radius: var(--radius-md);
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    transition: var(--transition);
-    font-size: var(--text-base);
-    border: none;
-    cursor: pointer;
-}
-
-.btn-primary {
-    background: var(--primary);
-    color: white;
-    box-shadow: 0 2px 10px rgba(79, 70, 229, 0.2);
-}
-
-.btn-primary:hover {
-    background: var(--primary-dark);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
-}
-
-.btn-secondary {
-    background: white;
-    color: var(--gray-700);
-    border: 1px solid var(--gray-300);
-}
-
-.btn-secondary:hover {
-    background: var(--gray-100);
-    transform: translateY(-2px);
-}
-
-/* Helper Components */
-.data-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    margin: 1rem 0;
-}
-
-.data-table th,
-.data-table td {
-    padding: 0.75rem 1rem;
-    text-align: left;
-    border-bottom: 1px solid var(--gray-200);
-}
-
-.data-table th {
-    background: var(--gray-50);
-    font-weight: 600;
-    color: var(--gray-700);
-    font-size: var(--text-sm);
-}
-
-.data-table tr:last-child td {
-    border-bottom: none;
-}
-
-.data-table tr:hover td {
-    background: var(--gray-50);
-}
-
-/* Visual Improvements */
-.section-divider {
-    height: 1px;
-    background: linear-gradient(to right, var(--gray-200), transparent);
-    margin: 2rem 0;
-}
-
-.highlight-text {
-    color: var(--primary);
-    font-weight: 500;
-}
-
-/* Responsive Design - Tối ưu trên nhiều thiết bị */
-@@media (max-width: 768px) {
+    /* Core Layout */
     .medical-record {
-        padding: 1rem;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 1.5rem;
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        color: var(--gray-800);
+        line-height: 1.6;
+        background-color: #f8fafc;
     }
 
-    .record-title {
-        font-size: var(--text-2xl);
-    }
-
-    .card-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem;
-    }
-
-    .info-group {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.75rem;
-    }
-
-    .nav-tabs {
-        overflow-x: auto;
-        padding-bottom: 0.5rem;
-    }
-
-    .nav-tabs .nav-link {
-        white-space: nowrap;
-    }
-
-    .action-buttons {
-        flex-direction: column;
-    }
-
-    .btn-action {
-        width: 100%;
-    }
-}
-
-/* Dark Mode Support - Hỗ trợ chế độ tối */
-@@media (prefers-color-scheme: dark) {
-    .medical-record[data-theme="auto"] {
-        background-color: #111827;
-        color: #e5e7eb;
-    }
-
-    .medical-record[data-theme="auto"] .info-card,
-    .medical-record[data-theme="auto"] .breadcrumb-nav,
-    .medical-record[data-theme="auto"] .tab-content {
-        background: #1f2937;
-        border-color: #374151;
-    }
-
-    .medical-record[data-theme="auto"] .card-header {
-        background: #1f2937;
-        border-color: #374151;
-    }
-
-    .medical-record[data-theme="auto"] .info-group {
-        border-color: #374151;
-    }
-
-    .medical-record[data-theme="auto"] .info-group:hover {
-        background-color: #111827;
-    }
-
-    .medical-record[data-theme="auto"] .info-label {
-        color: #9ca3af;
-    }
-
-    .medical-record[data-theme="auto"] .info-value {
-        color: #e5e7eb;
-    }
-}
-
-/* Print Styles - Tối ưu hóa in ấn */
-@@media print {
-    .medical-record {
-        padding: 0;
-        background: white;
-        font-size: 11pt;
-    }
-
-    .info-card {
-        box-shadow: none;
-        border: 1px solid #d1d5db;
-        break-inside: avoid;
-        margin-bottom: 1rem;
-    }
-
-    .nav-tabs, 
-    .action-buttons,
+    /* Breadcrumb Navigation */
     .breadcrumb-nav {
+        background: white;
+        padding: 0.75rem 1rem;
+        border-radius: var(--radius-md);
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: var(--text-sm);
+    }
+
+    .breadcrumb-item {
+        color: var(--gray-600);
+        display: flex;
+        align-items: center;
+    }
+
+    .breadcrumb-item::after {
+        content: '/';
+        margin: 0 0.5rem;
+        color: var(--gray-300);
+    }
+
+    .breadcrumb-item:last-child::after {
         display: none;
     }
 
-    .tab-content {
-        display: block !important;
-        box-shadow: none;
-        padding: 1rem;
+    .breadcrumb-item.active {
+        color: var(--primary);
+        font-weight: 500;
+    }
+
+    /* Header Section */
+    .record-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+        position: relative;
+    }
+
+    .record-header::after {
+        content: '';
+        position: absolute;
+        bottom: -0.75rem;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 3px;
+        background: var(--primary);
+        border-radius: 1.5px;
     }
 
     .record-title {
-        font-size: 18pt;
+        color: var(--gray-800);
+        font-size: var(--text-3xl);
+        font-weight: 700;
+        margin-bottom: 0.75rem;
     }
 
+    .record-subtitle {
+        color: var(--gray-600);
+        font-size: var(--text-lg);
+        font-weight: 400;
+    }
+
+    /* Enhanced Cards */
+    .info-card {
+        background: white;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        transition: var(--transition);
+        overflow: hidden;
+        border: 1px solid var(--gray-200);
+        margin-bottom: 1.5rem;
+    }
+
+    .info-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .card-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--gray-200);
+        background: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-header-title {
+        font-size: var(--text-xl);
+        font-weight: 600;
+        color: var(--gray-800);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .card-header-icon {
+        color: var(--primary);
+    }
+
+    /* Information Groups */
     .info-group {
-        padding: 0.5rem 1rem;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--gray-200);
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        transition: var(--transition);
     }
-}
 
+    .info-group:hover {
+        background-color: var(--gray-50);
+    }
+
+    .info-group:last-child {
+        border-bottom: none;
+    }
+
+    .info-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--primary-light);
+        color: var(--primary);
+        flex-shrink: 0;
+    }
+
+    .info-content {
+        flex: 1;
+    }
+
+    .info-label {
+        font-size: var(--text-sm);
+        color: var(--gray-600);
+        margin-bottom: 0.25rem;
+    }
+
+    .info-value {
+        font-size: var(--text-base);
+        color: var(--gray-800);
+        font-weight: 500;
+    }
+
+    /* Symptoms Section */
+    .symptoms-card {
+        background: linear-gradient(135deg, var(--info), #38bdf8);
+        color: white;
+        padding: 1.75rem;
+        border-radius: var(--radius-lg);
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow-md);
+    }
+
+    .symptoms-title {
+        font-size: var(--text-xl);
+        font-weight: 600;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .symptoms-text {
+        font-size: var(--text-lg);
+        line-height: 1.7;
+        opacity: 0.95;
+    }
+
+    /* Diagnosis Tabs */
+    .diagnosis-tabs {
+        margin-top: 1.5rem;
+    }
+
+    .nav-tabs {
+        display: flex;
+        gap: 0.5rem;
+        border: none;
+        flex-wrap: wrap;
+    }
+
+    .nav-tabs .nav-link {
+        border: none;
+        padding: 0.75rem 1.25rem;
+        border-radius: var(--radius-md);
+        color: var(--gray-700);
+        font-weight: 500;
+        transition: var(--transition);
+        background: white;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--gray-200);
+    }
+
+    .nav-tabs .nav-link:hover {
+        background: var(--gray-100);
+        color: var(--primary);
+    }
+
+    .nav-tabs .nav-link.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+        box-shadow: 0 2px 10px rgba(79, 70, 229, 0.2);
+    }
+
+    /* Tab Content */
+    .tab-content {
+        background: white;
+        border-radius: var(--radius-lg);
+        padding: 1.75rem;
+        margin-top: 1rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--gray-200);
+    }
+
+    /* Status Indicators */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.375rem 0.875rem;
+        border-radius: 2rem;
+        font-size: var(--text-sm);
+        font-weight: 500;
+    }
+
+    .status-badge.pending {
+        background: var(--warning-light);
+        color: var(--warning);
+    }
+
+    .status-badge.completed {
+        background: var(--success-light);
+        color: var(--success);
+    }
+
+    .status-badge.active {
+        background: var(--info-light);
+        color: var(--info);
+    }
+
+    /* Progress Indicators */
+    .progress-container {
+        margin: 1.25rem 0;
+    }
+
+    .progress-label {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        font-size: var(--text-sm);
+    }
+
+    .progress-title {
+        color: var(--gray-700);
+        font-weight: 500;
+    }
+
+    .progress-value {
+        color: var(--primary);
+        font-weight: 600;
+    }
+
+    .progress {
+        height: 0.5rem;
+        border-radius: 1rem;
+        background: var(--gray-200);
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        border-radius: 1rem;
+        background: linear-gradient(to right, var(--primary), #818cf8);
+        height: 100%;
+        transition: width 0.5s ease;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-action {
+        padding: 0.75rem 1.25rem;
+        border-radius: var(--radius-md);
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: var(--transition);
+        font-size: var(--text-base);
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background: var(--primary);
+        color: white;
+        box-shadow: 0 2px 10px rgba(79, 70, 229, 0.2);
+    }
+
+    .btn-primary:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
+
+    .btn-secondary {
+        background: white;
+        color: var(--gray-700);
+        border: 1px solid var(--gray-300);
+    }
+
+    .btn-secondary:hover {
+        background: var(--gray-100);
+        transform: translateY(-2px);
+    }
+
+    /* Data Table */
+    .data-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin: 1rem 0;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 0.75rem 1rem;
+        text-align: left;
+        border-bottom: 1px solid var(--gray-200);
+    }
+
+    .data-table th {
+        background: var(--gray-50);
+        font-weight: 600;
+        color: var(--gray-700);
+        font-size: var(--text-sm);
+    }
+
+    .data-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .data-table tr:hover td {
+        background: var(--gray-50);
+    }
+
+    /* Visual Improvements */
+    .section-divider {
+        height: 1px;
+        background: linear-gradient(to right, var(--gray-200), transparent);
+        margin: 2rem 0;
+    }
+
+    .highlight-text {
+        color: var(--primary);
+        font-weight: 500;
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .medical-record {
+            padding: 1rem;
+        }
+
+        .record-title {
+            font-size: var(--text-2xl);
+        }
+
+        .card-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .info-group {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .nav-tabs {
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+
+        .nav-tabs .nav-link {
+            white-space: nowrap;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .btn-action {
+            width: 100%;
+        }
+    }
+
+    /* Dark Mode Support */
+    @@media (prefers-color-scheme: dark) {
+        .medical-record[data-theme="auto"] {
+            background-color: #111827;
+            color: #e5e7eb;
+        }
+
+        .medical-record[data-theme="auto"] .info-card,
+        .medical-record[data-theme="auto"] .breadcrumb-nav,
+        .medical-record[data-theme="auto"] .tab-content {
+            background: #1f2937;
+            border-color: #374151;
+        }
+
+        .medical-record[data-theme="auto"] .card-header {
+            background: #1f2937;
+            border-color: #374151;
+        }
+
+        .medical-record[data-theme="auto"] .info-group {
+            border-color: #374151;
+        }
+
+        .medical-record[data-theme="auto"] .info-group:hover {
+            background-color: #111827;
+        }
+
+        .medical-record[data-theme="auto"] .info-label {
+            color: #9ca3af;
+        }
+
+        .medical-record[data-theme="auto"] .info-value {
+            color: #e5e7eb;
+        }
+    }
+
+    /* Print Styles */
+    @@media print {
+        .medical-record {
+            padding: 0;
+            background: white;
+            font-size: 11pt;
+        }
+
+        .info-card {
+            box-shadow: none;
+            border: 1px solid #d1d5db;
+            break-inside: avoid;
+            margin-bottom: 1rem;
+        }
+
+        .nav-tabs, 
+        .action-buttons,
+        .breadcrumb-nav {
+            display: none;
+        }
+
+        .tab-content {
+            display: block !important;
+            box-shadow: none;
+            padding: 1rem;
+        }
+
+        .record-title {
+            font-size: 18pt;
+        }
+
+        .info-group {
+            padding: 0.5rem 1rem;
+        }
+    }
+
+    .print-preview {
+        font-family: 'Times New Roman', Times, serif;
+        padding: 20px;
+        background: white;
+        color: #000;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .print-preview h1 {
+        text-align: center;
+        font-size: 24px;
+        margin-bottom: 10px;
+    }
+
+    .print-preview .hospital-info {
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+
+    .print-preview .signature-section {
+        margin-top: 40px;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .print-preview .signature {
+        text-align: center;
+        width: 200px;
+    }
+
+    .print-preview table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+    }
+
+    .print-preview th, .print-preview td {
+        border: 1px solid #000;
+        padding: 8px;
+        font-size: 14px;
+        text-align: left;
+    }
+
+    .print-preview th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+    }
+
+    @@media print {
+        body * {
+            visibility: hidden;
+        }
+        .print-preview, .print-preview * {
+            visibility: visible;
+        }
+        .print-preview {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
+    }
 </style>
 
 @section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pdf-lib/fontkit@0.10.1/dist/fontkit.umd.min.js"></script>
+    <script src="https://unpkg.com/jspdf-customfonts@1.0.0/dist/jspdf.customfonts.min.js"></script>
     <script>
+        // Ensure scripts are loaded
+        if (typeof jQuery === 'undefined') {
+            console.error('jQuery is not loaded');
+        }
+        if (typeof jspdf === 'undefined') {
+            console.error('jsPDF is not loaded');
+        }
+        if (typeof jspdf.jsPDF === 'undefined' || !jspdf.jsPDF.prototype.autoTable) {
+            console.error('jsPDF autoTable plugin is not loaded');
+        }
+
         $(document).ready(function() {
             // Initialize tooltips
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
             var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl)
+                return new bootstrap.Tooltip(tooltipTriggerEl);
             });
-            
+
             // Initialize tabs with smooth animation
             $('.nav-tabs button').on('click', function() {
                 $('.tab-pane').removeClass('animate__animated animate__fadeIn');
@@ -803,15 +873,10 @@
                     $('.tab-pane.active').addClass('animate__animated animate__fadeIn');
                 }, 150);
             });
-            
+
             // Add initial animation to active tab
             $('.tab-pane.active').addClass('animate__animated animate__fadeIn');
-            
-            // Add print functionality
-            $('button:contains("Print")').on('click', function() {
-                window.print();
-            });
-            
+
             // Show a notification when page loads
             setTimeout(function() {
                 const toastHTML = `
@@ -835,8 +900,242 @@
                 }, 3000);
             }, 500);
         });
+
+        function showPrintPreview() {
+            // Safely escape Razor output to prevent JavaScript syntax errors
+            const hospitalName = "Bệnh Viện Đa khoa MedicalCare";
+            const patientName = @Html.Raw(Json.Serialize(@Model.Acquaintance?.Name ?? @Model.Patient.FullName));
+            const dateOfBirth = @Html.Raw(Json.Serialize(@Model.Acquaintance?.DateOfBirth.ToString("dd 'tháng' MM, yyyy") ?? @Model.Patient.DateOfBirth?.ToString("dd 'tháng' MM, yyyy")));
+            const gender = "Nam";
+            const patientId = @Html.Raw(Json.Serialize(@Model.Patient.PatientId));
+            const appointmentTime = @Html.Raw(Json.Serialize(@Model.AppointmentTime.ToString("dddd, dd 'tháng' MM, yyyy - h:mm tt")));
+            const address = @Html.Raw(Json.Serialize(@Model.Acquaintance?.Address ?? @Model.Patient.Address));
+            const symptoms = @Html.Raw(Json.Serialize(@Model.Symptoms));
+            const diagnosis = @Html.Raw(Json.Serialize(@diagnosisHistory.Diagnosis));
+            const doctorNote = @Html.Raw(Json.Serialize(@diagnosisHistory.DoctorNote));
+            const doctorName = @Html.Raw(Json.Serialize(@diagnosisHistory.Doctor.FullName));
+            const prescription = [
+                @if (diagnosisHistory.Prescription != null && diagnosisHistory.Prescription.Any())
+                {
+                    foreach (var item in diagnosisHistory.Prescription)
+                    {
+                        var parts = item.Split('-');
+                        var medicineName = parts[0];
+                        var quantity = parts.Length > 1 ? parts[1] : "Không rõ";
+                        @Html.Raw($"{{ medicine: {Json.Serialize(medicineName)}, quantity: {Json.Serialize(quantity)} }},")
+                    }
+                }
+            ];
+
+            const previewWindow = window.open('', '_blank');
+            previewWindow.document.write(`
+                <html>
+                <head>
+                    <title>Xem trước Hồ sơ Chẩn đoán</title>
+                    <style>
+                        body { font-family: 'Times New Roman', Times, serif; margin: 0; }
+                        .print-preview { padding: 20px; max-width: 800px; margin: 0 auto; }
+                        .print-preview h1 { text-align: center; font-size: 24px; margin-bottom: 10px; }
+                        .hospital-info { text-align: center; margin-bottom: 20px; font-size: 14px; }
+                        .signature-section { margin-top: 40px; display: flex; justify-content: space-between; }
+                        .signature { text-align: center; width: 200px; }
+                        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                        th, td { border: 1px solid #000; padding: 8px; font-size: 14px; text-align: left; }
+                        th { background-color: #f2f2f2; font-weight: bold; }
+                        .print-button { text-align: center; margin-top: 20px; }
+                        .print-button button { padding: 10px 20px; font-size: 16px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="print-preview">
+                        <h1>HỒ SƠ CHẨN ĐOÁN BỆNH NHÂN</h1>
+                        <div class="hospital-info">
+                            <p><strong>${hospitalName}</strong></p>
+                            <p>Địa chỉ: 123 Đường Trưng Nữ Vương, Đà Nẵng</p>
+                            <p>Điện thoại: (028) 1234-5678</p>
+                        </div>
+                        <table>
+                            <tr><th>Thông Tin</th><th>Chi Tiết</th></tr>
+                            <tr><td>Họ Và Tên</td><td>${patientName}</td></tr>
+                            <tr><td>Ngày Sinh</td><td>${dateOfBirth}</td></tr>
+                            <tr><td>Giới Tính</td><td>${gender}</td></tr>
+                            <tr><td>Mã Bệnh Nhân</td><td>${patientId}</td></tr>
+                            <tr><td>Thời Gian Khám</td><td>${appointmentTime}</td></tr>
+                            <tr><td>Địa Chỉ</td><td>${address}</td></tr>
+                            <tr><td>Triệu Chứng</td><td>${symptoms}</td></tr>
+                            <tr><td>Chẩn Đoán</td><td>${diagnosis}</td></tr>
+                            <tr><td>Thuốc Kê Đơn</td><td>${
+                                prescription.length > 0 
+                                ? prescription.map(p => `${p.medicine} - ${p.quantity}`).join(', ') 
+                                : 'Không có'
+                            }</td></tr>
+                            <tr><td>Ghi Chú Bác Sĩ</td><td>${doctorNote}</td></tr>
+                            <tr><td>Bác Sĩ Phụ Trách</td><td>${doctorName}</td></tr>
+                            <tr><td>Khuyến Nghị Tái Khám</td><td>Đặt lịch sau 2 tuần</td></tr>
+                        </table>
+                        <div class="signature-section">
+                            <div class="signature">
+                                <p>__________________________</p>
+                                <p>Bác Sĩ Phụ Trách</p>
+                                <p>${doctorName}</p>
+                            </div>
+                            <div class="signature">
+                                <p>__________________________</p>
+                                <p>Người Xác Nhận</p>
+                            </div>
+                        </div>
+                        <div class="print-button">
+                            <button onclick="window.print()">In Hồ Sơ</button>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `);
+            previewWindow.document.close();
+        }
+
+        function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4'
+            });
+
+            // Patient and hospital data
+            const hospitalName = "Bệnh Viện Đa khoa MedicalCare";
+            const patientName = @Html.Raw(Json.Serialize(@Model.Acquaintance?.Name ?? @Model.Patient.FullName));
+            const dateOfBirth = @Html.Raw(Json.Serialize(@Model.Acquaintance?.DateOfBirth.ToString("dd 'tháng' MM, yyyy") ?? @Model.Patient.DateOfBirth?.ToString("dd 'tháng' MM, yyyy")));
+            const gender = "Nam";
+            const patientId = @Html.Raw(Json.Serialize(@Model.Patient.PatientId));
+            const appointmentTime = @Html.Raw(Json.Serialize(@Model.AppointmentTime.ToString("dddd, dd 'tháng' MM, yyyy - h:mm tt")));
+            const address = @Html.Raw(Json.Serialize(@Model.Acquaintance?.Address ?? @Model.Patient.Address));
+            const symptoms = @Html.Raw(Json.Serialize(@Model.Symptoms));
+            const diagnosis = @Html.Raw(Json.Serialize(@diagnosisHistory.Diagnosis));
+            const doctorNote = @Html.Raw(Json.Serialize(@diagnosisHistory.DoctorNote));
+            const doctorName = @Html.Raw(Json.Serialize(@diagnosisHistory.Doctor.FullName));
+            const prescription = [
+                @if (diagnosisHistory.Prescription != null && diagnosisHistory.Prescription.Any())
+                {
+                    foreach (var item in diagnosisHistory.Prescription)
+                    {
+                        var parts = item.Split('-');
+                        var medicineName = parts[0];
+                        var quantity = parts.Length > 1 ? parts[1] : "Không rõ";
+                        @Html.Raw($"{{ medicine: {Json.Serialize(medicineName)}, quantity: {Json.Serialize(quantity)} }},")
+                    }
+                }
+            ];
+
+            // Function to convert Vietnamese text to ASCII approximation
+            function vietnameseToAscii(str) {
+                const vietnameseMap = {
+                    'à': 'a', 'á': 'a', 'ạ': 'a', 'ả': 'a', 'ã': 'a', 'â': 'a', 'ầ': 'a', 'ấ': 'a', 'ậ': 'a', 'ẩ': 'a', 'ẫ': 'a', 'ă': 'a', 'ằ': 'a', 'ắ': 'a', 'ặ': 'a', 'ẳ': 'a', 'ẵ': 'a',
+                    'è': 'e', 'é': 'e', 'ẹ': 'e', 'ẻ': 'e', 'ẽ': 'e', 'ê': 'e', 'ề': 'e', 'ế': 'e', 'ệ': 'e', 'ể': 'e', 'ễ': 'e',
+                    'ì': 'i', 'í': 'i', 'ị': 'i', 'ỉ': 'i', 'ĩ': 'i',
+                    'ò': 'o', 'ó': 'o', 'ọ': 'o', 'ỏ': 'o', 'õ': 'o', 'ô': 'o', 'ồ': 'o', 'ố': 'o', 'ộ': 'o', 'ổ': 'o', 'ỗ': 'o', 'ơ': 'o', 'ờ': 'o', 'ớ': 'o', 'ợ': 'o', 'ở': 'o', 'ỡ': 'o',
+                    'ù': 'u', 'ú': 'u', 'ụ': 'u', 'ủ': 'u', 'ũ': 'u', 'ư': 'u', 'ừ': 'u', 'ứ': 'u', 'ự': 'u', 'ử': 'u', 'ữ': 'u',
+                    'ỳ': 'y', 'ý': 'y', 'ỵ': 'y', 'ỷ': 'y', 'ỹ': 'y',
+                    'đ': 'd',
+                    'À': 'A', 'Á': 'A', 'Ạ': 'A', 'Ả': 'A', 'Ã': 'A', 'Â': 'A', 'Ầ': 'A', 'Ấ': 'A', 'Ậ': 'A', 'Ẩ': 'A', 'Ẫ': 'A', 'Ă': 'A', 'Ằ': 'A', 'Ắ': 'A', 'Ặ': 'A', 'Ẳ': 'A', 'Ẵ': 'A',
+                    'È': 'E', 'É': 'E', 'Ẹ': 'E', 'Ẻ': 'E', 'Ẽ': 'E', 'Ê': 'E', 'Ề': 'E', 'Ế': 'E', 'Ệ': 'E', 'Ể': 'E', 'Ễ': 'E',
+                    'Ì': 'I', 'Í': 'I', 'Ị': 'I', 'Ỉ': 'I', 'Ĩ': 'I',
+                    'Ò': 'O', 'Ó': 'O', 'Ọ': 'O', 'Ỏ': 'O', 'Õ': 'O', 'Ô': 'O', 'Ồ': 'O', 'Ố': 'O', 'Ộ': 'O', 'Ổ': 'O', 'Ỗ': 'O', 'Ơ': 'O', 'Ờ': 'O', 'Ớ': 'O', 'Ợ': 'O', 'Ở': 'O', 'Ỡ': 'O',
+                    'Ù': 'U', 'Ú': 'U', 'Ụ': 'U', 'Ủ': 'U', 'Ũ': 'U', 'Ư': 'U', 'Ừ': 'U', 'Ứ': 'U', 'Ự': 'U', 'Ử': 'U', 'Ữ': 'U',
+                    'Ỳ': 'Y', 'Ý': 'Y', 'Ỵ': 'Y', 'Ỷ': 'Y', 'Ỹ': 'Y',
+                    'Đ': 'D'
+                };
+                
+                return str.replace(/[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđÀÁẠẢÃÂẦẤẬẨẪĂẰẮẶẲẴÈÉẸẺẼÊỀẾỆỂỄÌÍỊỈĨÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠÙÚỤỦŨƯỪỨỰỬỮỲÝỴỶỸĐ]/g, function(match) {
+                    return vietnameseMap[match] || match;
+                });
+            }
+
+            // Convert all Vietnamese text to ASCII
+            const convertedData = {
+                hospitalName: vietnameseToAscii(hospitalName),
+                patientName: vietnameseToAscii(patientName),
+                dateOfBirth: vietnameseToAscii(dateOfBirth),
+                gender: vietnameseToAscii(gender),
+                patientId: vietnameseToAscii(patientId),
+                appointmentTime: vietnameseToAscii(appointmentTime),
+                address: vietnameseToAscii(address),
+                symptoms: vietnameseToAscii(symptoms),
+                diagnosis: vietnameseToAscii(diagnosis),
+                doctorNote: vietnameseToAscii(doctorNote),
+                doctorName: vietnameseToAscii(doctorName)
+            };
+
+            // Convert prescription data
+            const convertedPrescription = prescription.map(p => ({
+                medicine: vietnameseToAscii(p.medicine),
+                quantity: vietnameseToAscii(p.quantity)
+            }));
+
+            // Use Helvetica font which supports more characters
+            doc.setFont('helvetica', 'normal');
+
+            // Add hospital header
+            doc.setFontSize(16);
+            doc.text(convertedData.hospitalName, 20, 20);
+            doc.setFontSize(12);
+            doc.text("Dia chi: 123 Trung Nu Vuong, Da Nang", 20, 28);
+            doc.text("Dien thoai: (028) 1234-5678", 20, 34);
+            
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.text("HO SO CHAN DOAN BENH NHAN", 20, 42);
+            doc.setFont('helvetica', 'normal');
+
+            // Create table with converted data
+            doc.autoTable({
+                startY: 50,
+                head: [['Thong Tin', 'Chi Tiet']],
+                body: [
+                    ['Ho Va Ten', convertedData.patientName],
+                    ['Ngay Sinh', convertedData.dateOfBirth],
+                    ['Gioi Tinh', convertedData.gender],
+                    ['Ma Benh Nhan', convertedData.patientId],
+                    ['Thoi Gian Kham', convertedData.appointmentTime],
+                    ['Dia Chi', convertedData.address],
+                    ['Trieu Chung', convertedData.symptoms],
+                    ['Chan Doan', convertedData.diagnosis],
+                    ['Thuoc Ke Don', convertedPrescription.length > 0 ? 
+                        convertedPrescription.map(p => `${p.medicine} - ${p.quantity}`).join(', ') : 
+                        'Khong co'],
+                    ['Ghi Chu Bac Si', convertedData.doctorNote],
+                    ['Bac Si Phu Trach', convertedData.doctorName],
+                    ['Khuyen Nghi Tai Kham', 'Dat lich sau 2 tuan']
+                ],
+                theme: 'grid',
+                styles: { 
+                    font: 'helvetica', 
+                    fontSize: 10, 
+                    cellPadding: 3, 
+                    overflow: 'linebreak',
+                    textColor: [0, 0, 0],
+                    halign: 'left',
+                    valign: 'middle'
+                },
+                headStyles: { 
+                    fillColor: [200, 200, 200], 
+                    textColor: [0, 0, 0], 
+                    fontStyle: 'bold'
+                },
+                margin: { left: 20, right: 20 }
+            });
+
+            // Add signature section
+            const finalY = doc.lastAutoTable.finalY + 20;
+            doc.text("__________________________", 20, finalY);
+            doc.text("Bac Si Phu Trach", 20, finalY + 10);
+            doc.text(convertedData.doctorName, 20, finalY + 20);
+            doc.text("__________________________", 140, finalY);
+            doc.text("Nguoi Xac Nhan", 140, finalY + 10);
+
+            // Save the PDF
+            doc.save(`Diagnosis_${convertedData.patientId}.pdf`);
+        }
     </script>
-    
-    <!-- Add animate.css for smoother animations -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 }
