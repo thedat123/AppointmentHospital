@@ -74,6 +74,7 @@
                             <th scope="col" class="ps-4 fw-semibold">Mã</th>
                             <th scope="col" class="fw-semibold">Ngày & Giờ</th>
                             <th scope="col" class="fw-semibold">Bệnh nhân</th>
+                            <th scope="col" class="fw-semibold">Bác sĩ</th>
                             <th scope="col" class="fw-semibold">Liên hệ</th>
                             <th scope="col" class="fw-semibold">Triệu chứng</th>
                             <th scope="col" class="fw-semibold">Trạng thái</th>
@@ -123,6 +124,23 @@
                                                 @if (appointment.Acquaintance?.Name != null)
                                                 {
                                                     <div class="small text-muted">Người thân</div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-circle rounded-circle text-center me-2 d-flex align-items-center justify-content-center"
+                                                 style="width: 36px; height: 36px; background-color: #e9ecef;">
+                                                <i class="fas fa-user-md text-primary"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-medium">
+                                                    @(appointment.Doctor?.FullName ?? "Chưa chỉ định")
+                                                </div>
+                                                @if (appointment.Doctor == null)
+                                                {
+                                                    <div class="small text-muted">Chưa chỉ định bác sĩ</div>
                                                 }
                                             </div>
                                         </div>
