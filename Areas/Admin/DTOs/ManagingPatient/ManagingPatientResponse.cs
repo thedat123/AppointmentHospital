@@ -14,5 +14,7 @@ namespace AppointmentHospital.Areas.Admin.DTOs.AdminDashBoard
 
         public string EmailAddress { get; set; }
         public string PhoneNumber { get; set; }
+        public bool IsDeleted { get; set; }
+        public bool IsBanned { get; set; }
     }
 }

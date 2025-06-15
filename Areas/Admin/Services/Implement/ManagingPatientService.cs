@@ -17,9 +17,14 @@ namespace AppointmentHospital.Areas.Admin.Services.Implement
             return (await _managingPatientRepository.CreateNewPatientAsync(request));
         }
 
-        public async Task DeletePatientAsync(Guid id)
+        public async Task<bool> SoftDeletePatientAsync(Guid id)
         {
-            await _managingPatientRepository.DeletePatientAsync(id);
+            if (id == Guid.Empty)
+            {
+                throw new ArgumentException("Patient ID cannot be empty.", nameof(id));
+            }
+
+            return await _managingPatientRepository.SoftDeletePatientAsync(id);
         }
 
         public async Task EditPatientAsync(Guid id, ManagingPatientRequest request)
@@ -32,9 +37,21 @@ namespace AppointmentHospital.Areas.Admin.Services.Implement
             return await _managingPatientRepository.GetPatientAsync(id);
         }
 
-        public async Task<Pagination<ManagingPatientResponse>> GetAllPatientAsync(int page, string searchTerm)
+        public async Task<Pagination<ManagingPatientResponse>> GetAllPatientAsync(int page, string searchTerm, string statusFilter = null, string isDeletedFilter = null)
         {
-            return await _managingPatientRepository.GetAllPatientAsync(page, searchTerm);
+            return await _managingPatientRepository.GetAllPatientAsync(page, searchTerm, statusFilter, isDeletedFilter);
+        }
+        public async Task<bool> UnBanPatientAsync(Guid id)
+        {
+            return await _managingPatientRepository.UnbanPatientAsync(id);
+        }
+        public async Task<bool> BanPatientAsync(Guid id)
+        {
+            return await _managingPatientRepository.BanPatientAsync(id);
+        }
+
+        public async Task<bool> RestorePatientAsync(Guid id){
+            return await _managingPatientRepository.RestorePatientAsync(id);
         }
     }
 }

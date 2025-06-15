@@ -6,10 +6,13 @@ namespace AppointmentHospital.Areas.Admin.Services
 {
     public interface IManagingPatientService
     {
-        Task<Pagination<ManagingPatientResponse>> GetAllPatientAsync(int page, string searchTerm);
+        Task<Pagination<ManagingPatientResponse>> GetAllPatientAsync(int page, string searchTerm, string statusFilter = null, string isDeletedFilter = null);
         Task<bool> CreateNewPatientAsync(ManagingPatientRequest request);
-        Task DeletePatientAsync(Guid id);
+        Task<bool> SoftDeletePatientAsync(Guid id);
         Task EditPatientAsync(Guid id, ManagingPatientRequest request);
         Task<ManagingPatientResponse> GetPatientAsync(Guid id);
+        Task<bool> BanPatientAsync(Guid id);
+        Task<bool> UnBanPatientAsync(Guid id);
+        Task<bool> RestorePatientAsync(Guid id);
     }
 }

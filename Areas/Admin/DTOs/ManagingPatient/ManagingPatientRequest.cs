@@ -24,5 +24,7 @@ namespace AppointmentHospital.Areas.Admin.DTOs.ManagingPatient
         [Required(ErrorMessage = "Date of birth is required.")]
         [DataType(DataType.Date, ErrorMessage = "Invalid date format.")]
         public DateTime DateOfBirth { get; set; }
+        public bool IsDeleted { get; set; } = false;
+        public bool IsBanned { get; set; } = false;
     }
 }

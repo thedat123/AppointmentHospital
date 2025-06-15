@@ -6,7 +6,7 @@ using AppointmentHospital.Areas.Admin.DTOs.ManagingPatient;
 namespace AppointmentHospital.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles ="Admin")]
+    [Authorize(Roles = "Admin")]
     public class ManagingPatientController : Controller
     {
         private readonly IManagingPatientService _managingPatientService;
@@ -14,11 +14,12 @@ namespace AppointmentHospital.Areas.Admin.Controllers
         {
             _managingPatientService = managingPatientService;
         }
-        public async Task<IActionResult> Index(int? page, string? searchTerm)
+        public async Task<IActionResult> Index(int? page, string? searchTerm, string? statusFilter, string? isDeletedFilter)
         {
-            var patientList = await _managingPatientService.GetAllPatientAsync(page ?? 1, searchTerm);
+            var patientList = await _managingPatientService.GetAllPatientAsync(page ?? 1, searchTerm, statusFilter, isDeletedFilter);
             ViewBag.PatientList = patientList;
             ViewBag.SearchTerm = searchTerm;
+            ViewBag.StatusFilter = statusFilter;
             return View(patientList);
         }
         [HttpGet]
@@ -27,14 +28,14 @@ namespace AppointmentHospital.Areas.Admin.Controllers
             return View(new ManagingPatientRequest());
         }
         [HttpPost]
-        public async Task<IActionResult> CreatePatient([FromForm]ManagingPatientRequest request)
+        public async Task<IActionResult> CreatePatient([FromForm] ManagingPatientRequest request)
         {
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 return View(request);
             }
-            var resultCreate =  await _managingPatientService.CreateNewPatientAsync(request);
-            if(!resultCreate)
+            var resultCreate = await _managingPatientService.CreateNewPatientAsync(request);
+            if (!resultCreate)
             {
                 return View(request);
             }
@@ -42,8 +43,8 @@ namespace AppointmentHospital.Areas.Admin.Controllers
         }
         public async Task<IActionResult> DeletePatient(Guid id, int? page)
         {
-            await _managingPatientService.DeletePatientAsync(id);
-            return RedirectToAction("Index",page ?? 1);
+            await _managingPatientService.SoftDeletePatientAsync(id);
+            return RedirectToAction("Index", page ?? 1);
         }
         [HttpGet]
         public async Task<IActionResult> EditPatient(Guid id)
@@ -60,6 +61,48 @@ namespace AppointmentHospital.Areas.Admin.Controllers
             }
             await _managingPatientService.EditPatientAsync(id, request);
             return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> BanPatient(Guid id, int? page, string searchTerm)
+        {
+            var success = await _managingPatientService.BanPatientAsync(id);
+
+            if (!success)
+            {
+                return NotFound();
+            }
+
+            var routeValues = new { page = page ?? 1, searchTerm = searchTerm };
+            return RedirectToAction("Index", routeValues);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> UnbanPatient(Guid id, int? page, string searchTerm)
+        {
+            var success = await _managingPatientService.UnBanPatientAsync(id);
+
+            if (!success)
+            {
+                return NotFound();
+            }
+
+            var routeValues = new { page = page ?? 1, searchTerm = searchTerm };
+            return RedirectToAction("Index", routeValues);
+        }
+        
+        [HttpGet]
+        public async Task<IActionResult> RestorePatient(Guid id, int? page, string searchTerm)
+        {
+            var success = await _managingPatientService.RestorePatientAsync(id);
+
+            if (!success)
+            {
+                return NotFound();
+            }
+
+            var routeValues = new { page = page ?? 1, searchTerm = searchTerm };
+            return RedirectToAction("Index", routeValues);
         }
     }
 }

@@ -19,6 +19,8 @@ namespace AppointmentHospital.Models
         public string? PhoneNumber { get; set; }
         [ForeignKey("PatientId")]
         public virtual User User { set;get; }
+        public bool IsDeleted { get; set; } = false;
+        public bool IsBanned { get; set; } = false;
         public virtual ICollection<Appointment> Appointments { set; get; }
 
         public virtual ICollection<Acquaintance> Acquaintances { get; set; }

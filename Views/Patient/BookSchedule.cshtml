@@ -123,7 +123,51 @@
 
 
 @section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
     <script>
+        // Initialize SignalR connection
+        const connection = new signalR.HubConnectionBuilder()
+                .withUrl('/scheduleHub')
+                .build();
+
+        // Start SignalR connection
+        connection.start().then(function () {
+            console.log("SignalR connected.");
+        }).catch(function (err) {
+            console.error("SignalR connection error: ", err.toString());
+        });
+
+        // Handle TimeSlotBooked message
+        connection.on("TimeSlotBooked", function (doctorId, updatedDate, timeSlotId) {
+            const formDoctorId = document.getElementById("doctorId").value;
+            const formTimeSlotId = document.getElementById("timeSlotId").value;
+            const formAppointmentDate = new Date(document.getElementById("appointmentDateTime").value).toISOString().split('T')[0];
+
+            // Check if the booked time slot matches the one in the form
+            if (doctorId === formDoctorId && timeSlotId === formTimeSlotId && updatedDate === formAppointmentDate) {
+                connection.on("TimeSlotBooked", function (doctorId, updatedDate, timeSlotId) {
+                    const formDoctorId = document.getElementById("doctorId").value;
+                    const formTimeSlotId = document.getElementById("timeSlotId").value;
+                    const formAppointmentDate = new Date(document.getElementById("appointmentDateTime").value).toISOString().split('T')[0];
+
+                    if (doctorId === formDoctorId && timeSlotId === formTimeSlotId && updatedDate === formAppointmentDate) {
+                        Swal.fire({
+                            title: 'Khung giờ không còn trống',
+                            text: 'Khung giờ này vừa được người khác đặt. Vui lòng chọn khung giờ khác.',
+                            icon: 'warning',
+                            confirmButtonText: 'Chọn khung giờ khác',
+                            confirmButtonColor: '#007bff'
+                        }).then(() => {
+                            // Optionally disable the submit button to prevent submission
+                            document.querySelector(".btn-primary").disabled = true;
+                            // Redirect to the doctor's schedule page to choose another slot
+                            window.location.href = `/Patient/DetailDoctor/${doctorId}`;
+                        });
+                    }
+                });
+            }
+        });
+
         // Initialize form on page load
         document.addEventListener('DOMContentLoaded', function () {
             togglePatientInfo();
@@ -134,19 +178,15 @@
             const selfSection = document.getElementById('self-section');
             const otherSection = document.getElementById('other-section');
             
-            // Toggle visibility of sections
             selfSection.style.display = forSelf ? 'block' : 'none';
             otherSection.style.display = forSelf ? 'none' : 'block';
             
-            // Toggle required attributes based on which section is active
             toggleRequiredFields(forSelf);
         }
         
         function toggleRequiredFields(forSelf) {
-            // Self section fields
             document.getElementById('selfSymptoms').required = forSelf;
             
-            // Other section fields
             const otherRequiredFields = [
                 document.getElementById('acquaintanceName'),
                 document.getElementById('otherSymptoms')
@@ -156,7 +196,6 @@
                 if (field) field.required = !forSelf;
             });
             
-            // Reset validation when switching sections
             document.getElementById('bookingForm').classList.remove('was-validated');
         }
 
@@ -164,10 +203,8 @@
             const form = document.getElementById('bookingForm');
             const forSelf = document.getElementById('forSelf').checked;
             
-            // Make sure required fields are properly set before validation
             toggleRequiredFields(forSelf);
             
-            // Add validation before showing confirmation
             if (!form.checkValidity()) {
                 console.log("Form is invalid, showing validation messages...");
                 form.classList.add('was-validated');
@@ -177,12 +214,12 @@
             console.log("Form is valid, proceeding to confirmation...");
             
             Swal.fire({
-                title: 'Confirm Booking',
-                text: 'Are you sure you want to book this appointment?',
+                title: 'Xác nhận đặt lịch',
+                text: 'Bạn có chắc chắn muốn đặt lịch khám này không?',
                 icon: 'question',
                 showCancelButton: true,
-                confirmButtonText: 'Confirm',
-                cancelButtonText: 'Cancel',
+                confirmButtonText: 'Xác nhận',
+                cancelButtonText: 'Hủy',
                 confirmButtonColor: '#007bff'
             }).then((result) => {
                 if (result.isConfirmed) {

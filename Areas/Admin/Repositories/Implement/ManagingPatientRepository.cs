@@ -12,11 +12,13 @@ namespace AppointmentHospital.Areas.Admin.Repositories.Implement
     {
         private readonly AppDbContext _context;
         private readonly UserManager<User> _userManager;
+
         public ManagingPatientRepository(AppDbContext context, UserManager<User> userManager)
         {
             _context = context;
             _userManager = userManager;
         }
+
         public async Task<bool> CreateNewPatientAsync(ManagingPatientRequest request)
         {
             var user = new User
@@ -27,7 +29,7 @@ namespace AppointmentHospital.Areas.Admin.Repositories.Implement
                 EmailConfirmed = true,
             };
             var createResult = await _userManager.CreateAsync(user, "Patient123#");
-            if(createResult.Succeeded)
+            if (createResult.Succeeded)
             {
                 await _userManager.AddToRoleAsync(user, "Patient");
                 var patient = new Patient
@@ -44,21 +46,33 @@ namespace AppointmentHospital.Areas.Admin.Repositories.Implement
             return false;
         }
 
-        public async Task DeletePatientAsync(Guid id)
+        public async Task<bool> SoftDeletePatientAsync(Guid id)
         {
-            var patient = await _context.Patients.Include(p => p.User)
-                                                 .Include(p => p.Appointments)
-                                                 .FirstOrDefaultAsync(p => p.PatientId == id);
-            _context.Appointments.RemoveRange(patient.Appointments);
-            _context.Patients.Remove(patient);
-            _context.Users.Remove(patient.User);
-           
+            var patient = await _context.Patients
+                .FirstOrDefaultAsync(p => p.PatientId == id);
+
+            if (patient == null)
+            {
+                return false;
+            }
+
+            patient.IsDeleted = true;
             await _context.SaveChangesAsync();
+
+            return true;
         }
 
         public async Task EditPatientAsync(Guid id, ManagingPatientRequest request)
         {
-            var patient = await _context.Patients.Include(p => p.User).Where(p => p.PatientId == id).FirstOrDefaultAsync();
+            var patient = await _context.Patients
+                .Include(p => p.User)
+                .FirstOrDefaultAsync(p => p.PatientId == id);
+
+            if (patient == null)
+            {
+                throw new InvalidOperationException("Patient not found.");
+            }
+
             var userPatient = patient.User;
             userPatient.Email = request.EmailAddress;
             userPatient.PhoneNumber = request.PhoneNumber;
@@ -66,40 +80,116 @@ namespace AppointmentHospital.Areas.Admin.Repositories.Implement
             patient.DateOfBirth = request.DateOfBirth;
             patient.FullName = request.FullName;
             patient.Address = request.Address;
+            patient.IsBanned = false;
+            patient.IsDeleted = false;
             _context.Update(patient);
             await _context.SaveChangesAsync();
         }
 
         public async Task<ManagingPatientResponse> GetPatientAsync(Guid id)
         {
-            var patient = await _context.Patients.Where(p => p.PatientId == id).Select(p => new ManagingPatientResponse
-            {
-                Address = p.Address,
-                EmailAddress = p.User.Email,
-                PhoneNumber = p.PhoneNumber,
-                FullName = p.FullName,
-                DateOfBirth = p.DateOfBirth,
-            }).FirstOrDefaultAsync();
+            var patient = await _context.Patients
+                .Include(p => p.User)
+                .Where(p => p.PatientId == id && !p.IsBanned && !p.IsDeleted)
+                .Select(p => new ManagingPatientResponse
+                {
+                    Address = p.Address,
+                    EmailAddress = p.User.Email,
+                    PhoneNumber = p.PhoneNumber,
+                    FullName = p.FullName,
+                    DateOfBirth = p.DateOfBirth,
+                    Id = p.PatientId
+                })
+                .FirstOrDefaultAsync();
             return patient;
         }
 
-        public async Task<Pagination<ManagingPatientResponse>> GetAllPatientAsync(int page, string searchTerm)
+        public async Task<Pagination<ManagingPatientResponse>> GetAllPatientAsync(int page, string searchTerm, string statusFilter = null, string isDeletedFilter = null)
         {
-            var query =  _context.Patients.Select(p => new ManagingPatientResponse
-            {
-                Id = p.PatientId,
-                DateOfBirth = p.DateOfBirth,
-                Address = p.Address,
-                FullName = p.FullName,
-                EmailAddress = p.User.Email,
-                PhoneNumber = p.PhoneNumber,
-            });
-            if(!searchTerm.IsNullOrEmpty())
+            var query = _context.Patients
+                .Include(p => p.User)
+                .Select(p => new ManagingPatientResponse
+                {
+                    Id = p.PatientId,
+                    DateOfBirth = p.DateOfBirth,
+                    Address = p.Address,
+                    FullName = p.FullName,
+                    EmailAddress = p.User.Email,
+                    PhoneNumber = p.PhoneNumber,
+                    IsBanned = p.IsBanned,
+                    IsDeleted = p.IsDeleted
+                });
+
+            if (!string.IsNullOrEmpty(searchTerm))
             {
                 query = query.Where(p => p.FullName.ToLower().Contains(searchTerm.ToLower()));
             }
+
+            if (statusFilter == "banned")
+            {
+                query = query.Where(p => p.IsBanned);
+            }
+            else
+            {
+                query = query.Where(p => !p.IsBanned); // Default to non-banned patients
+            }
+
+            if (isDeletedFilter == "deleted")
+            {
+                query = query.Where(p => p.IsDeleted);
+            }
+            else
+            {
+                query = query.Where(p => !p.IsDeleted); // Default to non-deleted patients
+            }
+
             var patientResponse = await Pagination<ManagingPatientResponse>.PaginatedList(query, page);
             return patientResponse;
+        }
+
+        public async Task<bool> BanPatientAsync(Guid id)
+        {
+            var patient = await _context.Patients
+                .FirstOrDefaultAsync(p => p.PatientId == id);
+
+            if (patient == null)
+            {
+                return false;
+            }
+
+            patient.IsBanned = !patient.IsBanned;
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> UnbanPatientAsync(Guid id)
+        {
+            var patient = await _context.Patients
+                .FirstOrDefaultAsync(p => p.PatientId == id);
+
+            if (patient == null)
+            {
+                return false;
+            }
+
+            patient.IsBanned = false;
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> RestorePatientAsync(Guid id)
+        {
+            var patient = await _context.Patients
+                .FirstOrDefaultAsync(p => p.PatientId == id);
+
+            if (patient == null)
+            {
+                return false;
+            }
+
+            patient.IsDeleted = false;
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

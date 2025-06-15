@@ -148,6 +148,14 @@ namespace AppointmentHospital.Controllers
                 return RedirectToAction("Index", "Patient");
             }
 
+            // Check if the time slot is still available
+            var timeSlot = _timeSlotService.GetTimeSlotById(TimeSlotId);
+            if (timeSlot == null || !timeSlot.Available)
+            {
+                TempData["ErrorMessage"] = "This time slot is no longer available. Please choose another.";
+                return RedirectToAction("DetailDoctor", "Patient", new { doctorId = DoctorId });
+            }
+
             var appointment = new Appointment
             {
                 DoctorId = DoctorId,
@@ -158,21 +166,30 @@ namespace AppointmentHospital.Controllers
 
             try
             {
-                _appointmentDateService.AddAppointment(appointment);
-                _timeSlotService.UpdateTimeSlotAvalableStatusByTimeSlotID(TimeSlotId, false);
-                string body = await _emailService.GetBookingTemplate(appointment.AppointmentTime, doctor.FullName, patient.FullName);
-                string bodyRemind = await _emailService.GetRemindedTemplate(appointment.AppointmentTime, doctor.FullName, patient.FullName);
-                BackgroundJob.Enqueue<IEmailService>(emailservice => emailservice.SendMailAsync(patient.EmailAddress, $"Medical Appointment Of ({patient.FullName})", body));
-                var remindTime = appointment.AppointmentTime.Date.AddDays(-1).AddHours(20);
-                if(remindTime >= DateTime.Now) {
-                    BackgroundJob.Schedule<IEmailService>(emailservice => emailservice.SendMailAsync(patient.EmailAddress, $"Remind appointment Of ({patient.FullName})", bodyRemind), remindTime);
-                }
-                TempData["SuccessMessage"] = "Your appointment has been booked successfully!";
+                // Use a transaction or lock to ensure atomicity
+                using (var transaction = _context.Database.BeginTransaction())
+                {
+                    _appointmentDateService.AddAppointment(appointment);
+                    _timeSlotService.UpdateTimeSlotAvalableStatusByTimeSlotID(TimeSlotId, false);
 
-                var updatedDate = appointment.AppointmentTime.Date.ToString("yyyy-MM-dd");
-                await _hubContext.Clients.All.SendAsync("ScheduleUpdated", DoctorId, updatedDate);
-                await _hubContext.Clients.All.SendAsync("UpdateStatistics");
-                return RedirectToAction("MySchedule", "Patient");
+                    string body = await _emailService.GetBookingTemplate(appointment.AppointmentTime, doctor.FullName, patient.FullName);
+                    string bodyRemind = await _emailService.GetRemindedTemplate(appointment.AppointmentTime, doctor.FullName, patient.FullName);
+                    BackgroundJob.Enqueue<IEmailService>(emailservice => emailservice.SendMailAsync(patient.EmailAddress, $"Medical Appointment Of ({patient.FullName})", body));
+                    var remindTime = appointment.AppointmentTime.Date.AddDays(-1).AddHours(20);
+                    if (remindTime >= DateTime.Now)
+                    {
+                        BackgroundJob.Schedule<IEmailService>(emailservice => emailservice.SendMailAsync(patient.EmailAddress, $"Remind appointment Of ({patient.FullName})", bodyRemind), remindTime);
+                    }
+
+                    var updatedDate = appointment.AppointmentTime.Date.ToString("yyyy-MM-dd");
+                    await _hubContext.Clients.All.SendAsync("ScheduleUpdated", DoctorId, updatedDate);
+                    await _hubContext.Clients.All.SendAsync("TimeSlotBooked", DoctorId, updatedDate, TimeSlotId);
+                    await _hubContext.Clients.All.SendAsync("UpdateStatistics");
+
+                    transaction.Commit();
+                    TempData["SuccessMessage"] = "Your appointment has been booked successfully!";
+                    return RedirectToAction("MySchedule", "Patient");
+                }
             }
             catch (Exception ex)
             {
@@ -197,6 +214,14 @@ namespace AppointmentHospital.Controllers
             {
                 TempData["ErrorMessage"] = "Patient not found.";
                 return RedirectToAction("Index", "Patient");
+            }
+
+            // Check if the time slot is still available
+            var timeSlot = _timeSlotService.GetTimeSlotById(TimeSlotId);
+            if (timeSlot == null || !timeSlot.Available)
+            {
+                TempData["ErrorMessage"] = "This time slot is no longer available. Please choose another.";
+                return RedirectToAction("DetailDoctor", "Patient", new { doctorId = DoctorId });
             }
 
             var aquaintance = new Acquaintance
@@ -228,24 +253,32 @@ namespace AppointmentHospital.Controllers
                 AcquaintanceId = aquaintance.Id
             };
 
-            Console.WriteLine($"Identification Number: {identificationNumber}, Address: {address}");
-
             try
             {
-                _appointmentDateService.AddAppointment(appointment);
-                _timeSlotService.UpdateTimeSlotAvalableStatusByTimeSlotID(TimeSlotId, false);
-                string body = await _emailService.GetBookingTemplate(appointment.AppointmentTime, doctor.FullName, patient.FullName);
-                string remindBody = await _emailService.GetRemindedTemplate(appointment.AppointmentTime, doctor.FullName, aquaintance.Name);
-                BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendMailAsync(patient.EmailAddress,$"Medical Appointment Of ({patient.FullName})", body));
-                var remindTime = appointment.AppointmentTime.Date.AddDays(-1).AddHours(20);
-                if(remindTime > DateTime.Now){
-                    BackgroundJob.Schedule<IEmailService>(emailService => emailService.SendMailAsync(patient.Address,$"Remind appointment Of ({patient.FullName})", remindBody ), remindTime);
-                }
-                TempData["SuccessMessage"] = "Appointment for acquaintance has been booked successfully!";
+                // Use a transaction or lock to ensure atomicity
+                using (var transaction = _context.Database.BeginTransaction())
+                {
+                    _appointmentDateService.AddAppointment(appointment);
+                    _timeSlotService.UpdateTimeSlotAvalableStatusByTimeSlotID(TimeSlotId, false);
 
-                var updatedDate = appointment.AppointmentTime.Date.ToString("yyyy-MM-dd");
-                await _hubContext.Clients.All.SendAsync("ScheduleUpdated", DoctorId, updatedDate);
-                return RedirectToAction("MySchedule", "Patient");
+                    string body = await _emailService.GetBookingTemplate(appointment.AppointmentTime, doctor.FullName, patient.FullName);
+                    string remindBody = await _emailService.GetRemindedTemplate(appointment.AppointmentTime, doctor.FullName, aquaintance.Name);
+                    BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendMailAsync(patient.EmailAddress, $"Medical Appointment Of ({patient.FullName})", body));
+                    var remindTime = appointment.AppointmentTime.Date.AddDays(-1).AddHours(20);
+                    if (remindTime > DateTime.Now)
+                    {
+                        BackgroundJob.Schedule<IEmailService>(emailService => emailService.SendMailAsync(patient.EmailAddress, $"Remind appointment Of ({patient.FullName})", remindBody), remindTime);
+                    }
+
+                    var updatedDate = appointment.AppointmentTime.Date.ToString("yyyy-MM-dd");
+                    await _hubContext.Clients.All.SendAsync("ScheduleUpdated", DoctorId, updatedDate);
+                    await _hubContext.Clients.All.SendAsync("TimeSlotBooked", DoctorId, updatedDate, TimeSlotId);
+                    await _hubContext.Clients.All.SendAsync("UpdateStatistics");
+
+                    transaction.Commit();
+                    TempData["SuccessMessage"] = "Appointment for acquaintance has been booked successfully!";
+                    return RedirectToAction("MySchedule", "Patient");
+                }
             }
             catch (Exception ex)
             {

@@ -13,6 +13,7 @@ using Microsoft.Extensions.Options;
 using AppointmentHospital.Configuration.BaseUrl;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 namespace AppointmentHospital.Controllers
 {
@@ -56,6 +57,11 @@ namespace AppointmentHospital.Controllers
 
         public async Task<IActionResult> Login()
         {
+            // Check for error message in TempData and add to ModelState
+            if (TempData["ErrorMessage"] != null)
+            {
+                ModelState.AddModelError("", TempData["ErrorMessage"].ToString());
+            }
             return View(new LoginUserRequest() { Email = string.Empty, Password = string.Empty });
         }
 
@@ -101,6 +107,21 @@ namespace AppointmentHospital.Controllers
             {
                 ModelState.AddModelError("", "User not found after login. Please contact support.");
                 return View(request);
+            }
+
+            // Kiểm tra nếu người dùng là bệnh nhân
+            if (await _userManager.IsInRoleAsync(user, "Patient"))
+            {
+                var patient = await _appDbContext.Patients
+                    .FirstOrDefaultAsync(p => p.PatientId == user.Id);
+                if (patient != null)
+                {
+                    if (patient.IsBanned || patient.IsDeleted)
+                    {
+                        TempData["ErrorMessage"] = "Your account has been banned or deleted. Please contact support.";
+                        return RedirectToAction("Login");
+                    }
+                }
             }
 
             var context = _contextAccessor.HttpContext;
@@ -156,21 +177,37 @@ namespace AppointmentHospital.Controllers
             var loginResult = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, false);
             if (loginResult.Succeeded)
             {
-                var userId = _accountService.GetIdByEmail(info.Principal.FindFirstValue(ClaimTypes.Email));
+                externalMail = info.Principal.FindFirstValue(ClaimTypes.Email);
+                var user = await _userManager.FindByEmailAsync(externalMail);
+                if (user != null && await _userManager.IsInRoleAsync(user, "Patient"))
+                {
+                    var patient = await _appDbContext.Patients
+                        .FirstOrDefaultAsync(p => p.PatientId == user.Id);
+                    if (patient != null && (patient.IsBanned || patient.IsDeleted))
+                    {
+                        ModelState.AddModelError("", "Your account has been banned or deleted. Please contact support.");
+                        return RedirectToAction("Login");
+                    }
+                }
+                var userId = _accountService.GetIdByEmail(externalMail);
                 _contextAccessor.HttpContext.Session.SetString("PatientId", userId.ToString());
                 return RedirectToAction("Index", "Patient");
             }
 
             externalMail = info.Principal.FindFirstValue(ClaimTypes.Email);
-            var user = await _userManager.FindByEmailAsync(externalMail);
+            var existingUser = await _userManager.FindByEmailAsync(externalMail);
 
-            if (user == null)
+            if (existingUser == null)
             {
                 var newUser = new User { UserName = externalMail, Email = externalMail };
                 var createResult = await _userManager.CreateAsync(newUser);
-                if (!createResult.Succeeded) return RedirectToAction("Login");
+                if (!createResult.Succeeded)
+                {
+                    ModelState.AddModelError("", "Failed to create user. Please try again.");
+                    return RedirectToAction("Login");
+                }
 
-                var patient = new Patient { FullName = newUser.UserName, User = newUser };
+                var patient = new Patient { FullName = newUser.UserName, User = newUser, PatientId = newUser.Id };
                 await _userManager.AddToRoleAsync(newUser, "Patient");
                 await _appDbContext.AddAsync(patient);
                 await _appDbContext.SaveChangesAsync();
@@ -187,17 +224,31 @@ namespace AppointmentHospital.Controllers
             }
             else
             {
-                if (!await _userManager.IsEmailConfirmedAsync(user))
+                if (!await _userManager.IsEmailConfirmedAsync(existingUser))
                 {
-                    var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                    await _userManager.ConfirmEmailAsync(user, token);
+                    var token = await _userManager.GenerateEmailConfirmationTokenAsync(existingUser);
+                    await _userManager.ConfirmEmailAsync(existingUser, token);
                 }
-                await _userManager.AddLoginAsync(user, info);
+
+                // Kiểm tra trạng thái banned hoặc deleted cho bệnh nhân
+                if (await _userManager.IsInRoleAsync(existingUser, "Patient"))
+                {
+                    var patient = await _appDbContext.Patients
+                        .FirstOrDefaultAsync(p => p.PatientId == existingUser.Id);
+                    if (patient != null && (patient.IsBanned || patient.IsDeleted))
+                    {
+                        ModelState.AddModelError("", "Your account has been banned or deleted. Please contact support.");
+                        return RedirectToAction("Login");
+                    }
+                }
+
+                await _userManager.AddLoginAsync(existingUser, info);
                 await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, false);
-                _contextAccessor.HttpContext.Session.SetString("PatientId", user.Id.ToString());
+                _contextAccessor.HttpContext.Session.SetString("PatientId", existingUser.Id.ToString());
                 return RedirectToAction("Index", "Patient");
             }
 
+            TempData["ErrorMessage"] = "An error occurred during external login. Please try again.";
             return RedirectToAction("Login");
         }
 
