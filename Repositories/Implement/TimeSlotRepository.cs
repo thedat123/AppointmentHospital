@@ -30,10 +30,21 @@ public class TimeSlotRepository : ITimeSlotRepository
         return paginatedTimeSlots;
     }
 
-    public void AddTimeSlot(TimeSlot timeSlot){
+    public bool AddTimeSlot(TimeSlot timeSlot)
+    {
+        var existingTimeSlot = _context.TimeSlots
+            .Any(x => x.DoctorId == timeSlot.DoctorId 
+                   && x.StartTime == timeSlot.StartTime 
+                   && x.EndTime == timeSlot.EndTime);
+                   
+        if (existingTimeSlot)
+        {
+            return false;
+        }
 
         _context.TimeSlots.Add(timeSlot);
         _context.SaveChanges();
+        return true;
     }
 
     public List<DateTime> GetRemainingDaysInMonth(DateTime startDate, DateTime endOfMonth, List<DaySchedule> schedules)

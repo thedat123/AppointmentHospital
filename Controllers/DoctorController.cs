@@ -138,6 +138,7 @@ namespace AppointmentHospital.Controllers
 
             var remainingDays = _timeSlotService.GetRemainingDaysInMonth(startDate, endOfMonth, input.Schedules);
             var parsedDoctorId = Guid.Parse(doctorId);
+            int addedSlots = 0;
 
             foreach (var day in remainingDays)
             {
@@ -152,18 +153,25 @@ namespace AppointmentHospital.Controllers
                     currentStartTime < schedule.EndTime.Value;
                     currentStartTime = currentStartTime.Add(TimeSpan.FromHours(1)))
                 {
-                    _timeSlotService.AddTimeSlot(new TimeSlot
+                    var newTimeSlot = new TimeSlot
                     {
                         TimeSlotId = Guid.NewGuid(),
                         DoctorId = parsedDoctorId,
                         StartTime = day.Date.Add(currentStartTime),
                         EndTime = day.Date.Add(currentStartTime.Add(TimeSpan.FromHours(1))),
                         Available = true
-                    });
+                    };
+
+                    if (_timeSlotService.AddTimeSlot(newTimeSlot))
+                    {
+                        addedSlots++;
+                    }
                 }
             }
 
-            TempData["SuccessMessage"] = "Update successful!";
+            TempData["SuccessMessage"] = addedSlots > 0 
+                ? $"Update successful! Added {addedSlots} new time slots."
+                : "No new time slots added due to existing schedules.";
             return RedirectToAction("Calendar");
         }
 

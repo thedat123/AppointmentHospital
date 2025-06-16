@@ -130,30 +130,37 @@ namespace AppointmentHospital.Controllers
             var patientId = _contextAccessor.HttpContext?.Session.GetString("PatientId");
             if (string.IsNullOrEmpty(patientId))
             {
-                TempData["ErrorMessage"] = "Patient ID is not available. Please log in.";
-                return RedirectToAction("Login", "Account");
+                return Json(new { success = false, message = "Patient ID is not available. Please log in." });
             }
 
             var doctor = _doctorService.getDoctorById(DoctorId);
             if (doctor == null)
             {
-                TempData["ErrorMessage"] = "Doctor not found.";
-                return RedirectToAction("Index", "Patient");
+                return Json(new { success = false, message = "Doctor not found." });
             }
 
             var patient = await _patientService.GetPatientById(Guid.Parse(patientId));
             if (patient == null)
             {
-                TempData["ErrorMessage"] = "Patient not found.";
-                return RedirectToAction("Index", "Patient");
+                return Json(new { success = false, message = "Patient not found." });
             }
 
-            // Check if the time slot is still available
+            // Validate patient information
+            if (!IsPatientInfoComplete(patient))
+            {
+                return Json(new { 
+                    success = false, 
+                    message = "Your profile information is incomplete. Please update your profile before booking an appointment." 
+                });
+            }
+
             var timeSlot = _timeSlotService.GetTimeSlotById(TimeSlotId);
             if (timeSlot == null || !timeSlot.Available)
             {
-                TempData["ErrorMessage"] = "This time slot is no longer available. Please choose another.";
-                return RedirectToAction("DetailDoctor", "Patient", new { doctorId = DoctorId });
+                return Json(new { 
+                    success = false, 
+                    message = "This time slot is no longer available. Please choose another." 
+                });
             }
 
             var appointment = new Appointment
@@ -166,7 +173,6 @@ namespace AppointmentHospital.Controllers
 
             try
             {
-                // Use a transaction or lock to ensure atomicity
                 using (var transaction = _context.Database.BeginTransaction())
                 {
                     _appointmentDateService.AddAppointment(appointment);
@@ -187,15 +193,22 @@ namespace AppointmentHospital.Controllers
                     await _hubContext.Clients.All.SendAsync("UpdateStatistics");
 
                     transaction.Commit();
-                    TempData["SuccessMessage"] = "Your appointment has been booked successfully!";
-                    return RedirectToAction("MySchedule", "Patient");
+                    return Json(new { success = true, message = "Your appointment has been booked successfully!" });
                 }
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"An error occurred while booking the appointment: {ex.Message}";
-                return RedirectToAction("DetailDoctor", "Patient");
+                return Json(new { success = false, message = $"An error occurred while booking the appointment: {ex.Message}" });
             }
+        }
+
+        private bool IsPatientInfoComplete(PatientResponse patient)
+        {
+            return !string.IsNullOrEmpty(patient.FullName) &&
+                !string.IsNullOrEmpty(patient.PhoneNumber) &&
+                patient.DateOfBirth != null &&
+                !string.IsNullOrEmpty(patient.Address)
+                && !string.IsNullOrEmpty(patient.IdentificationNumber); 
         }
 
         [HttpPost]
@@ -577,8 +590,7 @@ namespace AppointmentHospital.Controllers
         {
             try
             {
-                var patientId = _contextAccessor.HttpContext?.Session.GetString("PatientId");
-                
+                var patientId = _contextAccessor.HttpContext?.Session.GetString("PatientId");                
                 if (string.IsNullOrEmpty(patientId))
                 {
                     return BadRequest(new { error = "Patient not authenticated" });
@@ -593,6 +605,8 @@ namespace AppointmentHospital.Controllers
                     UpdatedAt = DateTime.Now,
                     IsActive = true
                 };
+
+                Console.WriteLine("Session: " + session.SessionId + " - " + session.SessionName + " - " + session.CreatedAt);
                 
                 _context.ChatSessions.Add(session);
                 await _context.SaveChangesAsync();

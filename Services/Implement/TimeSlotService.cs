@@ -18,9 +18,9 @@ public class TimeSlotService : ITimeSlotService
         return await timeSlotRepository.GetTimeSlotByDoctorId(doctorId, page, sortBy, sortOrder, filterDate);
     }
 
-    public void AddTimeSlot(TimeSlot timeSlot)
+    public bool AddTimeSlot(TimeSlot timeSlot)
     {
-        timeSlotRepository.AddTimeSlot(timeSlot);
+        return timeSlotRepository.AddTimeSlot(timeSlot);
     }
 
     public List<DateTime> GetRemainingDaysInMonth(DateTime startDate, DateTime endOfMonth, List<DaySchedule> schedules){

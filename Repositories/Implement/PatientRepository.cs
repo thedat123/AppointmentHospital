@@ -29,6 +29,7 @@ namespace AppointmentHospital.Repositories.Implement
                 patient.Address = request.Address;
                 patient.DateOfBirth = request.DateOfBirth;
                 patient.PhoneNumber = request.PhoneNumber;
+                patient.IdentificationNumber = request.IdentificationNumber;
                 appDbContext.Update(patient);
                 await appDbContext.SaveChangesAsync();
                 var patientResponse = new PatientResponse
@@ -40,6 +41,7 @@ namespace AppointmentHospital.Repositories.Implement
                     Address = patient.Address,
                     PatientId = patient.PatientId,
                     PhoneNumber = patient.PhoneNumber,
+                    IdentificationNumber = patient.IdentificationNumber,
                     Acquaintance = patient.Acquaintances.Select(a => new AcquaintanceResponse
                     {
                         Id = a.Id,
@@ -74,6 +76,7 @@ namespace AppointmentHospital.Repositories.Implement
                 Address = patient.Address,
                 PatientId = patient.PatientId,
                 PhoneNumber = patient.PhoneNumber,
+                IdentificationNumber = patient.IdentificationNumber,
                 Acquaintance = patient.Acquaintances.Select(a => new AcquaintanceResponse
                 {
                     Id = a.Id,

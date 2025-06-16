@@ -49,6 +49,14 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-floating">
+                                    <input type="tel" class="form-control" asp-for="@Model.IdentificationNumber"
+                                        value="@response.IdentificationNumber" id="identificationNumber" placeholder="CCCD/CMND" />
+                                    <label for="identificationNumber">Số CMND/CCCD</label>
+                                    <span asp-validation-for="@Model.IdentificationNumber"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
                                     <input type="tel" class="form-control" asp-for="@Model.PhoneNumber"
                                         value="@response.PhoneNumber" id="phoneNumber" placeholder="Số điện thoại" />
                                     <label for="phoneNumber">Số điện thoại</label>
@@ -115,6 +123,7 @@
 @section Styles {
     <link href="~/css/personal-profile.css" rel="stylesheet" />
 }
+
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -123,8 +132,8 @@
             buttonSubmit.addEventListener('click', function (e) {
                 buttonSubmit.disabled= true;
                 Swal.fire({
-                    title: 'Update information',
-                    text: 'Are you sure to update information?',
+                    title: 'Cập nhật thông tin',
+                    text: 'Bạn có chắc cập nhật thông tin?',
                     icon: 'question',
                     showCancelButton: true,
                     confirmButtonText: 'Accept',

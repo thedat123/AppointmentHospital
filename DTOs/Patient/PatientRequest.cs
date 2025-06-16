@@ -28,6 +28,7 @@ namespace AppointmentHospital.DTOs.Patient
         [Display(Name = "Email Address")]
         public string EmailAddress { get; set; }
         public string? PhoneNumber { get; set; }
+        public string? IdentificationNumber { get; set; }
     }
     public class FeedbackRequest
     {

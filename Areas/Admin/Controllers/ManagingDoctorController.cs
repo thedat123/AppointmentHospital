@@ -1,6 +1,7 @@
 ﻿using AppointmentHospital.Areas.Admin.DTOs.ManagingDoctor;
 using AppointmentHospital.Areas.Admin.Services;
 using AppointmentHospital.EnumStatus;
+using AppointmentHospital.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -15,9 +16,11 @@ namespace AppointmentHospital.Areas.Admin.Controllers
     public class ManagingDoctorController : Controller
     {
         private readonly IManagingDoctorService _managingDoctorService;
-        public ManagingDoctorController(IManagingDoctorService managingDoctorService)
+        private readonly ITimeSlotService _timeSlotService;
+        public ManagingDoctorController(IManagingDoctorService managingDoctorService, ITimeSlotService timeSlotService)
         {
             _managingDoctorService = managingDoctorService;
+            _timeSlotService = timeSlotService;
         }
         public async Task<IActionResult> Index(int? page, string searchTerm, int SpecialityId)
         {
@@ -51,8 +54,22 @@ namespace AppointmentHospital.Areas.Admin.Controllers
         }
         public async Task<IActionResult> DeleteDoctor(Guid id)
         {
-            await _managingDoctorService.DeleteDoctorAsync(id);
-            return RedirectToAction("Index");
+            var timeSlots = await _managingDoctorService.GetTimeSlotByDoctorIdAsync(id);
+
+            if (timeSlots)
+            {
+                return Json(new { success = false, message = "Không thể xóa bác sĩ này vì đã có lịch hẹn được đăng ký." });
+            }
+
+            try
+            {
+                await _managingDoctorService.DeleteDoctorAsync(id);
+                return Json(new { success = true, message = "Xóa bác sĩ thành công." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Lỗi khi xóa bác sĩ: {ex.Message}" });
+            }
         }
 
         [HttpGet]

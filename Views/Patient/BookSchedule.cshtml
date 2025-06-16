@@ -121,14 +121,14 @@
     </div>
 </div>
 
-
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         // Initialize SignalR connection
         const connection = new signalR.HubConnectionBuilder()
-                .withUrl('/scheduleHub')
-                .build();
+            .withUrl('/scheduleHub')
+            .build();
 
         // Start SignalR connection
         connection.start().then(function () {
@@ -143,27 +143,16 @@
             const formTimeSlotId = document.getElementById("timeSlotId").value;
             const formAppointmentDate = new Date(document.getElementById("appointmentDateTime").value).toISOString().split('T')[0];
 
-            // Check if the booked time slot matches the one in the form
             if (doctorId === formDoctorId && timeSlotId === formTimeSlotId && updatedDate === formAppointmentDate) {
-                connection.on("TimeSlotBooked", function (doctorId, updatedDate, timeSlotId) {
-                    const formDoctorId = document.getElementById("doctorId").value;
-                    const formTimeSlotId = document.getElementById("timeSlotId").value;
-                    const formAppointmentDate = new Date(document.getElementById("appointmentDateTime").value).toISOString().split('T')[0];
-
-                    if (doctorId === formDoctorId && timeSlotId === formTimeSlotId && updatedDate === formAppointmentDate) {
-                        Swal.fire({
-                            title: 'Khung giờ không còn trống',
-                            text: 'Khung giờ này vừa được người khác đặt. Vui lòng chọn khung giờ khác.',
-                            icon: 'warning',
-                            confirmButtonText: 'Chọn khung giờ khác',
-                            confirmButtonColor: '#007bff'
-                        }).then(() => {
-                            // Optionally disable the submit button to prevent submission
-                            document.querySelector(".btn-primary").disabled = true;
-                            // Redirect to the doctor's schedule page to choose another slot
-                            window.location.href = `/Patient/DetailDoctor/${doctorId}`;
-                        });
-                    }
+                Swal.fire({
+                    title: 'Khung giờ không còn trống',
+                    text: 'Khung giờ này vừa được người khác đặt. Vui lòng chọn khung giờ khác.',
+                    icon: 'warning',
+                    confirmButtonText: 'Chọn khung giờ khác',
+                    confirmButtonColor: '#007bff'
+                }).then(() => {
+                    document.querySelector(".btn-primary").disabled = true;
+                    window.location.href = `/Patient/DetailDoctor/${doctorId}`;
                 });
             }
         });
@@ -223,8 +212,50 @@
                 confirmButtonColor: '#007bff'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    form.action = forSelf ? '/Patient/BookForSelf' : '/Patient/BookForOther';
-                    form.submit();
+                    const formData = new FormData(form);
+                    const url = forSelf ? '/Patient/BookForSelf' : '/Patient/BookForOther';
+
+                    fetch(url, {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'Thành công!',
+                                text: data.message,
+                                icon: 'success',
+                                confirmButtonText: 'OK',
+                                confirmButtonColor: '#007bff'
+                            }).then(() => {
+                                window.location.href = '/Patient/MySchedule';
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Lỗi!',
+                                text: data.message,
+                                icon: 'error',
+                                confirmButtonText: 'OK',
+                                confirmButtonColor: '#007bff'
+                            }).then(() => {
+                                if (data.message.includes("profile information is incomplete")) {
+                                    window.location.href = `/Patient/PersonalProfile`;
+                                } else if (data.message.includes("time slot is no longer available")) {
+                                    window.location.href = `/Patient/DetailDoctor/${formData.get('DoctorId')}`;
+                                }
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire({
+                            title: 'Lỗi!',
+                            text: 'Đã xảy ra lỗi khi gửi yêu cầu: ' + error.message,
+                            icon: 'error',
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#007bff'
+                        });
+                    });
                 }
             });
         }

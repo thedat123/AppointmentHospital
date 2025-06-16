@@ -9,6 +9,7 @@ namespace AppointmentHospital.Areas.Admin.Services
     public interface IManagingDoctorService
     {
         Task<Pagination<ManagingDoctorResponse>> GetAllDoctor(int page, string searchTerm, int specialityId);
+        Task<bool> GetTimeSlotByDoctorIdAsync(Guid doctorId);
         List<SelectListItem> GetSpecialization();
         Task CreateNewDoctorAsync(ManagingDoctorRequest request);
         Task DeleteDoctorAsync(Guid id);

@@ -38,6 +38,9 @@ namespace AppointmentHospital.DTOs.Account
             [Required(ErrorMessage = "Vui lòng nhập số điện thoại.")]
             public string PhoneNumber { get; set; }
 
+            [Required(ErrorMessage = "Số CMND/CCCD không được để trống.")]
+            [RegularExpression(@"^[0-9]+$", ErrorMessage = "Số CMND/CCCD phải là số.")]
+            public string IdentificationNumber { get; set; }
             public DateTime DateOfBirth { get; set; }
         }
         public class ForgetPasswordRequest

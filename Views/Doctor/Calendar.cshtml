@@ -562,8 +562,8 @@
 
         function sortTable(column) {
             const urlParams = new URLSearchParams(window.location.search);
-            const sortBy = ['Days', 'StartTime', 'EndTime'][column];
-            const currentSortBy = urlParams.get('sortBy') || 'Days';
+            const sortBy = ['Ngày', 'Giờ bắt đầu', 'Giờ kết thúc'][column];
+            const currentSortBy = urlParams.get('sortBy') || 'Ngày';
             const currentSortOrder = urlParams.get('sortOrder') || 'asc';
             const sortOrder = (currentSortBy === sortBy && currentSortOrder === 'asc') ? 'desc' : 'asc';
             urlParams.set('sortBy', sortBy);
@@ -578,12 +578,12 @@
                 e.preventDefault();
                 saveRegularScheduleButton.disabled = true;
                 Swal.fire({
-                    title: 'Update Schedule',
-                    text: 'Are you sure to update schedule?',
+                    title: 'Cập nhật lịch',
+                    text: 'Bạn có chắc chắn muốn cập nhật lịch này?',
                     icon: 'question',
                     showCancelButton: true,
-                    confirmButtonText: 'Accept',
-                    cancelButtonText: 'Cancel'
+                    confirmButtonText: 'Xác nhận',
+                    cancelButtonText: 'Hủy'
                 }).then((result) => {
                     if (result.isConfirmed) {
                         updateRegularScheduleForm.submit();
@@ -628,12 +628,12 @@
                     if (available === "False" && startTime > new Date()) {
                         document.getElementById("timeSlotId").value = timeSlotId;
                         Swal.fire({
-                            title: 'Change Schedule',
-                            text: 'This schedule has been booked. Do you want to change to another appointment?',
+                            title: 'Thay đổi lịch',
+                            text: 'Lịch này đã được đặt. Bạn có muốn đổi sang lịch hẹn khác không?',
                             icon: 'question',
                             showCancelButton: true,
-                            confirmButtonText: 'Accept',
-                            cancelButtonText: 'Cancel'
+                            confirmButtonText: 'Xác nhận',
+                            cancelButtonText: 'Hủy'
                         }).then((result) => {
                             if (result.isConfirmed) {
                                 suggestModal.show();
@@ -641,12 +641,12 @@
                         });
                     } else {
                         Swal.fire({
-                            title: 'Delete Schedule',
-                            text: 'Are you sure to delete this schedule?',
+                            title: 'Xóa lịch',
+                            text: 'Bạn có chắc chắn muốn xóa lịch này?',
                             icon: 'question',
                             showCancelButton: true,
-                            confirmButtonText: 'Accept',
-                            cancelButtonText: 'Cancel'
+                            confirmButtonText: 'Xác nhận',
+                            cancelButtonText: 'Hủy'
                         }).then((result) => {
                             if (result.isConfirmed) {
                                 window.location.href = `/Doctor/DeleteTimeSlot/${timeSlotId}`;

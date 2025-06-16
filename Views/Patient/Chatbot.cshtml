@@ -683,12 +683,7 @@ class Chatbot {
         this.chatHistory = document.querySelector('.chat-history');
         this.chatTitleHeader = document.querySelector('.chat-title-header');
         
-        // Lấy patientId từ ViewBag
         this.patientId = window.PatientId || null;
-
-        console.log('Patient ID:', this.patientId);
-        
-        // Quản lý trạng thái của chatbot - key theo patientId
         this.storageKey = this.patientId ? `chatbotState_${this.patientId}` : 'chatbotState_guest';
         
         this.state = {
@@ -698,42 +693,32 @@ class Chatbot {
             sessionIds: {}
         };
         
-        // Khởi tạo
         this.init();
     }
     
     async init() {
-        // Chỉ tải sessions từ database nếu có patientId
         if (this.patientId) {
             await this.loadSessionsFromDatabase();
         } else {
-            // Guest mode - chỉ dùng localStorage
             this.loadStateFromStorage();
         }
         
-        // Event listeners
         this.setupEventListeners();
-        
-        // Render chat history
         this.renderChatHistory();
         
-        // Load tin nhắn cho chat hiện tại nếu có
         if (this.state.currentChatId) {
             this.loadChat(this.state.currentChatId);
         }
         
-        // Focus input
         this.userInput.focus();
     }
     
     setupEventListeners() {
-        // Form submit handler
         this.chatForm.addEventListener('submit', (e) => {
             e.preventDefault();
             this.sendMessage();
         });
 
-        // Enter key handler
         this.userInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -741,17 +726,14 @@ class Chatbot {
             }
         });
 
-        // New chat button
         document.querySelector('.new-chat-btn').addEventListener('click', () => {
             this.startNewChat();
         });
 
-        // Auto-resize textarea
         this.userInput.addEventListener('input', () => {
             this.autoResizeTextarea();
         });
 
-        // Window resize
         window.addEventListener('resize', () => {
             this.scrollToBottom();
         });
@@ -768,22 +750,10 @@ class Chatbot {
             
             if (response.ok) {
                 const sessionsResponse = await response.json();
-                console.log('Loaded sessions from database:', sessionsResponse);
+                let sessions = Array.isArray(sessionsResponse) ? sessionsResponse : 
+                              (sessionsResponse?.$values && Array.isArray(sessionsResponse.$values) ? sessionsResponse.$values : 
+                              (Object.values(sessionsResponse).find(value => Array.isArray(value)) || []));
                 
-                // Xử lý response structure
-                let sessions = [];
-                if (Array.isArray(sessionsResponse)) {
-                    sessions = sessionsResponse;
-                } else if (sessionsResponse && sessionsResponse.$values && Array.isArray(sessionsResponse.$values)) {
-                    sessions = sessionsResponse.$values;
-                } else if (sessionsResponse && typeof sessionsResponse === 'object') {
-                    const arrayProperty = Object.values(sessionsResponse).find(value => Array.isArray(value));
-                    if (arrayProperty) {
-                        sessions = arrayProperty;
-                    }
-                }
-                
-                console.log('Processed sessions array:', sessions);
                 await this.mergeSessionsWithLocalStorage(sessions);
             } else {
                 console.error('Failed to load sessions from database');
@@ -796,76 +766,48 @@ class Chatbot {
     }
     
     async mergeSessionsWithLocalStorage(dbSessions) {
-        // Load state từ localStorage
         this.loadStateFromStorage();
         
-        // Tạo map của các chat hiện có trong localStorage
-        const localChatsMap = new Map();
-        this.state.chats.forEach(chat => {
-            if (chat.sessionId) {
-                localChatsMap.set(chat.sessionId, chat);
-            }
-        });
-        
-        // Reset state
+        const localChatsMap = new Map(this.state.chats.map(chat => [chat.sessionId, chat]));
         this.state.chats = [];
         const newChatMessages = {};
         const newSessionIds = {};
         
-        // Process database sessions
         if (Array.isArray(dbSessions)) {
             for (const dbSession of dbSessions) {
                 const chatId = 'chat_' + dbSession.sessionId.replace(/-/g, '');
-                
-                const chat = {
+                this.state.chats.push({
                     id: chatId,
-                    title: dbSession.sessionName, // Đây là tin nhắn đầu tiên từ user
+                    title: dbSession.sessionName,
                     createdAt: dbSession.createdAt,
                     sessionId: dbSession.sessionId,
                     isFromDatabase: true
-                };
-                
-                this.state.chats.push(chat);
+                });
                 newSessionIds[chatId] = dbSession.sessionId;
                 
-                // Kiểm tra localStorage
                 const localChat = localChatsMap.get(dbSession.sessionId);
-                if (localChat && this.state.chatMessages[localChat.id]) {
-                    newChatMessages[chatId] = this.state.chatMessages[localChat.id];
-                } else {
-                    // Tải tin nhắn từ database
-                    const messages = await this.loadMessagesFromDatabase(dbSession.sessionId);
-                    newChatMessages[chatId] = messages;
-                }
+                newChatMessages[chatId] = localChat && this.state.chatMessages[localChat.id] 
+                    ? this.state.chatMessages[localChat.id] 
+                    : await this.loadMessagesFromDatabase(dbSession.sessionId);
             }
-        } else {
-            console.warn('dbSessions is not an array:', dbSessions);
         }
         
-        // Thêm các chat local chưa sync
         const originalChats = [...this.state.chats];
         this.loadStateFromStorage();
         
         this.state.chats.forEach(localChat => {
-            if (!localChat.sessionId) {
-                const existingChat = originalChats.find(c => c.id === localChat.id);
-                if (!existingChat) {
-                    originalChats.push(localChat);
-                    newChatMessages[localChat.id] = this.state.chatMessages[localChat.id] || [];
-                    newSessionIds[localChat.id] = this.state.sessionIds[localChat.id] || this.generateUUID();
-                }
+            if (!localChat.sessionId && !originalChats.find(c => c.id === localChat.id)) {
+                originalChats.push(localChat);
+                newChatMessages[localChat.id] = this.state.chatMessages[localChat.id] || [];
+                newSessionIds[localChat.id] = this.state.sessionIds[localChat.id] || this.generateUUID();
             }
         });
         
-        // Cập nhật state với merged data
         this.state.chats = originalChats;
         this.state.chatMessages = newChatMessages;
         this.state.sessionIds = newSessionIds;
         
-        // Sắp xếp theo thời gian
         this.state.chats.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        
-        // Lưu localStorage
         this.saveStateToStorage();
     }
     
@@ -880,45 +822,18 @@ class Chatbot {
             
             if (response.ok) {
                 const messagesResponse = await response.json();
-                console.log('Raw messages response for session', sessionId, ':', messagesResponse);
+                let dbMessages = Array.isArray(messagesResponse) ? messagesResponse : 
+                                (messagesResponse?.$values && Array.isArray(messagesResponse.$values) ? messagesResponse.$values : 
+                                (Object.values(messagesResponse).find(value => Array.isArray(value)) || []));
                 
-                // Xử lý response structure
-                let dbMessages = [];
-                if (Array.isArray(messagesResponse)) {
-                    dbMessages = messagesResponse;
-                } else if (messagesResponse && messagesResponse.$values && Array.isArray(messagesResponse.$values)) {
-                    dbMessages = messagesResponse.$values;
-                } else if (messagesResponse && typeof messagesResponse === 'object') {
-                    const arrayProperty = Object.values(messagesResponse).find(value => Array.isArray(value));
-                    if (arrayProperty) {
-                        dbMessages = arrayProperty;
-                    }
-                }
-                
-                console.log('Processed db messages:', dbMessages);
-                
-                // Mapping messages với validation
-                const mappedMessages = dbMessages.map(msg => {
-                    // Validation để đảm bảo MessageText không null/undefined
-                    const messageText = msg.MessageText || msg.messageText || '';
-                    const isFromPatient = msg.IsFromPatient !== undefined ? msg.IsFromPatient : (msg.isFromPatient || false);
-                    
-                    console.log('Processing message:', {
-                        original: msg,
-                        messageText: messageText,
-                        isFromPatient: isFromPatient
-                    });
-                    
-                    return {
-                        content: messageText,
-                        type: isFromPatient ? 'user' : 'bot', // IsFromPatient = true => user, false => bot
-                        isMarkdown: !isFromPatient, // Bot message sử dụng markdown
+                return dbMessages
+                    .map(msg => ({
+                        content: msg.MessageText || msg.messageText || '',
+                        type: (msg.IsFromPatient !== undefined ? msg.IsFromPatient : msg.isFromPatient || false) ? 'user' : 'bot',
+                        isMarkdown: !(msg.IsFromPatient !== undefined ? msg.IsFromPatient : msg.isFromPatient || false),
                         timestamp: msg.CreatedAt || msg.createdAt || new Date().toISOString()
-                    };
-                }).filter(msg => msg.content && msg.content.trim() !== ''); // Lọc bỏ tin nhắn rỗng
-                
-                console.log('Final mapped messages:', mappedMessages);
-                return mappedMessages;
+                    }))
+                    .filter(msg => msg.content && msg.content.trim() !== '');
             }
         } catch (error) {
             console.error('Error loading messages for session:', sessionId, error);
@@ -951,7 +866,6 @@ class Chatbot {
         const savedState = localStorage.getItem(this.storageKey);
         if (savedState) {
             const localState = JSON.parse(savedState);
-            
             this.state.chats = localState.chats || [];
             this.state.chatMessages = localState.chatMessages || {};
             this.state.sessionIds = localState.sessionIds || {};
@@ -974,7 +888,14 @@ class Chatbot {
         const defaultTitle = 'Cuộc trò chuyện mới';
         const newSessionId = this.generateUUID();
 
-        // Chỉ tạo session trên database nếu có patientId
+        // Validate UUID format
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+        if (!uuidRegex.test(newSessionId)) {
+            console.error('Invalid UUID generated:', newSessionId);
+            this.addMessage('Lỗi: Không thể tạo phiên chat mới do định dạng sessionId không hợp lệ.', 'bot');
+            return;
+        }
+
         if (this.patientId) {
             try {
                 const response = await fetch('/Patient/CreateChatSession', {
@@ -990,28 +911,39 @@ class Chatbot {
 
                 if (response.ok) {
                     const sessionData = await response.json();
+                    console.log('Session created successfully:', sessionData); // Debug log
                     this.state.chats.unshift({
-                        id: newChatId,
+                        id: newChatId, // Fixed from fellowChatId
                         title: sessionData.sessionName || defaultTitle,
                         createdAt: sessionData.createdAt || new Date().toISOString(),
                         sessionId: sessionData.sessionId,
                         isFromDatabase: true
                     });
                 } else {
-                    this.createLocalChat(newChatId, defaultTitle, newSessionId);
+                    const errorData = await response.json();
+                    console.error('Failed to create session:', errorData);
+                    this.addMessage(`Không thể tạo phiên chat mới: ${errorData.error || 'Lỗi server không xác định'}.`, 'bot');
+                    return;
                 }
             } catch (error) {
                 console.error('Error creating session:', error);
-                this.createLocalChat(newChatId, defaultTitle, newSessionId);
+                this.addMessage('Không thể tạo phiên chat mới do lỗi kết nối. Vui lòng kiểm tra kết nối mạng và thử lại.', 'bot');
+                return;
             }
         } else {
-            this.createLocalChat(newChatId, defaultTitle, newSessionId);
+            this.state.chats.unshift({
+                id: newChatId,
+                title: defaultTitle,
+                createdAt: new Date().toISOString(),
+                sessionId: newSessionId,
+                isFromDatabase: false
+            });
         }
 
         this.state.chatMessages[newChatId] = [];
         this.state.sessionIds[newChatId] = newSessionId;
-
         this.state.currentChatId = newChatId;
+
         this.saveStateToStorage();
         this.renderChatHistory();
         this.clearChatContainer();
@@ -1021,16 +953,6 @@ class Chatbot {
         this.userInput.value = '';
         this.autoResizeTextarea();
         this.userInput.focus();
-    }
-    
-    createLocalChat(chatId, title, sessionId) {
-        this.state.chats.unshift({
-            id: chatId,
-            title: title,
-            createdAt: new Date().toISOString(),
-            sessionId: sessionId,
-            isFromDatabase: false
-        });
     }
     
     async updateChatTitle(message) {
@@ -1043,11 +965,9 @@ class Chatbot {
         
         if (currentChat.title === 'Cuộc trò chuyện mới') {
             const newTitle = message.length > 50 ? message.substring(0, 50) + '...' : message;
-            
             this.state.chats[chatIndex].title = newTitle;
             this.chatTitleHeader.textContent = newTitle;
             
-            // Cập nhật database nếu có sessionId và patientId
             if (currentChat.sessionId && this.patientId) {
                 try {
                     await fetch('/Patient/UpdateChatSessionName', {
@@ -1076,7 +996,6 @@ class Chatbot {
         
         const chatToDelete = this.state.chats[chatIndex];
         
-        // Xóa database nếu có sessionId và patientId
         if (chatToDelete.sessionId && this.patientId) {
             try {
                 await fetch('/Patient/DeleteChatSession', {
@@ -1093,12 +1012,10 @@ class Chatbot {
             }
         }
         
-        // Xóa khỏi state
         this.state.chats.splice(chatIndex, 1);
         delete this.state.chatMessages[chatId];
         delete this.state.sessionIds[chatId];
         
-        // Xử lý current chat
         if (this.state.currentChatId === chatId) {
             if (this.state.chats.length > 0) {
                 this.state.currentChatId = this.state.chats[0].id;
@@ -1139,14 +1056,19 @@ class Chatbot {
         const message = this.userInput.value.trim();
         if (!message) return;
 
+        // Nếu không có currentChatId, tạo session mới
         if (!this.state.currentChatId) {
             await this.startNewChat();
         }
 
         const currentSessionId = this.getCurrentSessionId();
+        if (!currentSessionId) {
+            console.error('No session ID available for current chat');
+            this.addMessage('Lỗi: Không thể xác định phiên chat. Vui lòng thử lại.', 'bot');
+            return;
+        }
 
         await this.updateChatTitle(message);
-
         this.hideWelcomeScreen();
         this.addMessage(message, 'user');
 
@@ -1162,8 +1084,6 @@ class Chatbot {
                 timestamp: new Date().toISOString()
             });
             this.saveStateToStorage();
-
-            // Lưu vào database với sessionId hiện tại
             await this.saveMessageToDatabase(currentSessionId, message, true);
         }
 
@@ -1181,13 +1101,10 @@ class Chatbot {
             });
 
             const data = await response.json();
-
             this.hideTyping();
 
             if (data.botReply) {
                 this.addMessage(data.botReply, 'bot', true);
-
-                // Lưu tin nhắn bot vào session hiện tại
                 if (this.state.currentChatId) {
                     this.state.chatMessages[this.state.currentChatId].push({
                         content: data.botReply,
@@ -1196,18 +1113,14 @@ class Chatbot {
                         timestamp: new Date().toISOString()
                     });
                     this.saveStateToStorage();
-
-                    // Lưu vào database với sessionId hiện tại
                     await this.saveMessageToDatabase(currentSessionId, data.botReply, false);
                 }
             }
         } catch (error) {
             console.error('Error:', error);
             this.hideTyping();
-
             const errorMessage = 'Xin lỗi, có lỗi xảy ra. Vui lòng thử lại sau.';
             this.addMessage(errorMessage, 'bot');
-
             if (this.state.currentChatId) {
                 this.state.chatMessages[this.state.currentChatId].push({
                     content: errorMessage,
@@ -1228,8 +1141,7 @@ class Chatbot {
     }
     
     getCurrentSessionId() {
-        if (!this.state.currentChatId) return null;
-        return this.state.sessionIds[this.state.currentChatId];
+        return this.state.currentChatId ? this.state.sessionIds[this.state.currentChatId] : null;
     }
     
     renderChatHistory() {
@@ -1256,9 +1168,7 @@ class Chatbot {
         deleteBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             const chatId = chat.id;
-            
             chatItem.classList.add('removing');
-            
             setTimeout(() => {
                 this.deleteChat(chatId);
             }, 300);
@@ -1275,7 +1185,6 @@ class Chatbot {
     
     loadChat(chatId) {
         this.state.currentChatId = chatId;
-        
         const chat = this.state.chats.find(c => c.id === chatId);
         if (!chat) return;
         
@@ -1284,11 +1193,7 @@ class Chatbot {
         this.hideWelcomeScreen();
         
         const messages = this.state.chatMessages[chatId] || [];
-        console.log('Loading chat messages for', chatId, ':', messages);
-        
-        messages.forEach((msg, index) => {
-            console.log(`Displaying message ${index}:`, msg);
-            // Đảm bảo hiển thị đúng type và markdown
+        messages.forEach(msg => {
             this.addMessage(msg.content, msg.type, msg.isMarkdown, false);
         });
         
@@ -1318,30 +1223,25 @@ class Chatbot {
     }
     
     addMessage(content, type, isMarkdown = false, saveToStorage = true) {
-        // Validation để đảm bảo content không null hoặc undefined
         if (!content || typeof content !== 'string') {
             console.warn('Invalid message content:', content);
             return;
         }
         
         const messageRow = document.createElement('div');
-        // Sửa class - user message có class user-message-row, bot message không có
         messageRow.className = `message-row ${type === 'user' ? 'user-message-row' : ''}`;
         
         const avatarDiv = document.createElement('div');
-        // Sửa avatar - user dùng fa-user, bot dùng fa-robot
         avatarDiv.className = `avatar ${type}-avatar`;
         avatarDiv.innerHTML = type === 'user' ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
         
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${type}-message`;
         
-        // Bot message và có markdown
         if (type === 'bot' && isMarkdown && typeof marked !== 'undefined') {
             const markdownDiv = document.createElement('div');
             markdownDiv.className = 'markdown-content';
             
-            // Kiểm tra marked configuration
             if (typeof marked.setOptions === 'function') {
                 marked.setOptions({
                     breaks: true,
@@ -1354,16 +1254,9 @@ class Chatbot {
             }
             
             try {
-                // Đảm bảo content không rỗng trước khi parse
                 const trimmedContent = content.trim();
                 if (trimmedContent) {
-                    if (typeof marked.parse === 'function') {
-                        markdownDiv.innerHTML = marked.parse(trimmedContent);
-                    } else if (typeof marked === 'function') {
-                        markdownDiv.innerHTML = marked(trimmedContent);
-                    } else {
-                        markdownDiv.textContent = trimmedContent;
-                    }
+                    markdownDiv.innerHTML = typeof marked.parse === 'function' ? marked.parse(trimmedContent) : marked(trimmedContent);
                 } else {
                     markdownDiv.textContent = content;
                 }
@@ -1374,7 +1267,6 @@ class Chatbot {
             
             messageDiv.appendChild(markdownDiv);
         } else {
-            // User message hoặc bot message không có markdown
             messageDiv.textContent = content;
         }
         
@@ -1418,7 +1310,6 @@ class Chatbot {
     }
 }
 
-// Khởi tạo chatbot khi DOM đã tải
 document.addEventListener('DOMContentLoaded', () => {
     new Chatbot();
 });

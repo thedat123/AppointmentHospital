@@ -13,6 +13,7 @@ namespace AppointmentHospital.DTOs.Patient
         public string EmailAddress { get; set; }
         public List<AcquaintanceResponse> Acquaintance { get; set; }
         public string? PhoneNumber { get; set; }
+        public string? IdentificationNumber { get; set; }
     }
     public class AcquaintanceResponse
     {

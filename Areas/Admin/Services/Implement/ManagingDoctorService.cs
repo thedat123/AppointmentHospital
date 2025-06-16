@@ -18,6 +18,11 @@ namespace AppointmentHospital.Areas.Admin.Services.Implement
         {
              await _managingDoctorRepository.CreateNewDoctorAsync(request);
         }
+
+        public Task<bool> GetTimeSlotByDoctorIdAsync(Guid doctorId)
+        {
+            return _managingDoctorRepository.GetTimeSlotByDoctorIdAsync(doctorId);
+        }
         
         public async Task DeleteDoctorAsync(Guid id)
         {

@@ -77,6 +77,15 @@ namespace AppointmentHospital.Areas.Admin.Repositories.Implement
             return selectListItem;
         }
 
+        public async Task<bool> GetTimeSlotByDoctorIdAsync(Guid doctorId)
+        {
+            if (await _context.TimeSlots.AnyAsync(ts => ts.DoctorId == doctorId))
+            {
+                return true; // Doctor has time slots
+            }
+            return false;
+        }
+
         public async Task CreateNewDoctorAsync(ManagingDoctorRequest request)
         {
             var user = new User
