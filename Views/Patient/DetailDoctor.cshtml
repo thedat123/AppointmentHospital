@@ -753,20 +753,16 @@
             switch(error.code) {
                 case error.PERMISSION_DENIED:
                     message = "Bạn đã từ chối chia sẻ vị trí. Vui lòng bật định vị hoặc nhập vị trí thủ công.";
-                    document.getElementById('manual-location-input').style.display = 'block';
                     break;
                 case error.POSITION_UNAVAILABLE:
                     message = "Không thể xác định vị trí. Vui lòng kiểm tra kết nối hoặc nhập vị trí thủ công.";
-                    document.getElementById('manual-location-input').style.display = 'block';
                     break;
                 case error.TIMEOUT:
                     message = "Hết thời gian xác định vị trí.";
-                    document.getElementById('manual-location-input').style.display = 'block';
                     type = 'error';
                     break;
                 default:
                     message = "Lỗi xác định vị trí. Vui lòng nhập vị trí thủ công.";
-                    document.getElementById('manual-location-input').style.display = 'block';
                     type = 'error';
                     break;
             }

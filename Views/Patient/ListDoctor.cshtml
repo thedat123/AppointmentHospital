@@ -34,21 +34,6 @@
                 <div class="section-header">
                     <h2 class="section-title">Danh sách Bác sĩ</h2>
                     <div class="controls-wrapper">
-                        <div class="filter-wrapper">
-                            <div class="filter-pills" id="specialtyFilters">
-                                <button class="filter-pill @(ViewBag.SelectedSpec == null ? "active" : "")" data-specialty="all">
-                                    <i class="bi bi-grid-fill"></i>
-                                    Tất cả
-                                </button>
-                                @foreach (var specialty in Model.Select(d => d.Specialities.SpecialityName).Distinct())
-                                {
-                                    <button class="filter-pill @(ViewBag.SelectedSpec == specialty.ToLower() ? "active" : "")" data-specialty="@specialty.ToLower()">
-                                        <i class="bi bi-tag"></i>
-                                        @specialty
-                                    </button>
-                                }
-                            </div>
-                        </div>
                         <div class="view-options">
                             <button class="btn btn-view active" data-view="grid" title="Xem dạng lưới">
                                 <i class="bi bi-grid"></i>

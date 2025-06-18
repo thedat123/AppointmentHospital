@@ -17,7 +17,6 @@ public class ChatbotService : IChatbotService
     
     public async Task<ChatResponse> SendMessageAsync(ChatRequest chatRequest)
     {
-        // First, ensure we have a valid session
         var session = new SessionRequest
         {
             SessionId = chatRequest.SessionId,
@@ -35,14 +34,11 @@ public class ChatbotService : IChatbotService
             throw new Exception($"Failed to create session: {sessionResponse.StatusCode}");
         }
         
-        // Get the session ID from the response
         var sessionData = await sessionResponse.Content.ReadAsStringAsync();
         var sessionResult = JsonConvert.DeserializeObject<SessionResponse>(sessionData);
         
-        // Use the session ID from the response for the chat request
         chatRequest.SessionId = sessionResult.SessionId;
         
-        // Now send the chat request with the correct session ID
         var json = JsonConvert.SerializeObject(chatRequest);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
         
