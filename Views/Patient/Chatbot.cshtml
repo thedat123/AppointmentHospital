@@ -668,8 +668,13 @@
 
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
-    <script> window.PatientId = '@ViewBag.PatientId';</script>
-
+    <script> window.AppConfig = {
+                apiBaseUrl: window.location.hostname.includes('localhost') 
+                    ? 'http://localhost:5000' // Development
+                    : 'http://medicalcare.io.vn' // Production
+            };
+            window.PatientId = '@ViewBag.PatientId';
+    </script>
 <script>
 class Chatbot {
     constructor() {
@@ -685,6 +690,7 @@ class Chatbot {
         
         this.patientId = window.PatientId || null;
         this.storageKey = this.patientId ? `chatbotState_${this.patientId}` : 'chatbotState_guest';
+        this.apiBaseUrl = window.AppConfig.apiBaseUrl; // Sử dụng base URL từ cấu hình
         
         this.state = {
             currentChatId: null,
@@ -714,6 +720,7 @@ class Chatbot {
     }
     
     setupEventListeners() {
+        // Không thay đổi phần này
         this.chatForm.addEventListener('submit', (e) => {
             e.preventDefault();
             this.sendMessage();
@@ -739,29 +746,38 @@ class Chatbot {
         });
     }
     
+    // Hàm chuẩn hóa dữ liệu mảng
+    normalizeArray(data) {
+        if (Array.isArray(data)) {
+            return data;
+        }
+        if (data?.$values && Array.isArray(data.$values)) {
+            return data.$values;
+        }
+        const arrayData = Object.values(data).find(value => Array.isArray(value));
+        return arrayData || [];
+    }
+    
     async loadSessionsFromDatabase() {
         try {
-            const response = await fetch('/Patient/GetChatSessions', {
+            const response = await fetch(`${this.apiBaseUrl}/Patient/GetChatSessions`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                 }
             });
             
-            if (response.ok) {
-                const sessionsResponse = await response.json();
-                let sessions = Array.isArray(sessionsResponse) ? sessionsResponse : 
-                              (sessionsResponse?.$values && Array.isArray(sessionsResponse.$values) ? sessionsResponse.$values : 
-                              (Object.values(sessionsResponse).find(value => Array.isArray(value)) || []));
-                
-                await this.mergeSessionsWithLocalStorage(sessions);
-            } else {
-                console.error('Failed to load sessions from database');
-                this.loadStateFromStorage();
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
             }
+            
+            const sessionsResponse = await response.json();
+            const sessions = this.normalizeArray(sessionsResponse);
+            await this.mergeSessionsWithLocalStorage(sessions);
         } catch (error) {
-            console.error('Error loading sessions:', error);
+            console.error('Error loading sessions from database:', error);
             this.loadStateFromStorage();
+            this.addMessage('Không thể tải lịch sử trò chuyện từ server. Đã chuyển sang chế độ offline.', 'bot');
         }
     }
     
@@ -773,23 +789,21 @@ class Chatbot {
         const newChatMessages = {};
         const newSessionIds = {};
         
-        if (Array.isArray(dbSessions)) {
-            for (const dbSession of dbSessions) {
-                const chatId = 'chat_' + dbSession.sessionId.replace(/-/g, '');
-                this.state.chats.push({
-                    id: chatId,
-                    title: dbSession.sessionName,
-                    createdAt: dbSession.createdAt,
-                    sessionId: dbSession.sessionId,
-                    isFromDatabase: true
-                });
-                newSessionIds[chatId] = dbSession.sessionId;
-                
-                const localChat = localChatsMap.get(dbSession.sessionId);
-                newChatMessages[chatId] = localChat && this.state.chatMessages[localChat.id] 
-                    ? this.state.chatMessages[localChat.id] 
-                    : await this.loadMessagesFromDatabase(dbSession.sessionId);
-            }
+        for (const dbSession of dbSessions) {
+            const chatId = 'chat_' + dbSession.sessionId.replace(/-/g, '');
+            this.state.chats.push({
+                id: chatId,
+                title: dbSession.sessionName || 'Cuộc trò chuyện mới',
+                createdAt: dbSession.createdAt || new Date().toISOString(),
+                sessionId: dbSession.sessionId,
+                isFromDatabase: true
+            });
+            newSessionIds[chatId] = dbSession.sessionId;
+            
+            const localChat = localChatsMap.get(dbSession.sessionId);
+            newChatMessages[chatId] = localChat && this.state.chatMessages[localChat.id] 
+                ? this.state.chatMessages[localChat.id] 
+                : await this.loadMessagesFromDatabase(dbSession.sessionId);
         }
         
         const originalChats = [...this.state.chats];
@@ -813,36 +827,36 @@ class Chatbot {
     
     async loadMessagesFromDatabase(sessionId) {
         try {
-            const response = await fetch(`/Patient/GetChatMessages?sessionId=${encodeURIComponent(sessionId)}`, {
+            const response = await fetch(`${this.apiBaseUrl}/Patient/GetChatMessages?sessionId=${encodeURIComponent(sessionId)}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                 }
             });
             
-            if (response.ok) {
-                const messagesResponse = await response.json();
-                let dbMessages = Array.isArray(messagesResponse) ? messagesResponse : 
-                                (messagesResponse?.$values && Array.isArray(messagesResponse.$values) ? messagesResponse.$values : 
-                                (Object.values(messagesResponse).find(value => Array.isArray(value)) || []));
-                
-                return dbMessages
-                    .map(msg => ({
-                        content: msg.MessageText || msg.messageText || '',
-                        type: (msg.IsFromPatient !== undefined ? msg.IsFromPatient : msg.isFromPatient || false) ? 'user' : 'bot',
-                        isMarkdown: !(msg.IsFromPatient !== undefined ? msg.IsFromPatient : msg.isFromPatient || false),
-                        timestamp: msg.CreatedAt || msg.createdAt || new Date().toISOString()
-                    }))
-                    .filter(msg => msg.content && msg.content.trim() !== '');
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
             }
+            
+            const messagesResponse = await response.json();
+            const dbMessages = this.normalizeArray(messagesResponse);
+            
+            return dbMessages
+                .map(msg => ({
+                    content: msg.MessageText || msg.messageText || '',
+                    type: (msg.IsFromPatient !== undefined ? msg.IsFromPatient : msg.isFromPatient || false) ? 'user' : 'bot',
+                    isMarkdown: !(msg.IsFromPatient !== undefined ? msg.IsFromPatient : msg.isFromPatient || false),
+                    timestamp: msg.CreatedAt || msg.createdAt || new Date().toISOString()
+                }))
+                .filter(msg => msg.content && msg.content.trim() !== '');
         } catch (error) {
             console.error('Error loading messages for session:', sessionId, error);
+            return [];
         }
-        
-        return [];
     }
     
     saveStateToStorage() {
+        // Không thay đổi phần này
         const localOnlyState = {
             currentChatId: this.state.currentChatId,
             chats: this.state.chats.filter(chat => !chat.isFromDatabase),
@@ -863,6 +877,7 @@ class Chatbot {
     }
     
     loadStateFromStorage() {
+        // Không thay đổi phần này
         const savedState = localStorage.getItem(this.storageKey);
         if (savedState) {
             const localState = JSON.parse(savedState);
@@ -898,7 +913,7 @@ class Chatbot {
 
         if (this.patientId) {
             try {
-                const response = await fetch('/Patient/CreateChatSession', {
+                const response = await fetch(`${this.apiBaseUrl}/Patient/CreateChatSession`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -909,25 +924,22 @@ class Chatbot {
                     })
                 });
 
-                if (response.ok) {
-                    const sessionData = await response.json();
-                    console.log('Session created successfully:', sessionData); // Debug log
-                    this.state.chats.unshift({
-                        id: newChatId, // Fixed from fellowChatId
-                        title: sessionData.sessionName || defaultTitle,
-                        createdAt: sessionData.createdAt || new Date().toISOString(),
-                        sessionId: sessionData.sessionId,
-                        isFromDatabase: true
-                    });
-                } else {
+                if (!response.ok) {
                     const errorData = await response.json();
-                    console.error('Failed to create session:', errorData);
-                    this.addMessage(`Không thể tạo phiên chat mới: ${errorData.error || 'Lỗi server không xác định'}.`, 'bot');
-                    return;
+                    throw new Error(errorData.error || `HTTP error! Status: ${response.status}`);
                 }
+
+                const sessionData = await response.json();
+                this.state.chats.unshift({
+                    id: newChatId,
+                    title: sessionData.sessionName || defaultTitle,
+                    createdAt: sessionData.createdAt || new Date().toISOString(),
+                    sessionId: sessionData.sessionId,
+                    isFromDatabase: true
+                });
             } catch (error) {
                 console.error('Error creating session:', error);
-                this.addMessage('Không thể tạo phiên chat mới do lỗi kết nối. Vui lòng kiểm tra kết nối mạng và thử lại.', 'bot');
+                this.addMessage(`Không thể tạo phiên chat mới: ${error.message}.`, 'bot');
                 return;
             }
         } else {
@@ -970,7 +982,7 @@ class Chatbot {
             
             if (currentChat.sessionId && this.patientId) {
                 try {
-                    await fetch('/Patient/UpdateChatSessionName', {
+                    await fetch(`${this.apiBaseUrl}/Patient/UpdateChatSessionName`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -998,7 +1010,7 @@ class Chatbot {
         
         if (chatToDelete.sessionId && this.patientId) {
             try {
-                await fetch('/Patient/DeleteChatSession', {
+                await fetch(`${this.apiBaseUrl}/Patient/DeleteChatSession`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1036,7 +1048,7 @@ class Chatbot {
         if (!this.patientId || !sessionId) return;
         
         try {
-            await fetch('/Patient/SaveChatMessage', {
+            await fetch(`${this.apiBaseUrl}/Patient/SaveChatMessage`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1056,7 +1068,6 @@ class Chatbot {
         const message = this.userInput.value.trim();
         if (!message) return;
 
-        // Nếu không có currentChatId, tạo session mới
         if (!this.state.currentChatId) {
             await this.startNewChat();
         }
@@ -1072,7 +1083,6 @@ class Chatbot {
         this.hideWelcomeScreen();
         this.addMessage(message, 'user');
 
-        // Lưu tin nhắn user vào session hiện tại
         if (this.state.currentChatId) {
             if (!this.state.chatMessages[this.state.currentChatId]) {
                 this.state.chatMessages[this.state.currentChatId] = [];
@@ -1092,13 +1102,17 @@ class Chatbot {
         this.showTyping();
 
         try {
-            const response = await fetch('/Patient/ChatbotMessage', {
+            const response = await fetch(`${this.apiBaseUrl}/Patient/ChatbotMessage`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
                 body: `userMessage=${encodeURIComponent(message)}&sessionId=${encodeURIComponent(currentSessionId)}`
             });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
 
             const data = await response.json();
             this.hideTyping();
@@ -1117,7 +1131,7 @@ class Chatbot {
                 }
             }
         } catch (error) {
-            console.error('Error:', error);
+            console.error('Error sending message:', error);
             this.hideTyping();
             const errorMessage = 'Xin lỗi, có lỗi xảy ra. Vui lòng thử lại sau.';
             this.addMessage(errorMessage, 'bot');
@@ -1133,6 +1147,7 @@ class Chatbot {
         }
     }
     
+    // Các phương thức còn lại không thay đổi
     generateUUID() {
         return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
             var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
