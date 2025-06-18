@@ -52,17 +52,20 @@ public class CollaboratorController : Controller
         var patient = await _patientService.GetPatientById(appointment.PatientId);
         if ((AppointmentStatus)status == AppointmentStatus.Canceled)
         {
-            string body = await _emailService.GetCancelledTemplate(appointment.AppointmentTime, appointment.Doctor.FullName, appointment.Patient.FullName);
+            string body = await _emailService.GetCancelledTemplate(
+                appointment.AppointmentTime,
+                appointment.Doctor.FullName,
+                appointment.Acquaintance?.Name ?? appointment.Patient.FullName
+            );
             BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendMailAsync(patient.EmailAddress, $"Medical Appointment Of ({appointment.Patient.FullName})", body ));
         }
         else if ((AppointmentStatus)status == AppointmentStatus.Confirmed)
         {
-            string body = await _emailService.GetConfirmedTemplate(appointment.AppointmentTime, appointment.Doctor.FullName, appointment.Patient.FullName);
+            string body = await _emailService.GetConfirmedTemplate(appointment.AppointmentTime, appointment.Doctor.FullName, appointment.Acquaintance?.Name ?? appointment.Patient.FullName);
             BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendMailAsync(patient.EmailAddress, $"Medical Appointment Of ({appointment.Patient.FullName})", body ));
         }
         _appointmentDateService.UpdateStatusAppointment(id, (AppointmentStatus)status);
         await _hubContext.Clients.All.SendAsync("UpdateStatus", appointment.AppointmentId, (AppointmentStatus)status);
         return RedirectToAction("Index");
     }
-
 }

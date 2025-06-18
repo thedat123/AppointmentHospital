@@ -278,7 +278,7 @@ namespace AppointmentHospital.Controllers
                         _timeSlotService.UpdateTimeSlotAvalableStatusByTimeSlotID(TimeSlotId, false);
 
                         // Email notifications
-                        string body = await _emailService.GetBookingTemplate(appointment.AppointmentTime, doctor.FullName, patient.FullName);
+                        string body = await _emailService.GetBookingTemplate(appointment.AppointmentTime, doctor.FullName, acquaintance.Name);
                         string remindBody = await _emailService.GetRemindedTemplate(appointment.AppointmentTime, doctor.FullName, acquaintance.Name);
                         BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendMailAsync(patient.EmailAddress, $"Medical Appointment Of ({patient.FullName})", body));
                         var remindTime = appointment.AppointmentTime.Date.AddDays(-1).AddHours(20);

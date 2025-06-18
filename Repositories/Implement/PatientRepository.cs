@@ -126,7 +126,8 @@ namespace AppointmentHospital.Repositories.Implement
                 Console.WriteLine(ex.Message);
             }
         }
-        public async Task<FeedbackResponse> GetFeedback(Guid appointmentId) {
+        public async Task<FeedbackResponse> GetFeedback(Guid appointmentId)
+        {
             var feedback = await appDbContext.Feedbacks.Where(f => f.AppointmentId == appointmentId).Select(f => new FeedbackResponse
             {
                 AppointmentId = f.AppointmentId,
@@ -142,9 +143,10 @@ namespace AppointmentHospital.Repositories.Implement
             return feedback;
         }
 
-        public async Task<bool> HasFeedback(Guid appointmentId){
+        public async Task<bool> HasFeedback(Guid appointmentId)
+        {
             return await appDbContext.Feedbacks.AnyAsync(f => f.AppointmentId == appointmentId);
-        }                               
+        }
 
         public List<DiagnosisHistory> GetDiagnosisHistoriesByPatientId(Guid patientId)
         {
@@ -154,6 +156,11 @@ namespace AppointmentHospital.Repositories.Implement
         public List<DiagnosisHistory> GetDiagnosisHistoriesByAcquaintanceId(Guid acquaintanceId)
         {
             return appDbContext.DiagnosisHistory.Where(d => d.AcquaintanceId == acquaintanceId).ToList();
+        }
+
+        public async Task<Acquaintance> GetAcquaintanceById(Guid acquaintanceId)
+        {
+            return await appDbContext.Acquaintances.FindAsync(acquaintanceId);
         }
     }
 }

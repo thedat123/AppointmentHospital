@@ -267,8 +267,9 @@ namespace AppointmentHospital.Controllers
             ));
 
             var patient = await _patientService.GetPatientById(PatientId);
+            var acquaintance = AcquaintanceId != null ? await _patientService.GetAcquaintanceById(AcquaintanceId) : null;
 
-            string body = await _emailService.GetCompletedTemplate(patient.FullName, doctorService.getDoctorById(DoctorId).FullName, DiagnosisDetails, PrescribedMedicationsHtml, DoctorNotes);
+            string body = await _emailService.GetCompletedTemplate(acquaintance != null ? acquaintance.Name : patient.FullName, doctorService.getDoctorById(DoctorId).FullName, DiagnosisDetails, PrescribedMedicationsHtml, DoctorNotes);
             BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendMailAsync(patient.EmailAddress,$"Medical Appointment Of ({patient.FullName})", body));
 
             _appointmentDateService.UpdateStatusAppointment(AppointmentId, AppointmentStatus.Completed);
@@ -373,7 +374,7 @@ namespace AppointmentHospital.Controllers
             string emailBody = await _emailService.GetCancelAndSuggestTemplate(
                 appointment.AppointmentTime,
                 appointment.Doctor.FullName,
-                patient.FullName,
+                appointment.Acquaintance.Name ?? patient.FullName,
                 suggestDate
             );
 
@@ -400,7 +401,7 @@ namespace AppointmentHospital.Controllers
                 _appointmentDateService.UpdateStatusAppointment(appointment.AppointmentId, AppointmentStatus.Canceled);
                 _timeSlotService.DeleteTimeSlot(timeSlot.TimeSlotId);
 
-                string body = await _emailService.GetCancelAndSuggestTemplate(appointment.AppointmentTime, appointment.Doctor.FullName, appointment.Patient.FullName, suggestDate);
+                string body = await _emailService.GetCancelAndSuggestTemplate(appointment.AppointmentTime, appointment.Doctor.FullName, appointment.Acquaintance.Name ?? appointment.Patient.FullName, suggestDate);
                 BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendMailAsync(patient.EmailAddress, $"Medical Appointment Of ({patient.FullName})", body));
             }
 

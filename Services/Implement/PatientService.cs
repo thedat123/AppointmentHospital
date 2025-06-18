@@ -12,9 +12,9 @@ namespace AppointmentHospital.Services.Implement
             _patientRepository = patientRepository;
         }
 
-        public async Task<PatientResponse> EditPatientInfo(Guid patientId ,PatientRequest request)
+        public async Task<PatientResponse> EditPatientInfo(Guid patientId, PatientRequest request)
         {
-            return await _patientRepository.EditPatientInfo(patientId,request);
+            return await _patientRepository.EditPatientInfo(patientId, request);
         }
 
         public async Task<PatientResponse> GetPatientById(Guid userId)
@@ -26,22 +26,32 @@ namespace AppointmentHospital.Services.Implement
         {
             _patientRepository.AddAcquaintance(acquaintance);
         }
-        public async Task AddFeedback(FeedbackRequest request) {
+        public async Task AddFeedback(FeedbackRequest request)
+        {
             await _patientRepository.AddFeedback(request);
         }
-        public async Task<FeedbackResponse> GetFeedback(Guid appointmentId){
-           return await _patientRepository.GetFeedback(appointmentId);
+        public async Task<FeedbackResponse> GetFeedback(Guid appointmentId)
+        {
+            return await _patientRepository.GetFeedback(appointmentId);
         }
-        public async Task<bool> HasFeedback(Guid appointmentId) {
+        public async Task<bool> HasFeedback(Guid appointmentId)
+        {
             return await _patientRepository.HasFeedback(appointmentId);
         }
 
-        public List<DiagnosisHistory> GetDiagnosisHistoriesByPatientId(Guid patientId){
+        public List<DiagnosisHistory> GetDiagnosisHistoriesByPatientId(Guid patientId)
+        {
             return _patientRepository.GetDiagnosisHistoriesByPatientId(patientId);
         }
 
-        public List<DiagnosisHistory> GetDiagnosisHistoriesByAcquaintanceId(Guid acquaintanceId){
+        public List<DiagnosisHistory> GetDiagnosisHistoriesByAcquaintanceId(Guid acquaintanceId)
+        {
             return _patientRepository.GetDiagnosisHistoriesByAcquaintanceId(acquaintanceId);
+        }
+
+        public async Task<Acquaintance> GetAcquaintanceById(Guid acquaintanceId)
+        {
+            return await _patientRepository.GetAcquaintanceById(acquaintanceId);
         }
     }
 }
