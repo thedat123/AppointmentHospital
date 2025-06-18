@@ -691,7 +691,6 @@ class Chatbot {
         this.patientId = window.PatientId || null;
         this.storageKey = this.patientId ? `chatbotState_${this.patientId}` : 'chatbotState_guest';
         this.apiBaseUrl = window.AppConfig.apiBaseUrl; // Sử dụng base URL từ cấu hình
-        
         this.state = {
             currentChatId: null,
             chats: [],
@@ -704,6 +703,10 @@ class Chatbot {
     
     async init() {
         if (this.patientId) {
+            if (!this.apiBaseUrl) {
+                this.addMessage('Lỗi: URL API không được cấu hình. Vui lòng kiểm tra lại.', 'bot');
+                return;
+            }
             await this.loadSessionsFromDatabase();
         } else {
             this.loadStateFromStorage();
