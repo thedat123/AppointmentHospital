@@ -969,17 +969,18 @@ class Chatbot {
     
     async updateChatTitle(message) {
         if (!this.state.currentChatId) return;
-        
+
         const chatIndex = this.state.chats.findIndex(chat => chat.id === this.state.currentChatId);
         if (chatIndex === -1) return;
-        
+
         const currentChat = this.state.chats[chatIndex];
-        
-        if (currentChat.title === 'Cuộc trò chuyện mới') {
+
+        // Chỉ cập nhật tiêu đề nếu vẫn là tiêu đề mặc định
+        if (currentChat.title === 'Cuộc trò chuyện mới' || !currentChat.title.startsWith(message.substring(0, 10))) {
             const newTitle = message.length > 50 ? message.substring(0, 50) + '...' : message;
             this.state.chats[chatIndex].title = newTitle;
             this.chatTitleHeader.textContent = newTitle;
-            
+
             if (currentChat.sessionId && this.patientId) {
                 try {
                     await fetch(`${this.apiBaseUrl}/Patient/UpdateChatSessionName`, {
@@ -996,7 +997,7 @@ class Chatbot {
                     console.error('Error updating session name:', error);
                 }
             }
-            
+
             this.renderChatHistory();
             this.saveStateToStorage();
         }
@@ -1068,6 +1069,7 @@ class Chatbot {
         const message = this.userInput.value.trim();
         if (!message) return;
 
+        console.log('Sending message, currentChatId:', this.state.currentChatId); // Log để debug
         if (!this.state.currentChatId) {
             await this.startNewChat();
         }
@@ -1147,7 +1149,6 @@ class Chatbot {
         }
     }
     
-    // Các phương thức còn lại không thay đổi
     generateUUID() {
         return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
             var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
