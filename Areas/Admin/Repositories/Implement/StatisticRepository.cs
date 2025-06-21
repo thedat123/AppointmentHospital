@@ -257,126 +257,211 @@ namespace AppointmentHospital.Areas.Admin.Repositories.Implement
 
         public async Task<Dictionary<string, int>> GetCompareAmountAppointment(List<DateTime>? startAndEndDate, Dictionary<int, List<DateTime>>? startAndEndDateOfEachWeekInMonth, int? month, int? year)
         {
-            Dictionary<string, int> compareAmountAppointment = new Dictionary<string, int>();
-            
-            if (startAndEndDate != null && startAndEndDate.Count == 2)
+           try
             {
-                compareAmountAppointment = await _appDbContext.Appointments.Where(a => a.AppointmentTime.Date >= startAndEndDate[0].Date && a.AppointmentTime.Date <= startAndEndDate[1].Date)
-                                                                           .GroupBy(a => a.AppointmentTime.Date)
-                                                                           .ToDictionaryAsync(g => g.Key.Date.ToString("MM/dd"), g => g.Count());
-            }
-            else if (month.HasValue && year.HasValue)
-            {
-                // Show all months in the specified year
-                compareAmountAppointment = await _appDbContext.Appointments.Where(a => a.AppointmentTime.Year == year)
-                                          .GroupBy(a => a.AppointmentTime.Month)
-                                          .ToDictionaryAsync(g => g.Key.ToString(), g => g.Count());
-                
-                // Fill missing months with 0 count
-                for (int i = 1; i <= 12; i++)
+                Dictionary<string, int> compareAmountAppointment = new Dictionary<string, int>();
+
+                if (startAndEndDate != null && startAndEndDate.Count == 2)
                 {
-                    if (!compareAmountAppointment.ContainsKey(i.ToString()))
+                    // Use Aggregate to safely handle potential duplicates
+                    var appointmentsByDate = await _appDbContext.Appointments
+                        .Where(a => a.AppointmentTime.Date >= startAndEndDate[0].Date && a.AppointmentTime.Date <= startAndEndDate[1].Date)
+                        .Select(a => a.AppointmentTime.Date)
+                        .ToListAsync();
+
+                    compareAmountAppointment = appointmentsByDate
+                        .Aggregate(new Dictionary<string, int>(), (dict, date) =>
+                        {
+                            string key = date.ToString("MM/dd");
+                            if (dict.ContainsKey(key))
+                                dict[key]++;
+                            else
+                                dict[key] = 1;
+                            return dict;
+                        });
+                }
+                else if (month.HasValue && year.HasValue)
+                {
+                    // Initialize all months first
+                    for (int i = 1; i <= 12; i++)
                     {
-                        compareAmountAppointment.Add(i.ToString(), 0);
+                        compareAmountAppointment[i.ToString()] = 0;
+                    }
+
+                    // Get actual data and update
+                    var monthlyData = await _appDbContext.Appointments
+                        .Where(a => a.AppointmentTime.Year == year)
+                        .GroupBy(a => a.AppointmentTime.Month)
+                        .Select(g => new { Month = g.Key, Count = g.Count() })
+                        .ToListAsync();
+
+                    foreach (var item in monthlyData)
+                    {
+                        compareAmountAppointment[item.Month.ToString()] = item.Count;
                     }
                 }
-            }
-            else if (startAndEndDateOfEachWeekInMonth != null && startAndEndDateOfEachWeekInMonth.Count != 0)
-            {
-                foreach (var week in startAndEndDateOfEachWeekInMonth)
+                else if (startAndEndDateOfEachWeekInMonth != null && startAndEndDateOfEachWeekInMonth.Count != 0)
                 {
-                    var startDate = week.Value[0];
-                    var endDate = week.Value[1];
-                    var appointmentAmount = await _appDbContext.Appointments.Where(a => a.AppointmentTime.Date >= startDate.Date && a.AppointmentTime.Date <= endDate.Date).CountAsync();
-                    compareAmountAppointment.Add(week.Key.ToString(), appointmentAmount);
+                    foreach (var week in startAndEndDateOfEachWeekInMonth)
+                    {
+                        if (week.Value?.Count >= 2)
+                        {
+                            var startDate = week.Value[0];
+                            var endDate = week.Value[1];
+                            var appointmentAmount = await _appDbContext.Appointments
+                                .Where(a => a.AppointmentTime.Date >= startDate.Date && a.AppointmentTime.Date <= endDate.Date)
+                                .CountAsync();
+
+                            string weekKey = week.Key.ToString();
+                            compareAmountAppointment[weekKey] = appointmentAmount; // Use indexer instead of Add
+                        }
+                    }
                 }
+                else
+                {
+                    var appointments = await _appDbContext.Appointments
+                        .Select(a => a.AppointmentTime.Date)
+                        .ToListAsync();
+
+                    // Use Aggregate for safe dictionary building
+                    compareAmountAppointment = appointments
+                        .Aggregate(new Dictionary<string, int>(), (dict, date) =>
+                        {
+                            string key = date.ToString("MM/dd");
+                            if (dict.ContainsKey(key))
+                                dict[key]++;
+                            else
+                                dict[key] = 1;
+                            return dict;
+                        });
+                }
+
+                return compareAmountAppointment;
             }
-            else
+            catch (Exception ex)
             {
-                // FIXED: Load data to memory first, then group and order
-                var appointments = await _appDbContext.Appointments
-                    .Select(a => a.AppointmentTime.Date)
-                    .ToListAsync();
-                
-                compareAmountAppointment = appointments
-                    .GroupBy(date => date)
-                    .OrderBy(g => g.Key)
-                    .ToDictionary(g => g.Key.ToString("MM/dd"), g => g.Count());
+                Console.WriteLine($"Error in GetCompareAmountAppointment: {ex.Message}");
+                return new Dictionary<string, int>();
             }
-            
-            return compareAmountAppointment;
         }
         
         public async Task<Dictionary<string, List<int>>> GetCompareOldAndNewUser(List<DateTime>? startAndEndDate, Dictionary<int, List<DateTime>>? startAndEndDateOfEachWeekInMonth, int? month, int? year)
         {
             Dictionary<string, List<int>> amountOldAndNewUser = new Dictionary<string, List<int>>();
             
-            if (startAndEndDate != null && startAndEndDate.Count == 2)
+            try
             {
-                var startDate = startAndEndDate[0];
-                var endDate = startAndEndDate[1];
-                while (startDate <= endDate)
+                if (startAndEndDate != null && startAndEndDate.Count == 2)
                 {
-                    var userInPast = _appDbContext.Appointments.Where(a => a.AppointmentTime.Date < startDate.Date);
-                    var newUser = await _appDbContext.Appointments.Where(a => a.AppointmentTime.Date == startDate.Date && !userInPast.Any(ab => ab.PatientId == a.PatientId))
-                                                            .GroupBy(a => a.PatientId)
-                                                            .CountAsync();
-                    var oldUser = await _appDbContext.Appointments.Where(a => a.AppointmentTime.Date == startDate.Date && userInPast.Any(ab => ab.PatientId == a.PatientId))
-                                                            .GroupBy(a => a.PatientId)
-                                                            .CountAsync();
-                    amountOldAndNewUser.Add(startDate.Date.ToString("MM/dd"), new List<int> { newUser, oldUser });
-                    startDate = startDate.AddDays(1);
+                    var startDate = startAndEndDate[0];
+                    var endDate = startAndEndDate[1];
+                    
+                    while (startDate <= endDate)
+                    {
+                        string dateKey = startDate.Date.ToString("MM/dd");
+                        
+                        // Check if key already exists to avoid duplicates
+                        if (!amountOldAndNewUser.ContainsKey(dateKey))
+                        {
+                            var userInPast = _appDbContext.Appointments.Where(a => a.AppointmentTime.Date < startDate.Date);
+                            var newUser = await _appDbContext.Appointments.Where(a => a.AppointmentTime.Date == startDate.Date && !userInPast.Any(ab => ab.PatientId == a.PatientId))
+                                                                    .GroupBy(a => a.PatientId)
+                                                                    .CountAsync();
+                            var oldUser = await _appDbContext.Appointments.Where(a => a.AppointmentTime.Date == startDate.Date && userInPast.Any(ab => ab.PatientId == a.PatientId))
+                                                                    .GroupBy(a => a.PatientId)
+                                                                    .CountAsync();
+                            amountOldAndNewUser.Add(dateKey, new List<int> { newUser, oldUser });
+                        }
+                        startDate = startDate.AddDays(1);
+                    }
                 }
-            }
-            else if (month.HasValue && year.HasValue)
-            {
-                // Show all 12 months for the specified year
-                for (int startMonth = 1; startMonth <= 12; startMonth++)
+                else if (month.HasValue && year.HasValue)
                 {
-                    var userInPast = _appDbContext.Appointments.Where(a => a.AppointmentTime.Date < new DateTime(year.Value, startMonth, 1));
-                    var newUser = await _appDbContext.Appointments.Where(a => a.AppointmentTime.Month == startMonth && a.AppointmentTime.Year == year && !userInPast.Any(uip => uip.PatientId == a.PatientId))
-                                                                  .GroupBy(a => a.PatientId)
-                                                                  .CountAsync();
-                    var oldUser = await _appDbContext.Appointments.Where(a => a.AppointmentTime.Month == startMonth && a.AppointmentTime.Year == year && userInPast.Any(uip => uip.PatientId == a.PatientId))
-                                                                  .GroupBy(a => a.PatientId)
-                                                                  .CountAsync();
-                    amountOldAndNewUser.Add(startMonth.ToString(), new List<int> { newUser, oldUser });
+                    // Show all 12 months for the specified year
+                    for (int startMonth = 1; startMonth <= 12; startMonth++)
+                    {
+                        string monthKey = startMonth.ToString();
+                        
+                        var userInPast = _appDbContext.Appointments.Where(a => a.AppointmentTime.Date < new DateTime(year.Value, startMonth, 1));
+                        var newUser = await _appDbContext.Appointments.Where(a => a.AppointmentTime.Month == startMonth && a.AppointmentTime.Year == year && !userInPast.Any(uip => uip.PatientId == a.PatientId))
+                                                                    .GroupBy(a => a.PatientId)
+                                                                    .CountAsync();
+                        var oldUser = await _appDbContext.Appointments.Where(a => a.AppointmentTime.Month == startMonth && a.AppointmentTime.Year == year && userInPast.Any(uip => uip.PatientId == a.PatientId))
+                                                                    .GroupBy(a => a.PatientId)
+                                                                    .CountAsync();
+                        amountOldAndNewUser[monthKey] = new List<int> { newUser, oldUser }; // Use indexer instead of Add
+                    }
                 }
-            }
-            else if (startAndEndDateOfEachWeekInMonth != null && startAndEndDateOfEachWeekInMonth.Count != 0)
-            {
-                foreach (var week in startAndEndDateOfEachWeekInMonth)
+                else if (startAndEndDateOfEachWeekInMonth != null && startAndEndDateOfEachWeekInMonth.Count != 0)
                 {
-                    var weekValue = week.Value;
-                    var userInPast = _appDbContext.Appointments.Where(a => a.AppointmentTime.Date < weekValue[0].Date);
-                    var newUser = await _appDbContext.Appointments.Where(a => a.AppointmentTime.Date >= weekValue[0].Date && a.AppointmentTime.Date <= weekValue[1].Date && !userInPast.Any(uip => uip.PatientId == a.PatientId))
-                                                            .GroupBy(a => a.PatientId)
-                                                            .CountAsync();
-                    var oldUser = await _appDbContext.Appointments.Where(a => a.AppointmentTime.Date >= weekValue[0].Date && a.AppointmentTime.Date <= weekValue[1].Date && userInPast.Any(uip => uip.PatientId == a.PatientId))
-                                                            .GroupBy(a => a.PatientId).CountAsync();
-                    amountOldAndNewUser.Add(week.Key.ToString(), new List<int> { newUser, oldUser });
+                    foreach (var week in startAndEndDateOfEachWeekInMonth)
+                    {
+                        if (week.Value?.Count >= 2)
+                        {
+                            string weekKey = week.Key.ToString();
+                            var weekValue = week.Value;
+                            
+                            var userInPast = _appDbContext.Appointments.Where(a => a.AppointmentTime.Date < weekValue[0].Date);
+                            var newUser = await _appDbContext.Appointments.Where(a => a.AppointmentTime.Date >= weekValue[0].Date && a.AppointmentTime.Date <= weekValue[1].Date && !userInPast.Any(uip => uip.PatientId == a.PatientId))
+                                                                    .GroupBy(a => a.PatientId)
+                                                                    .CountAsync();
+                            var oldUser = await _appDbContext.Appointments.Where(a => a.AppointmentTime.Date >= weekValue[0].Date && a.AppointmentTime.Date <= weekValue[1].Date && userInPast.Any(uip => uip.PatientId == a.PatientId))
+                                                                    .GroupBy(a => a.PatientId).CountAsync();
+                            
+                            amountOldAndNewUser[weekKey] = new List<int> { newUser, oldUser }; // Use indexer instead of Add
+                        }
+                    }
                 }
-            }
-            else
-            {
-                // FIXED: Load data to memory first, then process
-                var allDates = await _appDbContext.Appointments
-                    .Select(a => a.AppointmentTime.Date)
-                    .Distinct()
-                    .OrderBy(d => d)
-                    .ToListAsync();
+                else
+                {
+                    // Load all distinct dates first
+                    var allDates = await _appDbContext.Appointments
+                        .Select(a => a.AppointmentTime.Date)
+                        .Distinct()
+                        .OrderBy(d => d)
+                        .ToListAsync();
 
-                foreach (var date in allDates)
-                {
-                    var userInPast = _appDbContext.Appointments.Where(a => a.AppointmentTime.Date < date);
-                    var newUser = await _appDbContext.Appointments.Where(a => a.AppointmentTime.Date == date && !userInPast.Any(uip => uip.PatientId == a.PatientId))
-                                                            .GroupBy(a => a.PatientId)
-                                                            .CountAsync();
-                    var oldUser = await _appDbContext.Appointments.Where(a => a.AppointmentTime.Date == date && userInPast.Any(uip => uip.PatientId == a.PatientId))
-                                                            .GroupBy(a => a.PatientId)
-                                                            .CountAsync();
-                    amountOldAndNewUser.Add(date.ToString("MM/dd"), new List<int> { newUser, oldUser });
+                    // Process each unique date
+                    foreach (var date in allDates)
+                    {
+                        string dateKey = date.ToString("MM/dd");
+                        
+                        // Use indexer to avoid duplicate key exception
+                        if (!amountOldAndNewUser.ContainsKey(dateKey))
+                        {
+                            var userInPast = _appDbContext.Appointments.Where(a => a.AppointmentTime.Date < date);
+                            var newUser = await _appDbContext.Appointments.Where(a => a.AppointmentTime.Date == date && !userInPast.Any(uip => uip.PatientId == a.PatientId))
+                                                                    .GroupBy(a => a.PatientId)
+                                                                    .CountAsync();
+                            var oldUser = await _appDbContext.Appointments.Where(a => a.AppointmentTime.Date == date && userInPast.Any(uip => uip.PatientId == a.PatientId))
+                                                                    .GroupBy(a => a.PatientId)
+                                                                    .CountAsync();
+                            
+                            amountOldAndNewUser[dateKey] = new List<int> { newUser, oldUser };
+                        }
+                        else
+                        {
+                            // If key exists, aggregate the values
+                            var userInPast = _appDbContext.Appointments.Where(a => a.AppointmentTime.Date < date);
+                            var newUser = await _appDbContext.Appointments.Where(a => a.AppointmentTime.Date == date && !userInPast.Any(uip => uip.PatientId == a.PatientId))
+                                                                    .GroupBy(a => a.PatientId)
+                                                                    .CountAsync();
+                            var oldUser = await _appDbContext.Appointments.Where(a => a.AppointmentTime.Date == date && userInPast.Any(uip => uip.PatientId == a.PatientId))
+                                                                    .GroupBy(a => a.PatientId)
+                                                                    .CountAsync();
+                            
+                            // Add to existing values
+                            amountOldAndNewUser[dateKey][0] += newUser;
+                            amountOldAndNewUser[dateKey][1] += oldUser;
+                        }
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in GetCompareOldAndNewUser: {ex.Message}");
+                // Return empty dictionary on error
+                return new Dictionary<string, List<int>>();
             }
             
             return amountOldAndNewUser;
