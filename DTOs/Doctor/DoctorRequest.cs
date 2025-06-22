@@ -1,4 +1,5 @@
 using AppointmentHospital.EnumStatus;
+using AppointmentHospital.Models;
 using System.ComponentModel.DataAnnotations;
 
 namespace AppointmentHospital.ViewModels
@@ -25,7 +26,7 @@ namespace AppointmentHospital.ViewModels
         public DateTime DateOfBirth { get; set; }
 
         [Required]
-        public Specialization Specializaiton { get; set; }
+        public Specialities Specialities { get; set; }
 
         [Required]
         [Range(0, 50)]

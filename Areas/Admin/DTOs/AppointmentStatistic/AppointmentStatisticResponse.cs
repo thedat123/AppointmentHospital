@@ -1,4 +1,5 @@
 ﻿using AppointmentHospital.EnumStatus;
+using AppointmentHospital.Models;
 
 namespace AppointmentHospital.Areas.Admin.DTOs.AppointmentStatistic
 {
@@ -17,7 +18,7 @@ namespace AppointmentHospital.Areas.Admin.DTOs.AppointmentStatistic
     {
         public Guid DoctorId { get; set; }
         public string DoctorName { get; set; }
-        public Specialization Specialization { get; set; }
+        public Specialities Specialities { get; set; }
         public int TotalConfirmAppointments { get; set; }
         public int ExperienceYear { get; set; }
     }
