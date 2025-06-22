@@ -13,7 +13,6 @@
             padding: 2rem 0;
         }
 
-        /* Sidebar styling - cải thiện */
         .sidebar {
             background-color: white;
             border-radius: 16px;
@@ -369,6 +368,7 @@
                         <table class="table">
                             <thead>
                                 <tr>
+                                    <th><i class="fas fa-user-md me-2"></i>Bệnh nhân</th>
                                     <th><i class="fas fa-user-md me-2"></i>Bác sĩ</th>
                                     <th><i class="fas fa-stethoscope me-2"></i>Chuyên khoa</th>
                                     <th><i class="fas fa-clock me-2"></i>Thời gian</th>
@@ -381,6 +381,14 @@
                                 @foreach (var appointment in Model.OrderByDescending(a => a.CreatedAt))
                                 {
                                     <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="doctor-avatar bg-primary bg-opacity-10 text-primary rounded-circle p-2">
+                                                    <i class="fas fa-user-md"></i>
+                                                </div>
+                                                <span class="fw-medium">@(appointment.Acquaintance?.Name ?? appointment.Patient.FullName)</span>
+                                            </div>
+                                        </td>
                                         <td>
                                             <div class="d-flex align-items-center gap-2">
                                                 <div class="doctor-avatar bg-primary bg-opacity-10 text-primary rounded-circle p-2">

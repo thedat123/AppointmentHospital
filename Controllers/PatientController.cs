@@ -17,7 +17,7 @@ using AppointmentHospital.Services;
 
 namespace AppointmentHospital.Controllers
 {
-    [Authorize(Roles ="Patient")]
+    [Authorize(Roles = "Patient")]
     public class PatientController : Controller
     {
         private readonly IDoctorService _doctorService;
@@ -35,7 +35,7 @@ namespace AppointmentHospital.Controllers
 
         private readonly ChatbotService _chatbotService = new ChatbotService();
 
-        public PatientController(AppDbContext appDbContext,IPatientService patientService ,IDoctorService doctorService, ILogger<PatientController> logger, IHttpContextAccessor contextAccessor, IAppointmentDateService appointmentDateService, IEmailService emailService, ITimeSlotService timeSlotService, IHubContext<ScheduleHub> hubContext, IDiseasePredictionService diseasePredictionService, IManagingDoctorService managingDoctorService, ISpecialitiesService specialitiesService)
+        public PatientController(AppDbContext appDbContext, IPatientService patientService, IDoctorService doctorService, ILogger<PatientController> logger, IHttpContextAccessor contextAccessor, IAppointmentDateService appointmentDateService, IEmailService emailService, ITimeSlotService timeSlotService, IHubContext<ScheduleHub> hubContext, IDiseasePredictionService diseasePredictionService, IManagingDoctorService managingDoctorService, ISpecialitiesService specialitiesService)
         {
             _context = appDbContext;
             _patientService = patientService;
@@ -89,7 +89,7 @@ namespace AppointmentHospital.Controllers
         [HttpGet]
         public async Task<IActionResult> PersonalProfile()
         {
-            if(User.HasClaim(c => c.Type == ClaimTypes.NameIdentifier))
+            if (User.HasClaim(c => c.Type == ClaimTypes.NameIdentifier))
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 Console.WriteLine($"User ID: {userId}");
@@ -103,7 +103,7 @@ namespace AppointmentHospital.Controllers
         [HttpPost]
         public async Task<IActionResult> PersonalProfile(Guid patientId, PatientRequest request)
         {
-            var patient = await _patientService.EditPatientInfo(patientId ,request);
+            var patient = await _patientService.EditPatientInfo(patientId, request);
             await _hubContext.Clients.All.SendAsync("UpdatePatientProfile", patient);
             ViewBag.PatientInfo = patient;
             return View(new PatientRequest());
@@ -148,18 +148,20 @@ namespace AppointmentHospital.Controllers
             // Validate patient information
             if (!IsPatientInfoComplete(patient))
             {
-                return Json(new { 
-                    success = false, 
-                    message = "Your profile information is incomplete. Please update your profile before booking an appointment." 
+                return Json(new
+                {
+                    success = false,
+                    message = "Your profile information is incomplete. Please update your profile before booking an appointment."
                 });
             }
 
             var timeSlot = _timeSlotService.GetTimeSlotById(TimeSlotId);
             if (timeSlot == null || !timeSlot.Available)
             {
-                return Json(new { 
-                    success = false, 
-                    message = "This time slot is no longer available. Please choose another." 
+                return Json(new
+                {
+                    success = false,
+                    message = "This time slot is no longer available. Please choose another."
                 });
             }
 
@@ -208,7 +210,7 @@ namespace AppointmentHospital.Controllers
                 !string.IsNullOrEmpty(patient.PhoneNumber) &&
                 patient.DateOfBirth != null &&
                 !string.IsNullOrEmpty(patient.Address)
-                && !string.IsNullOrEmpty(patient.IdentificationNumber); 
+                && !string.IsNullOrEmpty(patient.IdentificationNumber);
         }
 
         [HttpPost]
@@ -338,7 +340,7 @@ namespace AppointmentHospital.Controllers
                 ? await _appointmentDateService.GetAppointmentsByPatientId(Guid.Parse(patientId), status.Value, page)
                 : allAppointments;
 
-                return View(filteredAppointments); 
+                return View(filteredAppointments);
             }
             return RedirectToAction("Index", "Patient");
         }
@@ -363,14 +365,14 @@ namespace AppointmentHospital.Controllers
             var patient = await _patientService.GetPatientById(appointment.PatientId);
 
             string body = await _emailService.GetCancelledTemplate(appointment.AppointmentTime, appointment.Doctor.FullName, appointment.Patient.FullName);
-            BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendMailAsync(patient.EmailAddress, $"Medical Appointment Of ({appointment.Patient.FullName})", body ));
+            BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendMailAsync(patient.EmailAddress, $"Medical Appointment Of ({appointment.Patient.FullName})", body));
 
             TempData["SuccessMessage"] = "Appointment cancelled successfully.";
             return RedirectToAction("MySchedule");
         }
 
         [HttpPost]
-        public async Task<IActionResult> SubmitFeedback([FromForm] FeedbackRequest request )
+        public async Task<IActionResult> SubmitFeedback([FromForm] FeedbackRequest request)
         {
             await _patientService.AddFeedback(request);
             await _hubContext.Clients.All.SendAsync("UpdateFeedback");
@@ -379,7 +381,8 @@ namespace AppointmentHospital.Controllers
         [HttpGet]
         [AllowAnonymous]
         [Authorize(Roles = "Patient,Doctor")]
-        public async Task<IActionResult> GetFeedback(Guid id) {
+        public async Task<IActionResult> GetFeedback(Guid id)
+        {
             var feedback = await _patientService.GetFeedback(id);
             return Json(feedback);
         }
@@ -434,7 +437,8 @@ namespace AppointmentHospital.Controllers
         }
 
         [AllowAnonymous]
-        public IActionResult DetailSpecialities(int id){
+        public IActionResult DetailSpecialities(int id)
+        {
             var specialities = _specialitiesService.GetSpecialityById(id);
             return View(specialities);
         }
@@ -447,17 +451,17 @@ namespace AppointmentHospital.Controllers
             {
                 Console.WriteLine("User message received: " + userMessage);
                 Console.WriteLine("Session ID: " + sessionId);
-                
+
                 var patientId = _contextAccessor.HttpContext?.Session.GetString("PatientId");
-                
+
                 Guid sessionGuid;
-                
+
                 // Nếu sessionId không được cung cấp hoặc không hợp lệ, tạo mới
                 if (string.IsNullOrEmpty(sessionId) || !Guid.TryParse(sessionId, out sessionGuid))
                 {
                     sessionGuid = Guid.NewGuid();
                 }
-                
+
                 var chatRequest = new ChatRequest
                 {
                     Query = userMessage,
@@ -466,9 +470,9 @@ namespace AppointmentHospital.Controllers
                     PatientId = patientId != null ? Guid.Parse(patientId) : Guid.Empty,
                     SessionId = sessionGuid
                 };
-                
+
                 var chatResponse = await _chatbotService.SendMessageAsync(chatRequest);
-                
+
                 // Return JSON instead of View
                 return Json(new { botReply = chatResponse.Response });
             }
@@ -506,7 +510,7 @@ namespace AppointmentHospital.Controllers
             try
             {
                 var patientId = _contextAccessor.HttpContext?.Session.GetString("PatientId");
-                
+
                 if (string.IsNullOrEmpty(patientId))
                 {
                     return BadRequest(new { error = "Patient not authenticated" });
@@ -516,15 +520,15 @@ namespace AppointmentHospital.Controllers
 
                 // Lấy danh sách sessions với tin nhắn đầu tiên của user
                 var sessionsWithFirstMessage = await (from session in _context.ChatSessions
-                    where session.PatientId == Guid.Parse(patientId) && session.IsActive
-                    select new
-                    {
-                        Session = session,
-                        FirstMessage = _context.ChatMessages
-                            .Where(msg => msg.SessionId == session.SessionId && msg.IsFromPatient == true)
-                            .OrderBy(msg => msg.CreatedAt)
-                            .FirstOrDefault()
-                    })
+                                                      where session.PatientId == Guid.Parse(patientId) && session.IsActive
+                                                      select new
+                                                      {
+                                                          Session = session,
+                                                          FirstMessage = _context.ChatMessages
+                                                              .Where(msg => msg.SessionId == session.SessionId && msg.IsFromPatient == true)
+                                                              .OrderBy(msg => msg.CreatedAt)
+                                                              .FirstOrDefault()
+                                                      })
                     .Select(x => new
                     {
                         sessionId = x.Session.SessionId.ToString(),
@@ -557,7 +561,7 @@ namespace AppointmentHospital.Controllers
             try
             {
                 var patientId = _contextAccessor.HttpContext?.Session.GetString("PatientId");
-                
+
                 if (string.IsNullOrEmpty(patientId))
                 {
                     return BadRequest(new { error = "Patient not authenticated" });
@@ -565,10 +569,10 @@ namespace AppointmentHospital.Controllers
 
                 // Kiểm tra session có thuộc về patient này không
                 var sessionExists = await _context.ChatSessions
-                    .AnyAsync(s => s.SessionId == Guid.Parse(sessionId) && 
-                                s.PatientId == Guid.Parse(patientId) && 
+                    .AnyAsync(s => s.SessionId == Guid.Parse(sessionId) &&
+                                s.PatientId == Guid.Parse(patientId) &&
                                 s.IsActive);
-                                
+
                 if (!sessionExists)
                 {
                     return BadRequest(new { error = "Session not found or access denied" });
@@ -585,7 +589,7 @@ namespace AppointmentHospital.Controllers
                         CreatedAt = m.CreatedAt
                     })
                     .ToListAsync();
-                    
+
                 return Json(messages);
             }
             catch (Exception ex)
@@ -599,12 +603,12 @@ namespace AppointmentHospital.Controllers
         {
             try
             {
-                var patientId = _contextAccessor.HttpContext?.Session.GetString("PatientId");                
+                var patientId = _contextAccessor.HttpContext?.Session.GetString("PatientId");
                 if (string.IsNullOrEmpty(patientId))
                 {
                     return BadRequest(new { error = "Patient not authenticated" });
                 }
-                
+
                 var session = new ChatSessions
                 {
                     SessionId = Guid.Parse(request.SessionId),
@@ -616,10 +620,10 @@ namespace AppointmentHospital.Controllers
                 };
 
                 Console.WriteLine("Session: " + session.SessionId + " - " + session.SessionName + " - " + session.CreatedAt);
-                
+
                 _context.ChatSessions.Add(session);
                 await _context.SaveChangesAsync();
-                
+
                 return Json(new
                 {
                     sessionId = session.SessionId.ToString(),
@@ -639,17 +643,17 @@ namespace AppointmentHospital.Controllers
             try
             {
                 var patientId = _contextAccessor.HttpContext?.Session.GetString("PatientId");
-                
+
                 if (string.IsNullOrEmpty(patientId))
                 {
                     return BadRequest(new { error = "Patient not authenticated" });
                 }
 
                 var session = await _context.ChatSessions
-                    .FirstOrDefaultAsync(s => s.SessionId == Guid.Parse(request.SessionId) && 
-                                            s.PatientId == Guid.Parse(patientId) && 
+                    .FirstOrDefaultAsync(s => s.SessionId == Guid.Parse(request.SessionId) &&
+                                            s.PatientId == Guid.Parse(patientId) &&
                                             s.IsActive);
-                    
+
                 if (session != null)
                 {
                     session.SessionName = request.SessionName;
@@ -660,7 +664,7 @@ namespace AppointmentHospital.Controllers
                 {
                     return BadRequest(new { error = "Session not found or access denied" });
                 }
-                
+
                 return Json(new { success = true });
             }
             catch (Exception ex)
@@ -677,19 +681,19 @@ namespace AppointmentHospital.Controllers
                 var patientId = _contextAccessor.HttpContext?.Session.GetString("PatientId");
 
                 Console.WriteLine("Deleting session with ID: " + patientId);
-                
+
                 if (string.IsNullOrEmpty(patientId))
                 {
                     return BadRequest(new { error = "Patient not authenticated" });
                 }
 
                 var session = await _context.ChatSessions
-                    .FirstOrDefaultAsync(s => s.SessionId == request.SessionId && 
-                                            s.PatientId == Guid.Parse(patientId) && 
+                    .FirstOrDefaultAsync(s => s.SessionId == request.SessionId &&
+                                            s.PatientId == Guid.Parse(patientId) &&
                                             s.IsActive);
-                
+
                 Console.WriteLine($"Deleting session: {session?.SessionId} for patient: {patientId}");
-                    
+
                 if (session != null)
                 {
                     _context.ChatMessages.RemoveRange(
@@ -701,7 +705,7 @@ namespace AppointmentHospital.Controllers
                 {
                     return BadRequest(new { error = "Session not found or access denied" });
                 }
-                
+
                 return Json(new { success = true });
             }
             catch (Exception ex)
@@ -716,7 +720,7 @@ namespace AppointmentHospital.Controllers
             try
             {
                 var patientId = _contextAccessor.HttpContext?.Session.GetString("PatientId");
-                
+
                 if (string.IsNullOrEmpty(patientId))
                 {
                     return BadRequest(new { error = "Patient not authenticated" });
@@ -724,10 +728,10 @@ namespace AppointmentHospital.Controllers
 
                 // Kiểm tra session có thuộc về patient này không
                 var sessionExists = await _context.ChatSessions
-                    .AnyAsync(s => s.SessionId == Guid.Parse(request.SessionId) && 
-                                s.PatientId == Guid.Parse(patientId) && 
+                    .AnyAsync(s => s.SessionId == Guid.Parse(request.SessionId) &&
+                                s.PatientId == Guid.Parse(patientId) &&
                                 s.IsActive);
-                                
+
                 if (!sessionExists)
                 {
                     return BadRequest(new { error = "Session not found or access denied" });
@@ -740,10 +744,10 @@ namespace AppointmentHospital.Controllers
                     IsFromPatient = request.IsFromPatient,
                     CreatedAt = DateTime.Now
                 };
-                
+
                 _context.ChatMessages.Add(message);
                 await _context.SaveChangesAsync();
-                
+
                 // Cập nhật UpdatedAt của session để sắp xếp đúng thứ tự
                 var session = await _context.ChatSessions
                     .FirstOrDefaultAsync(s => s.SessionId == Guid.Parse(request.SessionId));
@@ -752,13 +756,44 @@ namespace AppointmentHospital.Controllers
                     session.UpdatedAt = DateTime.Now;
                     await _context.SaveChangesAsync();
                 }
-                
+
                 return Json(new { success = true });
             }
             catch (Exception ex)
             {
                 return BadRequest(new { error = ex.Message });
             }
+        }
+        [HttpGet]
+        [Route("Patient/PersonalDisease")]
+        public IActionResult PersonalDisease(int page = 1, int pageSize = 10)
+        {
+            var patientId = _contextAccessor.HttpContext?.Session.GetString("PatientId");
+            if (string.IsNullOrEmpty(patientId))
+            {
+                return RedirectToAction("Index", "Patient");
+            }
+
+            // Lấy danh sách bệnh án từ service
+            var diagnosisHistory = _patientService.GetDiagnosisHistoriesByPatientId(Guid.Parse(patientId));
+
+            // Phân trang
+            var pagedDiagnoses = diagnosisHistory
+                .OrderByDescending(d => d.Appointment.AppointmentTime)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            var totalCount = diagnosisHistory.Count;
+
+            var pagination = new Pagination<DiagnosisHistory>(
+                pagedDiagnoses,
+                totalCount,
+                page,
+                pageSize
+            );
+
+            return View(pagination);
         }
     }
 }

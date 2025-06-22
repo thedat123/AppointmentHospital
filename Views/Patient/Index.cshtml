@@ -3,14 +3,15 @@
     ViewData["Title"] = "MedicalCare Healthcare";
 }
 
-<!-- Hero Section -->
+<!-- Hero Section with Three.js -->
 <section class="hero-section">
+    <canvas id="hero-canvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0;"></canvas>
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-12 hero-content">
                 <h1 class="hero-title">Chăm sóc bằng tài năng, y đức và sự thấu cảm</h1>
                 <p class="hero-description">MedicalCare cam kết và trách nhiệm xã hội và đóng góp tích cực vào sự phát triển bền vững của cộng đồng</p>
-                <a href="#" class="btn hero-button">Khám phá ngay</a>
+                <a href="/Patient/Specialities" class="btn hero-button">Khám phá ngay</a>
             </div>
         </div>
     </div>
@@ -70,7 +71,7 @@
                 <div class="col-md-4">
                     <div class="partner-card">
                         <img src="https://www.vinmec.com/static/uploads/thumbnail_macquarie_b78149953a.webp" 
-                            alt="University of Sydney" 
+                            alt="Macquarie University" 
                             class="img-fluid" 
                             style="max-width: 100%; height: auto;">
                     </div>
@@ -78,7 +79,7 @@
                 <div class="col-md-4">
                     <div class="partner-card">
                         <img src="https://www.vinmec.com/static/uploads/thumbnail_astrazeneca_d3e3b4a691.webp" 
-                            alt="University of Sydney" 
+                            alt="AstraZeneca" 
                             class="img-fluid" 
                             style="max-width: 100%; height: auto;">
                     </div>
@@ -90,426 +91,399 @@
 
 <!-- Additional Styles -->
 <style>
-    .statistics-section {
-        background: linear-gradient(135deg, #f8fafc, #e2e8f0);
-        padding: 80px 0;
-    }
+    /* Importing Google Fonts */
+@@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
 
-    .stat-card {
-        background: white;
-        padding: 2rem;
-        border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-        transition: all 0.3s ease;
-    }
+/* Root Variables */
+:root {
+    --primary-color: #4f46e5; /* Indigo */
+    --secondary-color: #14b8a6; /* Teal */
+    --accent-color: #f59e0b; /* Amber */
+    --text-primary: #f8fafc; /* Light text for dark theme */
+    --text-secondary: #94a3b8; /* Gray for secondary text */
+    --bg-dark: #1e293b; /* Dark background */
+    --bg-gradient: linear-gradient(135deg, #4f46e5, #14b8a6);
+}
 
-    .stat-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-    }
+/* Light Theme */
+.light-theme {
+    --bg-dark: #ffffff;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+}
 
-    .stat-number {
-        font-size: 2.5rem;
-        font-weight: 700;
-        color: var(--primary-color);
-        margin: 1rem 0;
-    }
+body {
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    overflow-x: hidden;
+}
 
-    .stat-title {
-        color: var(--text-secondary);
-        font-size: 1.1rem;
-        margin: 0;
-    }
+/* Hero Section */
+.hero-section {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-gradient);
+    background-size: 200% 200%;
+    animation: gradientShift 15s ease infinite;
+    overflow: hidden;
+}
 
-    /* Call to Action Section */
-    .cta-section {
-        background: var(--bg-gradient);
-        padding: 80px 0;
-        color: white;
-        text-align: center;
-        position: relative;
-        overflow: hidden;
-    }
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('https://www.transparenttextures.com/patterns/stardust.png') repeat;
+    opacity: 0.2;
+    z-index: 1;
+}
 
-    .cta-section::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
-        background: url('/images/pattern.svg') repeat;
-        opacity: 0.1;
-    }
+.hero-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 1.5rem;
+}
 
-    .cta-content {
-        position: relative;
-        z-index: 1;
-    }
+.hero-title {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 700;
+    background: linear-gradient(to right, #ffffff, #a5b4fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 1rem;
+    animation: slideInLeft 1s ease-out;
+}
 
-    .cta-title {
-        font-size: 2.5rem;
-        font-weight: 700;
-        margin-bottom: 1.5rem;
-    }
+.hero-description {
+    font-size: clamp(1rem, 2.5vw, 1.25rem);
+    opacity: 0.9;
+    margin-bottom: 1.5rem;
+    animation: slideInLeft 1s ease-out 0.2s;
+}
 
-    .cta-description {
-        font-size: 1.25rem;
-        margin-bottom: 2rem;
-        opacity: 0.9;
-    }
+.hero-button {
+    padding: 0.8rem 2rem;
+    font-size: clamp(1rem, 2vw, 1.1rem);
+    border-radius: 50px;
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    transition: all 0.3s ease;
+    animation: slideInLeft 1s ease-out 0.4s;
+}
 
-    .cta-button {
-        padding: 1rem 2.5rem;
-        font-size: 1.125rem;
-        border-radius: 50px;
-        background: white;
-        color: var(--primary-color);
-        border: none;
-        transition: all 0.3s ease;
-    }
+.hero-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    background: #d97706;
+}
 
-    .cta-button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-        background: #f8fafc;
-    }
+/* Why MedicalCare Section */
+.why-medicalcare {
+    padding: 60px 0;
+    background: var(--bg-dark);
+}
 
-    /* Loading Animation */
-    .loading-animation {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: white;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 9999;
-    }
+.section-title {
+    font-size: clamp(2rem, 4vw, 2.5rem);
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 2rem;
+    background: linear-gradient(to right, #ffffff, #a5b4fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    position: relative;
+}
 
-    .loading-spinner {
-        width: 50px;
-        height: 50px;
-        border: 5px solid #f3f3f3;
-        border-top: 5px solid var(--primary-color);
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-    }
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: var(--bg-gradient);
+    border-radius: 2px;
+}
 
-    @@keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
+.feature-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    padding: 2rem;
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 
-    :root {
-        --primary-color: #2563eb;
-        --secondary-color: #0ea5e9;
-        --accent-color: #22c55e;
-        --text-primary: #1e293b;
-        --text-secondary: #64748b;
-        --bg-gradient: linear-gradient(135deg, #2563eb, #0ea5e9);
-    }
+.feature-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+    background: rgba(255, 255, 255, 0.12);
+}
 
-    /* Enhanced Header Section */
-    .hero-section {
-        background: var(--bg-gradient);
-        padding: 80px 0;
-        position: relative;
-        overflow: hidden;
-    }
+.feature-icon {
+    font-size: 2.5rem;
+    color: var(--accent-color);
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
 
-    .hero-section::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
-        background: url('/images/pattern.svg') repeat;
-        opacity: 0.1;
-    }
+.feature-card:hover .feature-icon {
+    transform: rotate(8deg);
+    color: #facc15;
+}
 
-    .hero-content {
-        position: relative;
-        z-index: 1;
-        color: white;
-    }
+.feature-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+}
 
+.feature-description {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    text-align: center;
+}
+
+/* Partners Section */
+.partners-section {
+    padding: 60px 0;
+    background: var(--bg-dark);
+}
+
+.partners-slider {
+    padding: 30px 0;
+    overflow: hidden;
+}
+
+.partners-slider .row {
+    display: flex;
+    transition: transform 0.5s ease;
+}
+
+.partner-card {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 120px;
+}
+
+.partner-card img {
+    max-width: 150px;
+    max-height: 80px;
+    object-fit: contain;
+    filter: brightness(0.8);
+    transition: all 0.3s ease;
+}
+
+.partner-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
+}
+
+.partner-card:hover img {
+    filter: brightness(1);
+    transform: scale(1.05);
+}
+
+/* Animations */
+@@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@@media (max-width: 992px) {
     .hero-title {
-        font-size: 3.5rem;
-        font-weight: 700;
-        line-height: 1.2;
-        margin-bottom: 1.5rem;
-        animation: slideInLeft 1s ease-out;
+        font-size: clamp(1.8rem, 4vw, 2.5rem);
     }
 
     .hero-description {
-        font-size: 1.25rem;
-        margin-bottom: 2rem;
-        opacity: 0.9;
-        animation: slideInLeft 1s ease-out 0.2s;
-    }
-
-    .hero-button {
-        padding: 1rem 2rem;
-        font-size: 1.125rem;
-        border-radius: 50px;
-        background: var(--accent-color);
-        border: none;
-        color: white;
-        transition: all 0.3s ease;
-        animation: slideInLeft 1s ease-out 0.4s;
-    }
-
-    .hero-button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-        background: #16a34a;
-    }
-
-    .hero-image {
-        animation: floatAnimation 3s ease-in-out infinite;
-        border-radius: 20px;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-    }
-
-    /* Enhanced Service Icons */
-    .services-section {
-        margin-top: -50px;
-        position: relative;
-        z-index: 2;
-    }
-
-    .service-card {
-        background: white;
-        padding: 2rem;
-        border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-        transition: all 0.3s ease;
-        cursor: pointer;
-    }
-
-    .service-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-    }
-
-    .service-icon {
-        font-size: 2.5rem;
-        color: var(--primary-color);
-        margin-bottom: 1.5rem;
-        transition: all 0.3s ease;
-    }
-
-    .service-card:hover .service-icon {
-        transform: scale(1.1);
-        color: var(--secondary-color);
-    }
-
-    .service-title {
-        font-size: 1.25rem;
-        font-weight: 600;
-        margin-bottom: 1rem;
-        color: var(--text-primary);
-    }
-
-    .service-description {
-        color: var(--text-secondary);
-        font-size: 0.95rem;
-    }
-
-    /* Enhanced Why Vinmec Section */
-    .why-vinmec {
-        padding: 80px 0;
-        background: #f8fafc;
-    }
-
-    .section-title {
-        font-size: 2.5rem;
-        font-weight: 700;
-        text-align: center;
-        margin-top: 3rem;
-        margin-bottom: 3rem;
-        color: var(--text-primary);
-        position: relative;
-    }
-
-    .section-title::after {
-        content: '';
-        position: absolute;
-        bottom: -15px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 80px;
-        height: 4px;
-        background: var(--bg-gradient);
-        border-radius: 2px;
+        font-size: clamp(0.9rem, 2vw, 1.1rem);
     }
 
     .feature-card {
-        background: white;
-        padding: 2.5rem;
-        border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-        transition: all 0.3s ease;
-        height: 100%;
-    }
-
-    .feature-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-    }
-
-    .feature-icon {
-        font-size: 3rem;
-        color: var(--primary-color);
         margin-bottom: 1.5rem;
-        transition: all 0.3s ease;
-    }
-
-    .feature-card:hover .feature-icon {
-        transform: scale(1.1);
-        color: var(--secondary-color);
-    }
-
-    .feature-title {
-        font-size: 1.5rem;
-        font-weight: 600;
-        margin-bottom: 1rem;
-        color: var(--text-primary);
-    }
-
-    .feature-description {
-        color: var(--text-secondary);
-        font-size: 1rem;
-        line-height: 1.7;
-    }
-
-    /* Enhanced Partners Section */
-    .partners-section {
-        padding: 80px 0;
-        background: white;
-    }
-
-    .partners-slider {
-        padding: 40px 0;
     }
 
     .partner-card {
-        background: white;
-        padding: 2rem;
-        border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-        transition: all 0.3s ease;
-        margin: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        margin-bottom: 1rem;
+    }
+}
+
+@@media (max-width: 576px) {
+    .hero-section {
+        min-height: 80vh;
+    }
+
+    .section-title {
+        font-size: clamp(1.5rem, 3.5vw, 2rem);
     }
 
     .partner-card img {
-        max-width: 180px;
-        filter: grayscale(100%);
-        transition: all 0.3s ease;
+        max-width: 120px;
+        max-height: 60px;
     }
-
-    .partner-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-    }
-
-    .partner-card:hover img {
-        filter: grayscale(0%);
-    }
-
-    /* Animations */
-    @@keyframes slideInLeft {
-        from {
-            opacity: 0;
-            transform: translateX(-50px);
-        }
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
-    }
-
-    @@keyframes floatAnimation {
-        0% {
-            transform: translateY(0px);
-        }
-        50% {
-            transform: translateY(-20px);
-        }
-        100% {
-            transform: translateY(0px);
-        }
-    }
-
-    /* Responsive Design */
-    @@media (max-width: 768px) {
-        .hero-title {
-            font-size: 2.5rem;
-        }
-
-        .hero-description {
-            font-size: 1.1rem;
-        }
-
-        .service-card {
-            margin-bottom: 20px;
-        }
-
-        .feature-card {
-            margin-bottom: 20px;
-        }
-    }
+}
 </style>
 
-<!-- JavaScript for Enhanced Interactions -->
+<!-- JavaScript for Enhanced Interactions and Three.js -->
 @section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
-        $(document).ready(function() {
-            // Loading Animation
-            $(window).on('load', function() {
-                $('.loading-animation').fadeOut('slow');
-            });
+        document.addEventListener('DOMContentLoaded', () => {
+    // Initialize Three.js
+    const canvas = document.getElementById('hero-canvas');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-            // Animate on scroll
-            $(window).scroll(function() {
-                $('.feature-card, .service-card, .stat-card, .partner-card').each(function() {
-                    var cardPosition = $(this).offset().top;
-                    var scrollPosition = $(window).scrollTop();
-                    var windowHeight = $(window).height();
+    // Particle system
+    const particlesGeometry = new THREE.BufferGeometry();
+    const particlesCount = 500; // Reduced for performance
+    const posArray = new Float32Array(particlesCount * 3);
+    for (let i = 0; i < particlesCount * 3; i++) {
+        posArray[i] = (Math.random() - 0.5) * 8;
+    }
+    particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+    const particlesMaterial = new THREE.PointsMaterial({
+        size: 0.015,
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.5
+    });
+    const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+    scene.add(particlesMesh);
+    camera.position.z = 4;
 
-                    if (scrollPosition > cardPosition - windowHeight + 100) {
-                        $(this).addClass('animate__animated animate__fadeInUp');
-                    }
-                });
-            });
+    // Animation loop
+    function animate() {
+        requestAnimationFrame(animate);
+        particlesMesh.rotation.y += 0.001;
+        renderer.render(scene, camera);
+    }
+    animate();
 
-            // Counter Animation for Statistics
-            $('.stat-number').each(function() {
-                $(this).prop('Counter', 0).animate({
-                    Counter: $(this).text()
-                }, {
-                    duration: 2000,
-                    easing: 'swing',
-                    step: function(now) {
-                        $(this).text(Math.ceil(now));
-                    }
-                });
-            });
+    // Handle window resize
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
 
-            // Smooth Scroll
-            $('a[href*="#"]').on('click', function(e) {
-                e.preventDefault();
-                $('html, body').animate({
-                    scrollTop: $($(this).attr('href')).offset().top - 100
-                }, 500, 'linear');
+    // Theme Toggle with localStorage
+    const themeToggle = document.createElement('div');
+    themeToggle.className = 'theme-toggle';
+    themeToggle.innerHTML = '<i class="bi bi-moon-fill"></i>';
+    document.body.appendChild(themeToggle);
+
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+        document.documentElement.style.setProperty('--bg-dark', '#ffffff');
+        document.documentElement.style.setProperty('--text-primary', '#1e293b');
+        document.documentElement.style.setProperty('--text-secondary', '#64748b');
+    }
+
+    themeToggle.addEventListener('click', () => {
+        document.body.classList.toggle('light-theme');
+        if (document.body.classList.contains('light-theme')) {
+            document.documentElement.style.setProperty('--bg-dark', '#ffffff');
+            document.documentElement.style.setProperty('--text-primary', '#1e293b');
+            document.documentElement.style.setProperty('--text-secondary', '#64748b');
+            localStorage.setItem('theme', 'light');
+        } else {
+            document.documentElement.style.setProperty('--bg-dark', '#1e293b');
+            document.documentElement.style.setProperty('--text-primary', '#f8fafc');
+            document.documentElement.style.setProperty('--text-secondary', '#94a3b8');
+            localStorage.setItem('theme', 'dark');
+        }
+    });
+
+    // Partners Slider
+    const slider = document.querySelector('.partners-slider .row');
+    let currentIndex = 0;
+    const cards = slider.querySelectorAll('.partner-card');
+    const cardWidth = cards[0].offsetWidth + 30; // Include margin
+    const maxIndex = cards.length - 3; // Show 3 cards at a time
+
+    function slide() {
+        if (currentIndex >= maxIndex) currentIndex = 0;
+        slider.style.transform = `translateX(-${currentIndex * cardWidth}px)`;
+        currentIndex++;
+    }
+    setInterval(slide, 3000);
+
+    // Scroll Animations with IntersectionObserver
+    const animateOnScroll = (entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate__animated', 'animate__fadeInUp');
+                observer.unobserve(entry.target);
+            }
+        });
+    };
+    const observer = new IntersectionObserver(animateOnScroll, { threshold: 0.1 });
+    document.querySelectorAll('.feature-card, .partner-card').forEach(card => {
+        observer.observe(card);
+    });
+
+    // Smooth Scroll
+    document.querySelectorAll('a[href*="#"]').forEach(anchor => {
+        anchor.addEventListener('click', e => {
+            e.preventDefault();
+            const target = document.querySelector(anchor.getAttribute('href'));
+            window.scrollTo({
+                top: target.offsetTop - 80,
+                behavior: 'smooth'
             });
         });
+    });
+
+    // Loading Animation Fallback
+    setTimeout(() => {
+        const loading = document.querySelector('.loading-animation');
+        if (loading) loading.style.display = 'none';
+    }, 3000);
+});
     </script>
 }

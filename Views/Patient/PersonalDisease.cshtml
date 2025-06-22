@@ -1,0 +1,482 @@
+@model Pagination<AppointmentHospital.Models.DiagnosisHistory>
+@using AppointmentHospital.Models
+@using AppointmentHospital.Helpers
+@using Newtonsoft.Json
+
+@section Styles {
+    <link href="~/css/my-schedule.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Existing styles remain unchanged */
+        :root {
+            --primary: #3182ce;
+            --success: #38a169;
+            --background: #f8fafc;
+            --text-primary: #2d3748;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+        }
+
+        * {
+            font-family: 'Poppins', sans-serif;
+            box-sizing: border-box;
+        }
+
+        .dashboard-container {
+            padding: 1.5rem;
+            background: var(--background);
+            min-height: 100vh;
+        }
+
+        .section-header {
+            background: white;
+            padding: 1.25rem;
+            border-radius: 12px 12px 0 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 0 0 12px 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .table thead th {
+            background: #f1f5f9;
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .table tbody td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.925rem;
+            color: var(--text-primary);
+            vertical-align: middle;
+        }
+
+        .table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .table tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        .badge {
+            padding: 0.375rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.8125rem;
+            font-weight: 500;
+        }
+
+        .bg-success {
+            background: #e6fffa;
+        }
+
+        .btn-action {
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .btn-view {
+            background: #e1f5fe;
+            color: var(--primary);
+        }
+
+        .btn-view:hover {
+            background: #bee3f8;
+            transform: translateY(-1px);
+        }
+
+        .btn-download {
+            background: #f0fff4;
+            color: var(--success);
+        }
+
+        .btn-download:hover {
+            background: #c6f6d5;
+            transform: translateY(-1px);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1.5rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .empty-state i {
+            font-size: 2.5rem;
+            color: #cbd5e0;
+            margin-bottom: 0.75rem;
+        }
+
+        .pagination-rounded .page-link {
+            border-radius: 9999px;
+            margin: 0 0.25rem;
+            padding: 0.5rem 0.75rem;
+            color: var(--primary);
+            border: none;
+            background: transparent;
+            transition: all 0.2s ease;
+        }
+
+        .pagination-rounded .page-item.active .page-link {
+            background: var(--primary);
+            color: white;
+        }
+
+        .pagination-rounded .page-link:hover {
+            background: #e1f5fe;
+        }
+
+        @@media (max-width: 767.98px) {
+            .dashboard-container {
+                padding: 1rem;
+            }
+
+            .table-container {
+                overflow-x: auto;
+            }
+
+            .table {
+                min-width: 768px;
+            }
+        }
+    </style>
+}
+
+<div class="dashboard-container">
+    <div class="main-content">
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="fas fa-file-medical-alt" aria-hidden="true"></i> 
+                <span>Hồ sơ bệnh án</span>
+            </h2>
+        </div>
+
+        <div class="table-container">
+            @if (Model?.Any() == true)
+            {
+                <table class="table" role="grid">
+                    <thead>
+                        <tr>
+                            <th scope="col"><i class="fas fa-user" aria-hidden="true"></i> Bệnh nhân</th>
+                            <th scope="col"><i class="fas fa-user-md" aria-hidden="true"></i> Bác sĩ</th>
+                            <th scope="col"><i class="fas fa-clock" aria-hidden="true"></i> Thời gian</th>
+                            <th scope="col"><i class="fas fa-notes-medical" aria-hidden="true"></i> Triệu chứng</th>
+                            <th scope="col"><i class="fas fa-clipboard-list" aria-hidden="true"></i> Chẩn đoán</th>
+                            <th scope="col"><i class="fas fa-info-circle" aria-hidden="true"></i> Trạng thái</th>
+                            <th scope="col"><i class="fas fa-cog" aria-hidden="true"></i> Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var diagnosis in Model
+                            .Where(d => d.Appointment?.Status == AppointmentHospital.EnumStatus.AppointmentStatus.Completed)
+                            .OrderByDescending(d => d.Appointment?.AppointmentTime)
+                            .Where(d => d?.Appointment != null && d.Doctor != null && d.Patient != null))
+                        {
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="avatar bg-primary bg-opacity-10 text-primary rounded-circle p-2">
+                                            <i class="fas fa-user" aria-hidden="true"></i>
+                                        </div>
+                                        <span class="fw-medium">@(diagnosis.Appointment.Acquaintance?.Name ?? diagnosis.Patient.FullName)</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="avatar bg-primary bg-opacity-10 text-primary rounded-circle p-2">
+                                            <i class="fas fa-user-md" aria-hidden="true"></i>
+                                        </div>
+                                        <span class="fw-medium">BS. @diagnosis.Doctor.FullName</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-column">
+                                        <span class="fw-medium">@diagnosis.Appointment.AppointmentTime.ToString("dd/MM/yyyy")</span>
+                                        <small class="text-muted">@diagnosis.Appointment.AppointmentTime.ToString("HH:mm")</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="text-truncate" style="max-width: 150px;" title="@diagnosis.Appointment.Symptoms">
+                                        @diagnosis.Appointment.Symptoms
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="text-truncate" style="max-width: 150px;" title="@diagnosis.Diagnosis">
+                                        @diagnosis.Diagnosis
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check-circle" aria-hidden="true"></i> Đã hoàn thành
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="action-buttons d-flex gap-2">
+                                        <a class="btn-action btn-view" 
+                                           asp-controller="Patient" 
+                                           asp-action="DiagnosisDetail" 
+                                           asp-route-id="@diagnosis.AppointmentId">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+
+                                        @{
+                                            var diagnosisData = new
+                                            {
+                                                patient = new
+                                                {
+                                                    fullName = diagnosis.Patient?.FullName,
+                                                    dateOfBirth = diagnosis.Patient?.DateOfBirth?.ToString("dd/MM/yyyy"),
+                                                    patientId = diagnosis.Patient?.PatientId,
+                                                    address = diagnosis.Patient?.Address
+                                                },
+                                                acquaintance = diagnosis.Appointment?.Acquaintance != null ? new
+                                                {
+                                                    name = diagnosis.Appointment.Acquaintance.Name,
+                                                    address = diagnosis.Appointment.Acquaintance.Address
+                                                } : null,
+                                                appointment = new
+                                                {
+                                                    appointmentTime = diagnosis.Appointment?.AppointmentTime.ToString("dd/MM/yyyy HH:mm"),
+                                                    symptoms = diagnosis.Appointment?.Symptoms
+                                                },
+                                                diagnosis = diagnosis.Diagnosis,
+                                                doctorNote = diagnosis.DoctorNote,
+                                                doctor = new
+                                                {
+                                                    fullName = diagnosis.Doctor?.FullName
+                                                },
+                                                prescription = diagnosis.Prescription?.Select(p => p.Trim()).ToList() ?? new List<string>()
+                                            };
+                                            var jsonData = JsonConvert.SerializeObject(diagnosisData);
+                                        }
+
+                                        <button class="btn-action btn-download" 
+                                                onclick='downloadPDF(@Html.Raw(jsonData))' 
+                                                title="Tải PDF"
+                                                aria-label="Tải PDF hồ sơ bệnh án">
+                                            <i class="fas fa-download" aria-hidden="true"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                @if (Model.TotalPage > 1)
+                {
+                    <nav aria-label="Phân trang hồ sơ bệnh án" class="d-flex justify-content-center p-3">
+                        <ul class="pagination pagination-rounded mb-0">
+                            @{
+                                const int maxDisplayedPages = 5;
+                                int currentPage = Model.CurrentPage;
+                                int totalPages = Model.TotalPage;
+                                int startPage = Math.Max(1, currentPage - maxDisplayedPages / 2);
+                                int endPage = Math.Min(totalPages, startPage + maxDisplayedPages - 1);
+
+                                if (endPage - startPage + 1 < maxDisplayedPages)
+                                {
+                                    startPage = Math.Max(1, endPage - maxDisplayedPages + 1);
+                                }
+                            }
+
+                            @if (Model.HasPreviousPage)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" 
+                                       href="@Url.Page("/Patient/PersonalDisease", new { page = currentPage - 1 })" 
+                                       aria-label="Trang trước">
+                                        <span aria-hidden="true">«</span>
+                                    </a>
+                                </li>
+                            }
+
+                            @if (startPage > 1)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="@Url.Page("/Patient/PersonalDisease", new { page = 1 })">1</a>
+                                </li>
+                                @if (startPage > 2)
+                                {
+                                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                                }
+                            }
+
+                            @for (int i = startPage; i <= endPage; i++)
+                            {
+                                <li class="page-item @(i == currentPage ? "active" : "")">
+                                    <a class="page-link" href="@Url.Page("/Patient/PersonalDisease", new { page = i })">@i</a>
+                                </li>
+                            }
+
+                            @if (endPage < totalPages)
+                            {
+                                @if (endPage < totalPages - 1)
+                                {
+                                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                                }
+                                <li class="page-item">
+                                    <a class="page-link" href="@Url.Page("/Patient/PersonalDisease", new { page = totalPages })">@totalPages</a>
+                                </li>
+                            }
+
+                            @if (Model.HasNextPage)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" 
+                                       href="@Url.Page("/Patient/PersonalDisease", new { page = currentPage + 1 })" 
+                                       aria-label="Trang sau">
+                                        <span aria-hidden="true">»</span>
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                }
+            }
+            else
+            {
+                <div class="empty-state">
+                    <i class="fas fa-file-medical" aria-hidden="true"></i>
+                    <h4>Chưa có hồ sơ bệnh án</h4>
+                    <p>Bạn chưa có bệnh án nào đã hoàn thành. Vui lòng đặt lịch hẹn để bắt đầu.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <script>
+        function downloadPDF(data) {
+            try {
+                if (!data?.patient) {
+                    throw new Error('Dữ liệu bệnh án không hợp lệ.');
+                }
+
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+
+                // Set font to Times New Roman with explicit Unicode support
+                doc.setFont('times', 'normal');
+                doc.setLanguage('vi'); // Set language to Vietnamese for better Unicode handling
+
+                // Dữ liệu từ tham số (ensure Unicode is preserved)
+                const hospitalName = "Bệnh Viện Đa khoa MedicalCare";
+                const patientName = data.acquaintance?.name ?? data.patient?.fullName ?? 'Không rõ';
+                const dateOfBirth = data.patient?.dateOfBirth ?? 'Không rõ';
+                const patientId = data.patient?.patientId ?? 'Không rõ';
+                const appointmentTime = data.appointment?.appointmentTime ?? 'Không rõ';
+                const address = data.acquaintance?.address ?? data.patient?.address ?? 'Không rõ';
+                const symptoms = data.appointment?.symptoms ?? 'Không rõ';
+                const diagnosis = data.diagnosis ?? 'Không rõ';
+                const doctorNote = data.doctorNote ?? 'Không có ghi chú';
+                const doctorName = data.doctor?.fullName ?? 'Không rõ';
+                const prescription = (data.prescription || []).map(p => ({
+                    medicine: p.split('-')[0]?.trim() ?? 'Không rõ',
+                    quantity: p.split('-').length > 1 ? p.split('-')[1].trim() : 'Không rõ'
+                }));
+
+                // Debug: Log data to console to check for encoding issues
+                console.log('Data being processed:', {
+                    patientName, dateOfBirth, patientId, appointmentTime, address,
+                    symptoms, diagnosis, doctorNote, doctorName, prescription
+                });
+
+                // Tạo PDF
+                doc.setFontSize(16);
+                doc.text(hospitalName, 20, 20);
+                doc.setFontSize(12);
+                doc.text("Địa chỉ: 123 Trưng Nữ Vương, Đà Nẵng", 20, 28);
+                doc.text("Điện thoại: (028) 1234-5678", 20, 34);
+
+                doc.setFontSize(14);
+                doc.setFont('times', 'bold');
+                doc.text("HỒ SƠ CHẨN ĐOÁN BỆNH NHÂN", 20, 42);
+                doc.setFont('times', 'normal');
+
+                doc.autoTable({
+                    startY: 50,
+                    head: [['Thông Tin', 'Chi Tiết']],
+                    body: [
+                        ['Họ Và Tên', patientName],
+                        ['Ngày Sinh', dateOfBirth],
+                        ['Mã Bệnh Nhân', patientId],
+                        ['Thời Gian Khám', appointmentTime],
+                        ['Địa Chỉ', address],
+                        ['Triệu Chứng', symptoms],
+                        ['Chẩn Đoán', diagnosis],
+                        ['Thuốc Kê Đơn', prescription.length > 0 ?
+                            prescription.map(p => `${p.medicine} - ${p.quantity}`).join(', ') : 'Không có'],
+                        ['Ghi Chú Bác Sĩ', doctorNote],
+                        ['Bác Sĩ Phụ Trách', doctorName],
+                        ['Khuyến Nghị Tái Khám', 'Đặt lịch sau 2 tuần']
+                    ],
+                    theme: 'grid',
+                    styles: { font: 'times', fontSize: 10, cellPadding: 3, overflow: 'linebreak', halign: 'left' },
+                    headStyles: { fillColor: [200, 200, 200], textColor: [0, 0, 0], fontStyle: 'bold' },
+                    margin: { left: 20, right: 20 },
+                    // Ensure Unicode text is handled correctly
+                    columnStyles: {
+                        0: { cellWidth: 'auto' },
+                        1: { cellWidth: 'auto' }
+                    }
+                });
+
+                const finalY = doc.lastAutoTable.finalY + 20;
+                doc.text("__________________________", 20, finalY);
+                doc.text("Bác Sĩ Phụ Trách", 20, finalY + 10);
+                doc.text(doctorName, 20, finalY + 20);
+                doc.text("__________________________", 140, finalY);
+                doc.text("Người Xác Nhận", 140, finalY + 10);
+
+                doc.save(`Diagnosis_${patientId}.pdf`);
+            } catch (error) {
+                console.error('Lỗi khi tạo PDF:', error);
+                alert(`Không thể tải PDF: ${error.message}`);
+            }
+        }
+    </script>
+}
