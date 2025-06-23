@@ -8,7 +8,7 @@ public interface IDoctorService
 {
     public Doctor getDoctorById(Guid doctorId);
     public Task<List<Doctor>> getAllDoctors(string selectSpec, string searchTerm, int page);
-    public Task<Doctor> UpdateDoctor(DoctorInfoUpdate request, string phoneNumber);
+    public Task<Doctor> UpdateDoctor(DoctorInfoUpdate request, string phoneNumber, string imageUrl = null);
     public List<TimeSlot> getTimeSlotByDoctorId(Guid doctorId);
     public string getDoctorNameByDoctorId(Guid doctorId);
     public List<string> GetDrugNameSearch(string search);

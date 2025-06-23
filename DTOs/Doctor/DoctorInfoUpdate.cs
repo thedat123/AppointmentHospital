@@ -13,7 +13,6 @@ namespace AppointmentHospital.ViewModels
         public string? FullName { get; set; }
         public string? Degree { get; set; }
         public int? SpecialityId { get; set; }
-        public string? ImagePath { get; set; }
         public string? Introduction { get; set; }
         public string? OrganizationMember { get; set; }
         public string? Expertise { get; set; }

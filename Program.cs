@@ -192,6 +192,7 @@ namespace AppointmentHospital
                     options.Cookie.HttpOnly = true;
                 });
             }
+            builder.Services.AddSingleton<CloudinaryService>();
 
             builder.Services.AddHangfire(config =>
             {

@@ -44,56 +44,45 @@ public class DoctorRepository : IDoctorRepository
         .FirstOrDefault(d => d.DoctorId == doctorId)!;
     }
 
-    public async Task<Doctor> UpdateDoctor(DoctorInfoUpdate request, string phoneNumber)
+    public async Task<Doctor> UpdateDoctor(DoctorInfoUpdate request, string phoneNumber, string imageUrl = null)
     {
         var doctor = await _context.Doctors
-            .Include(d => d.User) // Đảm bảo có thể cập nhật số điện thoại
+            .Include(d => d.User)
             .FirstOrDefaultAsync(d => d.DoctorId == request.DoctorId);
-
         if (doctor == null)
         {
             throw new Exception("Doctor not found");
         }
 
-        // Cập nhật các trường từ DTO nếu có giá trị
+        // Cập nhật các trường từ DTO nếu được cung cấp
         if (!string.IsNullOrEmpty(request.FullName))
             doctor.FullName = request.FullName;
-
         if (!string.IsNullOrEmpty(request.Degree))
             doctor.Degree = request.Degree;
-
         if (request.SpecialityId.HasValue)
             doctor.SpecialityId = request.SpecialityId;
-
-        if (!string.IsNullOrEmpty(request.ImagePath))
-            doctor.ImagePath = request.ImagePath;
-
+        if (imageUrl != null) // Chỉ cập nhật ImagePath nếu imageUrl không null
+            doctor.ImagePath = imageUrl;
+        else if (imageUrl == null && doctor.ImagePath != null) // Xóa ImagePath nếu yêu cầu xóa
+            doctor.ImagePath = null;
         if (!string.IsNullOrEmpty(request.Introduction))
             doctor.Introduction = request.Introduction;
-
         if (!string.IsNullOrEmpty(request.OrganizationMember))
             doctor.OrganizationMember = request.OrganizationMember;
-
         if (!string.IsNullOrEmpty(request.Expertise))
             doctor.Expertise = request.Expertise;
-
         if (!string.IsNullOrEmpty(request.Awards))
             doctor.Awards = request.Awards;
-
         if (!string.IsNullOrEmpty(request.ResearchProject))
             doctor.ResearchProject = request.ResearchProject;
-
         if (!string.IsNullOrEmpty(request.TrainingProcess))
             doctor.TrainingProcess = request.TrainingProcess;
-
         if (!string.IsNullOrEmpty(request.WorkExperience))
             doctor.WorkExperience = request.WorkExperience;
-
         if (!string.IsNullOrEmpty(phoneNumber))
             doctor.User.PhoneNumber = phoneNumber;
 
         await _context.SaveChangesAsync();
-
         return doctor;
     }
 

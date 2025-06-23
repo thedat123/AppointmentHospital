@@ -53,9 +53,9 @@
                     {
                         <div class="doctor-card" data-specialty="@doctor.Specialities.SpecialityName.ToLower()">
                             <div class="doctor-image">
-                                <img src="@Url.Content(string.IsNullOrEmpty(doctor.ImagePath) 
-                                    ? "~/images/user-default.png" 
-                                    : $"~/images/{doctor.ImagePath}")" 
+                                <img src="@(string.IsNullOrEmpty(doctor.ImagePath) 
+                                    ? Url.Content("~/images/user-default.png") 
+                                    : doctor.ImagePath)" 
                                     alt="@doctor.FullName"
                                     loading="lazy">
                                 <div class="doctor-specialty">

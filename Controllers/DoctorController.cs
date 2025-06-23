@@ -4,6 +4,7 @@ using AppointmentHospital.EnumStatus;
 using AppointmentHospital.Helpers;
 using AppointmentHospital.Models;
 using AppointmentHospital.Services;
+using AppointmentHospital.Services.Implement;
 using AppointmentHospital.ViewModels;
 using Hangfire;
 using Microsoft.AspNetCore.Authorization;
@@ -25,7 +26,8 @@ namespace AppointmentHospital.Controllers
         private readonly IPatientService _patientService;
         private readonly IHubContext<ScheduleHub> _hubContext;
         private readonly IManagingDoctorService _managingDoctorService;
-        public DoctorController(ILogger<DoctorController> logger, IDoctorService doctorService, IHttpContextAccessor contextAccessor, IAppointmentDateService appointmentDateService, ITimeSlotService timeSlotService, IEmailService emailService, IPatientService patientService, IManagingDoctorService managingDoctorService, IHubContext<ScheduleHub> hubContext)
+        private readonly CloudinaryService _cloudinaryService;
+        public DoctorController(ILogger<DoctorController> logger, IDoctorService doctorService, IHttpContextAccessor contextAccessor, IAppointmentDateService appointmentDateService, ITimeSlotService timeSlotService, IEmailService emailService, IPatientService patientService, IManagingDoctorService managingDoctorService, IHubContext<ScheduleHub> hubContext, CloudinaryService cloudinaryService)
         {
             _logger = logger;
             this.doctorService = doctorService;
@@ -36,6 +38,7 @@ namespace AppointmentHospital.Controllers
             this._patientService = patientService;
             this._hubContext = hubContext;
             this._managingDoctorService = managingDoctorService;
+            this._cloudinaryService = cloudinaryService;
         }
 
         public async Task<IActionResult> Index(AppointmentStatus? status = AppointmentStatus.Confirmed, int page = 1)
@@ -208,14 +211,51 @@ namespace AppointmentHospital.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> UpdateProfile(DoctorInfoUpdate request, string phoneNumber)
+        public async Task<IActionResult> UpdateProfile(DoctorInfoUpdate request, string phoneNumber, IFormFile profileImage, bool removeImage = false)
         {
-            var doctor = await doctorService.UpdateDoctor(request, phoneNumber);
-            ViewBag.Specializaiton = _managingDoctorService.GetSpecialization();
-            ViewBag.DoctorId = doctor.DoctorId;
+            try
+            {
+                ModelState.Remove("profileImage");
+                var doctorUpdate = doctorService.getDoctorById(request.DoctorId);
+                string imageUrl = null;
 
-            await _hubContext.Clients.All.SendAsync("UpdateDoctorProfile", doctor);
-            return View("PersonalInfo", doctor);
+                // Xử lý xóa ảnh
+                if (removeImage)
+                {
+                    if (doctorUpdate != null && !string.IsNullOrEmpty(doctorUpdate.ImagePath))
+                    {
+                        // Xóa ảnh trên Cloudinary (nếu cần)
+                        var publicId = Path.GetFileNameWithoutExtension(doctorUpdate.ImagePath); // Lấy public ID từ URL
+                        await _cloudinaryService.DeleteImageAsync(publicId);
+                        imageUrl = null; // Đặt imageUrl thành null để xóa ImagePath
+                    }
+                }
+                // Xử lý tải lên ảnh mới
+                else if (profileImage != null && profileImage.Length > 0)
+                {
+                    using (var stream = profileImage.OpenReadStream())
+                    {
+                        imageUrl = await _cloudinaryService.UploadImageAsync(stream, profileImage.FileName);
+                    }
+                }
+
+                // Cập nhật thông tin bác sĩ
+                var doctor = await doctorService.UpdateDoctor(request, phoneNumber, imageUrl);
+                ViewBag.Specializaiton = _managingDoctorService.GetSpecialization();
+                ViewBag.DoctorId = doctor.DoctorId;
+
+                await _hubContext.Clients.All.SendAsync("UpdateDoctorProfile", doctor);
+                TempData["SuccessMessage"] = "Profile updated successfully!";
+                return View("PersonalInfo", doctor);
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Specializaiton = _managingDoctorService.GetSpecialization();
+                ViewBag.DoctorId = request.DoctorId;
+                ModelState.AddModelError("", ex.Message);
+                var doctor = doctorService.getDoctorById(request.DoctorId);
+                return View("PersonalInfo", doctor);
+            }
         }
 
         public IActionResult Search(string query)
@@ -309,45 +349,46 @@ namespace AppointmentHospital.Controllers
 
                 if (!hasAvailable)
                 {
-                    TempData["ShowSuggestModal"] = true;
                     TempData["timeSlotIds"] = JsonConvert.SerializeObject(notifyPatientSlots);
-                    TempData["offDate"] = offDate;
+                    TempData["offDate"] = offDate.ToString("yyyy-MM-dd");
                     TempData["note"] = Note;
-                    return RedirectToAction("Calendar");
+                    return Json(new
+                    {
+                        success = false,
+                        showSuggestModal = true,
+                        timeSlotIds = JsonConvert.SerializeObject(notifyPatientSlots),
+                        offDate = offDate.ToString("yyyy-MM-dd"),
+                        note = Note
+                    });
                 }
 
-                TempData["SuccessMessage"] = "Off day registered successfully!";
+                return Json(new { success = true, message = "Đăng ký ngày nghỉ thành công!" });
             }
             else
             {
-                TempData["ErrorMessage"] = "No time slots available for the selected date.";
+                return Json(new { success = false, message = "Bạn không có lịch làm việc vào ngày này" });
             }
-
-            return RedirectToAction("Calendar");
         }
 
-        [HttpGet]
-        public async Task<IActionResult> SuggestDayForMultiplePatients(DateTime suggestDate)
+        [HttpPost]
+        public async Task<IActionResult> SuggestDayForMultiplePatients(DateTime suggestDate, string timeSlotIds, string offDate, string note)
         {
-            var timeSlotIdsJson = TempData["timeSlotIds"]?.ToString();
-            var offDateStr = TempData["offDate"]?.ToString();
-            var note = TempData["note"]?.ToString();
-
-            if (string.IsNullOrEmpty(timeSlotIdsJson) || string.IsNullOrEmpty(offDateStr))
+            if (string.IsNullOrEmpty(timeSlotIds) || string.IsNullOrEmpty(offDate))
             {
+                TempData["ErrorMessage"] = "Dữ liệu không hợp lệ.";
                 return RedirectToAction("Calendar");
             }
 
-            var timeSlotIds = JsonConvert.DeserializeObject<List<Guid>>(timeSlotIdsJson);
-            var offDate = DateTime.Parse(offDateStr);
+            var timeSlotIdList = JsonConvert.DeserializeObject<List<Guid>>(timeSlotIds);
+            var offDateParsed = DateTime.Parse(offDate);
             var doctorId = Guid.Parse(_contextAccessor.HttpContext?.Session.GetString("DoctorId")!);
 
-            foreach (var timeSlotId in timeSlotIds)
+            foreach (var timeSlotId in timeSlotIdList)
             {
                 var timeSlot = _timeSlotService.GetTimeSlotById(timeSlotId);
                 if (timeSlot == null) continue;
 
-                var appointments = _appointmentDateService.GetAppointmentsByDoctorIdAndDate(doctorId, offDate);
+                var appointments = _appointmentDateService.GetAppointmentsByDoctorIdAndDate(doctorId, offDateParsed);
                 foreach (var appointment in appointments)
                 {
                     await ProcessAppointmentAsync(appointment, suggestDate);
@@ -356,6 +397,7 @@ namespace AppointmentHospital.Controllers
                 _timeSlotService.UpdateTimeSlot(timeSlotId, suggestDate);
             }
 
+            TempData["SuccessMessage"] = "Đề xuất ngày khám mới đã được gửi thành công!";
             return RedirectToAction("Calendar");
         }
 
@@ -364,7 +406,7 @@ namespace AppointmentHospital.Controllers
             var patient = await _patientService.GetPatientById(appointment.PatientId);
             if (patient == null) return;
 
-            if(appointment.Status == AppointmentStatus.Completed || appointment.Status == AppointmentStatus.Canceled)
+            if (appointment.Status == AppointmentStatus.Completed || appointment.Status == AppointmentStatus.Canceled)
             {
                 return;
             }
@@ -374,7 +416,7 @@ namespace AppointmentHospital.Controllers
             string emailBody = await _emailService.GetCancelAndSuggestTemplate(
                 appointment.AppointmentTime,
                 appointment.Doctor.FullName,
-                appointment.Acquaintance.Name ?? patient.FullName,
+                appointment.Acquaintance?.Name ?? patient.FullName,
                 suggestDate
             );
 
@@ -386,25 +428,46 @@ namespace AppointmentHospital.Controllers
                 ));
         }
 
-
         [HttpPost]
         public async Task<IActionResult> SuggestDay(Guid timeSlotId, DateTime suggestDate)
         {
             var doctorId = _contextAccessor.HttpContext?.Session.GetString("DoctorId");
             var timeSlot = _timeSlotService.GetTimeSlotById(timeSlotId);
 
-            var appointment = _appointmentDateService.GetAppointmentsByDoctorIdAndStartTime(Guid.Parse(doctorId), timeSlot.StartTime);
-            var patient = await _patientService.GetPatientById(appointment.PatientId);
+            if (timeSlot == null)
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy lịch hẹn.";
+                return RedirectToAction("Calendar");
+            }
 
-            if (appointment != null)
+            var appointment = _appointmentDateService.GetAppointmentsByDoctorIdAndStartTime(Guid.Parse(doctorId), timeSlot.StartTime);
+            if (appointment == null)
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy cuộc hẹn liên quan.";
+                return RedirectToAction("Calendar");
+            }
+
+            var patient = await _patientService.GetPatientById(appointment.PatientId);
+            if (patient != null)
             {
                 _appointmentDateService.UpdateStatusAppointment(appointment.AppointmentId, AppointmentStatus.Canceled);
                 _timeSlotService.DeleteTimeSlot(timeSlot.TimeSlotId);
 
-                string body = await _emailService.GetCancelAndSuggestTemplate(appointment.AppointmentTime, appointment.Doctor.FullName, appointment.Acquaintance.Name ?? appointment.Patient.FullName, suggestDate);
-                BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendMailAsync(patient.EmailAddress, $"Medical Appointment Of ({patient.FullName})", body));
+                string body = await _emailService.GetCancelAndSuggestTemplate(
+                    appointment.AppointmentTime,
+                    appointment.Doctor.FullName,
+                    appointment.Acquaintance?.Name ?? patient.FullName,
+                    suggestDate
+                );
+                BackgroundJob.Enqueue<IEmailService>(emailService =>
+                    emailService.SendMailAsync(
+                        patient.EmailAddress,
+                        $"Medical Appointment Of ({patient.FullName})",
+                        body
+                    ));
             }
 
+            TempData["SuccessMessage"] = "Đề xuất ngày khám mới đã được gửi thành công!";
             return RedirectToAction("Calendar");
         }
     }

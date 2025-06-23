@@ -16,12 +16,14 @@ public class CollaboratorController : Controller
     private readonly IPatientService _patientService;
     private readonly IEmailService _emailService;
     private readonly IHubContext<ScheduleHub> _hubContext;
-    public CollaboratorController(IAppointmentDateService appointmentDateService, IPatientService patientService, IEmailService emailService, IHubContext<ScheduleHub> hubContext)
+    private readonly ITimeSlotService _timeSlotService;
+    public CollaboratorController(IAppointmentDateService appointmentDateService, IPatientService patientService, IEmailService emailService, IHubContext<ScheduleHub> hubContext, ITimeSlotService timeSlotService)
     {
         this._appointmentDateService = appointmentDateService;
         this._patientService = patientService;
         this._emailService = emailService;
         this._hubContext = hubContext;
+        this._timeSlotService = timeSlotService;
     }
 
     [HttpGet]
@@ -52,6 +54,8 @@ public class CollaboratorController : Controller
         var patient = await _patientService.GetPatientById(appointment.PatientId);
         if ((AppointmentStatus)status == AppointmentStatus.Canceled)
         {
+            var timeSlotId = _timeSlotService.GetTimeSlotIdByAppointmentime(appointment.AppointmentTime);
+            _timeSlotService.UpdateTimeSlotAvalableStatusByTimeSlotID(timeSlotId, true);
             string body = await _emailService.GetCancelledTemplate(
                 appointment.AppointmentTime,
                 appointment.Doctor.FullName,

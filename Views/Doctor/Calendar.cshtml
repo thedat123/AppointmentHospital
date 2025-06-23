@@ -4,22 +4,36 @@
 
 <div class="container py-4">
     <h1 class="text-primary mb-4">Đăng ký Lịch Khám Bệnh</h1>
-    <div class="card shadow-sm mb-4">
-        @if (TempData["SuccessMessage"] != null)
-        {
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                @TempData["SuccessMessage"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        }
 
-        @if (TempData["ErrorMessage"] != null)
-        {
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                @TempData["ErrorMessage"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        }
+    @if (!string.IsNullOrEmpty(ViewBag.SuccessMessage) || !string.IsNullOrEmpty(TempData["SuccessMessage"]?.ToString()))
+    {
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công',
+                    text: '@(ViewBag.SuccessMessage ?? TempData["SuccessMessage"])',
+                    confirmButtonText: 'OK'
+                });
+            });
+        </script>
+    }
+
+    @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage) || !string.IsNullOrEmpty(TempData["ErrorMessage"]?.ToString()))
+    {
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi',
+                    text: '@(ViewBag.ErrorMessage ?? TempData["ErrorMessage"])',
+                    confirmButtonText: 'OK'
+                });
+            });
+        </script>
+    }
+
+    <div class="card shadow-sm mb-4">
         <div class="card-header bg-white">
             <h3 class="card-title mb-0">Thông tin bác sĩ</h3>
         </div>
@@ -93,7 +107,6 @@
                         </div>
                     </div>
                 }
-
                 <button type="submit" id="saveRegularScheduleButton" class="btn btn-primary mt-3">Lưu Lịch Làm Việc</button>
             </form>
         </div>
@@ -104,7 +117,7 @@
             <h3 class="card-title mb-0">Đăng Ký Ngày Nghỉ</h3>
         </div>
         <div class="card-body">
-            <form method="post" asp-controller="Doctor" asp-action="RegisterOffDay">
+            <form method="post" id="registerOffDayForm" asp-controller="Doctor" asp-action="RegisterOffDay">
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label for="offDate" class="form-label">Ngày Nghỉ</label>
@@ -117,9 +130,7 @@
                             placeholder="Vui lòng nhập lý do xin nghỉ..."></textarea>
                 </div>
                 <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                    <button type="submit" class="btn btn-primary px-4">
-                        Đăng Ký Ngày Nghỉ
-                    </button>
+                    <button type="submit" class="btn btn-primary px-4">Đăng Ký Ngày Nghỉ</button>
                 </div>
             </form>
         </div>
@@ -133,7 +144,6 @@
                     <input type="hidden" name="sortBy" value="@ViewBag.CurrentSort" />
                     <input type="hidden" name="sortOrder" value="@ViewBag.CurrentSortOrder" />
                     <input type="hidden" name="page" value="@Model.CurrentPage" />
-
                     <div class="date-picker-wrapper">
                         <div class="form-floating">
                             <input type="date" id="filterDate" name="filterDate" class="form-control date-input"
@@ -143,7 +153,6 @@
                             </label>
                         </div>
                     </div>
-
                     <div class="button-group">
                         <button type="submit" class="btn btn-primary btn-animate">
                             <i class="bi bi-funnel-fill me-2"></i>
@@ -153,7 +162,6 @@
                 </form>
             </div>
         </div>
-
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-striped table-hover">
@@ -227,9 +235,9 @@
                                 <td>@schedule.StartTime.ToString("HH:mm")</td>
                                 <td>@schedule.EndTime.ToString("HH:mm")</td>
                                 <td class="text-center">
-                                    <button type="button" id="deleteButton" class="btn btn-danger btn-sm delete-btn"
-                                        data-id="@schedule.TimeSlotId" data-available="@schedule.Available"
-                                        data-starttime="@schedule.StartTime" data-endtime="@schedule.EndTime">
+                                    <button type="button" class="btn btn-danger btn-sm delete-btn"
+                                            data-id="@schedule.TimeSlotId" data-available="@schedule.Available"
+                                            data-starttime="@schedule.StartTime" data-endtime="@schedule.EndTime">
                                         <i class="bi bi-trash"></i> Xóa
                                     </button>
                                 </td>
@@ -237,7 +245,6 @@
                         }
                     </tbody>
                 </table>
-
                 <div class="d-flex justify-content-center align-items-center p-4">
                     <nav aria-label="Điều hướng phân trang" class="mx-auto">
                         <ul class="pagination pagination-rounded mb-0">
@@ -267,7 +274,6 @@
                                     endPage = totalPages;
                                 }
 
-                                // Helper method to create route values with all parameters
                                 object CreateRouteValues(int page)
                                 {
                                     var routeValues = new RouteValueDictionary
@@ -315,7 +321,7 @@
 
                             @if (endPage < totalPages)
                             {
-                                @if (endPage < totalPages - 1)
+                                @if (endPage < totalPages)
                                 {
                                     <li class="page-item disabled"><span class="page-link">...</span></li>
                                 }
@@ -347,7 +353,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="suggestForm" asp-controller="Doctor" asp-action="SuggestDay">
+                    <form id="suggestForm" asp-controller="Doctor" asp-action="SuggestDay" method="post">
                         <input type="hidden" id="timeSlotId" name="timeSlotId" />
                         <div class="mb-3">
                             <label for="suggestDate" class="form-label">Ngày mới</label>
@@ -368,10 +374,13 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="suggestForm" asp-controller="Doctor" asp-action="SuggestDayForMultiplePatients" method="get">
+                    <form id="suggestFormMultiple" asp-controller="Doctor" asp-action="SuggestDayForMultiplePatients" method="post">
+                        <input type="hidden" id="timeSlotIds" name="timeSlotIds" value="@TempData["timeSlotIds"]" />
+                        <input type="hidden" id="offDate" name="offDate" value="@TempData["offDate"]" />
+                        <input type="hidden" id="note" name="note" value="@TempData["note"]" />
                         <div class="mb-3">
-                            <label for="suggestDate" class="form-label">Ngày mới</label>
-                            <input type="date" id="suggestDate" name="suggestDate" class="form-control" required />
+                            <label for="suggestDateMultiple" class="form-label">Ngày mới</label>
+                            <input type="date" id="suggestDateMultiple" name="suggestDate" class="form-control" required />
                         </div>
                         <button type="submit" class="btn btn-primary">Gửi đề xuất</button>
                     </form>
@@ -379,17 +388,8 @@
             </div>
         </div>
     </div>
-
-    @if (TempData["ShowSuggestModal"] != null && (bool)TempData["ShowSuggestModal"])
-    {
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                const suggestModal = new bootstrap.Modal(document.getElementById("suggestedModal"));
-                suggestModal.show();
-            });
-        </script>
-    }
 </div>
+
 @section Styles {
     <style>
         .pagination-rounded .page-link {
@@ -514,21 +514,130 @@
         }
     </style>
 }
+
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         $(document).ready(function () {
-            $('input[name="ScheduleType"]').change(function () {
-                if ($(this).val() === 'special') {
-                    $('#specialTimeSection').show();
-                } else {
-                    $('#specialTimeSection').hide();
-                }
+            $('#registerOffDayForm').on('submit', function (e) {
+                e.preventDefault();
+                const form = $(this);
+                const submitButton = form.find('button[type="submit"]');
+                submitButton.prop('disabled', true);
+
+                $.ajax({
+                    url: form.attr('action'),
+                    type: form.attr('method'),
+                    data: form.serialize(),
+                    success: function (response) {
+                        if (response.success) {
+                            Swal.fire({
+                                title: 'Thành công',
+                                text: response.message,
+                                icon: 'success',
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                window.location.href = '@Url.Action("Calendar", "Doctor")';
+                            });
+                        } else {
+                            if (response.showSuggestModal) {
+                                $('#timeSlotIds').val(response.timeSlotIds);
+                                $('#offDate').val(response.offDate);
+                                $('#note').val(response.note);
+                                const suggestModal = new bootstrap.Modal(document.getElementById('suggestedModal'));
+                                suggestModal.show();
+                            } else {
+                                Swal.fire({
+                                    title: 'Lỗi',
+                                    text: response.message,
+                                    icon: 'error',
+                                    confirmButtonText: 'OK'
+                                });
+                            }
+                        }
+                    },
+                    error: function (xhr) {
+                        Swal.fire({
+                            title: 'Lỗi',
+                            text: xhr.status === 405 ? 'Phương thức HTTP không được hỗ trợ.' : 'Đã xảy ra lỗi khi đăng ký ngày nghỉ. Vui lòng thử lại.',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    },
+                    complete: function () {
+                        submitButton.prop('disabled', false);
+                    }
+                });
             });
 
-            $('#specialTimeSection').hide();
-        });
+            $('#suggestFormMultiple').on('submit', function (e) {
+                e.preventDefault();
+                const form = $(this);
+                const submitButton = form.find('button[type="submit"]');
+                submitButton.prop('disabled', true);
 
-        $(document).ready(function () {
+                $.ajax({
+                    url: form.attr('action'),
+                    type: form.attr('method'),
+                    data: form.serialize(),
+                    success: function (response) {
+                        Swal.fire({
+                            title: 'Thành công',
+                            text: 'Đề xuất ngày khám mới đã được gửi thành công!',
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            window.location.href = '@Url.Action("Calendar", "Doctor")';
+                        });
+                    },
+                    error: function (xhr) {
+                        Swal.fire({
+                            title: 'Lỗi',
+                            text: xhr.status === 405 ? 'Phương thức HTTP không được hỗ trợ.' : 'Đã xảy ra lỗi khi gửi đề xuất. Vui lòng thử lại.',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    },
+                    complete: function () {
+                        submitButton.prop('disabled', false);
+                    }
+                });
+            });
+
+            $('#suggestForm').on('submit', function (e) {
+                e.preventDefault();
+                const form = $(this);
+                const submitButton = form.find('button[type="submit"]');
+                submitButton.prop('disabled', true);
+
+                $.ajax({
+                    url: form.attr('action'),
+                    type: form.attr('method'),
+                    data: form.serialize(),
+                    success: function (response) {
+                        Swal.fire({
+                            title: 'Thành công',
+                            text: 'Đề xuất ngày khám mới đã được gửi thành công!',
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            window.location.href = '@Url.Action("Calendar", "Doctor")';
+                        });
+                    },
+                    error: function (xhr) {
+                        Swal.fire({
+                            title: 'Lỗi',
+                            text: xhr.status === 405 ? 'Phương thức HTTP không được hỗ trợ.' : 'Đã xảy ra lỗi khi gửi đề xuất. Vui lòng thử lại.',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    },
+                    complete: function () {
+                        submitButton.prop('disabled', false);
+                    }
+                });
+            });
+
             $('.filter-form').on('submit', function () {
                 localStorage.setItem('scrollPosition', window.scrollY);
             });
@@ -538,121 +647,123 @@
                 window.scrollTo(0, parseInt(scrollPosition));
                 localStorage.removeItem('scrollPosition');
             }
-        });
 
-        function changeSchedulePage(page) {
-            const urlParams = new URLSearchParams(window.location.search);
-            urlParams.set('page', page);
-            localStorage.setItem('scrollPosition', window.scrollY);
-            window.location.href = '@Url.Action("Calendar", "Doctor")?' + urlParams.toString();
-        }
-
-        window.onload = function () {
-            const scrollPosition = localStorage.getItem('scrollPosition');
-            if (scrollPosition) {
-                window.scrollTo(0, parseInt(scrollPosition));
-                localStorage.removeItem('scrollPosition');
+            const saveRegularScheduleButton = document.getElementById('saveRegularScheduleButton');
+            const updateRegularScheduleForm = document.getElementById('updateRegularScheduleForm');
+            if (saveRegularScheduleButton && updateRegularScheduleForm) {
+                saveRegularScheduleButton.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    saveRegularScheduleButton.disabled = true;
+                    Swal.fire({
+                        title: 'Cập nhật lịch',
+                        text: 'Bạn có chắc chắn muốn cập nhật lịch này?',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Xác nhận',
+                        cancelButtonText: 'Hủy'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            $.ajax({
+                                url: updateRegularScheduleForm.action,
+                                type: updateRegularScheduleForm.method,
+                                data: $(updateRegularScheduleForm).serialize(),
+                                success: function (response) {
+                                    Swal.fire({
+                                        title: 'Thành công',
+                                        text: 'Cập nhật lịch làm việc thành công!',
+                                        icon: 'success',
+                                        confirmButtonText: 'OK'
+                                    }).then(() => {
+                                        window.location.reload();
+                                    });
+                                },
+                                error: function (xhr) {
+                                    Swal.fire({
+                                        title: 'Lỗi',
+                                        text: xhr.status === 405 ? 'Phương thức HTTP không được hỗ trợ.' : 'Đã xảy ra lỗi khi cập nhật lịch. Vui lòng thử lại.',
+                                        icon: 'error',
+                                        confirmButtonText: 'OK'
+                                    });
+                                },
+                                complete: function () {
+                                    saveRegularScheduleButton.disabled = false;
+                                }
+                            });
+                        } else {
+                            saveRegularScheduleButton.disabled = false;
+                        }
+                    });
+                });
             }
-        }
 
-        let currentSort = {
-            column: -1,
-            direction: 'asc'
-        };
-
-        function sortTable(column) {
-            const urlParams = new URLSearchParams(window.location.search);
-            const sortBy = ['Ngày', 'Giờ bắt đầu', 'Giờ kết thúc'][column];
-            const currentSortBy = urlParams.get('sortBy') || 'Ngày';
-            const currentSortOrder = urlParams.get('sortOrder') || 'asc';
-            const sortOrder = (currentSortBy === sortBy && currentSortOrder === 'asc') ? 'desc' : 'asc';
-            urlParams.set('sortBy', sortBy);
-            urlParams.set('sortOrder', sortOrder);
-            window.location.href = '@Url.Action("Calendar", "Doctor")?' + urlParams.toString();
-        }
-
-        const saveRegularScheduleButton = document.getElementById('saveRegularScheduleButton');
-        const updateRegularScheduleForm = document.getElementById('updateRegularScheduleForm');
-        if (saveRegularScheduleButton && updateRegularScheduleForm) {
-            saveRegularScheduleButton.addEventListener('click', function (e) {
-                e.preventDefault();
-                saveRegularScheduleButton.disabled = true;
-                Swal.fire({
-                    title: 'Cập nhật lịch',
-                    text: 'Bạn có chắc chắn muốn cập nhật lịch này?',
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonText: 'Xác nhận',
-                    cancelButtonText: 'Hủy'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        updateRegularScheduleForm.submit();
+            document.querySelectorAll('input[type="time"]').forEach(function (timeInput) {
+                timeInput.addEventListener('input', function () {
+                    let [hour, minute] = this.value.split(':');
+                    if (minute !== '00') {
+                        this.value = `${hour}:00`;
                     }
                 });
-                saveRegularScheduleButton.disabled = false;
             });
-        }
 
-        document.querySelectorAll('input[type="time"]').forEach(function (timeInput) {
-            timeInput.addEventListener('input', function () {
-                let [hour, minute] = this.value.split(':');
-                if (minute !== '00') {
-                    this.value = `${hour}:00`;
-                }
-            });
-        });
+            document.addEventListener("DOMContentLoaded", function () {
+                const deleteButtons = document.querySelectorAll(".delete-btn");
+                const suggestModal = new bootstrap.Modal(document.getElementById("suggestModal"));
 
-        var alertElements = document.querySelectorAll(".alert-dismissible");
-        var hideTimeout = null;
+                deleteButtons.forEach(button => {
+                    button.addEventListener("click", () => {
+                        const { id: timeSlotId, available, starttime } = button.dataset;
+                        const startTime = new Date(starttime);
 
-        function hideAlert() {
-            alertElements.forEach(alert => alert.classList.remove('show'));
-        }
-
-        function showAlert() {
-            if (hideTimeout) {
-                clearTimeout(hideTimeout);
-            }
-            hideTimeout = setTimeout(hideAlert, 2000);
-        }
-
-        document.addEventListener("DOMContentLoaded", function () {
-            const deleteButtons = document.querySelectorAll(".delete-btn");
-            const suggestModal = new bootstrap.Modal(document.getElementById("suggestModal"));
-
-            deleteButtons.forEach(button => {
-                button.addEventListener("click", () => {
-                    const { id: timeSlotId, available, starttime } = button.dataset;
-                    const startTime = new Date(starttime);
-
-                    if (available === "False" && startTime > new Date()) {
-                        document.getElementById("timeSlotId").value = timeSlotId;
-                        Swal.fire({
-                            title: 'Thay đổi lịch',
-                            text: 'Lịch này đã được đặt. Bạn có muốn đổi sang lịch hẹn khác không?',
-                            icon: 'question',
-                            showCancelButton: true,
-                            confirmButtonText: 'Xác nhận',
-                            cancelButtonText: 'Hủy'
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                suggestModal.show();
-                            }
-                        });
-                    } else {
-                        Swal.fire({
-                            title: 'Xóa lịch',
-                            text: 'Bạn có chắc chắn muốn xóa lịch này?',
-                            icon: 'question',
-                            showCancelButton: true,
-                            confirmButtonText: 'Xác nhận',
-                            cancelButtonText: 'Hủy'
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                window.location.href = `/Doctor/DeleteTimeSlot/${timeSlotId}`;
-                            }
-                        });
-                    }
+                        if (available === "False" && startTime > new Date()) {
+                            document.getElementById("timeSlotId").value = timeSlotId;
+                            Swal.fire({
+                                title: 'Thay đổi lịch',
+                                text: 'Lịch này đã được đặt. Bạn có muốn đổi sang lịch hẹn khác không?',
+                                icon: 'question',
+                                showCancelButton: true,
+                                confirmButtonText: 'Xác nhận',
+                                cancelButtonText: 'Hủy'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    suggestModal.show();
+                                }
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Xóa lịch',
+                                text: 'Bạn có chắc chắn muốn xóa lịch này?',
+                                icon: 'question',
+                                showCancelButton: true,
+                                confirmButtonText: 'Xác nhận',
+                                cancelButtonText: 'Hủy'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    $.ajax({
+                                        url: `/Doctor/DeleteTimeSlot/${timeSlotId}`,
+                                        type: 'POST',
+                                        success: function (response) {
+                                            Swal.fire({
+                                                title: 'Thành công',
+                                                text: 'Xóa lịch thành công!',
+                                                icon: 'success',
+                                                confirmButtonText: 'OK'
+                                            }).then(() => {
+                                                window.location.reload();
+                                            });
+                                        },
+                                        error: function (xhr) {
+                                            Swal.fire({
+                                                title: 'Lỗi',
+                                                text: xhr.status === 405 ? 'Phương thức HTTP không được hỗ trợ.' : 'Đã xảy ra lỗi khi xóa lịch. Vui lòng thử lại.',
+                                                icon: 'error',
+                                                confirmButtonText: 'OK'
+                                            });
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
                 });
             });
         });
