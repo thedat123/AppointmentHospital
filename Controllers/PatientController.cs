@@ -247,7 +247,6 @@ namespace AppointmentHospital.Controllers
                 if (timeSlot == null || !timeSlot.Available)
                     return Json(new { success = false, message = "This time slot is no longer available. Please choose another." });
 
-                // Create acquaintance
                 var acquaintance = new Acquaintance
                 {
                     Name = acquaintanceName,
@@ -259,7 +258,15 @@ namespace AppointmentHospital.Controllers
                     PatientId = parsedPatientId
                 };
 
-                _patientService.AddAcquaintance(acquaintance);
+                var existingAcquaintance = await _patientService.IsAcquaintanceExist(acquaintanceName, birthDate, gender, identificationNumber, phoneNumber, address, parsedPatientId);
+                if (existingAcquaintance == null)
+                {
+                    _patientService.AddAcquaintance(acquaintance);
+                }
+                else
+                {
+                    acquaintance = existingAcquaintance;
+                }
 
                 // Create appointment
                 var appointment = new Appointment

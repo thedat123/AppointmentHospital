@@ -162,5 +162,21 @@ namespace AppointmentHospital.Repositories.Implement
         {
             return await appDbContext.Acquaintances.FindAsync(acquaintanceId);
         }
+
+        public async Task<Acquaintance> IsAcquaintanceExist(string name, DateTime dateOfBirth, string gender, string identificationNumber, string phoneNumber, string address, Guid patientId)
+        {
+            var existingAcquaintance = await appDbContext.Acquaintances
+                .FirstOrDefaultAsync(a => a.Name == name);
+            if (existingAcquaintance != null)
+            {
+                existingAcquaintance.DateOfBirth = dateOfBirth;
+                existingAcquaintance.Gender = gender;
+                existingAcquaintance.IdentificationNumber = identificationNumber;
+                existingAcquaintance.PhoneNumber = phoneNumber;
+                existingAcquaintance.Address = address;
+                existingAcquaintance.PatientId = patientId;
+            }
+            return existingAcquaintance;
+        }
     }
 }

@@ -14,6 +14,7 @@ namespace AppointmentHospital.Repositories
         Task<bool> HasFeedback(Guid appointmentId);
         List<DiagnosisHistory> GetDiagnosisHistoriesByPatientId(Guid patientId);
         List<DiagnosisHistory> GetDiagnosisHistoriesByAcquaintanceId(Guid acquaintanceId);
-        Task<Acquaintance> GetAcquaintanceById(Guid acquaintanceId);   
+        Task<Acquaintance> GetAcquaintanceById(Guid acquaintanceId);
+        Task<Acquaintance> IsAcquaintanceExist(string name, DateTime dateOfBirth, string gender, string identificationNumber, string phoneNumber, string address, Guid patientId);
     }
 }

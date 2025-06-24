@@ -53,5 +53,10 @@ namespace AppointmentHospital.Services.Implement
         {
             return await _patientRepository.GetAcquaintanceById(acquaintanceId);
         }
+
+        public Task<Acquaintance> IsAcquaintanceExist(string name, DateTime dateOfBirth, string gender, string identificationNumber, string phoneNumber, string address, Guid patientId)
+        {
+            return _patientRepository.IsAcquaintanceExist(name, dateOfBirth, gender, identificationNumber, phoneNumber, address, patientId);
+        }
     }
 }
