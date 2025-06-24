@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace AppointmentHospital.Controllers;
 
-[Authorize(Roles = "Collaborator")] 
+[Authorize(Roles = "Collaborator")]
 public class CollaboratorController : Controller
 {
     private readonly IAppointmentDateService _appointmentDateService;
@@ -28,16 +28,16 @@ public class CollaboratorController : Controller
 
     [HttpGet]
     public async Task<IActionResult> Index(
-        int page = 1, 
-        int? status = null, 
-        string searchTerm = null, 
+        int page = 1,
+        int? status = null,
+        string searchTerm = null,
         DateTime? appointmentDate = null)
     {
         // Get filtered and paginated appointments
         var appointments = await _appointmentDateService.GetAllPendingAppointments(
-                page, 
-                status, 
-                searchTerm, 
+                page,
+                status,
+                searchTerm,
                 appointmentDate);
 
         ViewBag.CurrentSearchTerm = searchTerm;
@@ -61,15 +61,20 @@ public class CollaboratorController : Controller
                 appointment.Doctor.FullName,
                 appointment.Acquaintance?.Name ?? appointment.Patient.FullName
             );
-            BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendMailAsync(patient.EmailAddress, $"Medical Appointment Of ({appointment.Patient.FullName})", body ));
+            BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendMailAsync(patient.EmailAddress, $"Medical Appointment Of ({appointment.Patient.FullName})", body));
         }
         else if ((AppointmentStatus)status == AppointmentStatus.Confirmed)
         {
             string body = await _emailService.GetConfirmedTemplate(appointment.AppointmentTime, appointment.Doctor.FullName, appointment.Acquaintance?.Name ?? appointment.Patient.FullName);
-            BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendMailAsync(patient.EmailAddress, $"Medical Appointment Of ({appointment.Patient.FullName})", body ));
+            BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendMailAsync(patient.EmailAddress, $"Medical Appointment Of ({appointment.Patient.FullName})", body));
         }
         _appointmentDateService.UpdateStatusAppointment(id, (AppointmentStatus)status);
         await _hubContext.Clients.All.SendAsync("UpdateStatus", appointment.AppointmentId, (AppointmentStatus)status);
         return RedirectToAction("Index");
+    }
+    
+    public async Task<IActionResult> Payment()
+    {
+        return View();
     }
 }

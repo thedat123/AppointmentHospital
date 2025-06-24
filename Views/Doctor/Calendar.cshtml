@@ -5,34 +5,6 @@
 <div class="container py-4">
     <h1 class="text-primary mb-4">Đăng ký Lịch Khám Bệnh</h1>
 
-    @if (!string.IsNullOrEmpty(ViewBag.SuccessMessage) || !string.IsNullOrEmpty(TempData["SuccessMessage"]?.ToString()))
-    {
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Thành công',
-                    text: '@(ViewBag.SuccessMessage ?? TempData["SuccessMessage"])',
-                    confirmButtonText: 'OK'
-                });
-            });
-        </script>
-    }
-
-    @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage) || !string.IsNullOrEmpty(TempData["ErrorMessage"]?.ToString()))
-    {
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Lỗi',
-                    text: '@(ViewBag.ErrorMessage ?? TempData["ErrorMessage"])',
-                    confirmButtonText: 'OK'
-                });
-            });
-        </script>
-    }
-
     <div class="card shadow-sm mb-4">
         <div class="card-header bg-white">
             <h3 class="card-title mb-0">Thông tin bác sĩ</h3>
@@ -65,6 +37,7 @@
         </div>
         <div class="card-body">
             <form method="post" id="updateRegularScheduleForm" asp-action="UpdateRegularSchedule">
+                @Html.AntiForgeryToken()
                 @foreach (var day in Enum.GetValues<DayOfWeek>())
                 {
                     <div class="row align-items-center mb-3">
@@ -118,6 +91,7 @@
         </div>
         <div class="card-body">
             <form method="post" id="registerOffDayForm" asp-controller="Doctor" asp-action="RegisterOffDay">
+                @Html.AntiForgeryToken()
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label for="offDate" class="form-label">Ngày Nghỉ</label>
@@ -126,8 +100,7 @@
                 </div>
                 <div class="mb-3">
                     <label for="Note" class="form-label">Lý Do Nghỉ</label>
-                    <textarea class="form-control" id="Note" name="Note" rows="3"
-                            placeholder="Vui lòng nhập lý do xin nghỉ..."></textarea>
+                    <textarea class="form-control" id="Note" name="Note" rows="3" placeholder="Vui lòng nhập lý do xin nghỉ..."></textarea>
                 </div>
                 <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                     <button type="submit" class="btn btn-primary px-4">Đăng Ký Ngày Nghỉ</button>
@@ -236,8 +209,10 @@
                                 <td>@schedule.EndTime.ToString("HH:mm")</td>
                                 <td class="text-center">
                                     <button type="button" class="btn btn-danger btn-sm delete-btn"
-                                            data-id="@schedule.TimeSlotId" data-available="@schedule.Available"
-                                            data-starttime="@schedule.StartTime" data-endtime="@schedule.EndTime">
+                                            data-id="@schedule.TimeSlotId" 
+                                            data-available="@schedule.Available.ToString().ToLower()"
+                                            data-starttime="@schedule.StartTime.ToString("o")" 
+                                            data-endtime="@schedule.EndTime.ToString("o")">
                                         <i class="bi bi-trash"></i> Xóa
                                     </button>
                                 </td>
@@ -354,6 +329,7 @@
                 </div>
                 <div class="modal-body">
                     <form id="suggestForm" asp-controller="Doctor" asp-action="SuggestDay" method="post">
+                        @Html.AntiForgeryToken()
                         <input type="hidden" id="timeSlotId" name="timeSlotId" />
                         <div class="mb-3">
                             <label for="suggestDate" class="form-label">Ngày mới</label>
@@ -375,6 +351,7 @@
                 </div>
                 <div class="modal-body">
                     <form id="suggestFormMultiple" asp-controller="Doctor" asp-action="SuggestDayForMultiplePatients" method="post">
+                        @Html.AntiForgeryToken()
                         <input type="hidden" id="timeSlotIds" name="timeSlotIds" value="@TempData["timeSlotIds"]" />
                         <input type="hidden" id="offDate" name="offDate" value="@TempData["offDate"]" />
                         <input type="hidden" id="note" name="note" value="@TempData["note"]" />
@@ -519,17 +496,50 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         $(document).ready(function () {
+            // Success message
+            @if (!string.IsNullOrEmpty(ViewBag.SuccessMessage) || !string.IsNullOrEmpty(TempData["SuccessMessage"]?.ToString()))
+            {
+                <text>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công',
+                    text: '@(ViewBag.SuccessMessage ?? TempData["SuccessMessage"])',
+                    confirmButtonText: 'OK'
+                });
+                </text>
+            }
+
+            // Error message
+            @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage) || !string.IsNullOrEmpty(TempData["ErrorMessage"]?.ToString()))
+            {
+                <text>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi',
+                    text: '@(ViewBag.ErrorMessage ?? TempData["ErrorMessage"])',
+                    confirmButtonText: 'OK'
+                });
+                </text>
+            }
+
+            // Register off day form submission
             $('#registerOffDayForm').on('submit', function (e) {
                 e.preventDefault();
                 const form = $(this);
                 const submitButton = form.find('button[type="submit"]');
                 submitButton.prop('disabled', true);
 
+                console.log("Form data:", form.serialize()); // Log dữ liệu gửi lên
+
                 $.ajax({
                     url: form.attr('action'),
                     type: form.attr('method'),
                     data: form.serialize(),
+                    headers: {
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    },
                     success: function (response) {
+                        console.log("Response:", response); // Log phản hồi từ server
                         if (response.success) {
                             Swal.fire({
                                 title: 'Thành công',
@@ -557,9 +567,18 @@
                         }
                     },
                     error: function (xhr) {
+                        console.error("Error:", xhr); // Log lỗi chi tiết
+                        let errorMessage = 'Đã xảy ra lỗi khi đăng ký ngày nghỉ. Vui lòng thử lại.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        } else if (xhr.status === 405) {
+                            errorMessage = 'Phương thức HTTP không được hỗ trợ.';
+                        } else if (xhr.status === 400) {
+                            errorMessage = 'Yêu cầu không hợp lệ, kiểm tra CSRF token.';
+                        }
                         Swal.fire({
                             title: 'Lỗi',
-                            text: xhr.status === 405 ? 'Phương thức HTTP không được hỗ trợ.' : 'Đã xảy ra lỗi khi đăng ký ngày nghỉ. Vui lòng thử lại.',
+                            text: errorMessage,
                             icon: 'error',
                             confirmButtonText: 'OK'
                         });
@@ -570,16 +589,22 @@
                 });
             });
 
+            // Suggest form for multiple patients
             $('#suggestFormMultiple').on('submit', function (e) {
                 e.preventDefault();
                 const form = $(this);
                 const submitButton = form.find('button[type="submit"]');
                 submitButton.prop('disabled', true);
 
+                console.log("Suggest form data:", form.serialize()); // Log dữ liệu gửi lên
+
                 $.ajax({
                     url: form.attr('action'),
                     type: form.attr('method'),
                     data: form.serialize(),
+                    headers: {
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    },
                     success: function (response) {
                         Swal.fire({
                             title: 'Thành công',
@@ -591,6 +616,7 @@
                         });
                     },
                     error: function (xhr) {
+                        console.error("Error:", xhr); // Log lỗi chi tiết
                         Swal.fire({
                             title: 'Lỗi',
                             text: xhr.status === 405 ? 'Phương thức HTTP không được hỗ trợ.' : 'Đã xảy ra lỗi khi gửi đề xuất. Vui lòng thử lại.',
@@ -604,16 +630,22 @@
                 });
             });
 
+            // Suggest form for single patient
             $('#suggestForm').on('submit', function (e) {
                 e.preventDefault();
                 const form = $(this);
                 const submitButton = form.find('button[type="submit"]');
                 submitButton.prop('disabled', true);
 
+                console.log("Suggest form data:", form.serialize()); // Log dữ liệu gửi lên
+
                 $.ajax({
                     url: form.attr('action'),
                     type: form.attr('method'),
                     data: form.serialize(),
+                    headers: {
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    },
                     success: function (response) {
                         Swal.fire({
                             title: 'Thành công',
@@ -625,6 +657,7 @@
                         });
                     },
                     error: function (xhr) {
+                        console.error("Error:", xhr); // Log lỗi chi tiết
                         Swal.fire({
                             title: 'Lỗi',
                             text: xhr.status === 405 ? 'Phương thức HTTP không được hỗ trợ.' : 'Đã xảy ra lỗi khi gửi đề xuất. Vui lòng thử lại.',
@@ -638,6 +671,7 @@
                 });
             });
 
+            // Filter form scroll position
             $('.filter-form').on('submit', function () {
                 localStorage.setItem('scrollPosition', window.scrollY);
             });
@@ -648,6 +682,7 @@
                 localStorage.removeItem('scrollPosition');
             }
 
+            // Update regular schedule form
             const saveRegularScheduleButton = document.getElementById('saveRegularScheduleButton');
             const updateRegularScheduleForm = document.getElementById('updateRegularScheduleForm');
             if (saveRegularScheduleButton && updateRegularScheduleForm) {
@@ -667,6 +702,9 @@
                                 url: updateRegularScheduleForm.action,
                                 type: updateRegularScheduleForm.method,
                                 data: $(updateRegularScheduleForm).serialize(),
+                                headers: {
+                                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                                },
                                 success: function (response) {
                                     Swal.fire({
                                         title: 'Thành công',
@@ -678,6 +716,7 @@
                                     });
                                 },
                                 error: function (xhr) {
+                                    console.error("Error:", xhr); // Log lỗi chi tiết
                                     Swal.fire({
                                         title: 'Lỗi',
                                         text: xhr.status === 405 ? 'Phương thức HTTP không được hỗ trợ.' : 'Đã xảy ra lỗi khi cập nhật lịch. Vui lòng thử lại.',
@@ -696,6 +735,7 @@
                 });
             }
 
+            // Time input formatting
             document.querySelectorAll('input[type="time"]').forEach(function (timeInput) {
                 timeInput.addEventListener('input', function () {
                     let [hour, minute] = this.value.split(':');
@@ -705,65 +745,88 @@
                 });
             });
 
-            document.addEventListener("DOMContentLoaded", function () {
-                const deleteButtons = document.querySelectorAll(".delete-btn");
-                const suggestModal = new bootstrap.Modal(document.getElementById("suggestModal"));
+            // Delete button logic
+            const deleteButtons = document.querySelectorAll(".delete-btn");
+            console.log("Found delete buttons:", deleteButtons.length);
+            const suggestModal = new bootstrap.Modal(document.getElementById("suggestModal"));
 
-                deleteButtons.forEach(button => {
-                    button.addEventListener("click", () => {
-                        const { id: timeSlotId, available, starttime } = button.dataset;
-                        const startTime = new Date(starttime);
+            deleteButtons.forEach(button => {
+                button.addEventListener("click", () => {
+                    const { id: timeSlotId, available, starttime } = button.dataset;
+                    console.log("Clicked button with timeSlotId:", timeSlotId, "available:", available, "starttime:", starttime);
+                    const startTime = new Date(starttime);
+                    console.log("startTime:", startTime, "isFuture:", startTime > new Date());
 
-                        if (available === "False" && startTime > new Date()) {
-                            document.getElementById("timeSlotId").value = timeSlotId;
-                            Swal.fire({
-                                title: 'Thay đổi lịch',
-                                text: 'Lịch này đã được đặt. Bạn có muốn đổi sang lịch hẹn khác không?',
-                                icon: 'question',
-                                showCancelButton: true,
-                                confirmButtonText: 'Xác nhận',
-                                cancelButtonText: 'Hủy'
-                            }).then((result) => {
-                                if (result.isConfirmed) {
-                                    suggestModal.show();
-                                }
-                            });
-                        } else {
-                            Swal.fire({
-                                title: 'Xóa lịch',
-                                text: 'Bạn có chắc chắn muốn xóa lịch này?',
-                                icon: 'question',
-                                showCancelButton: true,
-                                confirmButtonText: 'Xác nhận',
-                                cancelButtonText: 'Hủy'
-                            }).then((result) => {
-                                if (result.isConfirmed) {
-                                    $.ajax({
-                                        url: `/Doctor/DeleteTimeSlot/${timeSlotId}`,
-                                        type: 'POST',
-                                        success: function (response) {
+                    if (available === "false" && !isNaN(startTime) && startTime > new Date()) {
+                        document.getElementById("timeSlotId").value = timeSlotId;
+                        Swal.fire({
+                            title: 'Thay đổi lịch',
+                            text: 'Lịch này đã được đặt. Bạn có muốn đổi sang lịch hẹn khác không?',
+                            icon: 'question',
+                            showCancelButton: true,
+                            confirmButtonText: 'Xác nhận',
+                            cancelButtonText: 'Hủy'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                suggestModal.show();
+                            }
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Xóa lịch',
+                            text: 'Bạn có chắc chắn muốn xóa lịch này?',
+                            icon: 'question',
+                            showCancelButton: true,
+                            confirmButtonText: 'Xác nhận',
+                            cancelButtonText: 'Hủy'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                $.ajax({
+                                    url: '@Url.Action("DeleteTimeSlot", "Doctor")',
+                                    type: 'POST',
+                                    data: { id: timeSlotId },
+                                    headers: {
+                                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                                    },
+                                    success: function (response) {
+                                        if (response.success) {
                                             Swal.fire({
                                                 title: 'Thành công',
-                                                text: 'Xóa lịch thành công!',
+                                                text: response.message || 'Xóa lịch thành công!',
                                                 icon: 'success',
                                                 confirmButtonText: 'OK'
                                             }).then(() => {
                                                 window.location.reload();
                                             });
-                                        },
-                                        error: function (xhr) {
+                                        } else {
                                             Swal.fire({
                                                 title: 'Lỗi',
-                                                text: xhr.status === 405 ? 'Phương thức HTTP không được hỗ trợ.' : 'Đã xảy ra lỗi khi xóa lịch. Vui lòng thử lại.',
+                                                text: response.message || 'Đã xảy ra lỗi khi xóa lịch.',
                                                 icon: 'error',
                                                 confirmButtonText: 'OK'
                                             });
                                         }
-                                    });
-                                }
-                            });
-                        }
-                    });
+                                    },
+                                    error: function (xhr) {
+                                        let errorMessage = 'Đã xảy ra lỗi khi xóa lịch. Vui lòng thử lại.';
+                                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                                            errorMessage = xhr.responseJSON.message;
+                                        } else if (xhr.status === 405) {
+                                            errorMessage = 'Phương thức HTTP không được hỗ trợ.';
+                                        } else if (xhr.status === 400) {
+                                            errorMessage = 'Yêu cầu không hợp lệ, kiểm tra CSRF token.';
+                                        }
+                                        Swal.fire({
+                                            title: 'Lỗi',
+                                            text: errorMessage,
+                                            icon: 'error',
+                                            confirmButtonText: 'OK'
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    }
                 });
             });
         });

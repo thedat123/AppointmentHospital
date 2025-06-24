@@ -119,12 +119,12 @@
             transform: translateY(-1px);
         }
 
-        .btn-download {
+        .btn-print {
             background: #f0fff4;
             color: var(--success);
         }
 
-        .btn-download:hover {
+        .btn-print:hover {
             background: #c6f6d5;
             transform: translateY(-1px);
         }
@@ -173,6 +173,59 @@
 
             .table {
                 min-width: 768px;
+            }
+        }
+
+        /* Print-specific styles */
+        @@media print {
+            body {
+                background: white;
+                color: black;
+                font-family: 'Times New Roman', Times, serif;
+                font-size: 12pt;
+            }
+
+            .dashboard-container, .main-content, .table-container {
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                box-shadow: none;
+            }
+
+            /* Hide non-essential elements */
+            .section-header, .btn-action, .pagination, .empty-state {
+                display: none !important;
+            }
+
+            /* Show only the print container */
+            #printContent {
+                display: block !important;
+            }
+
+            .print-table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            .print-table th, .print-table td {
+                border: 1px solid #000;
+                padding: 8px;
+                text-align: left;
+            }
+
+            .print-table th {
+                background-color: #f0f0f0;
+                font-weight: bold;
+            }
+
+            .print-header, .print-footer {
+                text-align: center;
+                margin: 10px 0;
+            }
+
+            .print-header h2, .print-footer {
+                font-size: 14pt;
+                margin: 0;
             }
         }
     </style>
@@ -286,11 +339,11 @@
                                             var jsonData = JsonConvert.SerializeObject(diagnosisData);
                                         }
 
-                                        <button class="btn-action btn-download" 
-                                                onclick='downloadPDF(@Html.Raw(jsonData))' 
-                                                title="Tải PDF"
-                                                aria-label="Tải PDF hồ sơ bệnh án">
-                                            <i class="fas fa-download" aria-hidden="true"></i>
+                                        <button class="btn-action btn-print" 
+                                                onclick='printDiagnosis(@Html.Raw(jsonData))' 
+                                                title="In hồ sơ bệnh án"
+                                                aria-label="In hồ sơ bệnh án">
+                                            <i class="fas fa-print" aria-hidden="true"></i>
                                         </button>
                                     </div>
                                 </td>
@@ -380,30 +433,37 @@
             }
         </div>
     </div>
+
+    <!-- Hidden Print Container -->
+    <div id="printContent" style="display: none;">
+        <div class="print-header">
+            <h2>Bệnh Viện Đa khoa MedicalCare</h2>
+            <p>Địa chỉ: 123 Trưng Nữ Vương, Đà Nẵng</p>
+            <p>Điện thoại: (028) 1234-5678</p>
+            <h3>HỒ SƠ CHẨN ĐOÁN BỆNH NHÂN</h3>
+            <p>Ngày in: @(DateTime.Now.ToString("dd/MM/yyyy HH:mm"))</p>
+        </div>
+        <table class="print-table">
+            <tbody id="printTableBody"></tbody>
+        </table>
+        <div class="print-footer">
+            <p>__________________________</p>
+            <p>Bác Sĩ Phụ Trách: <span id="printDoctorName"></span></p>
+            <p>__________________________</p>
+            <p>Người Xác Nhận</p>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
     <script>
-        function downloadPDF(data) {
+        function printDiagnosis(data) {
             try {
                 if (!data?.patient) {
                     throw new Error('Dữ liệu bệnh án không hợp lệ.');
                 }
 
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF({
-                    orientation: 'portrait',
-                    unit: 'mm',
-                    format: 'a4'
-                });
-
-                // Set font to Times New Roman with explicit Unicode support
-                doc.setFont('times', 'normal');
-                doc.setLanguage('vi'); // Set language to Vietnamese for better Unicode handling
-
-                // Dữ liệu từ tham số (ensure Unicode is preserved)
+                // Dữ liệu từ tham số
                 const hospitalName = "Bệnh Viện Đa khoa MedicalCare";
                 const patientName = data.acquaintance?.name ?? data.patient?.fullName ?? 'Không rõ';
                 const dateOfBirth = data.patient?.dateOfBirth ?? 'Không rõ';
@@ -419,63 +479,52 @@
                     quantity: p.split('-').length > 1 ? p.split('-')[1].trim() : 'Không rõ'
                 }));
 
-                // Debug: Log data to console to check for encoding issues
+                // Debug: Log data to console
                 console.log('Data being processed:', {
                     patientName, dateOfBirth, patientId, appointmentTime, address,
                     symptoms, diagnosis, doctorNote, doctorName, prescription
                 });
 
-                // Tạo PDF
-                doc.setFontSize(16);
-                doc.text(hospitalName, 20, 20);
-                doc.setFontSize(12);
-                doc.text("Địa chỉ: 123 Trưng Nữ Vương, Đà Nẵng", 20, 28);
-                doc.text("Điện thoại: (028) 1234-5678", 20, 34);
+                // Populate the print container
+                const printTableBody = document.getElementById('printTableBody');
+                printTableBody.innerHTML = `
+                    <tr><td><strong>Họ Và Tên</strong></td><td>${patientName}</td></tr>
+                    <tr><td><strong>Ngày Sinh</strong></td><td>${dateOfBirth}</td></tr>
+                    <tr><td><strong>Mã Bệnh Nhân</strong></td><td>${patientId}</td></tr>
+                    <tr><td><strong>Thời Gian Khám</strong></td><td>${appointmentTime}</td></tr>
+                    <tr><td><strong>Địa Chỉ</strong></td><td>${address}</td></tr>
+                    <tr><td><strong>Triệu Chứng</strong></td><td>${symptoms}</td></tr>
+                    <tr><td><strong>Chẩn Đoán</strong></td><td>${diagnosis}</td></tr>
+                    <tr><td><strong>Thuốc Kê Đơn</strong></td><td>${
+                        prescription.length > 0
+                            ? prescription.map(p => `${p.medicine} - ${p.quantity}`).join(', ')
+                            : 'Không có'
+                    }</td></tr>
+                    <tr><td><strong>Ghi Chú Bác Sĩ</strong></td><td>${doctorNote}</td></tr>
+                    <tr><td><strong>Bác Sĩ Phụ Trách</strong></td><td>${doctorName}</td></tr>
+                    <tr><td><strong>Khuyến Nghị Tái Khám</strong></td><td>Đặt lịch sau 2 tuần</td></tr>
+                `;
 
-                doc.setFontSize(14);
-                doc.setFont('times', 'bold');
-                doc.text("HỒ SƠ CHẨN ĐOÁN BỆNH NHÂN", 20, 42);
-                doc.setFont('times', 'normal');
+                // Set doctor name in footer
+                document.getElementById('printDoctorName').textContent = doctorName;
 
-                doc.autoTable({
-                    startY: 50,
-                    head: [['Thông Tin', 'Chi Tiết']],
-                    body: [
-                        ['Họ Và Tên', patientName],
-                        ['Ngày Sinh', dateOfBirth],
-                        ['Mã Bệnh Nhân', patientId],
-                        ['Thời Gian Khám', appointmentTime],
-                        ['Địa Chỉ', address],
-                        ['Triệu Chứng', symptoms],
-                        ['Chẩn Đoán', diagnosis],
-                        ['Thuốc Kê Đơn', prescription.length > 0 ?
-                            prescription.map(p => `${p.medicine} - ${p.quantity}`).join(', ') : 'Không có'],
-                        ['Ghi Chú Bác Sĩ', doctorNote],
-                        ['Bác Sĩ Phụ Trách', doctorName],
-                        ['Khuyến Nghị Tái Khám', 'Đặt lịch sau 2 tuần']
-                    ],
-                    theme: 'grid',
-                    styles: { font: 'times', fontSize: 10, cellPadding: 3, overflow: 'linebreak', halign: 'left' },
-                    headStyles: { fillColor: [200, 200, 200], textColor: [0, 0, 0], fontStyle: 'bold' },
-                    margin: { left: 20, right: 20 },
-                    // Ensure Unicode text is handled correctly
-                    columnStyles: {
-                        0: { cellWidth: 'auto' },
-                        1: { cellWidth: 'auto' }
-                    }
-                });
+                // Store original content
+                const originalContent = document.body.innerHTML;
 
-                const finalY = doc.lastAutoTable.finalY + 20;
-                doc.text("__________________________", 20, finalY);
-                doc.text("Bác Sĩ Phụ Trách", 20, finalY + 10);
-                doc.text(doctorName, 20, finalY + 20);
-                doc.text("__________________________", 140, finalY);
-                doc.text("Người Xác Nhận", 140, finalY + 10);
+                // Replace body with print content
+                document.body.innerHTML = document.getElementById('printContent').outerHTML;
 
-                doc.save(`Diagnosis_${patientId}.pdf`);
+                // Trigger print
+                window.print();
+
+                // Restore original content
+                document.body.innerHTML = originalContent;
+
+                // Reload to restore event listeners
+                window.location.reload();
             } catch (error) {
-                console.error('Lỗi khi tạo PDF:', error);
-                alert(`Không thể tải PDF: ${error.message}`);
+                console.error('Lỗi khi in hồ sơ:', error);
+                alert(`Không thể in hồ sơ: ${error.message}`);
             }
         }
     </script>
