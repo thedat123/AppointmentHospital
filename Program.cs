@@ -229,7 +229,10 @@ namespace AppointmentHospital
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
-            app.UseHangfireDashboard();
+            app.UseHangfireDashboard("/hangfire", new DashboardOptions
+            {
+                Authorization = new[] { new HangfireAuthorization() }
+            });
 
             using (var scope = app.Services.CreateScope())
             {
@@ -252,10 +255,7 @@ namespace AppointmentHospital
                 name: "default",
                 pattern: "{controller=Patient}/{action=Index}/{id?}");
                 
-            app.UseHangfireDashboard("/hangfire", new DashboardOptions
-            {
-                Authorization = new[] { new HangfireAuthorization() }
-            });
+            
 
             app.Run();
         }
