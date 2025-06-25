@@ -229,6 +229,7 @@ namespace AppointmentHospital
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseHangfireDashboard();
 
             using (var scope = app.Services.CreateScope())
             {
