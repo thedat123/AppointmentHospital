@@ -229,7 +229,6 @@ namespace AppointmentHospital
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
-            app.UseHangfireDashboard();
 
             using (var scope = app.Services.CreateScope())
             {
@@ -265,7 +264,6 @@ namespace AppointmentHospital
         {
             public bool Authorize(Hangfire.Dashboard.DashboardContext context)
             {
-                // Allow all users to access Hangfire Dashboard
                 return true;
             }
         }
