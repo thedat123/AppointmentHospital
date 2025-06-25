@@ -355,13 +355,9 @@
                 <div class="modal-body">
                     <form id="suggestFormMultiple" asp-controller="Doctor" asp-action="SuggestDayForMultiplePatients" method="post">
                         @Html.AntiForgeryToken()
-                        <input type="hidden" id="timeSlotIds" name="timeSlotIds" value="@TempData["timeSlotIds"]" />
-                        <input type="hidden" id="offDate" name="offDate" value="@TempData["offDate"]" />
+                        <input id="timeSlotIds" name="timeSlotIds" value="@TempData["timeSlotIds"]" />
+                        <input id="offDate" name="offDate" value="@(TempData["offDate"]?.ToString() ?? "")" />
                         <input type="hidden" id="note" name="note" value="@TempData["note"]" />
-                        <div class="mb-3">
-                            <label for="offDateDisplay" class="form-label">Ngày nghỉ</label>
-                            <input type="date" id="offDateDisplay" class="form-control" value="@TempData["offDate"]" disabled />
-                        </div>
                         <div class="mb-3">
                             <label for="suggestDateMultiple" class="form-label">Ngày mới</label>
                             <input type="date" id="suggestDateMultiple" name="suggestDate" class="form-control" 
@@ -537,7 +533,7 @@
                 const submitButton = form.find('button[type="submit"]');
                 submitButton.prop('disabled', true);
 
-                console.log("Form data:", form.serialize()); // Log dữ liệu gửi lên
+                console.log("Form data:", form.serialize());
 
                 $.ajax({
                     url: form.attr('action'),
@@ -547,7 +543,7 @@
                         'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
                     },
                     success: function (response) {
-                        console.log("Response:", response); // Log phản hồi từ server
+                        console.log("Response:", response);
                         if (response.success) {
                             Swal.fire({
                                 title: 'Thành công',
@@ -562,6 +558,7 @@
                                 $('#timeSlotIds').val(response.timeSlotIds);
                                 $('#offDate').val(response.offDate);
                                 $('#note').val(response.note);
+                                console.log("Setting offDate:", $('#offDate').val()); // Debug offDate
                                 const suggestModal = new bootstrap.Modal(document.getElementById('suggestedModal'));
                                 suggestModal.show();
                             } else {
@@ -575,14 +572,14 @@
                         }
                     },
                     error: function (xhr) {
-                        console.error("Error:", xhr); // Log lỗi chi tiết
+                        console.error("Error:", xhr);
                         let errorMessage = 'Đã xảy ra lỗi khi đăng ký ngày nghỉ. Vui lòng thử lại.';
                         if (xhr.responseJSON && xhr.responseJSON.message) {
                             errorMessage = xhr.responseJSON.message;
+                        } else if (xhr.status === 400 && xhr.responseJSON) {
+                            errorMessage = Object.values(xhr.responseJSON.errors || {}).flat().join(' ');
                         } else if (xhr.status === 405) {
                             errorMessage = 'Phương thức HTTP không được hỗ trợ.';
-                        } else if (xhr.status === 400) {
-                            errorMessage = 'Yêu cầu không hợp lệ, kiểm tra CSRF token.';
                         }
                         Swal.fire({
                             title: 'Lỗi',
@@ -604,7 +601,7 @@
                 const submitButton = form.find('button[type="submit"]');
                 submitButton.prop('disabled', true);
 
-                console.log("Suggest form data:", form.serialize()); // Log dữ liệu gửi lên
+                console.log("Suggest form data:", form.serialize());
 
                 $.ajax({
                     url: form.attr('action'),
@@ -624,10 +621,18 @@
                         });
                     },
                     error: function (xhr) {
-                        console.error("Error:", xhr); // Log lỗi chi tiết
+                        console.error("Error:", xhr);
+                        let errorMessage = 'Đã xảy ra lỗi khi gửi đề xuất. Vui lòng thử lại.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        } else if (xhr.status === 400 && xhr.responseJSON) {
+                            errorMessage = Object.values(xhr.responseJSON.errors || {}).flat().join(' ');
+                        } else if (xhr.status === 405) {
+                            errorMessage = 'Phương thức HTTP không được hỗ trợ.';
+                        }
                         Swal.fire({
                             title: 'Lỗi',
-                            text: xhr.status === 405 ? 'Phương thức HTTP không được hỗ trợ.' : 'Đã xảy ra lỗi khi gửi đề xuất. Vui lòng thử lại.',
+                            text: errorMessage,
                             icon: 'error',
                             confirmButtonText: 'OK'
                         });

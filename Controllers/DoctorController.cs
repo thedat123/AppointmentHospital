@@ -343,13 +343,13 @@ namespace AppointmentHospital.Controllers
                 // Validate inputs
                 if (offDate == default || offDate.Date < DateTime.Now.Date)
                 {
-                    _logger.LogWarning("Ngày nghỉ không hợp lệ: {OffDate}", offDate);
+                    _logger.LogWarning("Invalid offDate: {OffDate}", offDate);
                     return Json(new { success = false, message = "Ngày nghỉ không hợp lệ hoặc là ngày trong quá khứ." });
                 }
 
                 if (string.IsNullOrWhiteSpace(note))
                 {
-                    _logger.LogWarning("Lý do nghỉ không được cung cấp.");
+                    _logger.LogWarning("Note is not provided.");
                     return Json(new { success = false, message = "Vui lòng cung cấp lý do nghỉ." });
                 }
 
@@ -357,7 +357,7 @@ namespace AppointmentHospital.Controllers
                 string? doctorIdString = _contextAccessor.HttpContext?.Session.GetString("DoctorId");
                 if (string.IsNullOrEmpty(doctorIdString) || !Guid.TryParse(doctorIdString, out Guid doctorId))
                 {
-                    _logger.LogWarning("DoctorId không hợp lệ hoặc không tồn tại trong session.");
+                    _logger.LogWarning("Invalid or missing DoctorId in session.");
                     return Json(new { success = false, message = "Không tìm thấy thông tin bác sĩ." });
                 }
 
@@ -368,7 +368,7 @@ namespace AppointmentHospital.Controllers
 
                 if (!timeList.Any())
                 {
-                    _logger.LogInformation("Không có lịch làm việc vào ngày {OffDate} cho DoctorId {DoctorId}", offDate, doctorId);
+                    _logger.LogInformation("No working schedule found for DoctorId {DoctorId} on date {OffDate}", doctorId, offDate);
                     return Json(new { success = false, message = "Bạn không có lịch làm việc vào ngày này." });
                 }
 
@@ -383,18 +383,18 @@ namespace AppointmentHospital.Controllers
                         {
                             _timeSlotService.UpdateNoteInTimeSlot(timeSlot.TimeSlotId, note);
                             _timeSlotService.DeleteTimeSlot(timeSlot.TimeSlotId);
-                            _logger.LogInformation("Đã cập nhật và xóa TimeSlot {TimeSlotId} (Available)", timeSlot.TimeSlotId);
+                            _logger.LogInformation("Updated and deleted available TimeSlot {TimeSlotId}", timeSlot.TimeSlotId);
                         }
                         else
                         {
                             notifyPatientSlots.Add(timeSlot.TimeSlotId);
                             allProcessedSuccessfully = false;
-                            _logger.LogInformation("TimeSlot {TimeSlotId} không có sẵn, thêm vào notifyPatientSlots", timeSlot.TimeSlotId);
+                            _logger.LogInformation("TimeSlot {TimeSlotId} is not available, added to notifyPatientSlots", timeSlot.TimeSlotId);
                         }
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "Lỗi khi xử lý TimeSlot {TimeSlotId}", timeSlot.TimeSlotId);
+                        _logger.LogError(ex, "Error processing TimeSlot {TimeSlotId}", timeSlot.TimeSlotId);
                         allProcessedSuccessfully = false;
                     }
                 }
@@ -403,15 +403,15 @@ namespace AppointmentHospital.Controllers
                 {
                     string timeSlotIdsJson = JsonConvert.SerializeObject(notifyPatientSlots);
                     TempData["timeSlotIds"] = timeSlotIdsJson;
-                    TempData["offDate"] = offDate.ToString("yyyy-MM-dd");
+                    TempData["offDate"] = offDate.ToString("yyyy-MM-dd"); // Store as string for modal
                     TempData["note"] = note;
-                    _logger.LogInformation("Set TempData: timeSlotIds={TimeSlotIds}, offDate={OffDate}, note={Note}", timeSlotIdsJson, offDate, note);
+                    _logger.LogInformation("Set TempData: timeSlotIds={TimeSlotIds}, offDate={OffDate}, note={Note}", timeSlotIdsJson, offDate.ToString("yyyy-MM-dd"), note);
                     return Json(new
                     {
                         success = false,
                         showSuggestModal = true,
                         timeSlotIds = timeSlotIdsJson,
-                        offDate = offDate.ToString("yyyy-MM-dd"),
+                        offDate = offDate.ToString("yyyy-MM-dd"), // Send as string to client
                         note
                     });
                 }
@@ -420,7 +420,7 @@ namespace AppointmentHospital.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Lỗi khi đăng ký ngày nghỉ: {Message}", ex.Message);
+                _logger.LogError(ex, "Error registering off day: {Message}", ex.Message);
                 return Json(new { success = false, message = "Đã xảy ra lỗi khi đăng ký ngày nghỉ. Vui lòng thử lại." });
             }
         }
@@ -430,79 +430,100 @@ namespace AppointmentHospital.Controllers
         {
             try
             {
+                _logger.LogInformation("Received SuggestDayForMultiplePatients: suggestDate={SuggestDate}, timeSlotIds={TimeSlotIds}, offDate={OffDate}, note={Note}", 
+                    suggestDate, timeSlotIds, offDate, note);
+
+                // Validate inputs
                 if (string.IsNullOrEmpty(timeSlotIds))
                 {
-                    _logger.LogWarning("Dữ liệu không hợp lệ: timeSlotIds={TimeSlotIds}, offDate={OffDate}", timeSlotIds, offDate);
+                    _logger.LogWarning("Invalid data: timeSlotIds is null or empty");
                     TempData["ErrorMessage"] = "Dữ liệu không hợp lệ.";
                     return RedirectToAction("Calendar");
                 }
-                var timeSlotIdList = JsonConvert.DeserializeObject<List<Guid>>(timeSlotIds);
-                if (timeSlotIdList == null || !timeSlotIdList.Any())
+
+                if (offDate == default || offDate.Date < DateTime.Now.Date)
                 {
-                    _logger.LogWarning("Danh sách timeSlotIds rỗng hoặc không hợp lệ: {TimeSlotIds}", timeSlotIds);
-                    TempData["ErrorMessage"] = "Danh sách lịch hẹn không hợp lệ.";
+                    _logger.LogWarning("Invalid offDate: {OffDate}", offDate);
+                    TempData["ErrorMessage"] = "Ngày nghỉ không hợp lệ hoặc là ngày trong quá khứ.";
                     return RedirectToAction("Calendar");
                 }
 
                 if (suggestDate.Date < DateTime.Now.Date)
                 {
-                    _logger.LogWarning("Ngày đề xuất không hợp lệ: {SuggestDate}", suggestDate);
+                    _logger.LogWarning("Invalid suggestDate: {SuggestDate}", suggestDate);
                     TempData["ErrorMessage"] = "Ngày đề xuất không thể là ngày trong quá khứ.";
                     return RedirectToAction("Calendar");
                 }
 
-                var doctorId = Guid.Parse(_contextAccessor.HttpContext?.Session.GetString("DoctorId")!);
-                bool allProcessedSuccessfully = false;
+                var timeSlotIdList = JsonConvert.DeserializeObject<List<Guid>>(timeSlotIds);
+                if (timeSlotIdList == null || !timeSlotIdList.Any())
+                {
+                    _logger.LogWarning("Invalid or empty timeSlotIds: {TimeSlotIds}", timeSlotIds);
+                    TempData["ErrorMessage"] = "Danh sách lịch hẹn không hợp lệ.";
+                    return RedirectToAction("Calendar");
+                }
+
+                // Validate DoctorId
+                string? doctorIdString = _contextAccessor.HttpContext?.Session.GetString("DoctorId");
+                if (string.IsNullOrEmpty(doctorIdString) || !Guid.TryParse(doctorIdString, out Guid doctorId))
+                {
+                    _logger.LogWarning("Invalid or missing DoctorId in session.");
+                    TempData["ErrorMessage"] = "Không tìm thấy thông tin bác sĩ.";
+                    return RedirectToAction("Calendar");
+                }
+
+                bool allProcessedSuccessfully = true;
 
                 foreach (var timeSlotId in timeSlotIdList)
                 {
-                    Console.WriteLine($"Processing TimeSlotId: {timeSlotId}");
-                    var timeSlot = _timeSlotService.GetTimeSlotById(timeSlotId);
-                    if (timeSlot == null)
-                    {
-                        _logger.LogWarning("TimeSlot không tồn tại: {TimeSlotId}", timeSlotId);
-                        continue;
-                    }
-
-                    if (timeSlot.Available)
-                    {
-                        _logger.LogWarning("TimeSlot đã có sẵn, không cần xử lý: {TimeSlotId}", timeSlotId);
-                        continue;
-                    }
-
-                    var appointments = _appointmentDateService.GetAppointmentsByDoctorIdAndDate(doctorId, offDate);
-                    if (!appointments.Any())
-                    {
-                        _logger.LogWarning("Không tìm thấy lịch hẹn cho TimeSlot {TimeSlotId} vào ngày {OffDate}", timeSlotId, offDate);
-                        continue;
-                    }
-
-                    foreach (var appointment in appointments)
-                    {
-                        try
-                        {
-                            await ProcessAppointmentAsync(appointment, suggestDate);
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError(ex, "Lỗi khi xử lý lịch hẹn {AppointmentId} cho TimeSlot {TimeSlotId}", appointment.AppointmentId, timeSlotId);
-                            continue;
-                        }
-                    }
-
                     try
                     {
-                        // Cập nhật TimeSlot sang ngày mới
+                        var timeSlot = _timeSlotService.GetTimeSlotById(timeSlotId);
+                        if (timeSlot == null)
+                        {
+                            _logger.LogWarning("TimeSlot not found: {TimeSlotId}", timeSlotId);
+                            continue;
+                        }
+
+                        if (timeSlot.Available)
+                        {
+                            _logger.LogWarning("TimeSlot is already available, skipping: {TimeSlotId}", timeSlotId);
+                            continue;
+                        }
+
+                        var appointments = _appointmentDateService.GetAppointmentsByDoctorIdAndDate(doctorId, offDate)
+                            .Where(a => a.AppointmentTime == timeSlot.StartTime)
+                            .ToList();
+
+                        if (!appointments.Any())
+                        {
+                            _logger.LogWarning("No appointments found for TimeSlot {TimeSlotId} on date {OffDate}", timeSlotId, offDate);
+                            continue;
+                        }
+
+                        foreach (var appointment in appointments)
+                        {
+                            try
+                            {
+                                await ProcessAppointmentAsync(appointment, suggestDate);
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError(ex, "Error processing appointment {AppointmentId} for TimeSlot {TimeSlotId}", appointment.AppointmentId, timeSlotId);
+                                allProcessedSuccessfully = false;
+                                continue;
+                            }
+                        }
+
+                        // Update and delete time slot
                         _timeSlotService.UpdateTimeSlot(timeSlotId, suggestDate);
-                        // Xóa TimeSlot cũ
                         _timeSlotService.DeleteTimeSlot(timeSlotId);
-                        allProcessedSuccessfully = true;
-                        _logger.LogInformation("Đã xóa TimeSlot {TimeSlotId}", timeSlotId);
-                        Console.WriteLine($"Successfully processed TimeSlotId: {timeSlotId}");
+                        _logger.LogInformation("Successfully processed TimeSlot {TimeSlotId}", timeSlotId);
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "Lỗi khi cập nhật hoặc xóa TimeSlot {TimeSlotId}", timeSlotId);
+                        _logger.LogError(ex, "Error processing TimeSlot {TimeSlotId}", timeSlotId);
+                        allProcessedSuccessfully = false;
                     }
                 }
 
@@ -519,7 +540,7 @@ namespace AppointmentHospital.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Lỗi khi đề xuất ngày khám mới: {Message}", ex.Message);
+                _logger.LogError(ex, "Error suggesting new appointment date: {Message}", ex.Message);
                 TempData["ErrorMessage"] = "Đã xảy ra lỗi khi đề xuất ngày khám mới. Vui lòng thử lại.";
                 return RedirectToAction("Calendar");
             }
@@ -528,52 +549,28 @@ namespace AppointmentHospital.Controllers
         private async Task ProcessAppointmentAsync(Appointment appointment, DateTime suggestDate)
         {
             var patient = await _patientService.GetPatientById(appointment.PatientId);
-            if (patient == null)
-            {
-                _logger.LogWarning("Bệnh nhân không tồn tại: {PatientId}", appointment.PatientId);
-                return;
-            }
-
-            if (string.IsNullOrEmpty(patient.EmailAddress))
-            {
-                _logger.LogWarning("Email của bệnh nhân {PatientId} rỗng hoặc không hợp lệ.", patient.PatientId);
-                return;
-            }
+            if (patient == null) return;
 
             if (appointment.Status == AppointmentStatus.Completed || appointment.Status == AppointmentStatus.Canceled)
             {
-                _logger.LogInformation("Lịch hẹn {AppointmentId} đã hoàn thành hoặc bị hủy, bỏ qua.", appointment.AppointmentId);
                 return;
             }
 
-            try
-            {
-                // Cập nhật trạng thái lịch hẹn thành Canceled
-                _appointmentDateService.UpdateStatusAppointment(appointment.AppointmentId, AppointmentStatus.Canceled);
-                _logger.LogInformation("Đã cập nhật trạng thái lịch hẹn {AppointmentId} thành Canceled", appointment.AppointmentId);
+            _appointmentDateService.UpdateStatusAppointment(appointment.AppointmentId, AppointmentStatus.Canceled);
 
-                // Tạo email thông báo
-                string emailBody = await _emailService.GetCancelAndSuggestTemplate(
-                    appointment.AppointmentTime,
-                    appointment.Doctor.FullName,
-                    appointment.Acquaintance?.Name ?? patient.FullName,
-                    suggestDate
-                );
+            string emailBody = await _emailService.GetCancelAndSuggestTemplate(
+                appointment.AppointmentTime,
+                appointment.Doctor.FullName,
+                appointment.Acquaintance?.Name ?? patient.FullName,
+                suggestDate
+            );
 
-                // Gửi email trực tiếp (tương tự SuggestDay)
-                await _emailService.SendMailAsync(
+            BackgroundJob.Enqueue<IEmailService>(emailService =>
+                emailService.SendMailAsync(
                     patient.EmailAddress,
                     $"Hủy và đề xuất lịch hẹn mới cho {patient.FullName}",
                     emailBody
-                );
-
-                _logger.LogInformation("Đã gửi email cho bệnh nhân {EmailAddress} với lịch hẹn {AppointmentId}", patient.EmailAddress, appointment.AppointmentId);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Lỗi khi xử lý lịch hẹn {AppointmentId}", appointment.AppointmentId);
-                throw;
-            }
+                ));
         }
 
         [HttpPost]

@@ -235,6 +235,11 @@ namespace AppointmentHospital
             {
                 var cronTimeSlotService = scope.ServiceProvider.GetRequiredService<ICronTimeSlotService>();
                 await cronTimeSlotService.DeleteOldTimeSlotAsync();
+
+                RecurringJob.AddOrUpdate<ICronTimeSlotService>(
+                    "delete-old-time-slots",
+                    service => service.DeleteOldTimeSlotAsync(),
+                    Cron.Daily()); // Adjust the schedule as needed (e.g., Cron.Hourly(), Cron.Minutely())
             }
 
             app.MapHub<ScheduleHub>("/scheduleHub");
@@ -247,7 +252,10 @@ namespace AppointmentHospital
                 name: "default",
                 pattern: "{controller=Patient}/{action=Index}/{id?}");
                 
-            app.MapHangfireDashboard("/hangfire");
+            app.UseHangfireDashboard("/hangfire", new DashboardOptions
+            {
+                Authorization = new[] { new HangfireCustomAuthorizationFilter() }
+            });
 
             app.Run();
         }
