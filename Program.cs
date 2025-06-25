@@ -229,16 +229,15 @@ namespace AppointmentHospital
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
-            app.UseHangfireDashboard("/hangfire", new DashboardOptions
-            {
-                Authorization = new[] { new HangfireAuthorization() }
-            });
+            app.UseHangfireDashboard();
 
             using (var scope = app.Services.CreateScope())
             {
                 var cronTimeSlotService = scope.ServiceProvider.GetRequiredService<ICronTimeSlotService>();
+                // Run immediately on startup
                 await cronTimeSlotService.DeleteOldTimeSlotAsync();
 
+                // Schedule recurring job (e.g., run daily at midnight)
                 RecurringJob.AddOrUpdate<ICronTimeSlotService>(
                     "delete-old-time-slots",
                     service => service.DeleteOldTimeSlotAsync(),
@@ -255,18 +254,9 @@ namespace AppointmentHospital
                 name: "default",
                 pattern: "{controller=Patient}/{action=Index}/{id?}");
                 
-            
+            app.MapHangfireDashboard("/hangfire");
 
             app.Run();
-        }
-    
-        // Custom Hangfire dashboard authorization filter that allows all users (for development only)
-        public class HangfireAuthorization : Hangfire.Dashboard.IDashboardAuthorizationFilter
-        {
-            public bool Authorize(Hangfire.Dashboard.DashboardContext context)
-            {
-                return true;
-            }
         }
     }
 }
