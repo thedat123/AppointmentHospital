@@ -8,9 +8,10 @@ namespace AppointmentHospital.Helpers
 {
     public class HangfireCustomAuthorizationFilter : IDashboardAuthorizationFilter
     {
+        private readonly IHttpContextAccessor _contextAccessor;
         public bool Authorize(DashboardContext context)
         {
-            var httpContext = context.GetHttpContext();
+            var httpContext = _contextAccessor.HttpContext;
             // Example: Allow only authenticated admins
             return httpContext.User.Identity.IsAuthenticated && httpContext.User.IsInRole("Admin");
         }
