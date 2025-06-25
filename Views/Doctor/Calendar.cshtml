@@ -355,8 +355,8 @@
                 <div class="modal-body">
                     <form id="suggestFormMultiple" asp-controller="Doctor" asp-action="SuggestDayForMultiplePatients" method="post">
                         @Html.AntiForgeryToken()
-                        <input id="timeSlotIds" name="timeSlotIds" value="@TempData["timeSlotIds"]" />
-                        <input id="offDate" name="offDate" value="@(TempData["offDate"]?.ToString() ?? "")" />
+                        <input type="hidden" id="timeSlotIds" name="timeSlotIds" value="@TempData["timeSlotIds"]" />
+                        <input type="hidden" id="offDate" name="offDate" value="@(TempData["offDate"]?.ToString() ?? "")" />
                         <input type="hidden" id="note" name="note" value="@TempData["note"]" />
                         <div class="mb-3">
                             <label for="suggestDateMultiple" class="form-label">Ngày mới</label>
