@@ -254,10 +254,20 @@ namespace AppointmentHospital
                 
             app.UseHangfireDashboard("/hangfire", new DashboardOptions
             {
-                Authorization = new[] { new HangfireCustomAuthorizationFilter() }
+                Authorization = new[] { new HangfireAuthorization() }
             });
 
             app.Run();
+        }
+    
+        // Custom Hangfire dashboard authorization filter that allows all users (for development only)
+        public class HangfireAuthorization : Hangfire.Dashboard.IDashboardAuthorizationFilter
+        {
+            public bool Authorize(Hangfire.Dashboard.DashboardContext context)
+            {
+                // Allow all users to access Hangfire Dashboard
+                return true;
+            }
         }
     }
 }
